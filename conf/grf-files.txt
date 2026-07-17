@@ -2,19 +2,18 @@
 //   必要なgrfファイルを列挙すること。
 //   上から順に読み込んでオーバーライドするので下に記述されているものが優先される。
 //   ファイルパスは絶対パス・相対パスどちらでもよい。
-//       grf: C:\Gravity\Ragnarok\data.grf
+//       grf: C:\game\test\data.grf
 //       grf: ./data.grf
 //   など。
 
-grf: C:\Gravity\Ragnarok\data.grf
-grf: C:\Gravity\Ragnarok\sdata.grf
-grf: C:\Gravity\Ragnarok\adata.grf
+grf: C:\game\test20260107\data.grf
+grf: C:\game\test20260107\20260107athena.grf
 
 // datadir: <dataフォルダのディレクトリ>
 //   dataフォルダを利用していて且つdataフォルダの読み込みが最優先の場合などに設定する。
 //   dataフォルダのあるディレクトリを指定することでdataフォルダ内のresnametable.txtを読み込み対象にする。
 //   末尾には必ず \ または / を付けること。
-//        datadir: C:\Gravity\Ragnarok\
+//        datadir: C:\game\test\
 //        datadir: ./
 //   など。
 //   指定がない場合（デフォルト）はデコードされたgrf内にあるresnametable.txtを自動的に参照する。

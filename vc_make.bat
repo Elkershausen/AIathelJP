@@ -2,9 +2,6 @@
 rem Visual Studio でのビルド用バッチファイル
 
 rem 対応するコンパイラのバージョン
-rem  - Visual Studio 2015
-rem  - Visual Studio 2017
-rem  - Visual Studio 2019
 rem  - Visual Studio 2022
 
 rem ----------------------------------------------------------------
@@ -14,88 +11,18 @@ set __BITTYPE__=x64
 
 rem ----------------------------------------------------------------
 rem パケット定義
-rem 2020-02-05aRagexeRE: 20200205
-rem 2019-05-30aRagexeRE: 20190530
-rem 2018-04-18bRagexeRE: 20180418
-rem 2017-08-30bRagexeRE: 20170830
-rem 2017-06-14bRagexeRE: 20170614
-rem 2016-12-28aRagexeRE: 20161228
-rem 2015-10-29aRagexeRE: 20151029
-rem 2015-05-13aRagexe: 20150513
-rem 2014-10-22bRagexe: 20141022
-rem 2014-03-05bRagexe: 20140305
-rem 2014-01-15eRagexe: 20140115
-rem 2013-12-23cRagexe: 20131223
-rem 2013-07-31aRagexe: 20130731
-rem 2012-09-25aRagexeRE: 20120925
-rem 2012-06-18aRagexeRE: 20120618
-rem 2012-04-10aRagexeRE: 20120410
-rem 2012-04-04aRagexeRE: 20120404
-rem 2012-03-28aRagexeRE: 20120328
-rem 2012-03-07aRagexeRE: 20120307
-rem 2012-02-22aRagexeRE: 20120222
-rem 2012-02-01aRagexeRE: 20120201
-rem 2011-11-02aRagexeRE: 20111102
-rem 2011-10-25aRagexeRE: 20111025
-rem 2011-09-28aRagexeRE: 20110928
-rem 2011-07-19aRagexeRE: 20110719
-rem 2011-03-09aRagexeRE: 20110309
-rem 2011-01-11aRagexeRE: 20110111
-rem 2010-10-20aRagexeRE: 20101020
-rem 2010-08-03aRagexeRE: 20100803
-rem 2010-07-28aRagexeRE: 20100728
-rem 2010-07-21aRagexeRE: 20100721
-rem 2010-06-29aRagexeRE: 20100629
-rem 2010-06-15aRagexeRE: 20100615
-rem 2010-04-14aRagexeRE: 20100414
-rem 2010-02-23aRagexeRE: 20100223
-rem 2009-12-08aRagexeRE: 20091208
-rem 2009-11-18cRagexeRE: 20091118
-rem 2009-11-04aRagexeRE: 20091104
-rem 2009-07-15aRagexeRE: 20090715
-rem 2009-06-17aRagexeRE: 20090617
-rem 2009-06-03aRagexeRE: 20090603
-rem 2008-11-26cSakexe or 2008-11-26aRagexeRE: 20081126
-rem 2008-11-13aSakexe: 20081113
-rem 2008-08-20aSakexe: 20080820
-rem 2008-05-28aSakexe or 2008-08-27aRagexeRE: 20080827
-rem 2008-01-02aSakexe: 20080102
-rem 2007-11-28aSakexe: 20071128
-rem 2007-11-06aSakexe: 20071106
-rem 2007-09-04aSakexe: 20070904
-rem 2007-07-11aSakexe: 20070711
-rem 2007-05-21aSakexe: 20070521
-rem 2007-02-12aSakexe: 20070212
-rem 2006-10-23aSakexe: 20061023
-set __PACKETDEF__=/D "PACKETVER=20151029" /D "NEW_006b"
+rem 2020-02-05aRagexeRE: 20200205:
+rem 2025-03-19_Ragexe_1742361965: 20250319
+rem 2025-06-04_Ragexe_1748494356: 20250604
+rem 2025-07-16_Ragexe_175220998: 20250716
+set __PACKETDEF__=/D "PACKETVER=20250716" /D "NEW_006b"
 
 rem ----------------------------------------------------------------
-rem コンパイラごとの設定（自分の環境にあうもののコメントアウトをはずす）
-
-rem ---- Visual Studio 2015 64bitコンパイル の設定 / 必要ならコメントアウトをはずす
-rem set PATH=C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin;C:\Program Files\Windows Kits\8.1\bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools;C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE;%PATH%
-rem set INCLUDE=C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\altmfc\include;C:\Program Files (x86)\Windows Kits\8.1\Include\um;C:\Program Files (x86)\Windows Kits\8.1\Include\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt;%INCLUDE%
-rem set LIB=C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\lib\amd64;C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x64;C:\Program Files (x86)\Microsoft Visual Studio 14.0\SDK\v3.5\lib\amd64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.10150.0\ucrt\x64;%LIB%
-rem set __BITTYPE__=x64
-rem ---- Visual Studio 2015 64bitコンパイル の設定ここまで
-
-rem ---- Visual Studio 2017 64bitコンパイル の設定
-rem set PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin\HostX64\x64;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin;C:\Program Files\Windows Kits\8.1\bin;C:\Program Files\Windows Kits\10\bin;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE;%PATH%
-rem set INCLUDE=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\include;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\atlmfc\include;C:\Program Files (x86)\Windows Kits\8.1\Include\um;C:\Program Files (x86)\Windows Kits\8.1\Include\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt;C:\Program Files (x86)\Windows Kits\10\Li\10.0.14393.0\ucrt;%INCLUDE%
-rem set LIB=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\lib\x64;C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.10150.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.10240.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.14393.0\ucrt\x64;%LIB%
-rem set __BITTYPE__=x64
-rem ---- Visual Studio 2017 64bitコンパイル の設定ここまで
-
-rem ---- Visual Studio 2019 64bitコンパイル の設定
-rem set PATH=C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.20.27508\bin\Hostx64\x64;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.20.27508\bin;C:\Program Files (x86)\Windows Kits\10\bin;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\Common7\Tools;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\Common7\IDE;%PATH%
-rem set INCLUDE=C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.20.27508\include;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.20.27508\atlmfc\include;C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\ucrt;%INCLUDE%
-rem set LIB=C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.20.27508\lib\x64;C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\um\x64;%LIB%
-rem set __BITTYPE__=x64
-rem ---- Visual Studio 2019 64bitコンパイル の設定ここまで
+rem コンパイラ設定
 
 rem ---- Visual Studio 2022 64bitコンパイル の設定
-rem call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
-rem set __BITTYPE__=x64
+call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+set __BITTYPE__=x64
 rem ---- Visual Studio 2022 64bitコンパイル の設定ここまで
 
 rem ----------------------------------------------------------------
@@ -116,14 +43,14 @@ rem データ保存方法が SQL の時、txt-converter が不要ならコメントアウトをはずす
 rem set __TXTCONVERTER__=SKIP
 
 rem zlib.dllをコンパイルするならコメントアウトをはずす
-rem set __ZLIB__=/D "LOCALZLIB"
+set __ZLIB__=/D "LOCALZLIB"
 
 rem login_id2 や IP で AUTHFIFO を比較する場合はコメントアウトをはずす
 rem set __CMP_AFL2__=/D "CMP_AUTHFIFO_LOGIN2"
 rem set __CMP_AFIP__=/D "CMP_AUTHFIFO_IP"
 
 rem httpd を完全に無効にする場合コメントアウトをはずす
-set __NO_HTTPD__=/D "NO_HTTPD"
+rem set __NO_HTTPD__=/D "NO_HTTPD"
 
 rem httpd で外部 CGI を使う場合はコメントアウトする
 set __NO_HTTPD_CGI__=/D "NO_HTTPD_CGI"
@@ -157,7 +84,7 @@ rem コンパイルオプション設定
 
 @rem CPU最適化スイッチ(By Nameless)
 @rem 以下の例を参考にスイッチ名を記入してください。
-set _model_=x32
+set _model_=EM64T
 
 @rem 最適化なし
 if "%_model_%"=="NOOPTIMIZE" set __cpu__=/c /W3 /Od /Zi

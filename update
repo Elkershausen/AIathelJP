@@ -1,4 +1,13 @@
-﻿2026-07-02 #0002
+﻿2026-07-18 #0004
+#0003 書き漏れ修正 
+vc_make.bat 現行最新定義にし、savedataをtxt設定 / localhostアカウント作成設定 を標準設定として更新
+grf-files.txt 手間を削減し、開発者の環境が共通になるように更新
+msg_auriga.conf 表示されるログの意味がわかるように更新
+
+2026-07-17 #0003
+item_db.txt merc_db.txt function_itemdb.sc 更新
+
+2026-07-02 #0002
 const.txt / produce_db.txt / packet_db.lua / item_arrowtype.txt / item_cardtype.txt / item_db2.txt / item_random.txt
 lapineupgrade_db.txt / item_randopt_db.lua / pet_db.txt 更新
 
