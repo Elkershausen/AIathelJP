@@ -1,4 +1,8 @@
-﻿2026-07-18 #0004
+﻿2026-07-26 #0005
+scrit.ref item_bonus.txt 更新
+grf-files.txt  packet_db.lua vc_make_bat 更新
+
+2026-07-18 #0004
 #0003 書き漏れ修正 
 vc_make.bat 現行最新定義にし、savedataをtxt設定 / localhostアカウント作成設定 を標準設定として更新
 grf-files.txt 手間を削減し、開発者の環境が共通になるように更新
