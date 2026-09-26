@@ -2,6 +2,7 @@
 rem Visual Studio でのビルド用バッチファイル
 
 rem 対応するコンパイラのバージョン
+rem  - Visual Studio 2026
 rem  - Visual Studio 2022
 
 rem ----------------------------------------------------------------
@@ -21,10 +22,39 @@ set __PACKETDEF__=/D "PACKETVER=20250716" /D "NEW_006b"
 rem ----------------------------------------------------------------
 rem コンパイラ設定
 
-rem ---- Visual Studio 2022 64bitコンパイル の設定
-call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+rem ---- Visual Studio 2026 / 2022 64bitコンパイル の設定
+set VCVARS_PATH=
+
+rem 1. VS2026 の検出 (Community / Professional / Enterprise)
+if exist "%ProgramFiles%\Microsoft Visual Studio\2026\Community\VC\Auxiliary\Build\vcvars64.bat" (
+    set "VCVARS_PATH=%ProgramFiles%\Microsoft Visual Studio\2026\Community\VC\Auxiliary\Build\vcvars64.bat"
+) else if exist "%ProgramFiles%\Microsoft Visual Studio\2026\Professional\VC\Auxiliary\Build\vcvars64.bat" (
+    set "VCVARS_PATH=%ProgramFiles%\Microsoft Visual Studio\2026\Professional\VC\Auxiliary\Build\vcvars64.bat"
+) else if exist "%ProgramFiles%\Microsoft Visual Studio\2026\Enterprise\VC\Auxiliary\Build\vcvars64.bat" (
+    set "VCVARS_PATH=%ProgramFiles%\Microsoft Visual Studio\2026\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+)
+
+rem 2. VS2026 が見つからない場合は VS2022 をフォールバック
+if "%VCVARS_PATH%"=="" (
+    if exist "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" (
+        set "VCVARS_PATH=%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+    ) else if exist "%ProgramFiles%\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat" (
+        set "VCVARS_PATH=%ProgramFiles%\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat"
+    ) else if exist "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" (
+        set "VCVARS_PATH=%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+    )
+)
+
+if "%VCVARS_PATH%"=="" (
+    echo [ERROR] Visual Studio 2026 または 2022 の vcvars64.bat が見つかりませんでした。
+    pause
+    exit /b 1
+)
+
+echo Visual Studio 環境をロード中: %VCVARS_PATH%
+call "%VCVARS_PATH%"
 set __BITTYPE__=x64
-rem ---- Visual Studio 2022 64bitコンパイル の設定ここまで
+rem ---- Visual Studio 設定ここまで
 
 rem ----------------------------------------------------------------
 rem SQL の設定 / 必要ならコメントアウトをはずす
