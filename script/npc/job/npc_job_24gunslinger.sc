@@ -1,16 +1,17 @@
-//= Athena Script ==============================================================
-// Ragnarok Online Gunslinger Jobchange Script	by Blaze
-//= Registry ===================================================================
-// CHANGE_GS -> 0～5
-//==============================================================================
+// 2026/03/04 アップデート
+// ショップNPC更新 / バレット交換NPC更新 / 箱詰めNPC更新 / スラッグ弾交換NPC実装
+// ショップ[シルバーバレット][ブラッドバレット] -> [シルバーバレットC][ブラッドバレットC] 変更 / 新種バレット追加
+// 2026/03/04 イズルードマップ仕様変更対応
+// npc_job_28gunslinger.sc 上書き
 
+//= 永久フラグ ===================================================================
+// CHANGE_GS -> 0～5
 //============================================================
-// ショップ
+// ショップ スフィア廃止 / バレット販売に変更 2025/05/07 アップデート
 //------------------------------------------------------------
 que_ng.gat,179,91,3	shop	武器商人・シバス	900,13150,13102,13151,13154,13155,13163,13165,13168
-que_ng.gat,180,79,3	shop	武器商人・ウィコ	900,13200,13201,13202
-alberta.gat,176,81,3	shop	貿易商人	900,13200,13201,13202,13150,13102,13151,13154,13155,13163,13165,13168
-
+que_ng.gat,180,79,3	shop	武器商人・ウィコ	900,13200,13215,13216,13217,13218,13219,13220,13221,13222,13228,13229,13230,13231,13232
+alberta.gat,176,81,3	shop	貿易商人	900,13200,13215,13216,13217,13218,13219,13220,13221,13222,13228,13229,13230,13231,13232,13150,13102,13151,13154,13155,13163,13165,13168
 //============================================================
 // 試験申請
 //------------------------------------------------------------
@@ -432,203 +433,234 @@ payon.gat,184,65,3	script	ファンソプル	866,{
 }
 
 //============================================================
-// 弾丸屋
+// 弾丸屋トニー 2025/05/07 アップデート
 //------------------------------------------------------------
 -	script	SphereShop	86,{
-	if(Job != Job_Gunslinger) {
-		mes "[トニー]";
-		mes "俺はガンスリンガーに";
-		mes "アイテムを支給している";
-		mes "弾丸屋のトニー。";
-		next;
-		mes "[トニー]";
-		mes "お前はガンスリンガーじゃないから";
-		mes "適当に見物でもしててくれ。";
-		close;
-	}
-	mes "[トニー]";
-	mes "俺は弾丸屋のトニー！";
-	mes "弾が不足しているなら";
-	mes "いつでもきな！";
+
+	setarray '@itemA[0],1010,1011,6961;
+	setarray '@itemB[0],1010,1011,6832;
+	setarray '@rate[0],2,20;
+	set '@itemC,25187;
+
+//職制限有効化ここから
+//	if(Job != Job_Gunslinger) {
+//		mes "["+strnpcinfo(1)+"]";
+//		mes "私はガンスリンガーの方に";
+//		mes "スラッグ弾を交換している";
+//		mes "トニーと言います。";
+//		next;
+//		mes "[ケニー]";
+//		mes "あなたはガンスリンガーではないので";
+//		mes "弾丸を扱えません。";
+//		mes "申し訳ありません。";
+//		close;
+//	}
+//職制限有効化ここまで
+
+	mes "["+strnpcinfo(1)+"]";
+	mes "私はガンスリンガーの方に";
+	mes "スラッグ弾を交換している";
+	mes "トニーと言います。";
 	next;
-	mes "[トニー]";
-	mes "さぁ、我が友、我が同士！";
-	mes "何が不足しているんだ!?";
+	mes "["+strnpcinfo(1)+"]";
+	mes "アイテムを"+getitemname('@itemC)+"に交換します";
+	mes "Aパターン:"+getitemname('@itemA[2])+" 1個";
+	mes ""+getitemname('@itemA[0])+" 1個 "+getitemname('@itemA[1])+" 1個";
+	mes ""+getitemname('@itemC)+" "+'@rate[0]+"個組 1セット";
+	mes "Bパターン : "+getitemname('@itemB[2])+" 1個";
+	mes ""+getitemname('@itemB[0])+" 1個 "+getitemname('@itemB[1])+" 1個";
+	mes ""+getitemname('@itemC)+" "+'@rate[1]+"個組 1セット";
+	mes "どちらにしますか？";
 	next;
-	switch(select("ポイズンスフィア","ファイアスフィア","ウィンドスフィア","ダークスフィア","アイススフィア","やめる")) {
-	case 1:	//ポイズンスフィア - 毒の牙10
-		set '@itemid,13205;
-		set '@need,937;
-		set '@amount,10;
-		break;
-	case 2:	//ファイアスフィア - 燃えている心臓2
-		set '@itemid,13203;
-		set '@need,7097;
-		set '@amount,2;
-		break;
-	case 3:	//ウィンドスフィア - サイファー3
-		set '@itemid,13204;
-		set '@need,7053;
-		set '@amount,3;
-		break;
-	case 4:	//ダークスフィア - 墨汁5
-		set '@itemid,13206;
-		set '@need,1024;
-		set '@amount,5;
-		break;
-	case 5:	//アイススフィア - ブリガン2
-		set '@itemid,13207;
-		set '@need,7054;
-		set '@amount,2;
-		break;
-	case 6:
-		mes "[トニー]";
-		mes "そうか。";
-		mes "また来てくれよ。";
-		mes "弾丸屋のトニーは";
-		mes "いつもここにいるぜ！";
-		close;
-	}
-	mes "[トニー]";
-	mes "プラコン1個、";
-	mes "エンベルタコン1個、";
-	mes getitemname('@need)+'@amount+ "個で";
-	mes getitemname('@itemid)+ "30個を";
-	mes "1セットとして交換してるぜ。";
-	next;
-	mes "[トニー]";
-	mes "何セット欲しいんだ？";
-	mes "一度に500セットまで";
-	mes "取引できる。";
-	mes "取引をやめるなら0でいいぜ。";
-	next;
-	input '@num;
-	if('@num <= 0 || '@num > 500) {
-		mes "[トニー]";
-		mes "OK、取引中止だ。";
-		close;
-	}
-	if(countitem(1010) < 1*'@num || countitem(1011) < 1*'@num || countitem('@need) < '@amount*'@num) {
-		mes "[トニー]";
-		mes "おいおい。";
-		mes "材料が足りないんじゃないか？";
-		mes "ちゃんと確認してから";
-		mes "取引しようぜ。";
-		close;
-	}
-	delitem 1010,'@num;
-	delitem 1011,'@num;
-	delitem '@need,'@amount*'@num;
-	getitem '@itemid,30*'@num;
-	mes "[トニー]";
-	mes "よし、取引完了！";
-	mes "また来てくれよ！";
+	switch(select(
+		"やめる",
+		"Aパターン",
+		"Bパターン")) {
+		case 1: mes "["+strnpcinfo(1)+"]"; mes "必要になったら";	mes "また来てください。";	close;
+		case 2: 
+			mes "["+strnpcinfo(1)+"]";
+			mes ""+'@rate[0]+"個組を何セット交換するか入力して下さい";
+			mes "マイナス値で取引中止です";
+			next;
+			input '@count;
+			if('@count < 0) {
+			mes "["+strnpcinfo(1)+"]"; mes "取引を中止します";
+			close;
+			}
+			if('@count > countitem('@itemA[0])) { mes "["+strnpcinfo(1)+"]"; mes ""+getitemname('@itemA[0])+"が足りません"; close; }
+			if('@count > countitem('@itemA[1])) { mes "["+strnpcinfo(1)+"]"; mes ""+getitemname('@itemA[1])+"が足りません"; close; }
+			if('@count > countitem('@itemA[2])) { mes "["+strnpcinfo(1)+"]"; mes ""+getitemname('@itemA[2])+"が足りません"; close; }
+
+			/* 所持重量判定 */
+			set '@weA,(getiteminfo('@itemC,6) * '@count * '@rate[0]);							//スラッグ弾の総重量 60 * 2
+			set '@weB,((getiteminfo('@itemA[0],6) + getiteminfo('@itemA[1],6) + getiteminfo('@itemA[2],6)) * '@count);	//交換して減る総重量 70
+			if(('@weA - '@weB) > (MaxWeight - Weight)) { mes "["+strnpcinfo(1)+"]"; mes "所持重量超過です"; close; }
+
+			delitem '@itemA[0],'@count; delitem '@itemA[1],'@count; delitem '@itemA[2],'@count;
+			getitem '@itemC,'@count * '@rate[0]; break;
+		case 3:
+			mes "["+strnpcinfo(1)+"]"; 
+			mes ""+'@rate[1]+"個組を何セット交換するか入力して下さい";
+			mes "マイナス値で取引中止です";
+			next;
+			input '@count;
+			if('@count < 0) { mes "["+strnpcinfo(1)+"]"; mes "取引を中止します"; close; }
+			if('@count > countitem('@itemB[0])) { mes "["+strnpcinfo(1)+"]"; mes ""+getitemname('@itemB[0])+"が足りません"; close; }
+			if('@count > countitem('@itemB[1])) { mes "["+strnpcinfo(1)+"]"; mes ""+getitemname('@itemB[1])+"が足りません"; close; }
+			if('@count > countitem('@itemB[2])) { mes "["+strnpcinfo(1)+"]"; mes ""+getitemname('@itemB[2])+"が足りません"; close; }
+
+			/* 所持重量判定 */
+			set '@weC,(getiteminfo('@itemC,6) * '@count * '@rate[1]);
+			set '@weD,((getiteminfo('@itemB[0],6) + getiteminfo('@itemB[1],6) + getiteminfo('@itemB[2],6)) * '@count);
+			if(('@weC - '@weD) > (MaxWeight - Weight)) { mes "["+strnpcinfo(1)+"]"; mes "所持重量超過です"; close; }
+
+			delitem '@itemB[0],'@count; delitem '@itemB[1],'@count; delitem '@itemB[2],'@count;
+			getitem '@itemC,'@count * '@rate[1]; break;
+			}
+		mes "["+strnpcinfo(1)+"]";
+		mes "交換しました";
 	close;
 }
 
 que_ng.gat,187,156,3	duplicate(SphereShop)	弾丸屋・トニー	86
-izlude.gat,171,133,3	duplicate(SphereShop)	トニー	86
+izlude.gat,171,165,3	duplicate(SphereShop)	トニー	86
+//prontera.gat,153,151,3		duplicate(SphereShop)	トニー	86
 
 //============================================================
-// 弾丸ケース屋
+// 弾丸ケース屋ケニー 2025/05/07 アップデート
 //------------------------------------------------------------
--	script	SphereCaseShop	83,{
-	if(Job != Job_Gunslinger) {
-		mes "[ケニー]";
-		mes "私はガンスリンガーの方に";
-		mes "弾丸と弾丸ケースを交換している";
-		mes "ケニーと言います。";
+//'@itemid_A == 交換先バレットケース 1個 '@itemid_B == 交換元バレット 最小 500個 '@num == 交換ケース数 最大 50個
+
+-	script	BulletboxShop	83,{
+	setarray '@ammo[0],	13200,13215,13216,13217,13218,13219,13220,13221,13222,13228,13229,13230,13231,13232;
+	setarray '@box[0],	12149,22744,22745,22746,22747,22748,22749,22738,22737,23123,23124,23125,23126,23127;
+	set '@cost,500;		//手数料zeny
+	set '@max,50;		//交換先ケース最大入手数
+	set '@rate,500;		//交換元必要バレット数(1ケース500個)
+
+//職制限有効化ここから
+//	if(Job != Job_Gunslinger) {
+//		mes "["+strnpcinfo(1)+"]";
+//		mes "私はガンスリンガーの方に";
+//		mes "弾丸と弾丸ケースを交換している";
+//		mes "ケニーと言います。";
+//		next;
+//		mes "[ケニー]";
+//		mes "あなたはガンスリンガーではないので";
+//		mes "弾丸を扱えません。";
+//		mes "申し訳ありません。";
+//		close;
+//	}
+//職制限有効化ここまで
+
+	mes "["+strnpcinfo(1)+"]"; mes "私は弾丸ケース屋のケニー！"; mes "弾薬が重いのなら"; mes "是非ご利用ください。";
+	next;
+	mes "["+strnpcinfo(1)+"]"; mes "私が作った弾丸ケースは"; mes "弾丸を気楽に持ち歩けるように"; mes "できる優れものです。";
+	next;
+	mes "["+strnpcinfo(1)+"]"; mes "廃止されたスフィア弾丸の交換もしています";
+	mes "どちらを利用しますか？";
+	next;
+	switch(select(
+		"やめる",
+		"弾丸ケースを作る",
+		"スフィア弾丸の交換をする")) {
+	case 1: mes "["+strnpcinfo(1)+"]"; mes "必要になったら";	mes "また来てください。";	close;
+	case 2: mes "["+strnpcinfo(1)+"]"; mes "どの弾丸ケースを作りますか？"; next;
+		switch(select(
+			"やめる",
+			""+getitemname('@ammo[0])+"500個 -> "+getitemname('@box[0])+"",
+			""+getitemname('@ammo[1])+"500個 -> "+getitemname('@box[1])+"",
+			""+getitemname('@ammo[2])+"500個 -> "+getitemname('@box[2])+"",
+			""+getitemname('@ammo[3])+"500個 -> "+getitemname('@box[3])+"",
+			""+getitemname('@ammo[4])+"500個 -> "+getitemname('@box[4])+"",
+			""+getitemname('@ammo[5])+"500個 -> "+getitemname('@box[5])+"",
+			""+getitemname('@ammo[6])+"500個 -> "+getitemname('@box[6])+"",
+			""+getitemname('@ammo[7])+"500個 -> "+getitemname('@box[7])+"",
+			""+getitemname('@ammo[8])+"500個 -> "+getitemname('@box[8])+"",
+			""+getitemname('@ammo[9])+"500個 -> "+getitemname('@box[9])+"",
+			""+getitemname('@ammo[10])+"500個 -> "+getitemname('@box[10])+"",
+			""+getitemname('@ammo[11])+"500個 -> "+getitemname('@box[11])+"",
+			""+getitemname('@ammo[12])+"500個 -> "+getitemname('@box[12])+"",
+			""+getitemname('@ammo[13])+"500個 -> "+getitemname('@box[13])+"")) {
+			case 1: mes "["+strnpcinfo(1)+"]"; mes "必要になったら";	mes "また来てください。";	close;
+			case 2:	set '@itemid_B,'@ammo[0];	set '@itemid_A,'@box[0];	break;
+			case 3:	set '@itemid_B,'@ammo[1];	set '@itemid_A,'@box[1];	break;
+			case 4:	set '@itemid_B,'@ammo[2];	set '@itemid_A,'@box[2];	break;
+			case 5:	set '@itemid_B,'@ammo[3];	set '@itemid_A,'@box[3];	break;
+			case 6:	set '@itemid_B,'@ammo[4];	set '@itemid_A,'@box[4];	break;
+			case 7:	set '@itemid_B,'@ammo[5];	set '@itemid_A,'@box[5];	break;
+			case 8:	set '@itemid_B,'@ammo[6];	set '@itemid_A,'@box[6];	break;
+			case 9:	set '@itemid_B,'@ammo[7];	set '@itemid_A,'@box[7];	break;
+			case 10:	set '@itemid_B,'@ammo[8];	set '@itemid_A,'@box[8];	break;
+			case 11:	set '@itemid_B,'@ammo[9];	set '@itemid_A,'@box[9];	break;
+			case 12:	set '@itemid_B,'@ammo[10];	set '@itemid_A,'@box[10];	break;
+			case 13:	set '@itemid_B,'@ammo[11];	set '@itemid_A,'@box[11];	break;
+			case 14:	set '@itemid_B,'@ammo[12];	set '@itemid_A,'@box[12];	break;
+			case 15:	set '@itemid_B,'@ammo[13];	set '@itemid_a,'@box[13];	break;	}
+			mes "["+strnpcinfo(1)+"]"; mes ""+getitemname('@itemid_A)+"は、"; mes ""+getitemname('@itemid_B)+""+'@rate+"発と"; mes "手数料"+'@cost+"Zenyで"; mes "1個交換できます。";
+			next;
+			mes "["+strnpcinfo(1)+"]"; mes "購入する数を入力してください。"; mes "一度に"+'@max+"個まで交換できます。"; mes "交換を止めるなら"; mes "0を入力してください。";
+			next;
+			input '@num;
+
+			if('@num <= 0 || '@num > '@max) 		{ mes "["+strnpcinfo(1)+"]"; mes "交換を中断しました。"; mes "また来てください。"; close; }
+			if(countitem('@itemid_B) < '@num*'@rate) 	{ mes "["+strnpcinfo(1)+"]"; mes "アイテムが足りないみたいですよ。"; mes "対象アイテム : "+getitemname('@itemid_B)+""; mes "所持数 : "+countitem('@itemid_B)+"個"; mes "一度確認してみてください。"; close; }
+			if(Zeny < '@cost*'@num)				{ mes "["+strnpcinfo(1)+"]"; mes "お金が足りないみたいですよ。"; mes "手数料は" +('@cost*'@num)+ "Zenyです。"; mes "所持ゼニー : "+Zeny+" Zeny"; mes "一度確認してみてください。"; close; }
+
+			set Zeny,Zeny-'@cost*'@num;
+			delitem '@itemid_B,'@num*'@rate;
+			getitem '@itemid_A,'@num;
+
+			mes "["+strnpcinfo(1)+"]";
+			mes "必要数:"+getitemname('@itemid_B)+""+'@num*'@rate+"個";
+			mes "手数料:"+'@cost*'@num+"Zeny";
+			mes "ケース:"+getitemname('@itemid_A)+""+'@num+"個";
+			mes "取引完了です。";
+			mes "またご利用ください。";
+			close;
+	case 3:
+		setarray '@itemA[0],13201,13202,13203,13204,13205,13206,13207;
+		setarray '@itemB[0],13221,13222,13228,13218,13231,13232,13230;
+		if(countitem('@itemA[0]) + countitem('@itemA[1]) + countitem('@itemA[2]) + countitem('@itemA[3]) + countitem('@itemA[4]) + countitem('@itemA[5]) + countitem('@itemA[6]) == 0) { mes "[" +strnpcinfo(1)+ "]"; mes "交換対象のアイテムを持っていません"; close; }
+		mes "[" +strnpcinfo(1)+ "]";
+		mes "以下の交換対象アイテムを持っています";
+		mes ""+getitemname('@itemA[0])+": "+countitem('@itemA[0])+"個";
+		mes ""+getitemname('@itemA[1])+": "+countitem('@itemA[1])+"個";
+		mes ""+getitemname('@itemA[2])+": "+countitem('@itemA[2])+"個";
+		mes ""+getitemname('@itemA[3])+": "+countitem('@itemA[3])+"個";
+		mes ""+getitemname('@itemA[4])+": "+countitem('@itemA[4])+"個";
+		mes ""+getitemname('@itemA[5])+": "+countitem('@itemA[5])+"個";
+		mes ""+getitemname('@itemA[6])+": "+countitem('@itemA[6])+"個";
+		mes "同種の新規バレットに交換しますか(手数料なし)";
 		next;
-		mes "[ケニー]";
-		mes "あなたはガンスリンガーではないので";
-		mes "弾丸を扱えません。";
-		mes "申し訳ありません。";
+		switch(select(
+		"やめる",
+		""+getitemname('@itemA[0])+" を交換する",
+		""+getitemname('@itemA[1])+" を交換する",
+		""+getitemname('@itemA[2])+" を交換する",
+		""+getitemname('@itemA[3])+" を交換する",
+		""+getitemname('@itemA[4])+" を交換する",
+		""+getitemname('@itemA[5])+" を交換する",
+		""+getitemname('@itemA[6])+" を交換する")) {
+			case 1:	 mes "["+strnpcinfo(1)+"]"; mes "必要になったら";	mes "また来てください。";	close;
+			case 2:	set '@numA,countitem('@itemA[0]); if('@numA == 0) { mes "["+strnpcinfo(1)+"]"; mes ""+getitemname('@itemA[0])+"を持っていません"; close; } delitem '@itemA[0],'@numA; getitem '@itemB[0],'@numA; break;
+			case 3: set '@numB,countitem('@itemA[1]); if('@numB == 0) { mes "["+strnpcinfo(1)+"]"; mes ""+getitemname('@itemA[1])+"を持っていません"; close; } delitem '@itemA[1],'@numB; getitem '@itemB[1],'@numB; break;
+			case 4: set '@numC,countitem('@itemA[2]); if('@numC == 0) { mes "["+strnpcinfo(1)+"]"; mes ""+getitemname('@itemA[2])+"を持っていません"; close; } delitem '@itemA[2],'@numC; getitem '@itemB[2],'@numC; break;
+			case 5: set '@numD,countitem('@itemA[3]); if('@numD == 0) { mes "["+strnpcinfo(1)+"]"; mes ""+getitemname('@itemA[3])+"を持っていません"; close; } delitem '@itemA[3],'@numD; getitem '@itemB[3],'@numD; break;
+			case 6: set '@numE,countitem('@itemA[4]); if('@numE == 0) { mes "["+strnpcinfo(1)+"]"; mes ""+getitemname('@itemA[4])+"を持っていません"; close; } delitem '@itemA[4],'@numE; getitem '@itemB[4],'@numE; break;
+			case 7: set '@numF,countitem('@itemA[5]); if('@numF == 0) { mes "["+strnpcinfo(1)+"]"; mes ""+getitemname('@itemA[5])+"を持っていません"; close; } delitem '@itemA[5],'@numF; getitem '@itemB[5],'@numF; break;
+			case 8: set '@numG,countitem('@itemA[6]); if('@numG == 0) { mes "["+strnpcinfo(1)+"]"; mes ""+getitemname('@itemA[6])+"を持っていません"; close; } delitem '@itemA[6],'@numG; getitem '@itemB[6],'@numG; break; }
+			mes "[" +strnpcinfo(1)+ "]"; 
+			mes "取引完了です。";
+			mes "またご利用ください。";
 		close;
 	}
-	mes "[ケニー]";
-	mes "私は弾丸ケース屋のケニー！";
-	mes "弾薬が重いのなら";
-	mes "是非ご利用ください。";
-	next;
-	mes "[ケニー]";
-	mes "私が作った弾丸ケースは";
-	mes "弾丸を気楽に持ち歩けるように";
-	mes "できる優れものです。";
-	next;
-	switch(select("ウィンドスフィアケース","ダークスフィアケース","ポイズンスフィアケース","アイススフィアケース","ファイアスフィアケース","バレットケース","ブラッドバレットケース","シルバーバレットケース","やめる")) {
-	case 1:	//ウィンドスフィアケース
-		set '@itemid,13204;
-		break;
-	case 2:	//ダークスフィアケース
-		set '@itemid,13206;
-		break;
-	case 3:	//ポイズンスフィアケース
-		set '@itemid,13205;
-		break;
-	case 4:	//アイススフィアケース
-		set '@itemid,13207;
-		break;
-	case 5:	//ファイアスフィアケース
-		set '@itemid,13203;
-		break;
-	case 6:	//バレットケース
-		set '@itemid,13200;
-		break;
-	case 7:	//ブラッドバレットケース
-		set '@itemid,13202;
-		break;
-	case 8:	//シルバーバレットケース
-		set '@itemid,13201;
-		break;
-	case 9:
-		mes "[ケニー]";
-		mes "必要になったら";
-		mes "また来てください。";
-		close;
-	}
-	mes "[ケニー]";
-	mes getitemname(12143+@menu)+ "は、";
-	mes getitemname('@itemid)+ "500発と";
-	mes "手数料500Zenyで";
-	mes "1個交換できます。";
-	next;
-	mes "[ケニー]";
-	mes "購入する数を入力してください。";
-	mes "一度に50個まで交換できます。";
-	mes "交換を止めるなら";
-	mes "0を入力してください。";
-	next;
-	input '@num;
-	if('@num <= 0 || '@num > 50) {
-		mes "[ケニー]";
-		mes "交換を中断しました。";
-		mes "また来てください。";
-		close;
-	}
-	if(countitem('@itemid) < 500*'@num) {
-		mes "[ケニー]";
-		mes "アイテムが足りないみたいですよ。";
-		mes "一度確認してみてください。";
-		close;
-	}
-	if(Zeny < 500*'@num) {
-		mes "[ケニー]";
-		mes "お金が足りないみたいですよ。";
-		mes "手数料は" +(500*'@num)+ "Zenyです。";
-		mes "一度確認してみてください。";
-		close;
-	}
-	set Zeny,Zeny-500*'@num;
-	delitem '@itemid,500*'@num;
-	getitem 12143+@menu,'@num;
-	mes "[ケニー]";
-	mes "取引完了です。";
-	mes "またご利用ください。";
-	close;
 }
 
-que_ng.gat,187,149,3	duplicate(SphereCaseShop)	弾丸ケース屋・ケニー	83
-izlude.gat,171,127,3	duplicate(SphereCaseShop)	弾丸ケース屋・ケニー	83
+que_ng.gat,187,149,3	duplicate(BulletboxShop)	弾丸ケース屋・ケニー	83
+izlude.gat,171,159,3	duplicate(BulletboxShop)	弾丸ケース屋・ケニー	83
+//prontera.gat,153,151,3	duplicate(BulletboxShop)	弾丸ケース屋・ケニー	83
+
 
 //============================================================
 // ガリスン製作
@@ -636,6 +668,7 @@ izlude.gat,171,127,3	duplicate(SphereCaseShop)	弾丸ケース屋・ケニー	83
 // GUN_1QUE -> 0～5
 //------------------------------------------------------------
 que_ng.gat,182,85,3	script	ガリスン	109,{
+
 	if(Job != Job_Gunslinger) {
 		mes "[ガリスン]";
 		mes "あなたはガンスリンガーでは";
@@ -645,6 +678,7 @@ que_ng.gat,182,85,3	script	ガリスン	109,{
 	}
 	if(BaseLevel < 55) {
 		mes "[ガリスン]";
+
 		mes "私の名はガリスン。";
 		mes "そして、私の製作した銃は";
 		mes "私のように完璧なので";
@@ -1137,7 +1171,7 @@ que_ng.gat,149,178,4	script	研究所企画者	744,{
 		mes "私は、アインブロック研究所企画者、";
 		mes "エイといいます。";
 		next;
-		if(Job != Job_Gunslinger) {
+		if(getbaseclass(Class) != CLASS_GS) {
 			menu "話しをする",-;
 			mes "[エイ]";
 			mes "もし、知り合いに";
@@ -1803,7 +1837,7 @@ que_ng.gat,185,180,3	script	ベネッサ	726,{
 		mes "世界中の格闘技を";
 		mes "全部マスターするぞ！";
 		next;
-		if(Job != Job_Gunslinger) {
+		if(getbaseclass(Class) != CLASS_GS) {
 			mes "[ベネッサ]";
 			mes "ん？　何？";
 			mes "練習の邪魔になるから";
@@ -2104,7 +2138,7 @@ que_ng.gat,187,163,3	script	イングリッド	744,{
 		mes "イングリッドと言います。";
 		mes "よろしくお願いします。";
 		next;
-		if(Job != Job_Gunslinger) {
+		if(getbaseclass(Class) != CLASS_GS) {
 			mes "[イングリッド]";
 			mes "でも、残念ながら";
 			mes "私が制作する武器は";

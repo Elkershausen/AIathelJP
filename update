@@ -1,4 +1,9 @@
-﻿2026-09-26 #0006
+﻿2026-09-26 #0007
+npc_job_24gunslinger.sc 更新
+npc_sample_4thjob.sc 追加
+map_auriga.conf 更新
+
+2026-09-26 #0006
 npc_4th_lib.sc npc_cash_ref.sc npc_cash_setting.sc npc_cashticket.sc npc_misc_photoflame.sc 追加
 map_auriga.conf 更新
 csvload フォルダ csvsave フォルダ 実装
