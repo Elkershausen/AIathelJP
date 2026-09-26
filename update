@@ -1,4 +1,8 @@
-﻿2026-09-26 #0007
+﻿2026-09-26 #0008
+npc_ench_entama.sc npc_ench_jiru.sc npc_ench_setting.sc 実装
+map_auriga.conf 更新
+
+2026-09-26 #0007
 npc_job_24gunslinger.sc 更新
 npc_sample_4thjob.sc 追加
 map_auriga.conf 更新
