@@ -1,4 +1,12 @@
-﻿2026-07-26 #0005
+﻿2026-09-26 #0006
+npc_4th_lib.sc npc_cash_ref.sc npc_cash_setting.sc npc_cashticket.sc npc_misc_photoflame.sc 追加
+map_auriga.conf 更新
+csvload フォルダ csvsave フォルダ 実装
+all_costume_list.csv boss_card_list.csv iteminfo_list.csv 実装
+masterlist フォルダ実装
+classname.json item_list.json skill_list.json stat_list.json 実装
+
+2026-07-26 #0005
 scrit.ref item_bonus.txt 更新
 grf-files.txt  packet_db.lua vc_make_bat 更新
 
