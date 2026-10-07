@@ -1,4 +1,8 @@
-﻿2026-09-27 #0012
+﻿2026-10-13 #0013
+Claude Code v2.1.277 変更に対応し、CLAUDE.md を AGENTS.MD に変更(AGENTS.md)
+hateffect定義を2026-09-01 まで更新(const.txt status.h)
+
+2026-09-27 #0012
 プレイヤーの最大HP 最大SP 所持重量警告値 を変更(battle_auriga.conf)
  - 最大HP 最大SP はrathenaと同一に設定
  - battle_auriga.conf は肥大化し、形骸化している設定が大量にあるため見直しを予定しています
