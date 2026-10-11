@@ -1,6 +1,6 @@
-//= Athena Script ==============================================================
-// Ragnarok Online Lutie Town Script
-//==============================================================================
+//ルティエNPC関連スクリプト 20240515 アップデート
+//20140819アップデート対応 交換NPC[黄金の手のビリーナ]の[温かい紅茶][甘いお菓子]購入数増加・所持重量制限の処理追記
+//npc_town_lutie.sc 上書き
 
 //============================================================
 // Shop
@@ -1205,6 +1205,7 @@ xmas.gat,240,291,3	script	黄金の手のビリーナ	711,{
 	mes "売ってやる。魂だけは除いてな。";
 	mes "　";
 	mes "^0000ff血塗られたコイン所持数" +countitem(7642)+ "枚^000000";
+	mes "所持残重量" +(MaxWeight - Weight)/10+ "";		//所持重量制限処理のため仮表示(消していい)
 	next;
 	switch(select("やめる","コインについて聞く","アイテムと交換する","アイテムの性能を見る")) {
 	case 1:
@@ -1292,16 +1293,103 @@ xmas.gat,240,291,3	script	黄金の手のビリーナ	711,{
 			set '@num,1;
 			break;
 		case 8:
-			set '@gain,11563;
-			set '@price,7;
-			set '@num,10;
+//11563[温かい紅茶]購入数の選択肢 一時変数'@Weight追記 個数による交換レート設定
+			switch(select("10セット","50セット","100セット","200セット","300セット","400セット","500セット")) {
+			case 1:
+				set '@gain,11563;
+				set '@price,70;
+				set '@num,100;
+				set '@Weight,200;
+				break;
+			case 2:
+				set '@gain,11563;
+				set '@price,350;
+				set '@num,500;
+				set '@Weight,1000;
+				break;
+			case 3:
+				set '@gain,11563;
+				set '@price,700;
+				set '@num,1000;
+				set '@Weight,2000;
+				break;
+			case 4:
+				set '@gain,11563;
+				set '@price,1400;
+				set '@num,2000;
+				set '@Weight,4000;
+				break;
+			case 5:
+				set '@gain,11563;
+				set '@price,2100;
+				set '@num,3000;
+				set '@Weight,6000;
+				break;
+			case 6:
+				set '@gain,11563;
+				set '@price,2800;
+				set '@num,4000;
+				set '@Weight,8000;
+				break;
+			case 7:
+				set '@gain,11563;
+				set '@price,3500;
+				set '@num,5000;
+				set '@Weight,10000;
+				break;
+				}
+//追記ここまで
 			break;
 		case 9:
-			set '@gain,11564;
-			set '@price,5;
-			set '@num,10;
-			break;
+//11564[甘いお菓子]購入数の選択肢 一時変数'@Weight追記 個数による交換レート設定
+			switch(select("10セット","50セット","100セット","200セット","300セット","400セット","500セット")) {
+			case 1:
+				set '@gain,11564;
+				set '@price,50;
+				set '@num,100;
+				set '@Weight,200;
+				break;
+			case 2:
+				set '@gain,11564;
+				set '@price,250;
+				set '@num,500;
+				set '@Weight,1000;
+				break;
+			case 3:
+				set '@gain,11564;
+				set '@price,500;
+				set '@num,1000;
+				set '@Weight,2000;
+				break;
+			case 4:
+				set '@gain,11564;
+				set '@price,1000;
+				set '@num,2000;
+				set '@Weight,4000;
+				break;
+			case 5:
+				set '@gain,11564;
+				set '@price,1500;
+				set '@num,3000;
+				set '@Weight,6000;
+				break;
+			case 6:
+				set '@gain,11564;
+				set '@price,2000;
+				set '@num,4000;
+				set '@Weight,8000;
+				break;
+			case 7:
+				set '@gain,11564;
+				set '@price,2500;
+				set '@num,5000;
+				set '@Weight,10000;
+				break;
+			}
+//追記ここまで
+		break;
 		}
+//所持コイン数判定
 		mes "[黄金の手のビリーナ]";
 		if(countitem(7642) < '@price) {
 			mes "^0000ff" +getitemname('@gain)+ "^000000は";
@@ -1309,6 +1397,16 @@ xmas.gat,240,291,3	script	黄金の手のビリーナ	711,{
 			mes "残念ながら、数が足りないようだな。";
 			close;
 		}
+
+//所持重量処理判定追記 一時変数'@Weight利用
+		if(((MaxWeight - Weight)/10) <= '@Weight) {
+			mes "^0000ff" +getitemname('@gain)+ "^000000は";
+ 			mes "重量の空き" + ('@Weight) + "必要だ。";
+			mes "荷物の整理をしてから来てくれ。";
+			close;
+		}
+//追記ここまで
+//アイテムの交換処理
 		mes "^0000ff" +getitemname('@gain)+ "^000000の購入には";
 		mes "血塗られたコイン^0000ff" +'@price+ "^000000枚が必要だ。";
 		mes "本当に買うのか？";

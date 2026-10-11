@@ -1,4 +1,7 @@
-﻿2026-10-13 #0013
+﻿2026-10-11 #0014
+NPC 更新(npc_quest_ice.sc npc_quest_smilegirl.sc npc_town_alberta.sc npc_town_einbroch.sc npc_town_geffen.sc npc_town_izlude.sc npc_town_lighthalzen.sc npc_town_lutie.sc npc_town_morocc.sc npc_town_payon.sc npc_town_prontera.sc npc_town_yuno.sc npc_town_rockridge.sc)
+
+2026-10-03 #0013
 Claude Code v2.1.277 変更に対応し、CLAUDE.md を AGENTS.MD に変更(AGENTS.md)
 hateffect定義を2026-09-01 まで更新(const.txt status.h)
 

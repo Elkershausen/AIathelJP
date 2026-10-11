@@ -1,6 +1,7 @@
-//==============================================================================
-//Ragnarok Online SmileGirl Script
-//==============================================================================
+//2025/06/03 アップデート
+//配置座標を修正 プロンテラから削除
+//npc_quest_smilegirl.sc に上書き
+
 -	script	SmileGirl	92,{
 	mes "[スマイルガール]";
 	mes "こんにちは～";
@@ -80,11 +81,10 @@
 		close;
 	}
 }
-
-prontera.gat,157,196,4	duplicate(SmileGirl)	スマイルマスク職員	92
+alberta.gat,113,53,4	duplicate(SmileGirl)	スマイルマスク職員	92
 aldebaran.gat,136,135,4	duplicate(SmileGirl)	スマイルマスク職員	92
 geffen.gat,119,107,4	duplicate(SmileGirl)	スマイルマスク職員	92
-alberta.gat,113,53,4	duplicate(SmileGirl)	スマイルマスク職員	92
-payon.gat,186,104,5	duplicate(SmileGirl)	スマイルマスク職員	92
-izlude.gat,129,118,4	duplicate(SmileGirl)	スマイルマスク職員	92
+izlude.gat,102,139,4	duplicate(SmileGirl)	スマイルマスク職員	92
 morocc.gat,158,97,4	duplicate(SmileGirl)	スマイルマスク職員	92
+payon.gat,186,104,5	duplicate(SmileGirl)	スマイルマスク職員	92
+payon_p.gat,84,158,4	duplicate(SmileGirl)	スマイルマスク職員	92
