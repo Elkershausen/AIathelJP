@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2002-2020  Auriga
  *
  * This file is part of Auriga.

@@ -1,4 +1,4 @@
-/*
+ï»¿/*
  * Copyright (C) 2002-2020  Auriga
  *
  * This file is part of Auriga.
@@ -28,7 +28,7 @@
 #include "pc.h"
 
 /*==========================================
- * —a‚¯“ü‚ê
+ * é ã‘å…¥ã‚Œ
  *------------------------------------------
  */
 void bank_deposit(struct map_session_data *sd, int target_id, int zeny)
@@ -41,12 +41,12 @@ void bank_deposit(struct map_session_data *sd, int target_id, int zeny)
 	if(!tmpsd || sd != tmpsd)
 		return;
 
-	// æˆø•s‰Âƒ`ƒFƒbƒN
+	// å–å¼•ä¸å¯ãƒã‚§ãƒƒã‚¯
 	if( sd->npc_id != 0 || sd->state.storage_flag || sd->state.store || sd->state.deal_mode != 0 ||
 	    sd->state.mail_appending || sd->chatID != 0 )
 		return;
 
-	// Zenyƒ`ƒFƒbƒN
+	// Zenyãƒã‚§ãƒƒã‚¯
 	if(zeny <= 0) {
 		clif_bank_deposit(sd, 1);
 		return;
@@ -60,21 +60,21 @@ void bank_deposit(struct map_session_data *sd, int target_id, int zeny)
 		return;
 	}
 
-	// Zeny‚Ìx•¥‚¢
+	// Zenyã®æ”¯æ‰•ã„
 	pc_payzeny(sd, zeny);
 	sd->deposit += zeny;
 
-	// —a‹àŠz•Ï”‚Ì•Û‘¶
+	// é é‡‘é¡å¤‰æ•°ã®ä¿å­˜
 	pc_setaccountreg(sd,"#PC_DEPOSIT",sd->deposit);
 
-	// æˆøŒ‹‰Ê‘—M
+	// å–å¼•çµæœé€ä¿¡
 	clif_bank_deposit(sd, 0);
 
 	return;
 }
 
 /*==========================================
- * ˆø‚«o‚µ
+ * å¼•ãå‡ºã—
  *------------------------------------------
  */
 void bank_withdraw(struct map_session_data *sd, int target_id, int zeny)
@@ -87,12 +87,12 @@ void bank_withdraw(struct map_session_data *sd, int target_id, int zeny)
 	if(!tmpsd || sd != tmpsd)
 		return;
 
-	// æˆø•s‰Âƒ`ƒFƒbƒN
+	// å–å¼•ä¸å¯ãƒã‚§ãƒƒã‚¯
 	if( sd->npc_id != 0 || sd->state.storage_flag || sd->state.store || sd->state.deal_mode != 0 ||
 	    sd->state.mail_appending || sd->chatID != 0 )
 		return;
 
-	// Zenyƒ`ƒFƒbƒN
+	// Zenyãƒã‚§ãƒƒã‚¯
 	if(zeny <= 0) {
 		clif_bank_withdraw(sd, 2);
 		return;
@@ -104,14 +104,14 @@ void bank_withdraw(struct map_session_data *sd, int target_id, int zeny)
 	if(sd->status.zeny > MAX_ZENY - zeny)
 		return;
 
-	// Zeny‚Ìx•¥‚¢
+	// Zenyã®æ”¯æ‰•ã„
 	pc_getzeny(sd, zeny);
 	sd->deposit -= zeny;
 
-	// —a‹àŠz•Ï”‚Ì•Û‘¶
+	// é é‡‘é¡å¤‰æ•°ã®ä¿å­˜
 	pc_setaccountreg(sd,"#PC_DEPOSIT",sd->deposit);
 
-	// æˆøŒ‹‰Ê‘—M
+	// å–å¼•çµæœé€ä¿¡
 	clif_bank_withdraw(sd, 0);
 
 	return;
