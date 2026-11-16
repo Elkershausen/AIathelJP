@@ -69,6 +69,8 @@
 #define MAX_EXP_TABLE	18		// 経験値テーブル最大数（exp.txtの列数に合わせる）
 #define MAX_SKILL_NEED	9		// スキルツリーの要求スキル最大数（skill_tree.txt）
 
+#define SI_MADOGEAR 192
+
 static atn_bignumber exp_table[MAX_EXP_TABLE][MAX_LEVEL];
 
 int stpoint_table[MAX_LEVEL];
@@ -7979,6 +7981,13 @@ void pc_setoption(struct map_session_data *sd, unsigned int type)
 
 	if( ((type&OPTION_MADOGEAR) || pc_isgear(sd)) && pc_iscarton(sd) )
 		type |= (sd->sc.option&OPTION_CARTMASK) | OPTION_PUSHCART;
+
+	if( (type&OPTION_MADOGEAR) && !pc_isgear(sd) ) {
+		clif_status_load_id(sd, SI_MADOGEAR, 1);
+	}
+	else if( !(type&OPTION_MADOGEAR) && pc_isgear(sd) ) {
+		clif_status_load_id(sd, SI_MADOGEAR, 0);
+	}
 
 	if( (type&OPTION_FALCON) && !pc_isfalcon(sd) ) {
 		clif_status_load_id(sd,SI_FALCON,1);

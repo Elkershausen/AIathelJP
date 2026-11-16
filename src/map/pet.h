@@ -22,15 +22,15 @@
 #ifndef _PET_H_
 #define _PET_H_
 
-#define MAX_PET_DB	100
+#define MAX_PET_DB	32767
 
 struct pet_db {
 	short class_;
 	char name[24],jname[24];
-	short itemID;
-	short EggID;
-	short AcceID;
-	short FoodID;
+	int itemID;
+	int EggID;
+	int AcceID;
+	int FoodID;
 	int fullness;
 	int hungry_delay;
 	int r_hungry;

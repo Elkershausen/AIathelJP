@@ -6,8 +6,8 @@
 //       grf: ./data.grf
 //   など。
 
-grf: C:\game\test20260107\data.grf
-grf: C:\game\test20260107\20260107athena.grf
+grf: C:\game\test\data.grf
+grf: C:\game\test\athena.grf
 
 // datadir: <dataフォルダのディレクトリ>
 //   dataフォルダを利用していて且つdataフォルダの読み込みが最優先の場合などに設定する。
