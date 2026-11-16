@@ -1,4 +1,4 @@
-/*
+ï»¿/* 
  * Copyright (C) 2002-2020  Auriga
  *
  * This file is part of Auriga.
@@ -240,7 +240,7 @@ ATCOMMAND_FUNC(callmerc);
 ATCOMMAND_FUNC(alliance);
 
 /*==========================================
- * AtCommandInfo atcommand_info[]\‘¢‘Ì‚Ì’è‹`
+ * AtCommandInfo atcommand_info[]æ§‹é€ ä½“ã®å®šç¾©
  *------------------------------------------
  */
 static AtCommandInfo atcommand_info[] = {
@@ -437,7 +437,7 @@ char GM_Symbol(void)
 }
 
 /*==========================================
- * ƒnƒbƒVƒ…ŒvZ
+ * ãƒãƒƒã‚·ãƒ¥è¨ˆç®—
  *------------------------------------------
  */
 static unsigned int command2hash(const unsigned char *p)
@@ -471,7 +471,7 @@ static AtCommandInfo* get_atcommandinfo_byname(const char* name)
 }
 
 /*==========================================
- * @ƒRƒ}ƒ“ƒh‚Ì•K—vƒŒƒxƒ‹‚ğæ“¾
+ * @ã‚³ãƒãƒ³ãƒ‰ã®å¿…è¦ãƒ¬ãƒ™ãƒ«ã‚’å–å¾—
  *------------------------------------------
  */
 int get_atcommand_level(const AtCommandType type)
@@ -486,7 +486,7 @@ int get_atcommand_level(const AtCommandType type)
 }
 
 /*==========================================
- * @ƒRƒ}ƒ“ƒh‚É‘¶İ‚·‚é‚©‚Ç‚¤‚©Šm”F‚·‚é
+ * @ã‚³ãƒãƒ³ãƒ‰ã«å­˜åœ¨ã™ã‚‹ã‹ã©ã†ã‹ç¢ºèªã™ã‚‹
  *------------------------------------------
  */
 AtCommandType is_atcommand_sub(const int fd, struct map_session_data *sd, const char *str, int gmlvl)
@@ -528,13 +528,13 @@ AtCommandType is_atcommand_sub(const int fd, struct map_session_data *sd, const 
 	if (map[sd->bl.m].flag.nocommand && map[sd->bl.m].flag.nocommand > gmlvl) {
 		msg_output(fd, msg_txt(180), command);
 	} else {
-		// ƒRƒ}ƒ“ƒhÀs
+		// ã‚³ãƒãƒ³ãƒ‰å®Ÿè¡Œ
 		if (isspace((unsigned char)*p)) {
 			p++;
 		}
 		if (info->proc(fd, sd, info->type, p) != 0) {
 			if (pc_isGM(sd)) {
-				// ˆÙíI—¹
+				// ç•°å¸¸çµ‚äº†
 				msg_output(fd, msg_txt(133), command);
 			} else {
 				return AtCommand_None;
@@ -582,7 +582,7 @@ static void atcommand_synonym_free(void)
 	int i;
 
 	for (i = 0; i < synonym_count; i++) {
-		char *cmd = (char *)synonym_table[i].command;	// free‚·‚é‚½‚ß‚ÉconstŠO‚·
+		char *cmd = (char *)synonym_table[i].command;	// freeã™ã‚‹ãŸã‚ã«constå¤–ã™
 		aFree(cmd);
 	}
 	if (synonym_table != NULL) {
@@ -595,7 +595,7 @@ static void atcommand_synonym_free(void)
 }
 
 /*==========================================
- * I—¹
+ * çµ‚äº†
  *------------------------------------------
  */
 void do_final_atcommand(void)
@@ -606,7 +606,7 @@ void do_final_atcommand(void)
 }
 
 /*==========================================
- * ƒnƒbƒVƒ…ƒe[ƒuƒ‹‚Ö’Ç‰Á
+ * ãƒãƒƒã‚·ãƒ¥ãƒ†ãƒ¼ãƒ–ãƒ«ã¸è¿½åŠ 
  *------------------------------------------
  */
 static void atcommand_add_hashtable(AtCommandInfo *info)
@@ -632,7 +632,7 @@ static void atcommand_add_hashtable(AtCommandInfo *info)
 }
 
 /*==========================================
- * ƒnƒbƒVƒ…ƒe[ƒuƒ‹ì¬
+ * ãƒãƒƒã‚·ãƒ¥ãƒ†ãƒ¼ãƒ–ãƒ«ä½œæˆ
  *------------------------------------------
  */
 static int atcommand_create_hashtable(void)
@@ -760,7 +760,7 @@ int atcommand_config_read(const char *cfgName)
 
 	counter--;
 	if (counter == 0) {
-		// synonym table‚Írealloc‚Åƒƒ‚ƒŠ‚ªˆÚ“®‚·‚é‚Ì‚ÅƒnƒbƒVƒ…ƒe[ƒuƒ‹‚Ö‚Ì’Ç‰Á‚ÍÅŒã‚És‚¤
+		// synonym tableã¯reallocã§ãƒ¡ãƒ¢ãƒªãŒç§»å‹•ã™ã‚‹ã®ã§ãƒãƒƒã‚·ãƒ¥ãƒ†ãƒ¼ãƒ–ãƒ«ã¸ã®è¿½åŠ ã¯æœ€å¾Œã«è¡Œã†
 		for (i = 0; i < synonym_count; i++) {
 			atcommand_add_hashtable(&synonym_table[i]);
 		}
@@ -770,7 +770,7 @@ int atcommand_config_read(const char *cfgName)
 	return 0;
 }
 
-// @ command ˆ—ŠÖ”ŒQ
+// @ command å‡¦ç†é–¢æ•°ç¾¤
 
 /*==========================================
  *
@@ -929,7 +929,7 @@ int atcommand_who(const int fd, struct map_session_data* sd, AtCommandType comma
 }
 
 /*==========================================
- * ‹êŠ•t‚«ŒŸõ‚ğs‚¤
+ * å±…å ´æ‰€ä»˜ãæ¤œç´¢ã‚’è¡Œã†
  *------------------------------------------
  */
 int atcommand_whop(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -1073,12 +1073,12 @@ int atcommand_hide(const int fd, struct map_session_data* sd, AtCommandType comm
 	if (pc_isinvisible(sd)) {
 		sd->sc.option &= ~OPTION_SPECIALHIDING;
 		clif_displaymessage(fd, msg_txt(10));
-		if (battle_config.gm_perfect_hide)	// Š®‘S‚ÈƒCƒ“ƒrƒWƒuƒ‹ƒ‚[ƒh‚È‚çoŒ»‚³‚¹‚é
+		if (battle_config.gm_perfect_hide)	// å®Œå…¨ãªã‚¤ãƒ³ãƒ“ã‚¸ãƒ–ãƒ«ãƒ¢ãƒ¼ãƒ‰ãªã‚‰å‡ºç¾ã•ã›ã‚‹
 			clif_spawnpc(sd);
 	} else {
 		sd->sc.option |= OPTION_SPECIALHIDING;
 		clif_displaymessage(fd, msg_txt(11));
-		if (battle_config.gm_perfect_hide)	// Š®‘S‚ÈƒCƒ“ƒrƒWƒuƒ‹ƒ‚[ƒh‚È‚çÁ–Å‚³‚¹‚é
+		if (battle_config.gm_perfect_hide)	// å®Œå…¨ãªã‚¤ãƒ³ãƒ“ã‚¸ãƒ–ãƒ«ãƒ¢ãƒ¼ãƒ‰ãªã‚‰æ¶ˆæ»…ã•ã›ã‚‹
 			clif_clearchar(&sd->bl,0);
 	}
 	clif_changeoption(&sd->bl);
@@ -1087,7 +1087,7 @@ int atcommand_hide(const int fd, struct map_session_data* sd, AtCommandType comm
 }
 
 /*==========================================
- * “]E‚·‚é upper‚ğw’è‚·‚é‚Æ“]¶‚â—{q‚É‚à‚È‚ê‚é
+ * è»¢è·ã™ã‚‹ upperã‚’æŒ‡å®šã™ã‚‹ã¨è»¢ç”Ÿã‚„é¤Šå­ã«ã‚‚ãªã‚Œã‚‹
  *------------------------------------------
  */
 int atcommand_jobchange(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -1201,7 +1201,7 @@ int atcommand_kami(const int fd, struct map_session_data* sd, AtCommandType comm
 }
 
 /*==========================================
- * ‹©‚Ô
+ * å«ã¶
  *------------------------------------------
  */
 int atcommand_onlymes(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -1222,7 +1222,7 @@ int atcommand_onlymes(const int fd, struct map_session_data* sd, AtCommandType c
 }
 
 /*==========================================
- * Webƒ`ƒƒƒbƒg
+ * Webãƒãƒ£ãƒƒãƒˆ
  *------------------------------------------
  */
 int atcommand_mesweb(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -1690,10 +1690,10 @@ int atcommand_help(const int fd, struct map_session_data* sd, AtCommandType comm
 				break;
 			}
 		}
-		if (buf[0] == '\0')	// ‹ó•¶š‚Í•\¦‚³‚ê‚È‚¢‚Ì‚ÅƒpƒPƒbƒg‘—M‚µ‚È‚¢
+		if (buf[0] == '\0')	// ç©ºæ–‡å­—ã¯è¡¨ç¤ºã•ã‚Œãªã„ã®ã§ãƒ‘ã‚±ãƒƒãƒˆé€ä¿¡ã—ãªã„
 			continue;
 
-		// symbol‚Ì’uŠ·
+		// symbolã®ç½®æ›
 		if (command_symbol != '@') {
 			char *p = buf;
 			while ((p = strchr(p, '@')) != NULL) {
@@ -1766,7 +1766,7 @@ int atcommand_pvpoff(const int fd, struct map_session_data* sd, AtCommandType co
 
 		map[sd->bl.m].flag.pvp = 0;
 		clif_send0199(sd->bl.m, 0);
-		for (i = 0; i < fd_max; i++) {	// l”•ªƒ‹[ƒv
+		for (i = 0; i < fd_max; i++) {	// äººæ•°åˆ†ãƒ«ãƒ¼ãƒ—
 			if (session[i] && (pl_sd = (struct map_session_data *)session[i]->session_data) && pl_sd->state.auth) {
 				if (sd->bl.m == pl_sd->bl.m) {
 					clif_pvpset(pl_sd, 0, 0, 2);
@@ -1876,12 +1876,12 @@ int atcommand_model(const int fd, struct map_session_data* sd, AtCommandType com
 			if ( (sd->sex == SEX_MALE && (sd->status.class_ == PC_CLASS_AS ||  sd->status.class_ == PC_CLASS_RG)) ||
 			     (sd->status.class_ >= PC_CLASS_TK && sd->status.class_ <= PC_CLASS_SL) )
 			{
-				// •‚ÌF–¢À‘•E‚Ì”»’è
+				// æœã®è‰²æœªå®Ÿè£…è·ã®åˆ¤å®š
 				clif_displaymessage(fd, msg_txt(35));
 				return 0;
 			}
 		}
-		// -1w’è‚Ì‰ÓŠ‚Í•ÏX‚µ‚È‚¢
+		// -1æŒ‡å®šã®ç®‡æ‰€ã¯å¤‰æ›´ã—ãªã„
 		if (hair_style >= 0)
 			pc_changelook(sd, LOOK_HAIR, hair_style);
 		if (hair_color >= 0)
@@ -1914,7 +1914,7 @@ int atcommand_go(const int fd, struct map_session_data* sd, AtCommandType comman
 
 	if(isdigit(*map_code)) {
 		int go_id = atoi(map_code);
-		// DB‚ÌID‚©‚çŒŸõ
+		// DBã®IDã‹ã‚‰æ¤œç´¢
 		for(i=0; i<MAX_ATCOMMAND_GO; i++) {
 			if(atcommand_go_db[i].nameid == go_id) {
 				idx = i;
@@ -1923,7 +1923,7 @@ int atcommand_go(const int fd, struct map_session_data* sd, AtCommandType comman
 		}
 	}
 	else {
-		// DB‚Ì—ªÌ–¼(code)‚©‚çŒŸõ
+		// DBã®ç•¥ç§°å(code)ã‹ã‚‰æ¤œç´¢
 		for(i=0; i<MAX_ATCOMMAND_GO; i++) {
 			if(strcmpi(atcommand_go_db[i].code,map_code) == 0) {
 				idx = i;
@@ -2151,8 +2151,8 @@ int atcommand_produce(const int fd, struct map_session_data* sd, AtCommandType c
 		tmp_item.card[0] = 0x00ff;
 		tmp_item.card[1] = ((star * 5) << 8) + attribute;
 		*((int *)(&tmp_item.card[2])) = sd->status.char_id;
-		clif_produceeffect(sd, 0, item_id); // »‘¢ƒGƒtƒFƒNƒgƒpƒPƒbƒg
-		clif_misceffect(&sd->bl, 3); // ‘¼l‚É‚à¬Œ÷‚ğ’Ê’m
+		clif_produceeffect(sd, 0, item_id); // è£½é€ ã‚¨ãƒ•ã‚§ã‚¯ãƒˆãƒ‘ã‚±ãƒƒãƒˆ
+		clif_misceffect(&sd->bl, 3); // ä»–äººã«ã‚‚æˆåŠŸã‚’é€šçŸ¥
 		if ((flag = pc_additem(sd, &tmp_item, 1, false)))
 			clif_additem(sd, 0, 0, flag);
 	} else {
@@ -2163,7 +2163,7 @@ int atcommand_produce(const int fd, struct map_session_data* sd, AtCommandType c
 }
 
 /*==========================================
- * ‰ó‚ê‚½•‹ï‚ğ‘S‚ÄC—‚·‚é
+ * å£Šã‚ŒãŸæ­¦å…·ã‚’å…¨ã¦ä¿®ç†ã™ã‚‹
  *------------------------------------------
  */
 int atcommand_repair(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -2183,7 +2183,7 @@ int atcommand_repair(const int fd, struct map_session_data* sd, AtCommandType co
 		clif_misceffect2(&sd->bl,101);
 		clif_itemlist(sd);
 		clif_equiplist(sd);
-		clif_displaymessage(fd, msg_txt(157)); // C—‚µ‚Ü‚µ‚½
+		clif_displaymessage(fd, msg_txt(157)); // ä¿®ç†ã—ã¾ã—ãŸ
 	}
 
 	return 0;
@@ -2236,7 +2236,7 @@ int atcommand_gat(const int fd, struct map_session_data* sd, AtCommandType comma
 }
 
 /*==========================================
- * w’èƒpƒPƒbƒg‚ğÜ‚è•Ô‚µ‘—‚è‚Â‚¯‚éiƒfƒoƒbƒOj
+ * æŒ‡å®šãƒ‘ã‚±ãƒƒãƒˆã‚’æŠ˜ã‚Šè¿”ã—é€ã‚Šã¤ã‘ã‚‹ï¼ˆãƒ‡ãƒãƒƒã‚°ï¼‰
  *------------------------------------------
  */
 int atcommand_packet(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -2732,7 +2732,7 @@ int atcommand_recall(const int fd, struct map_session_data* sd, AtCommandType co
 }
 
 /*==========================================
- * recall‚ğÚ‘±Ò‘Sˆõ‚É‚©‚¯‚é
+ * recallã‚’æ¥ç¶šè€…å…¨å“¡ã«ã‹ã‘ã‚‹
  *------------------------------------------
  */
 int atcommand_recallall(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -2825,7 +2825,7 @@ int atcommand_recallparty(const int fd, struct map_session_data* sd, AtCommandTy
 }
 
 /*==========================================
- * ‘ÎÛƒLƒƒƒ‰ƒNƒ^[‚ğ“]E‚³‚¹‚é upperw’è‚Å“]¶‚â—{q‚à‰Â”\
+ * å¯¾è±¡ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ã‚’è»¢è·ã•ã›ã‚‹ upperæŒ‡å®šã§è»¢ç”Ÿã‚„é¤Šå­ã‚‚å¯èƒ½
  *------------------------------------------
  */
 int atcommand_character_job(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -2839,9 +2839,9 @@ int atcommand_character_job(const int fd, struct map_session_data* sd, AtCommand
 	if (!message || !*message)
 		return -1;
 
-	if (sscanf(message, "%d %d %99[^\n]", &job, &upper, character) < 3) {	// upperw’è‚µ‚Ä‚ ‚é‚©
+	if (sscanf(message, "%d %d %99[^\n]", &job, &upper, character) < 3) {	// upperæŒ‡å®šã—ã¦ã‚ã‚‹ã‹
 		upper = -1;
-		if (sscanf(message, "%d %99[^\n]", &job, character) < 2)	// upperw’è‚µ‚Ä‚È‚¢ã‚É‰½‚©‘«‚è‚È‚¢
+		if (sscanf(message, "%d %99[^\n]", &job, character) < 2)	// upperæŒ‡å®šã—ã¦ãªã„ä¸Šã«ä½•ã‹è¶³ã‚Šãªã„
 			return -1;
 	}
 
@@ -3098,7 +3098,7 @@ int atcommand_raise(const int fd, struct map_session_data* sd, AtCommandType com
 }
 
 /*==========================================
- * atcommand_character_baselevel @charbaselvl‚Å‘ÎÛƒLƒƒƒ‰‚ÌƒŒƒxƒ‹‚ğã‚°‚é
+ * atcommand_character_baselevel @charbaselvlã§å¯¾è±¡ã‚­ãƒ£ãƒ©ã®ãƒ¬ãƒ™ãƒ«ã‚’ä¸Šã’ã‚‹
  *------------------------------------------
 */
 int atcommand_character_baselevel(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -3155,7 +3155,7 @@ int atcommand_character_baselevel(const int fd, struct map_session_data* sd, AtC
 }
 
 /*==========================================
- * atcommand_character_joblevel @charjoblvl‚Å‘ÎÛƒLƒƒƒ‰‚ÌJobƒŒƒxƒ‹‚ğã‚°‚é
+ * atcommand_character_joblevel @charjoblvlã§å¯¾è±¡ã‚­ãƒ£ãƒ©ã®Jobãƒ¬ãƒ™ãƒ«ã‚’ä¸Šã’ã‚‹
  *------------------------------------------
  */
 int atcommand_character_joblevel(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -3498,7 +3498,7 @@ int atcommand_agitend(const int fd, struct map_session_data* sd, AtCommandType c
 }
 
 /*==========================================
- * ƒ}ƒbƒvƒT[ƒo[‚ğI—¹‚³‚¹‚é
+ * ãƒãƒƒãƒ—ã‚µãƒ¼ãƒãƒ¼ã‚’çµ‚äº†ã•ã›ã‚‹
  *------------------------------------------
  */
 int atcommand_mapexit(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -3593,7 +3593,7 @@ int atcommand_shuffle(const int fd, struct map_session_data* sd, AtCommandType c
 
 	mode = atoi(message)+1;
 
-	if (mode&1) {	// PC‚ÌƒVƒƒƒbƒtƒ‹
+	if (mode&1) {	// PCã®ã‚·ãƒ£ãƒƒãƒ•ãƒ«
 		struct map_session_data *pl_sd;
 		int i;
 		for (i = 0; i < fd_max; i++) {
@@ -3602,7 +3602,7 @@ int atcommand_shuffle(const int fd, struct map_session_data* sd, AtCommandType c
 				pc_setpos(pl_sd, map[pl_sd->bl.m].name, 0, 0, 3);
 		}
 	}
-	if (mode&2) {	// MOB‚ÌƒVƒƒƒbƒtƒ‹
+	if (mode&2) {	// MOBã®ã‚·ãƒ£ãƒƒãƒ•ãƒ«
 		map_foreachinarea(atcommand_shuffle_sub, sd->bl.m, 0, 0, map[sd->bl.m].xs, map[sd->bl.m].ys, BL_MOB);
 	}
 	clif_displaymessage(fd, msg_txt(81));
@@ -3880,10 +3880,10 @@ int atcommand_charzeny(const int fd, struct map_session_data* sd, AtCommandType 
 /*==========================================
  * @mapinfo <map name> [0-3] by MC_Cameri
  * => Shows information about the map [map name]
- * 0 = ’Ç‰Áî•ñ‚È‚µ
- * 1 = MAP“à‚É‹‚éPC‚Ìî•ñ
- * 2 = MAP“à‚É‹‚éNPC‚Ìî•ñiÚGŒ^‚Ì‚İj
- * 3 = MAP“à‚É‚ ‚éƒ`ƒƒƒbƒg‚Ìî•ñ
+ * 0 = è¿½åŠ æƒ…å ±ãªã—
+ * 1 = MAPå†…ã«å±…ã‚‹PCã®æƒ…å ±
+ * 2 = MAPå†…ã«å±…ã‚‹NPCã®æƒ…å ±ï¼ˆæ¥è§¦å‹ã®ã¿ï¼‰
+ * 3 = MAPå†…ã«ã‚ã‚‹ãƒãƒ£ãƒƒãƒˆã®æƒ…å ±
  *------------------------------------------
  */
 int atcommand_mapinfo(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -3962,7 +3962,7 @@ int atcommand_mapinfo(const int fd, struct map_session_data* sd, AtCommandType c
 			break;
 		case 2:
 			clif_displaymessage(fd, "----- NPCs in Map -----");
-			for (i = 0; i < map[m_id].npc_num; i++) {	// map[].npc‚É‚ÍÚGŒ^‚ÌNPC‚µ‚©•Û‘¶‚³‚ê‚Ä‚¢‚È‚¢iè”²‚«j
+			for (i = 0; i < map[m_id].npc_num; i++) {	// map[].npcã«ã¯æ¥è§¦å‹ã®NPCã—ã‹ä¿å­˜ã•ã‚Œã¦ã„ãªã„ï¼ˆæ‰‹æŠœãï¼‰
 				const char *direction;
 				struct npc_data *nd = map[m_id].npc[i];
 
@@ -4082,7 +4082,7 @@ int atcommand_mobsearch(const int fd, struct map_session_data* sd, AtCommandType
 }
 
 /*==========================================
- * ƒhƒƒbƒvƒAƒCƒeƒ€‚Ì‘|œ
+ * ãƒ‰ãƒ­ãƒƒãƒ—ã‚¢ã‚¤ãƒ†ãƒ ã®æƒé™¤
  *------------------------------------------
  */
 static int atcommand_cleanmap_sub(struct block_list *bl,va_list ap)
@@ -4194,11 +4194,11 @@ int atcommand_giveitem(const int fd, struct map_session_data* sd, AtCommandType 
 	if (item_id <= 0)
 		return -1;
 
-	if ((pl_sd = map_nick2sd(character)) != NULL) { // ŠY“––¼‚ÌƒLƒƒƒ‰‚ª‘¶İ‚·‚é
+	if ((pl_sd = map_nick2sd(character)) != NULL) { // è©²å½“åã®ã‚­ãƒ£ãƒ©ãŒå­˜åœ¨ã™ã‚‹
 		atcommand_giveitem_sub(pl_sd,item_data,number);
 		msg_output(pl_sd->fd, msg_txt(97), item_data->jname, number);
 		msg_output(fd, msg_txt(98), pl_sd->status.name, item_data->jname, number);
-	} else if (strcmp(character,"ALL") == 0) {	// –¼‘O‚ªALL‚È‚çAÚ‘±Ò‘Sˆõ‚Ö
+	} else if (strcmp(character,"ALL") == 0) {	// åå‰ãŒALLãªã‚‰ã€æ¥ç¶šè€…å…¨å“¡ã¸
 		int i;
 		for (i = 0; i < fd_max; i++) {
 			if (session[i] && (pl_sd = (struct map_session_data *)session[i]->session_data) && pl_sd->state.auth) {
@@ -4216,7 +4216,7 @@ int atcommand_giveitem(const int fd, struct map_session_data* sd, AtCommandType 
 
 /*==========================================
  * Weather control
- * ”­“®Œã‚ÉŒø‰Ê‚ğ–ß‚·(Á‚·)•û–@‚ª•ª‚©‚ç‚È‚¢EEE
+ * ç™ºå‹•å¾Œã«åŠ¹æœã‚’æˆ»ã™(æ¶ˆã™)æ–¹æ³•ãŒåˆ†ã‹ã‚‰ãªã„ãƒ»ãƒ»ãƒ»
  *------------------------------------------
  */
 int atcommand_weather(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4368,7 +4368,7 @@ int atcommand_weather(const int fd, struct map_session_data* sd, AtCommandType c
 		struct map_session_data *psd;
 		int i;
 
-		// w’èƒ}ƒbƒv“à‚ÉŠù‚É‹‚éƒLƒƒƒ‰‚Í‘¦‚É“VŒó•Ï‰»
+		// æŒ‡å®šãƒãƒƒãƒ—å†…ã«æ—¢ã«å±…ã‚‹ã‚­ãƒ£ãƒ©ã¯å³æ™‚ã«å¤©å€™å¤‰åŒ–
 		for (i = 0; i < fd_max; i++) {
 			if (session[i] && (psd = (struct map_session_data *)session[i]->session_data) != NULL && psd->state.auth) {
 				if (psd->bl.m == m)
@@ -4381,7 +4381,7 @@ int atcommand_weather(const int fd, struct map_session_data* sd, AtCommandType c
 }
 
 /*==========================================
- * NPC‚É˜b‚³‚¹‚é
+ * NPCã«è©±ã•ã›ã‚‹
  *------------------------------------------
  */
 int atcommand_npctalk(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4399,7 +4399,7 @@ int atcommand_npctalk(const int fd, struct map_session_data* sd, AtCommandType c
 }
 
 /*==========================================
- * PET‚É˜b‚³‚¹‚é
+ * PETã«è©±ã•ã›ã‚‹
  *------------------------------------------
  */
 int atcommand_pettalk(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4422,7 +4422,7 @@ int atcommand_pettalk(const int fd, struct map_session_data* sd, AtCommandType c
 }
 
 /*==========================================
- * HOM‚É˜b‚³‚¹‚é
+ * HOMã«è©±ã•ã›ã‚‹
  *------------------------------------------
  */
 int atcommand_homtalk(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4445,7 +4445,7 @@ int atcommand_homtalk(const int fd, struct map_session_data* sd, AtCommandType c
 }
 
 /*==========================================
- * ƒT[ƒo[“à‚Ìl”ƒ}ƒbƒv‚ğ•\¦‚³‚¹‚é
+ * ã‚µãƒ¼ãƒãƒ¼å†…ã®äººæ•°ãƒãƒƒãƒ—ã‚’è¡¨ç¤ºã•ã›ã‚‹
  *------------------------------------------
  */
 int atcommand_users(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4482,7 +4482,7 @@ int atcommand_users(const int fd, struct map_session_data* sd, AtCommandType com
 
 /*==========================================
  * @reloadatcommand
- *   atcommand_auriga.conf ‚ÌƒŠƒ[ƒh
+ *   atcommand_auriga.conf ã®ãƒªãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 int atcommand_reloadatcommand(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4495,7 +4495,7 @@ int atcommand_reloadatcommand(const int fd, struct map_session_data* sd, AtComma
 
 /*==========================================
  * @reloadbattleconf
- *   battle_auriga.conf ‚ÌƒŠƒ[ƒh
+ *   battle_auriga.conf ã®ãƒªãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 int atcommand_reloadbattleconf(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4508,7 +4508,7 @@ int atcommand_reloadbattleconf(const int fd, struct map_session_data* sd, AtComm
 
 /*==========================================
  * @reloadgmaccount
- *   gm_account_filename ‚ÌƒŠƒ[ƒh
+ *   gm_account_filename ã®ãƒªãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 int atcommand_reloadgmaccount(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4521,7 +4521,7 @@ int atcommand_reloadgmaccount(const int fd, struct map_session_data* sd, AtComma
 
 /*==========================================
  * @reloadhomundb
- *   ƒzƒ€ƒ“ƒNƒ‹ƒXŠÖ˜ADB‚ÌƒŠƒ[ƒh
+ *   ãƒ›ãƒ ãƒ³ã‚¯ãƒ«ã‚¹é–¢é€£DBã®ãƒªãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 int atcommand_reloadhomundb(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4533,7 +4533,7 @@ int atcommand_reloadhomundb(const int fd, struct map_session_data* sd, AtCommand
 }
 
 /*==========================================
- * itemDB‚ÌƒŠƒ[ƒh
+ * itemDBã®ãƒªãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 int atcommand_reloaditemdb(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4547,7 +4547,7 @@ int atcommand_reloaditemdb(const int fd, struct map_session_data* sd, AtCommandT
 
 /*==========================================
  * @reloadmercdb
- *   —b•ºŠÖ˜ADB‚ÌƒŠƒ[ƒh
+ *   å‚­å…µé–¢é€£DBã®ãƒªãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 int atcommand_reloadmercdb(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4560,7 +4560,7 @@ int atcommand_reloadmercdb(const int fd, struct map_session_data* sd, AtCommandT
 
 /*==========================================
  * @reloadelemdb
- *   ¸—ìŠÖ˜ADB‚ÌƒŠƒ[ƒh
+ *   ç²¾éœŠé–¢é€£DBã®ãƒªãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 int atcommand_reloadelemdb(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4572,7 +4572,7 @@ int atcommand_reloadelemdb(const int fd, struct map_session_data* sd, AtCommandT
 }
 
 /*==========================================
- * MOBDB‚ÌƒŠƒ[ƒh
+ * MOBDBã®ãƒªãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 int atcommand_reloadmobdb(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4587,7 +4587,7 @@ int atcommand_reloadmobdb(const int fd, struct map_session_data* sd, AtCommandTy
 /*==========================================
  * @reloadpcdb
  *   exp.txt skill_tree.txt attr_fix.txt
- *   ‚ÌƒŠƒ[ƒh
+ *   ã®ãƒªãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 int atcommand_reloadpcdb(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4599,7 +4599,7 @@ int atcommand_reloadpcdb(const int fd, struct map_session_data* sd, AtCommandTyp
 }
 
 /*==========================================
- * ƒXƒLƒ‹DB‚ÌƒŠƒ[ƒh
+ * ã‚¹ã‚­ãƒ«DBã®ãƒªãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 int atcommand_reloadskilldb(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4614,7 +4614,7 @@ int atcommand_reloadskilldb(const int fd, struct map_session_data* sd, AtCommand
  * @reloadstatusdb
  *   job_db1.txt job_db2.txt job_db2-2.txt
  *   refine_db.txt size_fix.txt scdata_db.txt
- *   ‚ÌƒŠƒ[ƒh
+ *   ã®ãƒªãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 int atcommand_reloadstatusdb(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4626,7 +4626,7 @@ int atcommand_reloadstatusdb(const int fd, struct map_session_data* sd, AtComman
 }
 
 /*==========================================
- * Message of the Day‚ÌƒŠƒ[ƒh
+ * Message of the Dayã®ãƒªãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 int atcommand_reloadmotd(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4639,7 +4639,7 @@ int atcommand_reloadmotd(const int fd, struct map_session_data* sd, AtCommandTyp
 
 /*==========================================
  * @im
- *   ƒAƒCƒeƒ€‚âƒ‚ƒ“ƒXƒ^[‚ÌŠÈˆÕ¢ŠÒ
+ *   ã‚¢ã‚¤ãƒ†ãƒ ã‚„ãƒ¢ãƒ³ã‚¹ã‚¿ãƒ¼ã®ç°¡æ˜“å¬é‚„
  *------------------------------------------
  */
 int atcommand_itemmonster(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4734,7 +4734,7 @@ int atcommand_mapflag(const int fd, struct map_session_data* sd, AtCommandType c
 }
 
 /*==========================================
- * ƒ}ƒi[ƒ|ƒCƒ“ƒg
+ * ãƒãƒŠãƒ¼ãƒã‚¤ãƒ³ãƒˆ
  *------------------------------------------
  */
 int atcommand_mannerpoint(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4774,7 +4774,7 @@ int atcommand_mannerpoint(const int fd, struct map_session_data* sd, AtCommandTy
 }
 
 /*==========================================
- * ƒLƒƒƒ‰I‚Ì§ŒÀl”‚Ì•ÏX
+ * ã‚­ãƒ£ãƒ©é¯–ã®åˆ¶é™äººæ•°ã®å¤‰æ›´
  *------------------------------------------
  */
 int atcommand_connectlimit(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4800,7 +4800,7 @@ int atcommand_connectlimit(const int fd, struct map_session_data* sd, AtCommandT
 }
 
 /*==========================================
- * ‹Ù‹}µW‚Ìó‘ø
+ * ç·Šæ€¥æ‹›é›†ã®å—è«¾
  *------------------------------------------
  */
 int atcommand_econ(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4823,7 +4823,7 @@ int atcommand_econ(const int fd, struct map_session_data* sd, AtCommandType comm
 }
 
 /*==========================================
- * ‹Ù‹}µW‚Ì‹‘”Û
+ * ç·Šæ€¥æ‹›é›†ã®æ‹’å¦
  *------------------------------------------
  */
 int atcommand_ecoff(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4846,7 +4846,7 @@ int atcommand_ecoff(const int fd, struct map_session_data* sd, AtCommandType com
 }
 
 /*==========================================
- * ƒAƒCƒRƒ“•\¦ ƒfƒoƒbƒN—p
+ * ã‚¢ã‚¤ã‚³ãƒ³è¡¨ç¤º ãƒ‡ãƒãƒƒã‚¯ç”¨
  *------------------------------------------
  */
 int atcommand_icon(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4867,7 +4867,7 @@ int atcommand_icon(const int fd, struct map_session_data* sd, AtCommandType comm
 }
 
 /*==========================================
- * BSƒ‰ƒ“ƒLƒ“ƒO
+ * BSãƒ©ãƒ³ã‚­ãƒ³ã‚°
  *------------------------------------------
  */
 int atcommand_blacksmith(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4880,7 +4880,7 @@ int atcommand_blacksmith(const int fd, struct map_session_data* sd, AtCommandTyp
 }
 
 /*==========================================
- * ƒAƒ‹ƒPƒ~ƒ‰ƒ“ƒLƒ“ƒO
+ * ã‚¢ãƒ«ã‚±ãƒŸãƒ©ãƒ³ã‚­ãƒ³ã‚°
  *------------------------------------------
  */
 int atcommand_alchemist(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4893,7 +4893,7 @@ int atcommand_alchemist(const int fd, struct map_session_data* sd, AtCommandType
 }
 
 /*==========================================
- * ƒeƒRƒ“ƒ‰ƒ“ƒLƒ“ƒO
+ * ãƒ†ã‚³ãƒ³ãƒ©ãƒ³ã‚­ãƒ³ã‚°
  *------------------------------------------
  */
 int atcommand_taekwon(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4906,7 +4906,7 @@ int atcommand_taekwon(const int fd, struct map_session_data* sd, AtCommandType c
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒO
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°
  *------------------------------------------
  */
 int atcommand_ranking(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4928,7 +4928,7 @@ int atcommand_ranking(const int fd, struct map_session_data* sd, AtCommandType c
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒOƒ|ƒCƒ“ƒg•t—^
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°ãƒã‚¤ãƒ³ãƒˆä»˜ä¸
  *------------------------------------------
  */
 int atcommand_rankingpoint(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4963,7 +4963,7 @@ int atcommand_rankingpoint(const int fd, struct map_session_data* sd, AtCommandT
 }
 
 /*==========================================
- * Š´î‚ğƒŠƒZƒbƒg
+ * æ„Ÿæƒ…ã‚’ãƒªã‚»ãƒƒãƒˆ
  *------------------------------------------
  */
 int atcommand_resetfeel(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -4987,7 +4987,7 @@ int atcommand_resetfeel(const int fd, struct map_session_data* sd, AtCommandType
 }
 
 /*==========================================
- * ‘ˆ«‚ğƒŠƒZƒbƒg
+ * æ†æ‚ªã‚’ãƒªã‚»ãƒƒãƒˆ
  *------------------------------------------
  */
 int atcommand_resethate(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -5047,7 +5047,7 @@ int atcommand_resetskill(const int fd, struct map_session_data* sd, AtCommandTyp
 }
 
 /*==========================================
- * ƒGƒ‚[ƒVƒ‡ƒ“•\¦—ƒfƒoƒbƒO—p
+ * ã‚¨ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³è¡¨ç¤ºï¼ ãƒ‡ãƒãƒƒã‚°ç”¨
  *------------------------------------------
  */
 int atcommand_emotion(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -5063,7 +5063,7 @@ int atcommand_emotion(const int fd, struct map_session_data* sd, AtCommandType c
 }
 
 /*==========================================
- * ƒXƒe[ƒ^ƒXMAX
+ * ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹MAX
  *------------------------------------------
  */
 int atcommand_statall(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -5156,7 +5156,7 @@ int atcommand_viewclass(const int fd, struct map_session_data* sd, AtCommandType
 }
 
 /*==========================================
- * ƒ[ƒ‹BOXŠJ‚©‚¹‚é
+ * ãƒ¡ãƒ¼ãƒ«BOXé–‹ã‹ã›ã‚‹
  *------------------------------------------
  */
 int atcommand_mailbox(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -5167,7 +5167,7 @@ int atcommand_mailbox(const int fd, struct map_session_data* sd, AtCommandType c
 }
 
 /*==========================================
- * ƒXƒNƒŠƒvƒg•Ï”‚Ì‘€ì
+ * ã‚¹ã‚¯ãƒªãƒ—ãƒˆå¤‰æ•°ã®æ“ä½œ
  *------------------------------------------
  */
 static int atcommand_vars_sub(struct map_session_data *sd,const char *src_var,const char *name,const char *str)
@@ -5183,10 +5183,10 @@ static int atcommand_vars_sub(struct map_session_data *sd,const char *src_var,co
 	strncpy(dst_var, src_var, 99);
 	dst_var[99] = 0;
 
-	if ((p = strchr(dst_var, '[')) != NULL)	// []‚Ì•”•ª‚Íí‚é
+	if ((p = strchr(dst_var, '[')) != NULL)	// []ã®éƒ¨åˆ†ã¯å‰Šã‚‹
 		*p = 0;
 
-	// “o˜^‚³‚ê‚Ä‚¢‚ÄQÆ‰Â”\‚È•Ï”‚©‚Ç‚¤‚©’²‚×‚é
+	// ç™»éŒ²ã•ã‚Œã¦ã„ã¦å‚ç…§å¯èƒ½ãªå¤‰æ•°ã‹ã©ã†ã‹èª¿ã¹ã‚‹
 	if (!script_check_variable(dst_var, (p != NULL), read_only)) {
 		return 15;
 	}
@@ -5215,11 +5215,11 @@ static int atcommand_vars_sub(struct map_session_data *sd,const char *src_var,co
 		ref = &nd->u.scr.script->script_vars;
 	}
 
-	// []‚ª‚ ‚é‚Æ‚«‚Ígetelementofarray‚Æ“¯—l‚Ìˆ—‚ğ‚·‚é
+	// []ãŒã‚ã‚‹ã¨ãã¯getelementofarrayã¨åŒæ§˜ã®å‡¦ç†ã‚’ã™ã‚‹
 	if (p) {
 		size_t len;
 		int flag = 0;
-		if (postfix == '$') {	// postfix‚Íí‚é
+		if (postfix == '$') {	// postfixã¯å‰Šã‚‹
 			dst_var[strlen(dst_var)-1] = 0;
 		}
 		len = strlen(dst_var);
@@ -5264,7 +5264,7 @@ static int atcommand_vars_sub(struct map_session_data *sd,const char *src_var,co
 }
 
 /*==========================================
- * ƒXƒNƒŠƒvƒg•Ï”‚ğ“Ç‚İæ‚é
+ * ã‚¹ã‚¯ãƒªãƒ—ãƒˆå¤‰æ•°ã‚’èª­ã¿å–ã‚‹
  *------------------------------------------
  */
 int atcommand_readvars(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -5282,14 +5282,14 @@ int atcommand_readvars(const int fd, struct map_session_data* sd, AtCommandType 
 		return -1;
 
 	err = atcommand_vars_sub(sd, vars, name, NULL);
-	if (err >= 0)	// ƒGƒ‰[
+	if (err >= 0)	// ã‚¨ãƒ©ãƒ¼æ™‚
 		msg_output(fd, msg_txt(err), vars);
 
 	return 0;
 }
 
 /*==========================================
- * ƒXƒNƒŠƒvƒg•Ï”‚É‘‚«‚Ş
+ * ã‚¹ã‚¯ãƒªãƒ—ãƒˆå¤‰æ•°ã«æ›¸ãè¾¼ã‚€
  *------------------------------------------
  */
 int atcommand_writevars(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -5308,7 +5308,7 @@ int atcommand_writevars(const int fd, struct map_session_data* sd, AtCommandType
 
 	memset(name, 0, sizeof(name));
 
-	// "‚ÅˆÍ‚ñ‚Å‚ ‚éê‡‚ÍŠÈˆÕparse‚·‚é
+	// "ã§å›²ã‚“ã§ã‚ã‚‹å ´åˆã¯ç°¡æ˜“parseã™ã‚‹
 	if (c == '\"') {
 		int i = 0;
 		const char *p = message + next;
@@ -5330,7 +5330,7 @@ int atcommand_writevars(const int fd, struct map_session_data* sd, AtCommandType
 	}
 
 	err = atcommand_vars_sub(sd, vars, name, str);
-	if (err >= 0)	// ƒGƒ‰[
+	if (err >= 0)	// ã‚¨ãƒ©ãƒ¼æ™‚
 		msg_output(fd, msg_txt(err), vars);
 
 	return 0;
@@ -5463,9 +5463,9 @@ int atcommand_reproduce2(const int fd, struct map_session_data* sd, AtCommandTyp
  */
 int atcommand_mobinfo(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
 {
-	const char *msize[] = { "¬Œ^", "’†Œ^", "‘åŒ^" };
-	const char *mrace[] = { "–³", "•s€", "“®•¨", "A•¨", "©’", "‹›", "ˆ«–‚", "lŠÔ", "“Vg", "—³", "Boss", "Non-Boss" };
-	const char *melement[] = { "–³", "–³", "…", "’n", "‰Î", "•—", "“Å", "¹", "ˆÅ", "”O", "•s€" };
+	const char *msize[] = { "å°å‹", "ä¸­å‹", "å¤§å‹" };
+	const char *mrace[] = { "ç„¡", "ä¸æ­»", "å‹•ç‰©", "æ¤ç‰©", "æ˜†è™«", "é­š", "æ‚ªé­”", "äººé–“", "å¤©ä½¿", "ç«œ", "Boss", "Non-Boss" };
+	const char *melement[] = { "ç„¡", "ç„¡", "æ°´", "åœ°", "ç«", "é¢¨", "æ¯’", "è–", "é—‡", "å¿µ", "ä¸æ­»" };
 	char output[200];
 	struct item_data *item_data;
 	struct mobdb_data *m;
@@ -5558,7 +5558,7 @@ int atcommand_mobinfo(const int fd, struct map_session_data* sd, AtCommandType c
 }
 
 /*==========================================
- * ƒzƒ€‚ÌƒŒƒxƒ‹’²ß
+ * ãƒ›ãƒ ã®ãƒ¬ãƒ™ãƒ«èª¿ç¯€
  *------------------------------------------
  */
 int atcommand_homlevel(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -5584,14 +5584,14 @@ int atcommand_homlevel(const int fd, struct map_session_data* sd, AtCommandType 
 				break;
 			flag = 1;
 			hd->status.base_level++;
-			//hd->status.status_point += 15 + (hd->status.base_level+14)/3;	// ”÷’²®‚µ‚Ä‚à‚¤‚Ü‚­‚¢‚©‚¸EEE
-			if (hd->status.base_level%3 == 0)	// 3ƒŒƒxƒ‹–ˆ‚ÉSkillPoint‰ÁZ
+			//hd->status.status_point += 15 + (hd->status.base_level+14)/3;	// å¾®èª¿æ•´ã—ã¦ã‚‚ã†ã¾ãã„ã‹ãšãƒ»ãƒ»ãƒ»
+			if (hd->status.base_level%3 == 0)	// 3ãƒ¬ãƒ™ãƒ«æ¯ã«SkillPointåŠ ç®—
 				hd->status.skill_point++;
 
-			homun_upstatus(&hd->status);	// ƒXƒeƒAƒbƒvŒvZ
+			homun_upstatus(&hd->status);	// ã‚¹ãƒ†ã‚¢ãƒƒãƒ—è¨ˆç®—
 		}
 		if (flag) {
-			homun_calc_status(hd);			// ƒXƒe[ƒ^ƒXŒvZ
+			homun_calc_status(hd);			// ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹è¨ˆç®—
 			homun_heal(hd,hd->max_hp,hd->max_sp);
 			clif_misceffect2(&hd->bl,568);
 			if (hd->msd) {
@@ -5723,7 +5723,7 @@ int atcommand_homfriendly(const int fd, struct map_session_data* sd, AtCommandTy
 }
 
 /*==========================================
- * ƒAƒCƒeƒ€‚Ì©“®æ“¾‹@”\‚ğØ‚è‘Ö‚¦‚é
+ * ã‚¢ã‚¤ãƒ†ãƒ ã®è‡ªå‹•å–å¾—æ©Ÿèƒ½ã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹
  *------------------------------------------
  */
 int atcommand_autoloot(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -5742,7 +5742,7 @@ int atcommand_autoloot(const int fd, struct map_session_data* sd, AtCommandType 
 }
 
 /*==========================================
- * ƒZƒ‹ƒ^ƒCƒv‚ğ•ÏX‚·‚é
+ * ã‚»ãƒ«ã‚¿ã‚¤ãƒ—ã‚’å¤‰æ›´ã™ã‚‹
  *------------------------------------------
  */
 int atcommand_changemaptype(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -5765,7 +5765,7 @@ int atcommand_changemaptype(const int fd, struct map_session_data* sd, AtCommand
 }
 
 /*==========================================
- * ƒzƒbƒgƒL[ƒZƒbƒg‚ÌØ‚è‘Ö‚¦
+ * ãƒ›ãƒƒãƒˆã‚­ãƒ¼ã‚»ãƒƒãƒˆã®åˆ‡ã‚Šæ›¿ãˆ
  *------------------------------------------
  */
 int atcommand_hotkeyset(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -5798,7 +5798,7 @@ int atcommand_hotkeyset(const int fd, struct map_session_data* sd, AtCommandType
 }
 
 /*==========================================
- * —b•º¢Š«
+ * å‚­å…µå¬å–š
  *------------------------------------------
  */
 int atcommand_callmerc(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -5821,8 +5821,8 @@ int atcommand_callmerc(const int fd, struct map_session_data* sd, AtCommandType 
 }
 
 /*==========================================
- * @ƒRƒ}ƒ“ƒhİ’èƒtƒ@ƒCƒ‹“Ç‚İ‚İ
- * atcommand_go_db.txt @goİ’èƒtƒ@ƒCƒ‹
+ * @ã‚³ãƒãƒ³ãƒ‰è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«èª­ã¿è¾¼ã¿
+ * atcommand_go_db.txt @goè¨­å®šãƒ•ã‚¡ã‚¤ãƒ«
  *------------------------------------------
  */
 static int atcommand_readdb(void)
@@ -5863,7 +5863,7 @@ static int atcommand_readdb(void)
 		atcommand_go_db[i].x  = (short)atoi(split[3]);
 		atcommand_go_db[i].y  = (short)atoi(split[4]);
 
-		// mapname‚ÉŠg’£q".gat"w’è‚ª–³‚¢ê‡
+		// mapnameã«æ‹¡å¼µå­".gat"æŒ‡å®šãŒç„¡ã„å ´åˆ
 		if(strstr(atcommand_go_db[i].mapname, ".gat") == NULL && strlen(atcommand_go_db[i].mapname) < 19)
 			strcat(atcommand_go_db[i].mapname, ".gat");
 
@@ -5882,7 +5882,7 @@ static int atcommand_readdb(void)
 }
 
 /*==========================================
- * “¯–¿ƒ`ƒƒƒbƒg‚ÌØ‚è‘Ö‚¦
+ * åŒç›Ÿãƒãƒ£ãƒƒãƒˆã®åˆ‡ã‚Šæ›¿ãˆ
  *------------------------------------------
  */
 int atcommand_alliance(const int fd, struct map_session_data* sd, AtCommandType command, const char* message)
@@ -5904,7 +5904,7 @@ int atcommand_alliance(const int fd, struct map_session_data* sd, AtCommandType 
 }
 
 /*==========================================
- * ƒŠƒ[ƒh
+ * ãƒªãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 void atcommand_reload(void)
@@ -5913,7 +5913,7 @@ void atcommand_reload(void)
 }
 
 /*==========================================
- * ƒNƒGƒXƒg‰Šú‰»ˆ—
+ * ã‚¯ã‚¨ã‚¹ãƒˆåˆæœŸåŒ–å‡¦ç†
  *------------------------------------------
  */
 int do_init_atcommand(void)

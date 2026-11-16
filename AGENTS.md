@@ -16,6 +16,9 @@ Welcome, AI Agent! This project is a next-generation Ragnarok Online server emul
    - Make small, focused, and single-purpose modifications.
    - Do not perform mass refactoring across multiple files at once.
 
+4. ** Not CP932 **
+   - Only UTF-8
+
 ## 🛠️ Project Environment
 
 - **Base Engine:** Auriga (rAthena Branch)
