@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -36,7 +15,7 @@
 #include "pc.h"
 
 /*==========================================
- * ƒAƒCƒeƒ€‚âZeny‚ğ“Y•t
+ * ã‚¢ã‚¤ãƒ†ãƒ ã‚„Zenyã‚’æ·»ä»˜
  *------------------------------------------
  */
 void mail_setitem(struct map_session_data *sd, int idx, int amount)
@@ -58,13 +37,13 @@ void mail_setitem(struct map_session_data *sd, int idx, int amount)
 			sd->mail_append.amount = amount;
 			sd->mail_append.index  = idx;
 		} else {
-			// “Y•t•s‰Â
+			// æ·»ä»˜ä¸å¯
 			clif_res_sendmail_setappend(sd->fd,idx,1);
 			return;
 		}
 	}
 
-	// “Y•t¬Œ÷
+	// æ·»ä»˜æˆåŠŸ
 	sd->state.mail_appending = 1;
 	clif_res_sendmail_setappend(sd->fd,idx,0);
 
@@ -72,7 +51,7 @@ void mail_setitem(struct map_session_data *sd, int idx, int amount)
 }
 
 /*==========================================
- * “Y•tƒAƒCƒeƒ€‚ğ‰Šú‰»
+ * æ·»ä»˜ã‚¢ã‚¤ãƒ†ãƒ ã‚’åˆæœŸåŒ–
  *------------------------------------------
  */
 int mail_removeitem(struct map_session_data *sd, int flag)
@@ -80,12 +59,12 @@ int mail_removeitem(struct map_session_data *sd, int flag)
 	nullpo_retr(0, sd);
 
 	if(!(flag&2) && sd->mail_append.index >= 0) {
-		clif_additem(sd, sd->mail_append.index, sd->mail_append.amount, 0);	// ƒAƒCƒeƒ€•Ô‹p
+		clif_additem(sd, sd->mail_append.index, sd->mail_append.amount, 0);	// ã‚¢ã‚¤ãƒ†ãƒ è¿”å´
 		sd->mail_append.index  = -1;
 		sd->mail_append.amount = 0;
 	}
 	if(!(flag&1) && sd->mail_append.zeny > 0) {
-		clif_updatestatus(sd, SP_ZENY);		// Zeny•Ô‹p
+		clif_updatestatus(sd, SP_ZENY);		// Zenyè¿”å´
 		sd->mail_append.zeny = 0;
 	}
 
@@ -96,7 +75,7 @@ int mail_removeitem(struct map_session_data *sd, int flag)
 }
 
 /*==========================================
- * “Y•tƒAƒCƒeƒ€‚âZeny‚ğƒ`ƒFƒbƒN‚µ‚ÄŒ¸‚ç‚·
+ * æ·»ä»˜ã‚¢ã‚¤ãƒ†ãƒ ã‚„Zenyã‚’ãƒã‚§ãƒƒã‚¯ã—ã¦æ¸›ã‚‰ã™
  *------------------------------------------
  */
 static int mail_checkappend(struct map_session_data *sd, struct mail_data *md)
@@ -127,7 +106,7 @@ static int mail_checkappend(struct map_session_data *sd, struct mail_data *md)
 }
 
 /*==========================================
- * ‘—M‘Oƒ`ƒFƒbƒN
+ * é€ä¿¡å‰ãƒã‚§ãƒƒã‚¯
  *------------------------------------------
  */
 int mail_checkmail(struct map_session_data *sd, const char *name, const char *title, const char *body, int len)
@@ -137,7 +116,7 @@ int mail_checkmail(struct map_session_data *sd, const char *name, const char *ti
 
 	nullpo_retr(0, sd);
 
-	// –{•¶‚Ì’·‚³‚ª•s³A‚Ü‚½‚Í‘—M‘Šè‚ª©•ª‚È‚çƒ_ƒ
+	// æœ¬æ–‡ã®é•·ã•ãŒä¸æ­£ã€ã¾ãŸã¯é€ä¿¡ç›¸æ‰‹ãŒè‡ªåˆ†ãªã‚‰ãƒ€ãƒ¡
 	if(len <= 0 || len > sizeof(md.body) || rd == sd) {
 		clif_res_sendmail(sd->fd,1);
 		mail_removeitem(sd,0);
@@ -160,13 +139,13 @@ int mail_checkmail(struct map_session_data *sd, const char *name, const char *ti
 	if(rd)
 		mail_sendmail(sd,&md);
 	else
-		intif_mail_checkmail(sd->status.account_id,&md);	// ó‚¯æ‚él‚ª‚¢‚é‚©InterƒT[ƒo‚ÉŠm”F—v‹
+		intif_mail_checkmail(sd->status.account_id,&md);	// å—ã‘å–ã‚‹äººãŒã„ã‚‹ã‹Interã‚µãƒ¼ãƒã«ç¢ºèªè¦æ±‚
 
 	return 0;
 }
 
 /*==========================================
- * ‘—M¨Inter‚Ö
+ * é€ä¿¡â†’Interã¸
  *------------------------------------------
  */
 int mail_sendmail(struct map_session_data *sd, struct mail_data *md)
@@ -174,9 +153,9 @@ int mail_sendmail(struct map_session_data *sd, struct mail_data *md)
 	nullpo_retr(0, sd);
 	nullpo_retr(0, md);
 
-	// “ú•t‚Ì•Û‘¶
+	// æ—¥ä»˜ã®ä¿å­˜
 	md->times = (unsigned int)time(NULL);
-	// ƒAƒCƒeƒ€EZenyƒ`ƒFƒbƒN
+	// ã‚¢ã‚¤ãƒ†ãƒ ãƒ»Zenyãƒã‚§ãƒƒã‚¯
 	if(mail_checkappend(sd,md) == 0)
 		intif_sendmail(md);
 
@@ -189,7 +168,7 @@ int mail_sendmail(struct map_session_data *sd, struct mail_data *md)
 }
 
 /*==========================================
- * “Y•tƒAƒCƒeƒ€‚âZeny‚ğæ“¾
+ * æ·»ä»˜ã‚¢ã‚¤ãƒ†ãƒ ã‚„Zenyã‚’å–å¾—
  *------------------------------------------
  */
 void mail_getappend(int account_id, int zeny, int mail_num, struct item *item)
@@ -203,7 +182,7 @@ void mail_getappend(int account_id, int zeny, int mail_num, struct item *item)
 	if(sd == NULL)
 		return;
 
-	// ƒAƒCƒeƒ€ƒ`ƒFƒbƒN
+	// ã‚¢ã‚¤ãƒ†ãƒ ãƒã‚§ãƒƒã‚¯
 	if( item->nameid > 0 && item->amount > 0 )
 	{
 		switch(pc_checkadditem(sd,item->nameid,item->amount))
@@ -221,23 +200,23 @@ void mail_getappend(int account_id, int zeny, int mail_num, struct item *item)
 		}
 	}
 
-	// Zenyƒ`ƒFƒbƒN
+	// Zenyãƒã‚§ãƒƒã‚¯
 	if( zeny > 0 )
 	{
 		if( sd->status.zeny > MAX_ZENY - zeny )
 			result = false;
 	}
 
-	// ƒAƒCƒeƒ€‚Ìæ“¾‚É¬Œ÷‚µ‚½ê‡A“Y•tƒtƒ@ƒCƒ‹‚Ìíœ‚ğƒLƒƒƒ‰I‚É—v‹‚·‚é
+	// ã‚¢ã‚¤ãƒ†ãƒ ã®å–å¾—ã«æˆåŠŸã—ãŸå ´åˆã€æ·»ä»˜ãƒ•ã‚¡ã‚¤ãƒ«ã®å‰Šé™¤ã‚’ã‚­ãƒ£ãƒ©é¯–ã«è¦æ±‚ã™ã‚‹
 	if( result == true )
 	{
-		// ƒAƒCƒeƒ€‚Ìæ“¾
+		// ã‚¢ã‚¤ãƒ†ãƒ ã®å–å¾—
 		if( item->nameid > 0 && item->amount > 0 )
 		{
 			pc_additem(sd, item, item->amount, false);
 		}
 
-		// Zeny‚Ìæ“¾
+		// Zenyã®å–å¾—
 		if( zeny > 0 )
 		{
 			sd->status.zeny += zeny;

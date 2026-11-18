@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _SCRIPT_H_
+ï»¿#ifndef _SCRIPT_H_
 #define _SCRIPT_H_
 
 #include "map.h"
@@ -31,7 +10,7 @@ struct script_data {
 		char *str;
 		void *ptr;
 	} u;
-	struct linkdb_node** ref; // ƒŠƒtƒ@ƒŒƒ“ƒX
+	struct linkdb_node** ref; // ãƒªãƒ•ã‚¡ãƒ¬ãƒ³ã‚¹
 };
 
 struct script_code {
@@ -43,7 +22,7 @@ struct script_code {
 struct script_stack {
 	int sp,sp_max,defsp;
 	struct script_data *stack_data;
-	struct linkdb_node **var_function;	// ŠÖ”ˆË‘¶•Ï”
+	struct linkdb_node **var_function;	// é–¢æ•°ä¾å­˜å¤‰æ•°
 };
 
 struct script_sleep {

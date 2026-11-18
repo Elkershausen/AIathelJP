@@ -1,25 +1,4 @@
-﻿/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#define _CHAR_C_
+﻿#define _CHAR_C_
 
 #define DUMP_UNKNOWN_PACKET	1
 
@@ -79,12 +58,12 @@ static int char_new;
 static int delete_delay_time = 86400;
 
 int human_start_zeny   = 500;
-int human_start_weapon = 1201;		/* Knife */
-int human_start_armor  = 2301;		/* Cotton Shirt */
+int human_start_weapon = 1201;
+int human_start_armor  = 2301;
 
 int doram_start_zeny   = 500;
-int doram_start_weapon = 1681;		/* Short_Foxtail_Staff */
-int doram_start_armor  = 2301;		/* Cotton Shirt */
+int doram_start_weapon = 1681;
+int doram_start_armor  = 2301;
 
 struct Ranking_Data ranking_data[MAX_RANKING][MAX_RANKER];
 char GM_account_filename[1024] = "conf/GM_account.txt";
@@ -96,7 +75,7 @@ static char default_map_name[16] = "prontera.gat";
 static int  default_map_type = 0;
 
 int check_status_polygon = 2;
-int max_char_slot = 9;	// キャラクタースロットの最大数
+int max_char_slot = 9;	// ID max character count
 
 struct char_online {
 	int account_id;
@@ -122,7 +101,7 @@ static struct {
 } auth_fifo[AUTH_FIFO_SIZE];
 static int auth_fifo_pos = 0;
 
-// online DB
+/* Online DB */
 static struct dbt *char_online_db;
 
 #define CHAR_STATE_WAITAUTH 0
@@ -139,17 +118,13 @@ const char ranking_reg[MAX_RANKING][32] = {
 	//"PC_PVP_POINT",
 };
 
-// 初期位置（confファイルから再設定可能）
+/* Start Coordinates （fix conf） */
 struct point human_start_point = { "new_1-1.gat", 53, 111 };
-//struct point doram_start_point = { "new_do1.gat", 95, 255 };
 struct point doram_start_point = { "new_1-1.gat", 53, 111 };
 
 static struct dbt *gm_account_db;
 
-/*==========================================
- * GMかどうか
- *------------------------------------------
- */
+/* GM or not */
 int isGM(int account_id)
 {
 	struct gm_account *p = (struct gm_account *)numdb_search(gm_account_db,account_id);
@@ -160,10 +135,7 @@ int isGM(int account_id)
 	return p->level;
 }
 
-/*==========================================
- * GMアカウント読み込み
- *------------------------------------------
- */
+/* Load GM account */
 static void read_gm_account(void)
 {
 	char line[8192];
@@ -226,10 +198,7 @@ static void read_gm_account(void)
 	return;
 }
 
-/*==========================================
- * 同期
- *------------------------------------------
- */
+/* synchronization */
 static int mmo_char_sync_timer(int tid,unsigned int tick,int id,void *data)
 {
 	chardb_sync();
@@ -238,10 +207,7 @@ static int mmo_char_sync_timer(int tid,unsigned int tick,int id,void *data)
 	return 0;
 }
 
-/*==========================================
- * ワールドのユーザ数取得
- *------------------------------------------
- */
+/* login ID num */
 static int count_users(void)
 {
 	int users = 0;
@@ -257,10 +223,7 @@ static int count_users(void)
 	return users;
 }
 
-/*==========================================
- * キャラクターサーバ接続成功情報送信
- *------------------------------------------
- */
+/* Sending notification of successful character server connection */
 static int mmo_char_send006b(int fd, struct char_session_data *sd)
 {
 	int i;
@@ -269,7 +232,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 
 	nullpo_retr(0, sd);
 
-	session[fd]->auth = 1; // 認証終了を socket.c に伝える
+	session[fd]->auth = 1; // Notify socket.c that authentication has finished
 	sd->state = CHAR_STATE_AUTHOK;
 	found_num = chardb_load_all(sd,sd->account_id);
 
@@ -286,7 +249,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,20+i*106) = st->job_level;
 		WFIFOL(fd,24+i*106) = 0;
 		WFIFOL(fd,28+i*106) = 0;
-		WFIFOL(fd,32+i*106) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,32+i*106) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,36+i*106) = st->karma;
 		WFIFOL(fd,40+i*106) = st->manner;
 		WFIFOW(fd,44+i*106) = st->status_point;
@@ -335,7 +298,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,40+i*106) = st->job_level;
 		WFIFOL(fd,44+i*106) = 0;
 		WFIFOL(fd,48+i*106) = 0;
-		WFIFOL(fd,52+i*106) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,52+i*106) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,56+i*106) = st->karma;
 		WFIFOL(fd,60+i*106) = st->manner;
 		WFIFOW(fd,64+i*106) = st->status_point;
@@ -384,7 +347,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,40+i*112) = st->job_level;
 		WFIFOL(fd,44+i*112) = 0;
 		WFIFOL(fd,48+i*112) = 0;
-		WFIFOL(fd,52+i*112) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,52+i*112) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,56+i*112) = st->karma;
 		WFIFOL(fd,60+i*112) = st->manner;
 		WFIFOW(fd,64+i*112) = st->status_point;
@@ -412,7 +375,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOB(fd,130+i*112) = (st->dex > 255)  ? 255: st->dex;
 		WFIFOB(fd,131+i*112) = (st->luk > 255)  ? 255: st->luk;
 		WFIFOW(fd,132+i*112) = st->char_num;
-		WFIFOW(fd,133+i*112) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
+		WFIFOW(fd,133+i*112) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
 	}
 	WFIFOW(fd,2)=found_num*112+24;
 	WFIFOSET(fd,WFIFOW(fd,2));
@@ -434,7 +397,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,40+i*108) = st->job_level;
 		WFIFOL(fd,44+i*108) = 0;
 		WFIFOL(fd,48+i*108) = 0;
-		WFIFOL(fd,52+i*108) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,52+i*108) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,56+i*108) = st->karma;
 		WFIFOL(fd,60+i*108) = st->manner;
 		WFIFOW(fd,64+i*108) = st->status_point;
@@ -462,7 +425,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOB(fd,126+i*108) = (st->dex > 255)  ? 255: st->dex;
 		WFIFOB(fd,127+i*108) = (st->luk > 255)  ? 255: st->luk;
 		WFIFOW(fd,128+i*108) = st->char_num;
-		WFIFOW(fd,130+i*108) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
+		WFIFOW(fd,130+i*108) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
 	}
 	WFIFOW(fd,2)=found_num*108+24;
 	WFIFOSET(fd,WFIFOW(fd,2));
@@ -487,7 +450,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,43+i*112) = st->job_level;
 		WFIFOL(fd,47+i*112) = 0;
 		WFIFOL(fd,51+i*112) = 0;
-		WFIFOL(fd,55+i*112) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,55+i*112) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,59+i*112) = st->karma;
 		WFIFOL(fd,63+i*112) = st->manner;
 		WFIFOW(fd,67+i*112) = st->status_point;
@@ -515,7 +478,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOB(fd,133+i*112) = (st->dex > 255)  ? 255: st->dex;
 		WFIFOB(fd,134+i*112) = (st->luk > 255)  ? 255: st->luk;
 		WFIFOW(fd,135+i*112) = st->char_num;
-		WFIFOW(fd,137+i*112) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
+		WFIFOW(fd,137+i*112) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
 	}
 	WFIFOW(fd,2)=found_num*112+27;
 	WFIFOSET(fd,WFIFOW(fd,2));
@@ -540,7 +503,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,43+i*108) = st->job_level;
 		WFIFOL(fd,47+i*108) = 0;
 		WFIFOL(fd,51+i*108) = 0;
-		WFIFOL(fd,55+i*108) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,55+i*108) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,59+i*108) = st->karma;
 		WFIFOL(fd,63+i*108) = st->manner;
 		WFIFOW(fd,67+i*108) = st->status_point;
@@ -568,7 +531,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOB(fd,129+i*108) = (st->dex > 255)  ? 255: st->dex;
 		WFIFOB(fd,130+i*108) = (st->luk > 255)  ? 255: st->luk;
 		WFIFOW(fd,131+i*108) = st->char_num;
-		WFIFOW(fd,133+i*108) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
+		WFIFOW(fd,133+i*108) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
 	}
 	WFIFOW(fd,2)=found_num*108+27;
 	WFIFOSET(fd,WFIFOW(fd,2));
@@ -593,7 +556,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,43+i*128) = st->job_level;
 		WFIFOL(fd,47+i*128) = 0;
 		WFIFOL(fd,51+i*128) = 0;
-		WFIFOL(fd,55+i*128) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,55+i*128) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,59+i*128) = st->karma;
 		WFIFOL(fd,63+i*128) = st->manner;
 		WFIFOW(fd,67+i*128) = st->status_point;
@@ -621,8 +584,8 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOB(fd,133+i*128) = (st->dex > 255)  ? 255: st->dex;
 		WFIFOB(fd,134+i*128) = (st->luk > 255)  ? 255: st->luk;
 		WFIFOW(fd,135+i*128) = st->char_num;
-		WFIFOW(fd,137+i*128) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-		memcpy(WFIFOP(fd,139+i*128),st->last_point.map,16);	// 最後に在籍していたMAP名
+		WFIFOW(fd,137+i*128) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+		memcpy(WFIFOP(fd,139+i*128),st->last_point.map,16);	// Last visited map name (at logout)
 	}
 	WFIFOW(fd,2)=found_num*128+27;
 	WFIFOSET(fd,WFIFOW(fd,2));
@@ -647,7 +610,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,43+i*112) = st->job_level;
 		WFIFOL(fd,47+i*112) = 0;
 		WFIFOL(fd,51+i*112) = 0;
-		WFIFOL(fd,55+i*112) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,55+i*112) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,59+i*112) = st->karma;
 		WFIFOL(fd,63+i*112) = st->manner;
 		WFIFOW(fd,67+i*112) = st->status_point;
@@ -675,7 +638,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOB(fd,133+i*112) = (st->dex > 255)  ? 255: st->dex;
 		WFIFOB(fd,134+i*112) = (st->luk > 255)  ? 255: st->luk;
 		WFIFOW(fd,135+i*112) = st->char_num;
-		WFIFOW(fd,137+i*112) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
+		WFIFOW(fd,137+i*112) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
 	}
 	WFIFOW(fd,2)=found_num*112+27;
 	WFIFOSET(fd,WFIFOW(fd,2));
@@ -700,7 +663,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,43+i*132) = st->job_level;
 		WFIFOL(fd,47+i*132) = 0;
 		WFIFOL(fd,51+i*132) = 0;
-		WFIFOL(fd,55+i*132) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,55+i*132) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,59+i*132) = st->karma;
 		WFIFOL(fd,63+i*132) = st->manner;
 		WFIFOW(fd,67+i*132) = st->status_point;
@@ -728,9 +691,9 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOB(fd,133+i*132) = (st->dex > 255)  ? 255: st->dex;
 		WFIFOB(fd,134+i*132) = (st->luk > 255)  ? 255: st->luk;
 		WFIFOW(fd,135+i*132) = st->char_num;
-		WFIFOW(fd,137+i*132) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-		memcpy(WFIFOP(fd,139+i*132),st->last_point.map,16);	// 最後に在籍していたMAP名
-		WFIFOL(fd,155+i*132) = st->delete_date;	// 削除待機時間
+		WFIFOW(fd,137+i*132) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+		memcpy(WFIFOP(fd,139+i*132),st->last_point.map,16);	// Last visited map name (at logout)
+		WFIFOL(fd,155+i*132) = st->delete_date;	// Character deletion grace period
 	}
 	WFIFOW(fd,2)=found_num*132+27;
 	WFIFOSET(fd,WFIFOW(fd,2));
@@ -755,7 +718,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,43+i*136) = st->job_level;
 		WFIFOL(fd,47+i*136) = 0;
 		WFIFOL(fd,51+i*136) = 0;
-		WFIFOL(fd,55+i*136) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,55+i*136) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,59+i*136) = st->karma;
 		WFIFOL(fd,63+i*136) = st->manner;
 		WFIFOW(fd,67+i*136) = st->status_point;
@@ -783,9 +746,9 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOB(fd,133+i*136) = (st->dex > 255)  ? 255: st->dex;
 		WFIFOB(fd,134+i*136) = (st->luk > 255)  ? 255: st->luk;
 		WFIFOW(fd,135+i*136) = st->char_num;
-		WFIFOW(fd,137+i*136) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-		memcpy(WFIFOP(fd,139+i*136),st->last_point.map,16);	// 最後に在籍していたMAP名
-		WFIFOL(fd,155+i*136) = st->delete_date;	// 削除待機時間
+		WFIFOW(fd,137+i*136) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+		memcpy(WFIFOP(fd,139+i*136),st->last_point.map,16);	// Last visited map name (at logout)
+		WFIFOL(fd,155+i*136) = st->delete_date;	// Character deletion grace period
 		WFIFOL(fd,159+i*136) = st->robe;	// 肩装備
 	}
 	WFIFOW(fd,2)=found_num*136+27;
@@ -811,7 +774,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,43+i*140) = st->job_level;
 		WFIFOL(fd,47+i*140) = 0;
 		WFIFOL(fd,51+i*140) = 0;
-		WFIFOL(fd,55+i*140) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,55+i*140) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,59+i*140) = st->karma;
 		WFIFOL(fd,63+i*140) = st->manner;
 		WFIFOW(fd,67+i*140) = st->status_point;
@@ -839,9 +802,9 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOB(fd,133+i*140) = (st->dex > 255)  ? 255: st->dex;
 		WFIFOB(fd,134+i*140) = (st->luk > 255)  ? 255: st->luk;
 		WFIFOW(fd,135+i*140) = st->char_num;
-		WFIFOW(fd,137+i*140) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-		memcpy(WFIFOP(fd,139+i*140),st->last_point.map,16);	// 最後に在籍していたMAP名
-		WFIFOL(fd,155+i*140) = st->delete_date;	// 削除待機時間
+		WFIFOW(fd,137+i*140) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+		memcpy(WFIFOP(fd,139+i*140),st->last_point.map,16);	// Last visited map name (at logout)
+		WFIFOL(fd,155+i*140) = st->delete_date;	// Character deletion grace period
 		WFIFOL(fd,159+i*140) = st->robe;	// 肩装備
 		WFIFOL(fd,163+i*140) = 0;	// TODO: スロット変更が可能な状態かどうか
 	}
@@ -868,7 +831,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,43+i*144) = st->job_level;
 		WFIFOL(fd,47+i*144) = 0;
 		WFIFOL(fd,51+i*144) = 0;
-		WFIFOL(fd,55+i*144) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,55+i*144) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,59+i*144) = st->karma;
 		WFIFOL(fd,63+i*144) = st->manner;
 		WFIFOW(fd,67+i*144) = st->status_point;
@@ -896,9 +859,9 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOB(fd,133+i*144) = (st->dex > 255)  ? 255: st->dex;
 		WFIFOB(fd,134+i*144) = (st->luk > 255)  ? 255: st->luk;
 		WFIFOW(fd,135+i*144) = st->char_num;
-		WFIFOW(fd,137+i*144) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-		memcpy(WFIFOP(fd,139+i*144),st->last_point.map,16);	// 最後に在籍していたMAP名
-		WFIFOL(fd,155+i*144) = st->delete_date;	// 削除待機時間
+		WFIFOW(fd,137+i*144) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+		memcpy(WFIFOP(fd,139+i*144),st->last_point.map,16);	// Last visited map name (at logout)
+		WFIFOL(fd,155+i*144) = st->delete_date;	// Character deletion grace period
 		WFIFOL(fd,159+i*144) = st->robe;	// 肩装備
 		WFIFOL(fd,163+i*144) = 0;	// TODO: スロット変更が可能な状態かどうか
 		WFIFOL(fd,167+i*144) = 0;	// TODO: Add-Ons
@@ -926,7 +889,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,43+i*147) = st->job_level;
 		WFIFOL(fd,47+i*147) = 0;
 		WFIFOL(fd,51+i*147) = 0;
-		WFIFOL(fd,55+i*147) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,55+i*147) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,59+i*147) = st->karma;
 		WFIFOL(fd,63+i*147) = st->manner;
 		WFIFOW(fd,67+i*147) = st->status_point;
@@ -955,9 +918,9 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOB(fd,135+i*147) = (st->dex > 255)  ? 255: st->dex;
 		WFIFOB(fd,136+i*147) = (st->luk > 255)  ? 255: st->luk;
 		WFIFOW(fd,137+i*147) = st->char_num;
-		WFIFOW(fd,139+i*147) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-		memcpy(WFIFOP(fd,141+i*147),st->last_point.map,16);	// 最後に在籍していたMAP名
-		WFIFOL(fd,157+i*147) = st->delete_date;	// 削除待機時間
+		WFIFOW(fd,139+i*147) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+		memcpy(WFIFOP(fd,141+i*147),st->last_point.map,16);	// Last visited map name (at logout)
+		WFIFOL(fd,157+i*147) = st->delete_date;	// Character deletion grace period
 		WFIFOL(fd,161+i*147) = st->robe;	// 肩装備
 		WFIFOL(fd,165+i*147) = 0;	// TODO: スロット変更が可能な状態かどうか
 		WFIFOL(fd,169+i*147) = 0;	// TODO: Add-Ons
@@ -986,7 +949,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,51+i*155) = st->job_level;
 		WFIFOL(fd,55+i*155) = 0;
 		WFIFOL(fd,59+i*155) = 0;
-		WFIFOL(fd,63+i*155) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,63+i*155) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,67+i*155) = st->karma;
 		WFIFOL(fd,71+i*155) = st->manner;
 		WFIFOW(fd,75+i*155) = st->status_point;
@@ -1015,9 +978,9 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOB(fd,143+i*155) = (st->dex > 255)  ? 255: st->dex;
 		WFIFOB(fd,144+i*155) = (st->luk > 255)  ? 255: st->luk;
 		WFIFOW(fd,145+i*155) = st->char_num;
-		WFIFOW(fd,147+i*155) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-		memcpy(WFIFOP(fd,149+i*155),st->last_point.map,16);	// 最後に在籍していたMAP名
-		WFIFOL(fd,165+i*155) = st->delete_date;	// 削除待機時間
+		WFIFOW(fd,147+i*155) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+		memcpy(WFIFOP(fd,149+i*155),st->last_point.map,16);	// Last visited map name (at logout)
+		WFIFOL(fd,165+i*155) = st->delete_date;	// Character deletion grace period
 		WFIFOL(fd,169+i*155) = st->robe;	// 肩装備
 		WFIFOL(fd,173+i*155) = 0;	// TODO: スロット変更が可能な状態かどうか
 		WFIFOL(fd,177+i*155) = 0;	// TODO: Add-Ons
@@ -1046,7 +1009,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,51+i*175) = st->job_level;
 		WFIFOL(fd,55+i*175) = 0;
 		WFIFOL(fd,59+i*175) = 0;
-		WFIFOL(fd,63+i*175) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,63+i*175) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,67+i*175) = st->karma;
 		WFIFOL(fd,71+i*175) = st->manner;
 		WFIFOW(fd,75+i*175) = st->status_point;
@@ -1075,9 +1038,9 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOB(fd,163+i*175) = (st->dex > 255)  ? 255: st->dex;
 		WFIFOB(fd,164+i*175) = (st->luk > 255)  ? 255: st->luk;
 		WFIFOW(fd,165+i*175) = st->char_num;
-		WFIFOW(fd,167+i*175) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-		memcpy(WFIFOP(fd,169+i*175),st->last_point.map,16);	// 最後に在籍していたMAP名
-		WFIFOL(fd,185+i*175) = st->delete_date;	// 削除待機時間
+		WFIFOW(fd,167+i*175) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+		memcpy(WFIFOP(fd,169+i*175),st->last_point.map,16);	// Last visited map name (at logout)
+		WFIFOL(fd,185+i*175) = st->delete_date;	// Character deletion grace period
 		WFIFOL(fd,189+i*175) = st->robe;	// 肩装備
 		WFIFOL(fd,193+i*175) = 0;	// TODO: スロット変更が可能な状態かどうか
 		WFIFOL(fd,197+i*175) = 0;	// TODO: Add-Ons
@@ -1106,7 +1069,7 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOL(fd,51+i*175) = st->job_level;
 		WFIFOL(fd,55+i*175) = 0;
 		WFIFOL(fd,59+i*175) = 0;
-		WFIFOL(fd,63+i*175) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+		WFIFOL(fd,63+i*175) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 		WFIFOL(fd,67+i*175) = st->karma;
 		WFIFOL(fd,71+i*175) = st->manner;
 		WFIFOW(fd,75+i*175) = st->status_point;
@@ -1135,9 +1098,9 @@ static int mmo_char_send006b(int fd, struct char_session_data *sd)
 		WFIFOB(fd,163+i*175) = (st->dex > 255)  ? 255: st->dex;
 		WFIFOB(fd,164+i*175) = (st->luk > 255)  ? 255: st->luk;
 		WFIFOW(fd,165+i*175) = st->char_num;
-		WFIFOW(fd,167+i*175) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-		memcpy(WFIFOP(fd,169+i*175),st->last_point.map,16);	// 最後に在籍していたMAP名
-		WFIFOL(fd,185+i*175) = st->delete_date;	// 削除待機時間
+		WFIFOW(fd,167+i*175) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+		memcpy(WFIFOP(fd,169+i*175),st->last_point.map,16);	// Last visited map name (at logout)
+		WFIFOL(fd,185+i*175) = st->delete_date;	// Character deletion grace period
 		WFIFOL(fd,189+i*175) = st->robe;	// 肩装備
 		WFIFOL(fd,193+i*175) = 0;	// TODO: スロット変更が可能な状態かどうか
 		WFIFOL(fd,197+i*175) = 0;	// TODO: Add-Ons
@@ -1233,7 +1196,7 @@ static void mmo_char_send006d(int fd, const struct mmo_charstatus *st, int sex)
 	WFIFOB(fd,108) = (st->dex  > 255) ? 255 : st->dex;
 	WFIFOB(fd,109) = (st->luk  > 255) ? 255 : st->luk;
 	WFIFOW(fd,110) = st->char_num;
-	WFIFOW(fd,112) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
+	WFIFOW(fd,112) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
 	WFIFOSET(fd,114);
 #elif PACKETVER < 20100223
 	WFIFOW(fd,0) = 0x6d;
@@ -1272,7 +1235,7 @@ static void mmo_char_send006d(int fd, const struct mmo_charstatus *st, int sex)
 	WFIFOB(fd,104) = (st->dex  > 255) ? 255 : st->dex;
 	WFIFOB(fd,105) = (st->luk  > 255) ? 255 : st->luk;
 	WFIFOW(fd,106) = st->char_num;
-	WFIFOW(fd,108) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
+	WFIFOW(fd,108) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
 	WFIFOSET(fd,110);
 #elif PACKETVER < 20100728
 	WFIFOW(fd,0) = 0x6d;
@@ -1311,8 +1274,8 @@ static void mmo_char_send006d(int fd, const struct mmo_charstatus *st, int sex)
 	WFIFOB(fd,108) = (st->dex  > 255) ? 255 : st->dex;
 	WFIFOB(fd,109) = (st->luk  > 255) ? 255 : st->luk;
 	WFIFOW(fd,110) = st->char_num;
-	WFIFOW(fd,112) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-	memcpy(WFIFOP(fd,114),st->last_point.map,16);	// 最後に在籍していたMAP名
+	WFIFOW(fd,112) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+	memcpy(WFIFOP(fd,114),st->last_point.map,16);	// Last visited map name (at logout)
 	WFIFOSET(fd,130);
 #elif PACKETVER < 20100803
 	WFIFOW(fd,0) = 0x6d;
@@ -1351,7 +1314,7 @@ static void mmo_char_send006d(int fd, const struct mmo_charstatus *st, int sex)
 	WFIFOB(fd,108) = (st->dex  > 255) ? 255 : st->dex;
 	WFIFOB(fd,109) = (st->luk  > 255) ? 255 : st->luk;
 	WFIFOW(fd,110) = st->char_num;
-	WFIFOW(fd,112) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
+	WFIFOW(fd,112) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
 	WFIFOSET(fd,114);
 #elif PACKETVER < 20110111
 	WFIFOW(fd,0) = 0x6d;
@@ -1390,9 +1353,9 @@ static void mmo_char_send006d(int fd, const struct mmo_charstatus *st, int sex)
 	WFIFOB(fd,108) = (st->dex  > 255) ? 255 : st->dex;
 	WFIFOB(fd,109) = (st->luk  > 255) ? 255 : st->luk;
 	WFIFOW(fd,110) = st->char_num;
-	WFIFOW(fd,112) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-	memcpy(WFIFOP(fd,114),st->last_point.map,16);	// 最後に在籍していたMAP名
-	WFIFOL(fd,130) = st->delete_date;	// 削除待機時間
+	WFIFOW(fd,112) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+	memcpy(WFIFOP(fd,114),st->last_point.map,16);	// Last visited map name (at logout)
+	WFIFOL(fd,130) = st->delete_date;	// Character deletion grace period
 	WFIFOSET(fd,134);
 #elif PACKETVER < 20110928
 	WFIFOW(fd,0) = 0x6d;
@@ -1431,9 +1394,9 @@ static void mmo_char_send006d(int fd, const struct mmo_charstatus *st, int sex)
 	WFIFOB(fd,108) = (st->dex  > 255) ? 255 : st->dex;
 	WFIFOB(fd,109) = (st->luk  > 255) ? 255 : st->luk;
 	WFIFOW(fd,110) = st->char_num;
-	WFIFOW(fd,112) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-	memcpy(WFIFOP(fd,114),st->last_point.map,16);	// 最後に在籍していたMAP名
-	WFIFOL(fd,130) = st->delete_date;	// 削除待機時間
+	WFIFOW(fd,112) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+	memcpy(WFIFOP(fd,114),st->last_point.map,16);	// Last visited map name (at logout)
+	WFIFOL(fd,130) = st->delete_date;	// Character deletion grace period
 	WFIFOL(fd,134) = st->robe;	// 肩装備
 	WFIFOSET(fd,138);
 #elif PACKETVER < 20111025
@@ -1473,9 +1436,9 @@ static void mmo_char_send006d(int fd, const struct mmo_charstatus *st, int sex)
 	WFIFOB(fd,108) = (st->dex  > 255) ? 255 : st->dex;
 	WFIFOB(fd,109) = (st->luk  > 255) ? 255 : st->luk;
 	WFIFOW(fd,110) = st->char_num;
-	WFIFOW(fd,112) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-	memcpy(WFIFOP(fd,114),st->last_point.map,16);	// 最後に在籍していたMAP名
-	WFIFOL(fd,130) = st->delete_date;	// 削除待機時間
+	WFIFOW(fd,112) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+	memcpy(WFIFOP(fd,114),st->last_point.map,16);	// Last visited map name (at logout)
+	WFIFOL(fd,130) = st->delete_date;	// Character deletion grace period
 	WFIFOL(fd,134) = st->robe;	// 肩装備
 	WFIFOL(fd,138) = 0;	// TODO: スロット変更が可能な状態かどうか
 	WFIFOSET(fd,142);
@@ -1516,9 +1479,9 @@ static void mmo_char_send006d(int fd, const struct mmo_charstatus *st, int sex)
 	WFIFOB(fd,108) = (st->dex  > 255) ? 255 : st->dex;
 	WFIFOB(fd,109) = (st->luk  > 255) ? 255 : st->luk;
 	WFIFOW(fd,110) = st->char_num;
-	WFIFOW(fd,112) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-	memcpy(WFIFOP(fd,114),st->last_point.map,16);	// 最後に在籍していたMAP名
-	WFIFOL(fd,130) = st->delete_date;	// 削除待機時間
+	WFIFOW(fd,112) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+	memcpy(WFIFOP(fd,114),st->last_point.map,16);	// Last visited map name (at logout)
+	WFIFOL(fd,130) = st->delete_date;	// Character deletion grace period
 	WFIFOL(fd,134) = st->robe;	// 肩装備
 	WFIFOL(fd,138) = 0;	// TODO: スロット変更が可能な状態かどうか
 	WFIFOL(fd,142) = 0;	// TODO: Add-Ons
@@ -1561,9 +1524,9 @@ static void mmo_char_send006d(int fd, const struct mmo_charstatus *st, int sex)
 	WFIFOB(fd,110) = (st->dex  > 255) ? 255 : st->dex;
 	WFIFOB(fd,111) = (st->luk  > 255) ? 255 : st->luk;
 	WFIFOW(fd,112) = st->char_num;
-	WFIFOW(fd,114) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-	memcpy(WFIFOP(fd,116),st->last_point.map,16);	// 最後に在籍していたMAP名
-	WFIFOL(fd,132) = st->delete_date;	// 削除待機時間
+	WFIFOW(fd,114) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+	memcpy(WFIFOP(fd,116),st->last_point.map,16);	// Last visited map name (at logout)
+	WFIFOL(fd,132) = st->delete_date;	// Character deletion grace period
 	WFIFOL(fd,136) = st->robe;	// 肩装備
 	WFIFOL(fd,140) = 0;	// TODO: スロット変更が可能な状態かどうか
 	WFIFOL(fd,144) = 0;	// TODO: Add-Ons
@@ -1607,9 +1570,9 @@ static void mmo_char_send006d(int fd, const struct mmo_charstatus *st, int sex)
 	WFIFOB(fd,118) = (st->dex  > 255) ? 255 : st->dex;
 	WFIFOB(fd,119) = (st->luk  > 255) ? 255 : st->luk;
 	WFIFOW(fd,120) = st->char_num;
-	WFIFOW(fd,122) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-	memcpy(WFIFOP(fd,124),st->last_point.map,16);	// 最後に在籍していたMAP名
-	WFIFOL(fd,140) = st->delete_date;	// 削除待機時間
+	WFIFOW(fd,122) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+	memcpy(WFIFOP(fd,124),st->last_point.map,16);	// Last visited map name (at logout)
+	WFIFOL(fd,140) = st->delete_date;	// Character deletion grace period
 	WFIFOL(fd,144) = st->robe;	// 肩装備
 	WFIFOL(fd,148) = 0;	// TODO: スロット変更が可能な状態かどうか
 	WFIFOL(fd,152) = 0;	// TODO: Add-Ons
@@ -1653,9 +1616,9 @@ static void mmo_char_send006d(int fd, const struct mmo_charstatus *st, int sex)
 	WFIFOB(fd,138) = (st->dex > 255)  ? 255: st->dex;
 	WFIFOB(fd,139) = (st->luk > 255)  ? 255: st->luk;
 	WFIFOW(fd,140) = st->char_num;
-	WFIFOW(fd,142) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-	memcpy(WFIFOP(fd,144),st->last_point.map,16);	// 最後に在籍していたMAP名
-	WFIFOL(fd,160) = st->delete_date;	// 削除待機時間
+	WFIFOW(fd,142) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+	memcpy(WFIFOP(fd,144),st->last_point.map,16);	// Last visited map name (at logout)
+	WFIFOL(fd,160) = st->delete_date;	// Character deletion grace period
 	WFIFOL(fd,164) = st->robe;	// 肩装備
 	WFIFOL(fd,168) = 0;	// TODO: スロット変更が可能な状態かどうか
 	WFIFOL(fd,172) = 0;	// TODO: Add-Ons
@@ -1699,9 +1662,9 @@ static void mmo_char_send006d(int fd, const struct mmo_charstatus *st, int sex)
 	WFIFOB(fd,138) = (st->dex > 255)  ? 255: st->dex;
 	WFIFOB(fd,139) = (st->luk > 255)  ? 255: st->luk;
 	WFIFOW(fd,140) = st->char_num;
-	WFIFOW(fd,142) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-	memcpy(WFIFOP(fd,144),st->last_point.map,16);	// 最後に在籍していたMAP名
-	WFIFOL(fd,160) = st->delete_date;	// 削除待機時間
+	WFIFOW(fd,142) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+	memcpy(WFIFOP(fd,144),st->last_point.map,16);	// Last visited map name (at logout)
+	WFIFOL(fd,160) = st->delete_date;	// Character deletion grace period
 	WFIFOL(fd,164) = st->robe;	// 肩装備
 	WFIFOL(fd,168) = 0;	// TODO: スロット変更が可能な状態かどうか
 	WFIFOL(fd,172) = 0;	// TODO: Add-Ons
@@ -2349,7 +2312,7 @@ int parse_tologin(int fd)
 										WFIFOL(fdc,20+j*144) = st->job_level;
 										WFIFOL(fdc,24+j*144) = 0;
 										WFIFOL(fdc,28+j*144) = 0;
-										WFIFOL(fdc,32+j*144) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+										WFIFOL(fdc,32+j*144) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 										WFIFOL(fdc,36+j*144) = st->karma;
 										WFIFOL(fdc,40+j*144) = st->manner;
 										WFIFOW(fdc,44+j*144) = st->status_point;
@@ -2377,10 +2340,10 @@ int parse_tologin(int fd)
 										WFIFOB(fdc,110+j*144) = (st->dex > 255)  ? 255: st->dex;
 										WFIFOB(fdc,111+j*144) = (st->luk > 255)  ? 255: st->luk;
 										WFIFOW(fdc,112+j*144) = st->char_num;
-										WFIFOW(fdc,114+j*144) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-										memcpy(WFIFOP(fdc,116+j*144),st->last_point.map,16);	// 最後に在籍していたMAP名
+										WFIFOW(fdc,114+j*144) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+										memcpy(WFIFOP(fdc,116+j*144),st->last_point.map,16);	// Last visited map name (at logout)
 										if(st->delete_date)
-											WFIFOL(fdc,132+j*144) = st->delete_date - (unsigned int)time(NULL);	// 削除待機時間
+											WFIFOL(fdc,132+j*144) = st->delete_date - (unsigned int)time(NULL);	// Character deletion grace period
 										else
 											WFIFOL(fdc,132+j*144) = 0;
 										WFIFOL(fdc,136+j*144) = st->robe;	// 肩装備
@@ -2396,7 +2359,7 @@ int parse_tologin(int fd)
 										WFIFOL(fdc,20+j*147) = st->job_level;
 										WFIFOL(fdc,24+j*147) = 0;
 										WFIFOL(fdc,28+j*147) = 0;
-										WFIFOL(fdc,32+j*147) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+										WFIFOL(fdc,32+j*147) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 										WFIFOL(fdc,36+j*147) = st->karma;
 										WFIFOL(fdc,40+j*147) = st->manner;
 										WFIFOW(fdc,44+j*147) = st->status_point;
@@ -2425,10 +2388,10 @@ int parse_tologin(int fd)
 										WFIFOB(fdc,112+j*147) = (st->dex > 255)  ? 255: st->dex;
 										WFIFOB(fdc,113+j*147) = (st->luk > 255)  ? 255: st->luk;
 										WFIFOW(fdc,114+j*147) = st->char_num;
-										WFIFOW(fdc,116+j*147) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-										memcpy(WFIFOP(fdc,118+j*147),st->last_point.map,16);	// 最後に在籍していたMAP名
+										WFIFOW(fdc,116+j*147) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+										memcpy(WFIFOP(fdc,118+j*147),st->last_point.map,16);	// Last visited map name (at logout)
 										if(st->delete_date)
-											WFIFOL(fdc,134+j*147) = st->delete_date - (unsigned int)time(NULL);	// 削除待機時間
+											WFIFOL(fdc,134+j*147) = st->delete_date - (unsigned int)time(NULL);	// Character deletion grace period
 										else
 											WFIFOL(fdc,134+j*147) = 0;
 										WFIFOL(fdc,138+j*147) = st->robe;	// 肩装備
@@ -2445,7 +2408,7 @@ int parse_tologin(int fd)
 										WFIFOL(fdc,28+j*155) = st->job_level;
 										WFIFOL(fdc,32+j*155) = 0;
 										WFIFOL(fdc,36+j*155) = 0;
-										WFIFOL(fdc,40+j*155) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+										WFIFOL(fdc,40+j*155) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 										WFIFOL(fdc,44+j*155) = st->karma;
 										WFIFOL(fdc,48+j*155) = st->manner;
 										WFIFOW(fdc,52+j*155) = st->status_point;
@@ -2474,10 +2437,10 @@ int parse_tologin(int fd)
 										WFIFOB(fdc,120+j*155) = (st->dex > 255)  ? 255: st->dex;
 										WFIFOB(fdc,121+j*155) = (st->luk > 255)  ? 255: st->luk;
 										WFIFOW(fdc,122+j*155) = st->char_num;
-										WFIFOW(fdc,124+j*155) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-										memcpy(WFIFOP(fdc,126+j*155),st->last_point.map,16);	// 最後に在籍していたMAP名
+										WFIFOW(fdc,124+j*155) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+										memcpy(WFIFOP(fdc,126+j*155),st->last_point.map,16);	// Last visited map name (at logout)
 										if(st->delete_date)
-											WFIFOL(fdc,142+j*155) = st->delete_date - (unsigned int)time(NULL);	// 削除待機時間
+											WFIFOL(fdc,142+j*155) = st->delete_date - (unsigned int)time(NULL);	// Character deletion grace period
 										else
 											WFIFOL(fdc,142+j*155) = 0;
 										WFIFOL(fdc,146+j*155) = st->robe;	// 肩装備
@@ -2494,7 +2457,7 @@ int parse_tologin(int fd)
 										WFIFOL(fdc,28+j*175) = st->job_level;
 										WFIFOL(fdc,32+j*175) = 0;
 										WFIFOL(fdc,36+j*175) = 0;
-										WFIFOL(fdc,40+j*175) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+										WFIFOL(fdc,40+j*175) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 										WFIFOL(fdc,44+j*175) = st->karma;
 										WFIFOL(fdc,48+j*175) = st->manner;
 										WFIFOW(fdc,52+j*175) = st->status_point;
@@ -2523,10 +2486,10 @@ int parse_tologin(int fd)
 										WFIFOB(fdc,140+j*175) = (st->dex > 255)  ? 255: st->dex;
 										WFIFOB(fdc,141+j*175) = (st->luk > 255)  ? 255: st->luk;
 										WFIFOW(fdc,142+j*175) = st->char_num;
-										WFIFOW(fdc,144+j*175) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-										memcpy(WFIFOP(fdc,146+j*175),st->last_point.map,16);	// 最後に在籍していたMAP名
+										WFIFOW(fdc,144+j*175) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+										memcpy(WFIFOP(fdc,146+j*175),st->last_point.map,16);	// Last visited map name (at logout)
 										if(st->delete_date)
-											WFIFOL(fdc,162+j*175) = st->delete_date - (unsigned int)time(NULL);	// 削除待機時間
+											WFIFOL(fdc,162+j*175) = st->delete_date - (unsigned int)time(NULL);	// Character deletion grace period
 										else
 											WFIFOL(fdc,162+j*175) = 0;
 										WFIFOL(fdc,166+j*175) = st->robe;	// 肩装備
@@ -2543,7 +2506,7 @@ int parse_tologin(int fd)
 										WFIFOL(fdc,28+j*175) = st->job_level;
 										WFIFOL(fdc,32+j*175) = 0;
 										WFIFOL(fdc,36+j*175) = 0;
-										WFIFOL(fdc,40+j*175) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+										WFIFOL(fdc,40+j*175) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 										WFIFOL(fdc,44+j*175) = st->karma;
 										WFIFOL(fdc,48+j*175) = st->manner;
 										WFIFOW(fdc,52+j*175) = st->status_point;
@@ -2572,10 +2535,10 @@ int parse_tologin(int fd)
 										WFIFOB(fdc,140+j*175) = (st->dex > 255)  ? 255: st->dex;
 										WFIFOB(fdc,141+j*175) = (st->luk > 255)  ? 255: st->luk;
 										WFIFOW(fdc,142+j*175) = st->char_num;
-										WFIFOW(fdc,144+j*175) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-										memcpy(WFIFOP(fdc,146+j*175),st->last_point.map,16);	// 最後に在籍していたMAP名
+										WFIFOW(fdc,144+j*175) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+										memcpy(WFIFOP(fdc,146+j*175),st->last_point.map,16);	// Last visited map name (at logout)
 										if(st->delete_date)
-											WFIFOL(fdc,162+j*175) = st->delete_date - (unsigned int)time(NULL);	// 削除待機時間
+											WFIFOL(fdc,162+j*175) = st->delete_date - (unsigned int)time(NULL);	// Character deletion grace period
 										else
 											WFIFOL(fdc,162+j*175) = 0;
 										WFIFOL(fdc,166+j*175) = st->robe;	// 肩装備
@@ -4220,7 +4183,7 @@ int parse_char(int fd)
 					WFIFOL(fd,20+j*144) = st->job_level;
 					WFIFOL(fd,24+j*144) = 0;
 					WFIFOL(fd,28+j*144) = 0;
-					WFIFOL(fd,32+j*144) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+					WFIFOL(fd,32+j*144) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 					WFIFOL(fd,36+j*144) = st->karma;
 					WFIFOL(fd,40+j*144) = st->manner;
 					WFIFOW(fd,44+j*144) = st->status_point;
@@ -4248,10 +4211,10 @@ int parse_char(int fd)
 					WFIFOB(fd,110+j*144) = (st->dex > 255)  ? 255: st->dex;
 					WFIFOB(fd,111+j*144) = (st->luk > 255)  ? 255: st->luk;
 					WFIFOW(fd,112+j*144) = st->char_num;
-					WFIFOW(fd,114+j*144) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-					memcpy(WFIFOP(fd,116+j*144),st->last_point.map,16);	// 最後に在籍していたMAP名
+					WFIFOW(fd,114+j*144) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+					memcpy(WFIFOP(fd,116+j*144),st->last_point.map,16);	// Last visited map name (at logout)
 					if(st->delete_date)
-						WFIFOL(fd,132+j*144) = st->delete_date - (unsigned int)time(NULL);	// 削除待機時間
+						WFIFOL(fd,132+j*144) = st->delete_date - (unsigned int)time(NULL);	// Character deletion grace period
 					else
 						WFIFOL(fd,132+j*144) = 0;
 					WFIFOL(fd,136+j*144) = st->robe;	// 肩装備
@@ -4267,7 +4230,7 @@ int parse_char(int fd)
 					WFIFOL(fd,20+j*147) = st->job_level;
 					WFIFOL(fd,24+j*147) = 0;
 					WFIFOL(fd,28+j*147) = 0;
-					WFIFOL(fd,32+j*147) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+					WFIFOL(fd,32+j*147) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 					WFIFOL(fd,36+j*147) = st->karma;
 					WFIFOL(fd,40+j*147) = st->manner;
 					WFIFOW(fd,44+j*147) = st->status_point;
@@ -4296,10 +4259,10 @@ int parse_char(int fd)
 					WFIFOB(fd,112+j*147) = (st->dex > 255)  ? 255: st->dex;
 					WFIFOB(fd,113+j*147) = (st->luk > 255)  ? 255: st->luk;
 					WFIFOW(fd,114+j*147) = st->char_num;
-					WFIFOW(fd,116+j*147) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-					memcpy(WFIFOP(fd,118+j*147),st->last_point.map,16);	// 最後に在籍していたMAP名
+					WFIFOW(fd,116+j*147) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+					memcpy(WFIFOP(fd,118+j*147),st->last_point.map,16);	// Last visited map name (at logout)
 					if(st->delete_date)
-						WFIFOL(fd,134+j*147) = st->delete_date - (unsigned int)time(NULL);	// 削除待機時間
+						WFIFOL(fd,134+j*147) = st->delete_date - (unsigned int)time(NULL);	// Character deletion grace period
 					else
 						WFIFOL(fd,134+j*147) = 0;
 					WFIFOL(fd,138+j*147) = st->robe;	// 肩装備
@@ -4316,7 +4279,7 @@ int parse_char(int fd)
 					WFIFOL(fd,28+j*155) = st->job_level;
 					WFIFOL(fd,32+j*155) = 0;
 					WFIFOL(fd,36+j*155) = 0;
-					WFIFOL(fd,40+j*155) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+					WFIFOL(fd,40+j*155) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 					WFIFOL(fd,44+j*155) = st->karma;
 					WFIFOL(fd,48+j*155) = st->manner;
 					WFIFOW(fd,52+j*155) = st->status_point;
@@ -4345,10 +4308,10 @@ int parse_char(int fd)
 					WFIFOB(fd,120+j*155) = (st->dex > 255)  ? 255: st->dex;
 					WFIFOB(fd,121+j*155) = (st->luk > 255)  ? 255: st->luk;
 					WFIFOW(fd,122+j*155) = st->char_num;
-					WFIFOW(fd,124+j*155) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-					memcpy(WFIFOP(fd,126+j*155),st->last_point.map,16);	// 最後に在籍していたMAP名
+					WFIFOW(fd,124+j*155) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+					memcpy(WFIFOP(fd,126+j*155),st->last_point.map,16);	// Last visited map name (at logout)
 					if(st->delete_date)
-						WFIFOL(fd,142+j*155) = st->delete_date - (unsigned int)time(NULL);	// 削除待機時間
+						WFIFOL(fd,142+j*155) = st->delete_date - (unsigned int)time(NULL);	// Character deletion grace period
 					else
 						WFIFOL(fd,142+j*155) = 0;
 					WFIFOL(fd,146+j*155) = st->robe;	// 肩装備
@@ -4365,7 +4328,7 @@ int parse_char(int fd)
 					WFIFOL(fd,28+j*175) = st->job_level;
 					WFIFOL(fd,32+j*175) = 0;
 					WFIFOL(fd,36+j*175) = 0;
-					WFIFOL(fd,40+j*175) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+					WFIFOL(fd,40+j*175) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 					WFIFOL(fd,44+j*175) = st->karma;
 					WFIFOL(fd,48+j*175) = st->manner;
 					WFIFOW(fd,52+j*175) = st->status_point;
@@ -4394,10 +4357,10 @@ int parse_char(int fd)
 					WFIFOB(fd,140+j*175) = (st->dex > 255)  ? 255: st->dex;
 					WFIFOB(fd,141+j*175) = (st->luk > 255)  ? 255: st->luk;
 					WFIFOW(fd,142+j*175) = st->char_num;
-					WFIFOW(fd,144+j*175) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-					memcpy(WFIFOP(fd,146+j*175),st->last_point.map,16);	// 最後に在籍していたMAP名
+					WFIFOW(fd,144+j*175) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+					memcpy(WFIFOP(fd,146+j*175),st->last_point.map,16);	// Last visited map name (at logout)
 					if(st->delete_date)
-						WFIFOL(fd,162+j*175) = st->delete_date - (unsigned int)time(NULL);	// 削除待機時間
+						WFIFOL(fd,162+j*175) = st->delete_date - (unsigned int)time(NULL);	// Character deletion grace period
 					else
 						WFIFOL(fd,162+j*175) = 0;
 					WFIFOL(fd,166+j*175) = st->robe;	// 肩装備
@@ -4414,7 +4377,7 @@ int parse_char(int fd)
 					WFIFOL(fd,28+j*175) = st->job_level;
 					WFIFOL(fd,32+j*175) = 0;
 					WFIFOL(fd,36+j*175) = 0;
-					WFIFOL(fd,40+j*175) = ( st->option&0x7e80020 ) ? 0 : st->option;	// 騎乗中のログイン時エラー対策
+					WFIFOL(fd,40+j*175) = ( st->option&0x7e80020 ) ? 0 : st->option;	// Prevent login errors while riding
 					WFIFOL(fd,44+j*175) = st->karma;
 					WFIFOL(fd,48+j*175) = st->manner;
 					WFIFOW(fd,52+j*175) = st->status_point;
@@ -4443,10 +4406,10 @@ int parse_char(int fd)
 					WFIFOB(fd,140+j*175) = (st->dex > 255)  ? 255: st->dex;
 					WFIFOB(fd,141+j*175) = (st->luk > 255)  ? 255: st->luk;
 					WFIFOW(fd,142+j*175) = st->char_num;
-					WFIFOW(fd,144+j*175) = 1;	// TODO: キャラ名の変更が可能な状態かどうか(0でON 1でOFF)
-					memcpy(WFIFOP(fd,146+j*175),st->last_point.map,16);	// 最後に在籍していたMAP名
+					WFIFOW(fd,144+j*175) = 1;	// TODO: Check if character name can be changed (0: enabled, 1: disabled)
+					memcpy(WFIFOP(fd,146+j*175),st->last_point.map,16);	// Last visited map name (at logout)
 					if(st->delete_date)
-						WFIFOL(fd,162+j*175) = st->delete_date - (unsigned int)time(NULL);	// 削除待機時間
+						WFIFOL(fd,162+j*175) = st->delete_date - (unsigned int)time(NULL);	// Character deletion grace period
 					else
 						WFIFOL(fd,162+j*175) = 0;
 					WFIFOL(fd,166+j*175) = st->robe;	// 肩装備

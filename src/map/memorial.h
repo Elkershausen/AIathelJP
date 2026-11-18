@@ -1,31 +1,10 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _MEMORIAL_H_
+ï»¿#ifndef _MEMORIAL_H_
 #define _MEMORIAL_H_
 
 #include "map.h"
 
-#define MAX_MEMORIAL_DATA		50		// ƒƒ‚ƒŠƒAƒ‹ƒ_ƒ“ƒWƒ‡ƒ“Å‘å“o˜^”
-#define MAX_MEMORIAL_SEGMAP		8		// ƒƒ‚ƒŠƒAƒ‹ƒ_ƒ“ƒWƒ‡ƒ“Å‘å•ªŠ„ƒ}ƒbƒv”
+#define MAX_MEMORIAL_DATA		50		// ãƒ¡ãƒ¢ãƒªã‚¢ãƒ«ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³æœ€å¤§ç™»éŒ²æ•°
+#define MAX_MEMORIAL_SEGMAP		8		// ãƒ¡ãƒ¢ãƒªã‚¢ãƒ«ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³æœ€å¤§åˆ†å‰²ãƒãƒƒãƒ—æ•°
 
 enum {
 	MDCREATE_NOERROR = 0,

@@ -1,4 +1,8 @@
-﻿2026-11-16 #0018
+﻿2026-11-18 #0019
+ニブルヘイムダンジョン反映(map_auriga.conf mob_db.txt npc_monster_niflheimdun.sc mapflag.sc)
+文字コード修正(char map)
+
+2026-11-16 #0018
 前プロジェクトの 1598 までロールバック
 
 2026-10-29 #0017

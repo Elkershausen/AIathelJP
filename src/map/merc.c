@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -56,7 +35,7 @@ static struct merc_skill_tree_entry {
 static int merc_count;
 
 /*==========================================
- * —b•ºDB‚ÌŒŸõ
+ * å‚­å…µDBã®æ¤œç´¢
  *------------------------------------------
  */
 static int merc_search_index(int nameid)
@@ -73,7 +52,7 @@ static int merc_search_index(int nameid)
 }
 
 /*==========================================
- * —b•ºDB‚ğ•Ô‚·
+ * å‚­å…µDBã‚’è¿”ã™
  *------------------------------------------
  */
 struct merc_db* merc_search_data(int nameid)
@@ -87,7 +66,7 @@ struct merc_db* merc_search_data(int nameid)
 }
 
 /*==========================================
- * —b•ºí•Ê‚Ìæ“¾
+ * å‚­å…µç¨®åˆ¥ã®å–å¾—
  *------------------------------------------
  */
 static int merc_get_type(int class_)
@@ -103,7 +82,7 @@ static int merc_get_type(int class_)
 }
 
 /*==========================================
- * ƒXƒLƒ‹ƒcƒŠ[î•ñ‚ÌŒŸõ
+ * ã‚¹ã‚­ãƒ«ãƒ„ãƒªãƒ¼æƒ…å ±ã®æ¤œç´¢
  *------------------------------------------
  */
 static struct merc_skill_tree_entry* merc_search_skilltree(int class_, int skillid)
@@ -125,7 +104,7 @@ static struct merc_skill_tree_entry* merc_search_skilltree(int class_, int skill
 		if(st[mid].id && st[mid].id == skillid)
 			return &st[mid];
 
-		// 0‚Ì‚Æ‚«‚Í‘å‚Æ‚İ‚È‚·
+		// 0ã®ã¨ãã¯å¤§ã¨ã¿ãªã™
 		if(st[mid].id == 0 || st[mid].id > skillid)
 			max = mid;
 		else
@@ -135,7 +114,7 @@ static struct merc_skill_tree_entry* merc_search_skilltree(int class_, int skill
 }
 
 /*==========================================
- * ƒXƒLƒ‹‚ÌMaxLv‚ğ•Ô‚·
+ * ã‚¹ã‚­ãƒ«ã®MaxLvã‚’è¿”ã™
  *------------------------------------------
  */
 int merc_get_skilltree_max(int class_,int skillid)
@@ -150,7 +129,7 @@ int merc_get_skilltree_max(int class_,int skillid)
 }
 
 /*==========================================
- * ŒÙ—pŠúŒÀƒ^ƒCƒ}[
+ * é›‡ç”¨æœŸé™ã‚¿ã‚¤ãƒãƒ¼
  *------------------------------------------
  */
 static int merc_employ_timer(int tid,unsigned int tick,int id,void *data)
@@ -167,17 +146,17 @@ static int merc_employ_timer(int tid,unsigned int tick,int id,void *data)
 	}
 	sd->mcd->limit_timer = -1;
 
-	// –¼º’l+1
+	// åå£°å€¤+1
 	merc_set_fame(sd, sd->mcd->status.class_, 1);
 
-	clif_msgstringtable(sd, 0x4f2);	// —b•ºg—pŠÔ‚ªŠ®—¹‚µ‚Ü‚µ‚½B
+	clif_msgstringtable(sd, 0x4f2);	// å‚­å…µä½¿ç”¨æ™‚é–“ãŒå®Œäº†ã—ã¾ã—ãŸã€‚
 	merc_delete_data(sd);
 
 	return 0;
 }
 
 /*==========================================
- * ŒÙ—pŠúŒÀƒ^ƒCƒ}[íœ
+ * é›‡ç”¨æœŸé™ã‚¿ã‚¤ãƒãƒ¼å‰Šé™¤
  *------------------------------------------
  */
 int merc_employ_timer_delete(struct merc_data *mcd)
@@ -193,7 +172,7 @@ int merc_employ_timer_delete(struct merc_data *mcd)
 }
 
 /*==========================================
- * ŠeƒXƒeŒvZ
+ * å„ã‚¹ãƒ†è¨ˆç®—
  *------------------------------------------
  */
 int merc_calc_status(struct merc_data *mcd)
@@ -235,38 +214,38 @@ int merc_calc_status(struct merc_data *mcd)
 	mcd->hprecov_rate = 100;
 	mcd->sprecov_rate = 100;
 
-	// ƒXƒe[ƒ^ƒX•Ï‰»‚É‚æ‚éŠî–{ƒpƒ‰ƒ[ƒ^•â³
+	// ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹å¤‰åŒ–ã«ã‚ˆã‚‹åŸºæœ¬ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿è£œæ­£
 	if(mcd->sc.count > 0)
 	{
 		int sc_speed_rate = 100;
 
-		if(mcd->sc.data[SC_INCREASEAGI].timer != -1 && sc_speed_rate > 75)	// ‘¬“x‘‰Á‚É‚æ‚éˆÚ“®‘¬“x‘‰Á
+		if(mcd->sc.data[SC_INCREASEAGI].timer != -1 && sc_speed_rate > 75)	// é€Ÿåº¦å¢—åŠ ã«ã‚ˆã‚‹ç§»å‹•é€Ÿåº¦å¢—åŠ 
 			sc_speed_rate = 75;
-		if(mcd->sc.data[SC_BERSERK].timer != -1 && sc_speed_rate > 75)	// ƒo[ƒT[ƒN‚É‚æ‚éˆÚ“®‘¬“x‘‰Á
+		if(mcd->sc.data[SC_BERSERK].timer != -1 && sc_speed_rate > 75)	// ãƒãƒ¼ã‚µãƒ¼ã‚¯ã«ã‚ˆã‚‹ç§»å‹•é€Ÿåº¦å¢—åŠ 
 			sc_speed_rate = 75;
 
 		mcd->speed = mcd->speed * sc_speed_rate / 100;
 
-		if(mcd->sc.data[SC_DECREASEAGI].timer != -1) {		// ‘¬“xŒ¸­(agi‚Íbattle.c‚Å)
-			if(mcd->sc.data[SC_DEFENDER].timer == -1) {	// ƒfƒBƒtƒFƒ“ƒ_[‚Í‘¬“x’á‰º‚µ‚È‚¢
+		if(mcd->sc.data[SC_DECREASEAGI].timer != -1) {		// é€Ÿåº¦æ¸›å°‘(agiã¯battle.cã§)
+			if(mcd->sc.data[SC_DEFENDER].timer == -1) {	// ãƒ‡ã‚£ãƒ•ã‚§ãƒ³ãƒ€ãƒ¼æ™‚ã¯é€Ÿåº¦ä½ä¸‹ã—ãªã„
 				mcd->speed = mcd->speed *((mcd->sc.data[SC_DECREASEAGI].val1 > 5)? 150: 133)/100;
 			}
 		}
 
-		if(mcd->sc.data[SC_MER_FLEE].timer != -1)	// —b•ºƒ{[ƒiƒX(FLEE)
+		if(mcd->sc.data[SC_MER_FLEE].timer != -1)	// å‚­å…µãƒœãƒ¼ãƒŠã‚¹(FLEE)
 			mcd->flee += mcd->sc.data[SC_MER_FLEE].val2;
-		if(mcd->sc.data[SC_MER_ATK].timer != -1) {	// —b•ºƒ{[ƒiƒX(ATK)
+		if(mcd->sc.data[SC_MER_ATK].timer != -1) {	// å‚­å…µãƒœãƒ¼ãƒŠã‚¹(ATK)
 			mcd->atk1 += mcd->sc.data[SC_MER_ATK].val2;
 			mcd->atk2 += mcd->sc.data[SC_MER_ATK].val2;
 		}
-		if(mcd->sc.data[SC_MER_HP].timer != -1)	// —b•ºƒ{[ƒiƒX(HP)
+		if(mcd->sc.data[SC_MER_HP].timer != -1)	// å‚­å…µãƒœãƒ¼ãƒŠã‚¹(HP)
 			hp_rate += mcd->sc.data[SC_MER_HP].val2;
-		if(mcd->sc.data[SC_MER_SP].timer != -1)	// —b•ºƒ{[ƒiƒX(SP)
+		if(mcd->sc.data[SC_MER_SP].timer != -1)	// å‚­å…µãƒœãƒ¼ãƒŠã‚¹(SP)
 			sp_rate += mcd->sc.data[SC_MER_SP].val2;
-		if(mcd->sc.data[SC_MER_HIT].timer != -1)	// —b•ºƒ{[ƒiƒX(HIT)
+		if(mcd->sc.data[SC_MER_HIT].timer != -1)	// å‚­å…µãƒœãƒ¼ãƒŠã‚¹(HIT)
 			mcd->hit += mcd->sc.data[SC_MER_HIT].val2;
 
-		// ƒSƒXƒyƒ‹ALL+20
+		// ã‚´ã‚¹ãƒšãƒ«ALL+20
 		if(mcd->sc.data[SC_INCALLSTATUS].timer != -1) {
 			mcd->str  += mcd->sc.data[SC_INCALLSTATUS].val1;
 			mcd->agi  += mcd->sc.data[SC_INCALLSTATUS].val1;
@@ -276,28 +255,28 @@ int merc_calc_status(struct merc_data *mcd)
 			mcd->luk  += mcd->sc.data[SC_INCALLSTATUS].val1;
 		}
 
-		if(mcd->sc.data[SC_INCREASEAGI].timer != -1)	// ‘¬“x‘‰Á
+		if(mcd->sc.data[SC_INCREASEAGI].timer != -1)	// é€Ÿåº¦å¢—åŠ 
 			mcd->agi += 2+mcd->sc.data[SC_INCREASEAGI].val1;
 
-		if(mcd->sc.data[SC_DECREASEAGI].timer != -1)	// ‘¬“xŒ¸­(agi‚Íbattle.c‚Å)
+		if(mcd->sc.data[SC_DECREASEAGI].timer != -1)	// é€Ÿåº¦æ¸›å°‘(agiã¯battle.cã§)
 			mcd->agi -= 2+mcd->sc.data[SC_DECREASEAGI].val1;
 
-		if(mcd->sc.data[SC_BLESSING].timer != -1) {	// ƒuƒŒƒbƒVƒ“ƒO
+		if(mcd->sc.data[SC_BLESSING].timer != -1) {	// ãƒ–ãƒ¬ãƒƒã‚·ãƒ³ã‚°
 			mcd->str  += mcd->sc.data[SC_BLESSING].val1;
 			mcd->dex  += mcd->sc.data[SC_BLESSING].val1;
 			mcd->int_ += mcd->sc.data[SC_BLESSING].val1;
 		}
-		if(mcd->sc.data[SC_SUITON].timer != -1) {	// …“Ù
+		if(mcd->sc.data[SC_SUITON].timer != -1) {	// æ°´é
 			if(mcd->sc.data[SC_SUITON].val3)
 				mcd->agi += mcd->sc.data[SC_SUITON].val3;
 			if(mcd->sc.data[SC_SUITON].val4)
 				mcd->speed = mcd->speed*2;
 		}
 
-		if(mcd->sc.data[SC_GLORIA].timer != -1)	// ƒOƒƒŠƒA
+		if(mcd->sc.data[SC_GLORIA].timer != -1)	// ã‚°ãƒ­ãƒªã‚¢
 			mcd->luk += 30;
 
-		if(mcd->sc.data[SC_QUAGMIRE].timer != -1) {	// ƒNƒ@ƒOƒ}ƒCƒA
+		if(mcd->sc.data[SC_QUAGMIRE].timer != -1) {	// ã‚¯ã‚¡ã‚°ãƒã‚¤ã‚¢
 			short subagi = 0;
 			short subdex = 0;
 			subagi = (mcd->agi/2 < mcd->sc.data[SC_QUAGMIRE].val1*10) ? mcd->agi/2 : mcd->sc.data[SC_QUAGMIRE].val1*10;
@@ -311,7 +290,7 @@ int merc_calc_status(struct merc_data *mcd)
 			mcd->dex -= subdex;
 		}
 
-		if(mcd->sc.data[SC_BERSERK].timer != -1) {	// ƒo[ƒT[ƒN
+		if(mcd->sc.data[SC_BERSERK].timer != -1) {	// ãƒãƒ¼ã‚µãƒ¼ã‚¯
 			def_rate  = 0;
 			mdef_rate = 0;
 			aspd_rate -= 30;
@@ -319,20 +298,20 @@ int merc_calc_status(struct merc_data *mcd)
 			mcd->max_hp = mcd->max_hp * 3;
 		}
 
-		if(mcd->sc.data[SC_DEFENDER].timer != -1) {	// ƒfƒBƒtƒFƒ“ƒ_[
+		if(mcd->sc.data[SC_DEFENDER].timer != -1) {	// ãƒ‡ã‚£ãƒ•ã‚§ãƒ³ãƒ€ãƒ¼
 			mcd->amotion += (25 - mcd->sc.data[SC_DEFENDER].val1*5);
 			mcd->speed = (mcd->speed * (155 - mcd->sc.data[SC_DEFENDER].val1*5)) / 100;
 		}
 
-		// ƒEƒFƒ|ƒ“ƒNƒCƒbƒPƒ“
+		// ã‚¦ã‚§ãƒãƒ³ã‚¯ã‚¤ãƒƒã‚±ãƒ³
 		if(mcd->sc.data[SC_WEAPONQUICKEN].timer != -1 &&
 		   mcd->sc.data[SC_QUAGMIRE].timer == -1 &&
 		   mcd->sc.data[SC_DONTFORGETME].timer == -1 &&
 		   mcd->sc.data[SC_DECREASEAGI].timer == -1)
 			aspd_rate -= 30;
 		
-		if(mcd->sc.data[SC_CREATINGSTAR].timer != -1) {	// ‘n¯‚Ì‘
-			mcd->speed = mcd->speed*100/90;	//‘¬“xŒ¸­—¦‚Í—v’²¸
+		if(mcd->sc.data[SC_CREATINGSTAR].timer != -1) {	// å‰µæ˜Ÿã®æ›¸
+			mcd->speed = mcd->speed*100/90;	//é€Ÿåº¦æ¸›å°‘ç‡ã¯è¦èª¿æŸ»
 		}
 	}
 
@@ -342,7 +321,7 @@ int merc_calc_status(struct merc_data *mcd)
 	mcd->flee     += mcd->agi + mcd->base_level;
 	mcd->critical += mcd->luk * 3 + 10;
 
-	// •â³
+	// è£œæ­£
 	if(atk_rate != 100) {
 		mcd->atk1 = mcd->atk1*atk_rate/100;
 		mcd->atk2 = mcd->atk2*atk_rate/100;
@@ -375,7 +354,7 @@ int merc_calc_status(struct merc_data *mcd)
 	if(mcd->max_sp <= 0)
 		mcd->max_sp = 1;
 
-	// ©‘R‰ñ•œ
+	// è‡ªç„¶å›å¾©
 	mcd->nhealhp = (int)(((atn_bignumber)mcd->max_hp * mcd->vit / 10000 + 1) * 6);
 	mcd->nhealsp = (int)(((atn_bignumber)mcd->max_sp * (mcd->int_ + 10) / 750) + 1);
 	if(mcd->hprecov_rate != 100)
@@ -388,7 +367,7 @@ int merc_calc_status(struct merc_data *mcd)
 	    (mcd->sc.data[SC_PROVOKE].timer == -1 || mcd->sc.data[SC_PROVOKE].val2 == 0) &&
 	    !unit_isdead(&mcd->bl) )
 	{
-		// ƒI[ƒgƒo[ƒT[ƒN”­“®
+		// ã‚ªãƒ¼ãƒˆãƒãƒ¼ã‚µãƒ¼ã‚¯ç™ºå‹•
 		status_change_start(&mcd->bl,SC_PROVOKE,10,1,0,0,0,0);
 	}
 
@@ -396,7 +375,7 @@ int merc_calc_status(struct merc_data *mcd)
 }
 
 /*==========================================
- * —b•º¢Š«
+ * å‚­å…µå¬å–š
  *------------------------------------------
  */
 int merc_callmerc(struct map_session_data *sd,int class_, unsigned int limit)
@@ -406,7 +385,7 @@ int merc_callmerc(struct map_session_data *sd,int class_, unsigned int limit)
 
 	nullpo_retr(0, sd);
 
-	if(sd->status.merc_id > 0 || sd->mcd)	// Šù‚É¢Š«’†
+	if(sd->status.merc_id > 0 || sd->mcd)	// æ—¢ã«å¬å–šä¸­
 		return 0;
 	if(sd->state.merc_creating)
 		return 0;
@@ -427,7 +406,7 @@ int merc_callmerc(struct map_session_data *sd,int class_, unsigned int limit)
 	sd->state.merc_creating = 1;
 	intif_create_merc(sd->status.account_id,sd->status.char_id,&st);
 
-	// ¢Š«‰ñ”+1
+	// å¬å–šå›æ•°+1
 	merc_set_call(sd, class_, 1);
 
 	return 1;
@@ -466,14 +445,14 @@ static int merc_data_init(struct map_session_data *sd)
 	mcd->bl.type = BL_MERC;
 	memcpy(mcd->name, merc_db[class_].jname , 24);
 	mcd->dir         = sd->dir;
-	mcd->speed       = status_get_speed(&sd->bl);	// •às‘¬“x‚ÍAƒR[ƒ‹‚Ìål‚Ìspeed‚É‚È‚é
+	mcd->speed       = status_get_speed(&sd->bl);	// æ­©è¡Œé€Ÿåº¦ã¯ã€ã‚³ãƒ¼ãƒ«æ™‚ã®ä¸»äººã®speedã«ãªã‚‹
 	mcd->target_id   = 0;
 	mcd->msd         = sd;
 	mcd->view_class  = sd->mcd->status.class_;
 	mcd->base_level  = merc_db[class_].lv;
 	mcd->attackrange = merc_db[class_].range;
 
-	// ƒXƒLƒ‹æ“¾
+	// ã‚¹ã‚­ãƒ«å–å¾—
 	for(i = 0; (id = merc_skill_tree[class_][i].id) > 0; i++) {
 		id -= MERC_SKILLID;
 		mcd->skill[id].id = id + MERC_SKILLID;
@@ -484,10 +463,10 @@ static int merc_data_init(struct map_session_data *sd)
 	unit_dataset(&mcd->bl);
 
 #ifdef DYNAMIC_SC_DATA
-	// ƒ_ƒ~[‘}“ü
+	// ãƒ€ãƒŸãƒ¼æŒ¿å…¥
 	mcd->sc.data = dummy_sc_data;
 #else
-	// ƒXƒe[ƒ^ƒXˆÙí‚Ì‰Šú‰»
+	// ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ç•°å¸¸ã®åˆæœŸåŒ–
 	for(i=0; i<MAX_STATUSCHANGE; i++) {
 		mcd->sc.data[i].timer = -1;
 		mcd->sc.data[i].val1  = 0;
@@ -502,7 +481,7 @@ static int merc_data_init(struct map_session_data *sd)
 	mcd->sc.opt2  = OPT2_NORMAL;
 	mcd->sc.opt3  = OPT3_NORMAL;
 
-	merc_calc_status(mcd);			// ƒXƒe[ƒ^ƒXŒvZ
+	merc_calc_status(mcd);			// ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹è¨ˆç®—
 	map_addiddb(&mcd->bl);
 
 	mcd->natural_heal_hp = add_timer(tick+MERC_NATURAL_HEAL_HP_INTERVAL,merc_natural_heal_hp,mcd->bl.id,NULL);
@@ -520,7 +499,7 @@ static int merc_data_init(struct map_session_data *sd)
 }
 
 /*==========================================
- * inter‚©‚ç—b•º‚Ìƒf[ƒ^óM
+ * interã‹ã‚‰å‚­å…µã®ãƒ‡ãƒ¼ã‚¿å—ä¿¡
  *------------------------------------------
  */
 int merc_recv_mercdata(int account_id,int char_id,struct mmo_mercstatus *p,int flag)
@@ -534,7 +513,7 @@ int merc_recv_mercdata(int account_id,int char_id,struct mmo_mercstatus *p,int f
 	if(sd == NULL || sd->status.char_id != char_id || (sd->status.merc_id && sd->status.merc_id != p->merc_id))
 	{
 		if(flag) {
-			// V‹Kì¬‚È‚ç—b•ºƒf[ƒ^‚ğíœ‚·‚é
+			// æ–°è¦ä½œæˆæ™‚ãªã‚‰å‚­å…µãƒ‡ãƒ¼ã‚¿ã‚’å‰Šé™¤ã™ã‚‹
 			intif_delete_mercdata(account_id,char_id,p->merc_id);
 		}
 		if(sd)
@@ -551,7 +530,7 @@ int merc_recv_mercdata(int account_id,int char_id,struct mmo_mercstatus *p,int f
 
 		if(!merc_data_init(sd) && sd->bl.prev != NULL)
 		{
-			if(sd->mcd->status.hp <= 0) {	// €–S
+			if(sd->mcd->status.hp <= 0) {	// æ­»äº¡
 				merc_delete_data(sd);
 				sd->state.merc_creating = 0;
 				return 0;
@@ -571,7 +550,7 @@ int merc_recv_mercdata(int account_id,int char_id,struct mmo_mercstatus *p,int f
 }
 
 /*==========================================
- * —b•ºíœ
+ * å‚­å…µå‰Šé™¤
  *------------------------------------------
  */
 int merc_delete_data(struct map_session_data *sd)
@@ -591,7 +570,7 @@ int merc_delete_data(struct map_session_data *sd)
 }
 
 /*==========================================
- * —b•ºƒƒjƒ…[‚Ì‰“š
+ * å‚­å…µãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®å¿œç­”
  *------------------------------------------
  */
 int merc_menu(struct map_session_data *sd, int menunum)
@@ -607,7 +586,7 @@ int merc_menu(struct map_session_data *sd, int menunum)
 			clif_mercskillinfoblock(sd);
 			break;
 		case 2:
-			clif_msgstringtable(sd, 0x4f4);	// —b•º‚ª‰ğŒÙ‚³‚ê‚Ü‚µ‚½B
+			clif_msgstringtable(sd, 0x4f4);	// å‚­å…µãŒè§£é›‡ã•ã‚Œã¾ã—ãŸã€‚
 			merc_delete_data(sd);
 			break;
 	}
@@ -615,7 +594,7 @@ int merc_menu(struct map_session_data *sd, int menunum)
 }
 
 /*==========================================
- * ‘Ò‹@–½—ß‚È‚Ç‚ÅAål‚Ì‰º‚ÖˆÚ“®
+ * å¾…æ©Ÿå‘½ä»¤ãªã©ã§ã€ä¸»äººã®ä¸‹ã¸ç§»å‹•
  *------------------------------------------
  */
 int merc_return_master(struct map_session_data *sd)
@@ -631,7 +610,7 @@ int merc_return_master(struct map_session_data *sd)
 }
 
 /*==========================================
- * ƒXƒLƒ‹‚ÌŒŸõ Š—L‚µ‚Ä‚¢‚½ê‡Lv‚ª•Ô‚é
+ * ã‚¹ã‚­ãƒ«ã®æ¤œç´¢ æ‰€æœ‰ã—ã¦ã„ãŸå ´åˆLvãŒè¿”ã‚‹
  *------------------------------------------
  */
 int merc_checkskill(struct merc_data *mcd,int skill_id)
@@ -650,7 +629,7 @@ int merc_checkskill(struct merc_data *mcd,int skill_id)
 }
 
 /*==========================================
- * –¼º’l‚Ìæ“¾
+ * åå£°å€¤ã®å–å¾—
  *------------------------------------------
  */
 int merc_get_fame(struct map_session_data *sd, int class_)
@@ -666,7 +645,7 @@ int merc_get_fame(struct map_session_data *sd, int class_)
 }
 
 /*==========================================
- * –¼º’l‚Ì‘Œ¸
+ * åå£°å€¤ã®å¢—æ¸›
  *------------------------------------------
  */
 int merc_set_fame(struct map_session_data *sd, int class_, int val)
@@ -688,7 +667,7 @@ int merc_set_fame(struct map_session_data *sd, int class_, int val)
 }
 
 /*==========================================
- * ¢Š«‰ñ”‚Ìæ“¾
+ * å¬å–šå›æ•°ã®å–å¾—
  *------------------------------------------
  */
 int merc_get_call(struct map_session_data *sd, int class_)
@@ -704,7 +683,7 @@ int merc_get_call(struct map_session_data *sd, int class_)
 }
 
 /*==========================================
- * ¢Š«‰ñ”‚Ì‘Œ¸
+ * å¬å–šå›æ•°ã®å¢—æ¸›
  *------------------------------------------
  */
 int merc_set_call(struct map_session_data *sd, int class_, int val)
@@ -724,7 +703,7 @@ int merc_set_call(struct map_session_data *sd, int class_, int val)
 }
 
 /*==========================================
- * ƒLƒ‹ƒJƒEƒ“ƒg‚Ì‘‰Á
+ * ã‚­ãƒ«ã‚«ã‚¦ãƒ³ãƒˆã®å¢—åŠ 
  *------------------------------------------
  */
 int merc_killcount(struct merc_data *mcd, unsigned short lv)
@@ -733,11 +712,11 @@ int merc_killcount(struct merc_data *mcd, unsigned short lv)
 
 	nullpo_retr(0, mcd);
 
-	// ‘Šè‚ÌƒŒƒxƒ‹‚ª©•ª‚ÌƒŒƒxƒ‹‚Ì1/2ˆÈã‚©H
+	// ç›¸æ‰‹ã®ãƒ¬ãƒ™ãƒ«ãŒè‡ªåˆ†ã®ãƒ¬ãƒ™ãƒ«ã®1/2ä»¥ä¸Šã‹ï¼Ÿ
 	if(lv >= mcd->base_level / 2) {
 		mcd->status.kill_count++;
 
-		// ƒLƒ‹ƒJƒEƒ“ƒg50–ˆ‚É–¼º’l+1AƒLƒ‹ƒJƒEƒ“ƒgƒ{[ƒiƒX
+		// ã‚­ãƒ«ã‚«ã‚¦ãƒ³ãƒˆ50æ¯ã«åå£°å€¤+1ã€ã‚­ãƒ«ã‚«ã‚¦ãƒ³ãƒˆãƒœãƒ¼ãƒŠã‚¹
 		if(mcd->status.kill_count % 50 == 0) {
 			merc_set_fame(mcd->msd, mcd->status.class_, 1);
 			status_change_start(&mcd->bl,type[atn_rand()%(sizeof(type)/sizeof(type[0]))],atn_rand()%5+1,0,0,0,600000,0);
@@ -751,7 +730,7 @@ int merc_killcount(struct merc_data *mcd, unsigned short lv)
 }
 
 /*==========================================
- * ŒoŒ±’læ“¾
+ * çµŒé¨“å€¤å–å¾—
  *------------------------------------------
  */
 int merc_gainexp(struct merc_data *mcd,struct mob_data *md,atn_bignumber base_exp,atn_bignumber job_exp)
@@ -766,7 +745,7 @@ int merc_gainexp(struct merc_data *mcd,struct mob_data *md,atn_bignumber base_ex
 		job_exp  = job_exp  * (125 + md->sc.data[SC_RICHMANKIM].val1*11)/100;
 	}
 
-	if(mcd->msd) {	// ål‚Öw’è”{‚ÌŒoŒ±’l
+	if(mcd->msd) {	// ä¸»äººã¸æŒ‡å®šå€ã®çµŒé¨“å€¤
 		atn_bignumber mbexp = 0, mjexp = 0;
 		if(battle_config.master_get_merc_base_exp)
 			mbexp = base_exp * battle_config.master_get_merc_base_exp / 100;
@@ -781,7 +760,7 @@ int merc_gainexp(struct merc_data *mcd,struct mob_data *md,atn_bignumber base_ex
 }
 
 /*==========================================
- * mcd‚Édamage‚Ìƒ_ƒ[ƒW
+ * mcdã«damageã®ãƒ€ãƒ¡ãƒ¼ã‚¸
  *------------------------------------------
  */
 int merc_damage(struct block_list *src,struct merc_data *mcd,int damage)
@@ -791,11 +770,11 @@ int merc_damage(struct block_list *src,struct merc_data *mcd,int damage)
 	nullpo_retr(0, mcd);
 	nullpo_retr(0, sd = mcd->msd);
 
-	// Šù‚É€‚ñ‚Å‚¢‚½‚ç–³Œø
+	// æ—¢ã«æ­»ã‚“ã§ã„ãŸã‚‰ç„¡åŠ¹
 	if(unit_isdead(&mcd->bl))
 		return 0;
 
-	// •à‚¢‚Ä‚¢‚½‚ç‘«‚ğ~‚ß‚é
+	// æ­©ã„ã¦ã„ãŸã‚‰è¶³ã‚’æ­¢ã‚ã‚‹
 	if((mcd->sc.data[SC_ENDURE].timer == -1 && mcd->sc.data[SC_BERSERK].timer == -1) || map[mcd->bl.m].flag.gvg)
 		unit_stop_walking(&mcd->bl,battle_config.pc_hit_stop_type);
 
@@ -811,35 +790,35 @@ int merc_damage(struct block_list *src,struct merc_data *mcd,int damage)
 	if(mcd->status.hp > mcd->max_hp)
 		mcd->status.hp = mcd->max_hp;
 
-	// over kill•ª‚ÍŠÛ‚ß‚é
+	// over killåˆ†ã¯ä¸¸ã‚ã‚‹
 	if(damage > mcd->status.hp)
 		damage = mcd->status.hp;
 
 	mcd->status.hp -= damage;
 
-	// ƒnƒCƒhó‘Ô‚ğ‰ğœ
+	// ãƒã‚¤ãƒ‰çŠ¶æ…‹ã‚’è§£é™¤
 	status_change_hidden_end(&mcd->bl);
 
 	clif_mercupdatestatus(sd,SP_HP);
 
-	// €–S‚µ‚Ä‚¢‚½
+	// æ­»äº¡ã—ã¦ã„ãŸ
 	if(mcd->status.hp <= 0) {
-		// ƒXƒLƒ‹ƒ†ƒjƒbƒg‚©‚ç‚Ì—£’E
+		// ã‚¹ã‚­ãƒ«ãƒ¦ãƒ‹ãƒƒãƒˆã‹ã‚‰ã®é›¢è„±
 		mcd->status.hp = 1;
 		skill_unit_move(&mcd->bl,gettick(),0);
 		mcd->status.hp = 0;
 
-		// –¼º’l-1
+		// åå£°å€¤-1
 		merc_set_fame(sd, mcd->status.class_, -1);
 
-		clif_msgstringtable(sd, 0x4f3);	// —b•º‚ª“|‚ê‚Ü‚µ‚½B
+		clif_msgstringtable(sd, 0x4f3);	// å‚­å…µãŒå€’ã‚Œã¾ã—ãŸã€‚
 		merc_delete_data(sd);
 	} else {
 		if( mcd->sc.data[SC_AUTOBERSERK].timer != -1 &&
 		    mcd->status.hp < mcd->max_hp>>2 &&
 		    (mcd->sc.data[SC_PROVOKE].timer == -1 || mcd->sc.data[SC_PROVOKE].val2 == 0) )
 		{
-			// ƒI[ƒgƒo[ƒT[ƒN”­“®
+			// ã‚ªãƒ¼ãƒˆãƒãƒ¼ã‚µãƒ¼ã‚¯ç™ºå‹•
 			status_change_start(&mcd->bl,SC_PROVOKE,10,1,0,0,0,0);
 		}
 	}
@@ -848,14 +827,14 @@ int merc_damage(struct block_list *src,struct merc_data *mcd,int damage)
 }
 
 /*==========================================
- * HP/SP‰ñ•œ
+ * HP/SPå›å¾©
  *------------------------------------------
  */
 int merc_heal(struct merc_data *mcd,int hp,int sp)
 {
 	nullpo_retr(0, mcd);
 
-	// ƒo[ƒT[ƒN’†‚Í‰ñ•œ‚³‚¹‚È‚¢
+	// ãƒãƒ¼ã‚µãƒ¼ã‚¯ä¸­ã¯å›å¾©ã•ã›ãªã„
 	if(mcd->sc.data[SC_BERSERK].timer != -1) {
 		if(sp > 0)
 			sp = 0;
@@ -887,7 +866,7 @@ int merc_heal(struct merc_data *mcd,int hp,int sp)
 }
 
 /*==========================================
- * ©‘R‰ñ•œ•¨
+ * è‡ªç„¶å›å¾©ç‰©
  *------------------------------------------
  */
 static int merc_natural_heal_hp(int tid,unsigned int tick,int id,void *data)
@@ -963,7 +942,7 @@ int merc_natural_heal_timer_delete(struct merc_data *mcd)
 }
 
 /*==========================================
- * —b•º‚Ìƒf[ƒ^‚ğƒZ[ƒu
+ * å‚­å…µã®ãƒ‡ãƒ¼ã‚¿ã‚’ã‚»ãƒ¼ãƒ–
  *------------------------------------------
  */
 int merc_save_data(struct map_session_data *sd)
@@ -979,10 +958,10 @@ int merc_save_data(struct map_session_data *sd)
 }
 
 //
-// ‰Šú‰»•¨
+// åˆæœŸåŒ–ç‰©
 //
 /*==========================================
- * —b•º‰ŠúƒXƒe[ƒ^ƒXƒf[ƒ^“Ç‚İ‚İ
+ * å‚­å…µåˆæœŸã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒ‡ãƒ¼ã‚¿èª­ã¿è¾¼ã¿
  *------------------------------------------
  */
 static int read_merc_db(void)
@@ -994,7 +973,7 @@ static int read_merc_db(void)
 	struct script_code *script = NULL;
 	const char *filename[] = { "db/merc_db.txt", "db/addon/merc_db_add.txt" };
 
-	// DBî•ñ‚Ì‰Šú‰»
+	// DBæƒ…å ±ã®åˆæœŸåŒ–
 	for(i=0; i<MAX_MERC_DB; i++) {
 		if(merc_db[i].script)
 			script_free_code(merc_db[i].script);
@@ -1095,7 +1074,7 @@ static int read_merc_db(void)
 }
 
 /*==========================================
- * —b•ºƒXƒLƒ‹ƒf[ƒ^“Ç‚İ‚İ
+ * å‚­å…µã‚¹ã‚­ãƒ«ãƒ‡ãƒ¼ã‚¿èª­ã¿è¾¼ã¿
  *------------------------------------------
  */
 static int read_merc_skilldb(void)
@@ -1105,7 +1084,7 @@ static int read_merc_skilldb(void)
 	char line[1024],*p;
 	const char *filename = "db/merc_skill_tree.txt";
 
-	// ƒXƒLƒ‹ƒcƒŠ[
+	// ã‚¹ã‚­ãƒ«ãƒ„ãƒªãƒ¼
 	memset(merc_skill_tree,0,sizeof(merc_skill_tree));
 	fp = fopen(filename, "r");
 	if(fp == NULL){
@@ -1141,12 +1120,12 @@ static int read_merc_skilldb(void)
 		for(j=0; st[j].id && st[j].id != skillid; j++);
 
 		if(j >= MAX_MERCSKILL_TREE - 1) {
-			// ––”ö‚ÍƒAƒ“ƒJ[‚Æ‚µ‚Ä0‚É‚µ‚Ä‚¨‚­•K—v‚ª‚ ‚é
+			// æœ«å°¾ã¯ã‚¢ãƒ³ã‚«ãƒ¼ã¨ã—ã¦0ã«ã—ã¦ãŠãå¿…è¦ãŒã‚ã‚‹
 			printf("read_merc_skilldb: skill (%d) is over max tree %d!!\n", skillid, MAX_MERCSKILL_TREE);
 			continue;
 		}
 		if(j > 0 && skillid < st[j-1].id) {
-			// ƒXƒLƒ‹ID‚Ì¸‡‚É•À‚ñ‚Å‚È‚¢ê‡
+			// ã‚¹ã‚­ãƒ«IDã®æ˜‡é †ã«ä¸¦ã‚“ã§ãªã„å ´åˆ
 			int max = j;
 			while(j > 0 && skillid < st[j-1].id) {
 				j--;
@@ -1167,7 +1146,7 @@ static int read_merc_skilldb(void)
 }
 
 /*==========================================
- * —b•ºDB‚ÌƒŠƒ[ƒh
+ * å‚­å…µDBã®ãƒªãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 void merc_reload(void)
@@ -1177,7 +1156,7 @@ void merc_reload(void)
 }
 
 /*==========================================
- * ‰Šú‰»ˆ—
+ * åˆæœŸåŒ–å‡¦ç†
  *------------------------------------------
  */
 int do_init_merc(void)
@@ -1193,7 +1172,7 @@ int do_init_merc(void)
 }
 
 /*==========================================
- * I—¹
+ * çµ‚äº†
  *------------------------------------------
  */
 int do_final_merc(void)

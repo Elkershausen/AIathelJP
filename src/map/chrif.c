@@ -1,27 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-// $Id: chrif.c,v 1.6 2003/06/29 05:52:56 lemit Exp $
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -65,7 +42,7 @@ static char userid[24] = "", passwd[24] = "";
 static int chrif_state;
 
 /*==========================================
- * ƒ†[ƒU[ ID ƒZƒbƒg
+ * ãƒ¦ãƒ¼ã‚¶ãƒ¼ ID ã‚»ãƒƒãƒˆ
  *------------------------------------------
  */
 void chrif_setuserid(const char *id)
@@ -75,7 +52,7 @@ void chrif_setuserid(const char *id)
 }
 
 /*==========================================
- * ƒpƒXƒ[ƒhƒZƒbƒg
+ * ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ã‚»ãƒƒãƒˆ
  *------------------------------------------
  */
 void chrif_setpasswd(const char *pwd)
@@ -85,7 +62,7 @@ void chrif_setpasswd(const char *pwd)
 }
 
 /*==========================================
- * ƒzƒXƒgƒZƒbƒg
+ * ãƒ›ã‚¹ãƒˆã‚»ãƒƒãƒˆ
  *------------------------------------------
  */
 void chrif_sethost(const char *host)
@@ -102,7 +79,7 @@ void chrif_sethost(const char *host)
 }
 
 /*==========================================
- * IP ƒAƒhƒŒƒXƒZƒbƒg
+ * IP ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚»ãƒƒãƒˆ
  *------------------------------------------
  */
 void chrif_setip(void)
@@ -111,7 +88,7 @@ void chrif_setip(void)
 }
 
 /*==========================================
- * ƒ|[ƒg”Ô†ƒZƒbƒg
+ * ãƒãƒ¼ãƒˆç•ªå·ã‚»ãƒƒãƒˆ
  *------------------------------------------
  */
 void chrif_setport(unsigned short port)
@@ -120,7 +97,7 @@ void chrif_setport(unsigned short port)
 }
 
 /*==========================================
- * Ú‘±‚µ‚Ä‚¢‚é‚©‚Ç‚¤‚©
+ * æ¥ç¶šã—ã¦ã„ã‚‹ã‹ã©ã†ã‹
  *------------------------------------------
  */
 int chrif_isconnect(void)
@@ -129,7 +106,7 @@ int chrif_isconnect(void)
 }
 
 /*==========================================
- * ƒLƒƒƒ‰‰i‘±•Ï”•Û‘¶
+ * ã‚­ãƒ£ãƒ©æ°¸ç¶šå¤‰æ•°ä¿å­˜
  *------------------------------------------
  */
 static int chrif_save_globalreg(struct map_session_data *sd)
@@ -159,7 +136,7 @@ static int chrif_save_globalreg(struct map_session_data *sd)
 }
 
 /*==========================================
- * ƒLƒƒƒ‰ƒNƒ^[ƒf[ƒ^•Û‘¶
+ * ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ãƒ‡ãƒ¼ã‚¿ä¿å­˜
  *------------------------------------------
  */
 int chrif_save(struct map_session_data *sd, int final)
@@ -169,14 +146,14 @@ int chrif_save(struct map_session_data *sd, int final)
 	if (char_fd < 0)
 		return -1;
 
-	// Ø’f‘Ò‚¿‚Ì‚Íˆ—‚µ‚È‚¢
+	// åˆ‡æ–­å¾…ã¡ã®æ™‚ã¯å‡¦ç†ã—ãªã„
 	if(sd->state.waitingdisconnect)
 		return 0;
 
 	if(!final)
 		pc_makesavestatus(sd);
 
-	if(sd->state.reg_dirty) {	// ƒLƒƒƒ‰‰i‘±•Ï”‚Í•ÏX‚ª‚ ‚Á‚½‚Æ‚«‚Ì‚İƒZ[ƒu‚·‚é
+	if(sd->state.reg_dirty) {	// ã‚­ãƒ£ãƒ©æ°¸ç¶šå¤‰æ•°ã¯å¤‰æ›´ãŒã‚ã£ãŸã¨ãã®ã¿ã‚»ãƒ¼ãƒ–ã™ã‚‹
 		sd->state.reg_dirty = 0;
 		chrif_save_globalreg(sd);
 	}
@@ -193,16 +170,16 @@ int chrif_save(struct map_session_data *sd, int final)
 }
 
 /*==========================================
- * Ú‘±
+ * æ¥ç¶š
  *------------------------------------------
  */
 static int chrif_connect(int fd)
 {
-	// ˆÃ†‰»ƒƒOƒCƒ“‚Ìƒ`ƒƒƒŒƒ“ƒW—v‹
+	// æš—å·åŒ–ãƒ­ã‚°ã‚¤ãƒ³ã®ãƒãƒ£ãƒ¬ãƒ³ã‚¸è¦æ±‚
 	WFIFOW(fd,0)=0x2b2a;
 	WFIFOSET(fd,2);
 
-	/* ƒvƒŒ[ƒ“‚ÈƒƒOƒCƒ“‚ÍŒ»İ”p~ */
+	/* ãƒ—ãƒ¬ãƒ¼ãƒ³ãªãƒ­ã‚°ã‚¤ãƒ³ã¯ç¾åœ¨å»ƒæ­¢ */
 	//WFIFOW(fd,0)=0x2af8;
 	//memcpy(WFIFOP(fd,2),userid,24);
 	//memcpy(WFIFOP(fd,26),passwd,24);
@@ -216,7 +193,7 @@ static int chrif_connect(int fd)
 }
 
 /*==========================================
- * ˆÃ†‰»ƒƒOƒCƒ“
+ * æš—å·åŒ–ãƒ­ã‚°ã‚¤ãƒ³
  *------------------------------------------
  */
 static int chrif_cram_connect(int fd)
@@ -236,7 +213,7 @@ static int chrif_cram_connect(int fd)
 }
 
 /*==========================================
- * ƒ}ƒbƒv‘—M
+ * ãƒãƒƒãƒ—é€ä¿¡
  *------------------------------------------
  */
 static int chrif_sendmap(int fd)
@@ -253,7 +230,7 @@ static int chrif_sendmap(int fd)
 }
 
 /*==========================================
- * ƒ}ƒbƒvóM
+ * ãƒãƒƒãƒ—å—ä¿¡
  *------------------------------------------
  */
 static int chrif_recvmap(int fd)
@@ -262,7 +239,7 @@ static int chrif_recvmap(int fd)
 	unsigned long ip;
 	unsigned short port;
 
-	if(chrif_state < 2)	// ‚Ü‚¾€”õ’†
+	if(chrif_state < 2)	// ã¾ã æº–å‚™ä¸­
 		return -1;
 
 	ip   = RFIFOL(fd,4);
@@ -279,7 +256,7 @@ static int chrif_recvmap(int fd)
 }
 
 /*==========================================
- * íœƒ}ƒbƒvóM
+ * å‰Šé™¤ãƒãƒƒãƒ—å—ä¿¡
  *------------------------------------------
  */
 static int chrif_recverasemap(int fd)
@@ -288,7 +265,7 @@ static int chrif_recverasemap(int fd)
 	unsigned long ip;
 	unsigned short port;
 
-	if(chrif_state < 2)	// ‚Ü‚¾€”õ’†
+	if(chrif_state < 2)	// ã¾ã æº–å‚™ä¸­
 		return -1;
 
 	ip   = RFIFOL(fd,4);
@@ -307,7 +284,7 @@ static int chrif_recverasemap(int fd)
 }
 
 /*==========================================
- * ƒ}ƒbƒvIŠÔˆÚ“®‚Ì‚½‚ß‚Ìƒf[ƒ^€”õ—v‹
+ * ãƒãƒƒãƒ—é¯–é–“ç§»å‹•ã®ãŸã‚ã®ãƒ‡ãƒ¼ã‚¿æº–å‚™è¦æ±‚
  *------------------------------------------
  */
 int chrif_changemapserver(struct map_session_data *sd,const char *name,int x,int y,unsigned long ip,unsigned short port)
@@ -333,7 +310,7 @@ int chrif_changemapserver(struct map_session_data *sd,const char *name,int x,int
 }
 
 /*==========================================
- * ƒ}ƒbƒvIŠÔˆÚ“®ack
+ * ãƒãƒƒãƒ—é¯–é–“ç§»å‹•ack
  *------------------------------------------
  */
 static int chrif_changemapserverack(int fd)
@@ -354,7 +331,7 @@ static int chrif_changemapserverack(int fd)
 }
 
 /*==========================================
- * ƒLƒƒƒ‰ƒNƒ^[ƒf[ƒ^•Û‘¶ack
+ * ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ãƒ‡ãƒ¼ã‚¿ä¿å­˜ack
  *------------------------------------------
  */
 static int chrif_saveack(int fd)
@@ -363,11 +340,11 @@ static int chrif_saveack(int fd)
 	int type = RFIFOB(fd,6);
 
 	if(sd) {
-		if(type == 1) {		// Ø’f
+		if(type == 1) {		// åˆ‡æ–­
 			;
-		} else if(type == 2) {	// ƒLƒƒƒ‰ƒNƒ^[ƒZƒŒƒNƒg
+		} else if(type == 2) {	// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ã‚»ãƒ¬ã‚¯ãƒˆ
 			chrif_charselectreq(sd);
-		} else if(type == 3) {	// •Êƒ}ƒbƒvƒT[ƒo[‚ÖˆÚ“®
+		} else if(type == 3) {	// åˆ¥ãƒãƒƒãƒ—ã‚µãƒ¼ãƒãƒ¼ã¸ç§»å‹•
 			unsigned long ip;
 			unsigned short port;
 
@@ -381,7 +358,7 @@ static int chrif_saveack(int fd)
 }
 
 /*==========================================
- * Ú‘±Š®—¹
+ * æ¥ç¶šå®Œäº†
  *------------------------------------------
  */
 static int chrif_connectack(int fd)
@@ -391,7 +368,7 @@ static int chrif_connectack(int fd)
 		exit(1);
 	}
 	chrif_state = 1;
-	session[fd]->auth = -1; // ”FØI—¹‚ğ socket.c ‚É“`‚¦‚é
+	session[fd]->auth = -1; // èªè¨¼çµ‚äº†ã‚’ socket.c ã«ä¼ãˆã‚‹
 
 	chrif_sendmap(fd);
 	chrif_ranking_request(fd);
@@ -407,7 +384,7 @@ static int chrif_connectack(int fd)
 }
 
 /*==========================================
- * ƒ}ƒbƒv‘—MI—¹
+ * ãƒãƒƒãƒ—é€ä¿¡çµ‚äº†
  *------------------------------------------
  */
 static int chrif_sendmapack(int fd)
@@ -422,7 +399,7 @@ static int chrif_sendmapack(int fd)
 }
 
 /*==========================================
- * ƒNƒ‰ƒCƒAƒ“ƒg‚Ì”FØ—v‹
+ * ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã®èªè¨¼è¦æ±‚
  *------------------------------------------
  */
 int chrif_authreq(struct map_session_data *sd)
@@ -445,7 +422,7 @@ int chrif_authreq(struct map_session_data *sd)
 }
 
 /*==========================================
- * ƒNƒ‰ƒCƒAƒ“ƒg‚Ì”FØŠ®—¹
+ * ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã®èªè¨¼å®Œäº†
  *------------------------------------------
  */
 static int chrif_authok(int fd)
@@ -464,7 +441,7 @@ static int chrif_authok(int fd)
 }
 
 /*==========================================
- * ƒNƒ‰ƒCƒAƒ“ƒg‚ÌƒLƒƒƒ‰ƒZƒŒ‚Ì‚½‚ß‚Ì€”õ—v‹
+ * ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã®ã‚­ãƒ£ãƒ©ã‚»ãƒ¬ã®ãŸã‚ã®æº–å‚™è¦æ±‚
  *------------------------------------------
  */
 int chrif_charselectreq(struct map_session_data *sd)
@@ -493,7 +470,7 @@ int chrif_charselectreq(struct map_session_data *sd)
 }
 
 /*==========================================
- * ƒLƒƒƒ‰–¼–â‚¢‡‚í‚¹
+ * ã‚­ãƒ£ãƒ©åå•ã„åˆã‚ã›
  *------------------------------------------
  */
 void chrif_searchcharid(int char_id)
@@ -509,7 +486,7 @@ void chrif_searchcharid(int char_id)
 }
 
 /*==========================================
- * GM‚É•Ï‰»—v‹
+ * GMã«å¤‰åŒ–è¦æ±‚
  *------------------------------------------
  */
 int chrif_changegm(int id,const char *pass,size_t len)
@@ -527,7 +504,7 @@ int chrif_changegm(int id,const char *pass,size_t len)
 }
 
 /*==========================================
- * «•Ê•Ï‰»—v‹
+ * æ€§åˆ¥å¤‰åŒ–è¦æ±‚
  *------------------------------------------
  */
 int chrif_changesex(int id,int sex)
@@ -547,7 +524,7 @@ int chrif_changesex(int id,int sex)
 }
 
 /*==========================================
- * GM‚É•Ï‰»I—¹
+ * GMã«å¤‰åŒ–çµ‚äº†
  *------------------------------------------
  */
 static int chrif_changedgm(int fd)
@@ -564,17 +541,17 @@ static int chrif_changedgm(int fd)
 	if(battle_config.etc_log)
 		printf("chrif_changedgm %d -> %d\n",oldacc,newacc);
 
-	if(newacc>0){	// GM•ÏX‚É‚æ‚é‹­§Ø’f
-		clif_displaymessage(sd->fd, msg_txt(172)); // GM•ÏX¬Œ÷BÄÚ‘±‚µ‚Ä‰º‚³‚¢B
+	if(newacc>0){	// GMå¤‰æ›´ã«ã‚ˆã‚‹å¼·åˆ¶åˆ‡æ–­
+		clif_displaymessage(sd->fd, msg_txt(172)); // GMå¤‰æ›´æˆåŠŸã€‚å†æ¥ç¶šã—ã¦ä¸‹ã•ã„ã€‚
 		clif_setwaitclose(sd->fd);
 	}else{
-		clif_displaymessage(sd->fd, msg_txt(173)); // GM•ÏX¸”s
+		clif_displaymessage(sd->fd, msg_txt(173)); // GMå¤‰æ›´å¤±æ•—
 	}
 	return 0;
 }
 
 /*==========================================
- * «•Ê•Ï‰»I—¹
+ * æ€§åˆ¥å¤‰åŒ–çµ‚äº†
  *------------------------------------------
  */
 static int chrif_changedsex(int fd)
@@ -586,7 +563,7 @@ static int chrif_changedsex(int fd)
 
 	if(acc > 0) {
 		struct map_session_data *sd = map_id2sd(acc);
-		if(sd)	// •ÏX‚É‚æ‚é‹­§Ø’f
+		if(sd)	// å¤‰æ›´ã«ã‚ˆã‚‹å¼·åˆ¶åˆ‡æ–­
 			clif_setwaitclose(sd->fd);
 	}else{
 		printf("chrif_changedsex failed\n");
@@ -595,7 +572,7 @@ static int chrif_changedsex(int fd)
 }
 
 /*==========================================
- * ƒAƒJƒEƒ“ƒg•Ï”•Û‘¶—v‹
+ * ã‚¢ã‚«ã‚¦ãƒ³ãƒˆå¤‰æ•°ä¿å­˜è¦æ±‚
  *------------------------------------------
  */
 int chrif_saveaccountreg2(struct map_session_data *sd)
@@ -624,7 +601,7 @@ int chrif_saveaccountreg2(struct map_session_data *sd)
 }
 
 /*==========================================
- * ƒAƒJƒEƒ“ƒg•Ï”’Ê’m
+ * ã‚¢ã‚«ã‚¦ãƒ³ãƒˆå¤‰æ•°é€šçŸ¥
  *------------------------------------------
  */
 static int chrif_accountreg2(int fd)
@@ -645,7 +622,7 @@ static int chrif_accountreg2(int fd)
 }
 
 /*==========================================
- * —£¥î•ñ“¯Šú—v‹
+ * é›¢å©šæƒ…å ±åŒæœŸè¦æ±‚
  *------------------------------------------
  */
 int chrif_reqdivorce(int char_id)
@@ -661,7 +638,7 @@ int chrif_reqdivorce(int char_id)
 }
 
 /*==========================================
- * —£¥î•ñ“¯Šúó•t
+ * é›¢å©šæƒ…å ±åŒæœŸå—ä»˜
  *------------------------------------------
  */
 static int chrif_divorce(int char_id)
@@ -676,10 +653,10 @@ static int chrif_divorce(int char_id)
 	if( sd->status.partner_id ){
 		struct map_session_data *p_sd = map_id2sd(sd->status.partner_id);
 		int i;
-		// —£¥
+		// é›¢å©š
 		sd->status.partner_id = 0;
 
-		// Œ‹¥w—Ö‚ğ”’D
+		// çµå©šæŒ‡è¼ªã‚’å‰¥å¥ª
 		for(i=0;i<MAX_INVENTORY;i++) {
 			if(sd->status.inventory[i].nameid == WEDDING_RING_M || sd->status.inventory[i].nameid == WEDDING_RING_F) {
 				pc_delitem(sd,i,1,0,0);
@@ -693,7 +670,7 @@ static int chrif_divorce(int char_id)
 }
 
 /*==========================================
- * mapƒT[ƒoƒAƒNƒeƒBƒu—v‹
+ * mapã‚µãƒ¼ãƒã‚¢ã‚¯ãƒ†ã‚£ãƒ–è¦æ±‚
  *------------------------------------------
  */
 int chrif_mapactive(int active)
@@ -710,7 +687,7 @@ int chrif_mapactive(int active)
 }
 
 /*==========================================
- * charƒT[ƒoƒƒ“ƒeƒiƒ“ƒX—v‹
+ * charã‚µãƒ¼ãƒãƒ¡ãƒ³ãƒ†ãƒŠãƒ³ã‚¹è¦æ±‚
  *------------------------------------------
  */
 int chrif_maintenance(int maintenance)
@@ -727,7 +704,7 @@ int chrif_maintenance(int maintenance)
 }
 
 /*==========================================
- * charƒT[ƒoƒƒ“ƒeƒiƒ“ƒX‰“š
+ * charã‚µãƒ¼ãƒãƒ¡ãƒ³ãƒ†ãƒŠãƒ³ã‚¹å¿œç­”
  *------------------------------------------
  */
 static int chrif_maintenanceack(int maintenance)
@@ -740,7 +717,7 @@ static int chrif_maintenanceack(int maintenance)
 }
 
 /*==========================================
- * ƒLƒƒƒ‰ƒNƒ^[Ø’f’Ê’m
+ * ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼åˆ‡æ–­é€šçŸ¥
  *------------------------------------------
  */
 int chrif_chardisconnect(struct map_session_data *sd)
@@ -759,7 +736,7 @@ int chrif_chardisconnect(struct map_session_data *sd)
 }
 
 /*==========================================
- * char‚©‚çƒLƒƒƒ‰ƒNƒ^[‹­§Ø’f—v‹
+ * charã‹ã‚‰ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼å¼·åˆ¶åˆ‡æ–­è¦æ±‚
  *------------------------------------------
  */
 static int chrif_parse_chardisconnectreq(int account_id)
@@ -773,7 +750,7 @@ static int chrif_parse_chardisconnectreq(int account_id)
 }
 
 /*==========================================
- * ƒjdƒƒOƒCƒ“‚Ìˆ—
+ * ãƒ‹é‡ãƒ­ã‚°ã‚¤ãƒ³æ™‚ã®å‡¦ç†
  *------------------------------------------
  */
 static int chrif_parse_chardisconnect_doublelogin(int account_id)
@@ -788,7 +765,7 @@ static int chrif_parse_chardisconnect_doublelogin(int account_id)
 }
 
 /*==========================================
- * —F’BƒŠƒXƒg‚Ìíœ’Ê’m
+ * å‹é”ãƒªã‚¹ãƒˆã®å‰Šé™¤é€šçŸ¥
  *------------------------------------------
  */
 int chrif_friend_delete( struct map_session_data* sd, int account_id, int char_id )
@@ -807,7 +784,7 @@ int chrif_friend_delete( struct map_session_data* sd, int account_id, int char_i
 }
 
 /*==========================================
- * —F’BƒŠƒXƒg‚Ìíœ’Ê’m
+ * å‹é”ãƒªã‚¹ãƒˆã®å‰Šé™¤é€šçŸ¥
  *------------------------------------------
  */
 static int chrif_parse_friend_delete( int fd )
@@ -817,7 +794,7 @@ static int chrif_parse_friend_delete( int fd )
 }
 
 /*==========================================
- * —F’BƒŠƒXƒg‚ÌƒIƒ“ƒ‰ƒCƒ“î•ñ’Ê’m
+ * å‹é”ãƒªã‚¹ãƒˆã®ã‚ªãƒ³ãƒ©ã‚¤ãƒ³æƒ…å ±é€šçŸ¥
  *------------------------------------------
  */
 int chrif_friend_online( struct map_session_data *sd, int flag )
@@ -843,7 +820,7 @@ int chrif_friend_online( struct map_session_data *sd, int flag )
 }
 
 /*==========================================
- * —F’BƒŠƒXƒg‚ÌƒIƒ“ƒ‰ƒCƒ“î•ñ’Ê’móM
+ * å‹é”ãƒªã‚¹ãƒˆã®ã‚ªãƒ³ãƒ©ã‚¤ãƒ³æƒ…å ±é€šçŸ¥å—ä¿¡
  *------------------------------------------
  */
 static int chrif_parse_friend_online( int fd )
@@ -853,7 +830,7 @@ static int chrif_parse_friend_online( int fd )
 }
 
 /*==========================================
- * —{q‰ğ‘Ìî•ñ“¯Šú—v‹
+ * é¤Šå­è§£ä½“æƒ…å ±åŒæœŸè¦æ±‚
  *------------------------------------------
  */
 int chrif_req_break_adoption(int char_id, const char *name)
@@ -870,7 +847,7 @@ int chrif_req_break_adoption(int char_id, const char *name)
 }
 
 /*==========================================
- * —{qî•ñ“¯Šúó•t
+ * é¤Šå­æƒ…å ±åŒæœŸå—ä»˜
  *------------------------------------------
  */
 static int chrif_breakadoption(int char_id, const char *name)
@@ -888,14 +865,14 @@ static int chrif_breakadoption(int char_id, const char *name)
 	sd->status.parent_id[1] = 0;
 
 	if(pc_isbaby(sd)) {
-		// q‹Ÿ‚È‚çŒ³‚ÌE‚É–ß‚·
+		// å­ä¾›ãªã‚‰å…ƒã®è·ã«æˆ»ã™
 		pc_jobchange(sd,sd->s_class.job,0);
 	} else {
-		// e‚È‚çWE_BABY”jŠüi—£¥‚µ‚Ä‚Ä‚à‚¢‚¢‚Ì‚Åpc_ismarried‚Íg‚í‚È‚¢j
+		// è¦ªãªã‚‰WE_BABYç ´æ£„ï¼ˆé›¢å©šã—ã¦ã¦ã‚‚ã„ã„ã®ã§pc_ismarriedã¯ä½¿ã‚ãªã„ï¼‰
 		status_calc_pc(sd,0);
 	}
 
-	snprintf(output, sizeof(output), msg_txt(174), name); // %s‚³‚ñ‚Ì—v–]‚É‚æ‚èA—{qŠÖŒW‚ª”jŠü‚³‚ê‚Ü‚µ‚½
+	snprintf(output, sizeof(output), msg_txt(174), name); // %sã•ã‚“ã®è¦æœ›ã«ã‚ˆã‚Šã€é¤Šå­é–¢ä¿‚ãŒç ´æ£„ã•ã‚Œã¾ã—ãŸ
 	clif_disp_onlyself(sd->fd, output);
 #if PACKETVER > 20080102
 	clif_skillinfoblock(sd);
@@ -904,7 +881,7 @@ static int chrif_breakadoption(int char_id, const char *name)
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒOƒf[ƒ^—v‹
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°ãƒ‡ãƒ¼ã‚¿è¦æ±‚
  *------------------------------------------
  */
 int chrif_ranking_request(int fd)
@@ -919,7 +896,7 @@ int chrif_ranking_request(int fd)
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒOƒf[ƒ^XV
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°ãƒ‡ãƒ¼ã‚¿æ›´æ–°
  *------------------------------------------
  */
 int chrif_ranking_update(struct Ranking_Data *rd,int ranking_id,int rank)
@@ -938,7 +915,7 @@ int chrif_ranking_update(struct Ranking_Data *rd,int ranking_id,int rank)
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒOƒf[ƒ^óM
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°ãƒ‡ãƒ¼ã‚¿å—ä¿¡
  *------------------------------------------
  */
 static int chrif_ranking_recv(int fd)
@@ -948,7 +925,7 @@ static int chrif_ranking_recv(int fd)
 }
 
 /*==========================================
- * MAPƒT[ƒoƒ^ƒO–¼“o˜^‰“š
+ * MAPã‚µãƒ¼ãƒã‚¿ã‚°åç™»éŒ²å¿œç­”
  *------------------------------------------
  */
 static int chrif_mapservertag_ack(int fail)
@@ -960,7 +937,7 @@ static int chrif_mapservertag_ack(int fail)
 }
 
 /*==========================================
- * ƒNƒ‰ƒCƒAƒ“ƒg‚ğØ’f‚·‚é
+ * ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã‚’åˆ‡æ–­ã™ã‚‹
  *------------------------------------------
  */
 int chrif_disconnect_sub(struct map_session_data* sd,va_list va)
@@ -970,21 +947,21 @@ int chrif_disconnect_sub(struct map_session_data* sd,va_list va)
 }
 
 /*==========================================
- * Ø’f‚³‚ê‚½ê‡‚Ìˆ—
+ * åˆ‡æ–­ã•ã‚ŒãŸå ´åˆã®å‡¦ç†
  *------------------------------------------
  */
 static int chrif_disconnect(int fd)
 {
 	if (fd == char_fd) {
 		char_fd = -1;
-		// “¯Šú‚ªæ‚ê‚È‚¢‚Ì‚ÆAÄÚ‘±‚µ‚½‚É–â‘è‚ª‹N‚é‰Â”\«‚ª‚ ‚é‚Ì‚ÅA
-		// map I‚ÉÚ‘±‚µ‚Ä‚¢‚éƒLƒƒƒ‰‚ğ‘S‚ÄØ’f‚·‚éB
+		// åŒæœŸãŒå–ã‚Œãªã„ã®ã¨ã€å†æ¥ç¶šã—ãŸæ™‚ã«å•é¡ŒãŒèµ·ã‚‹å¯èƒ½æ€§ãŒã‚ã‚‹ã®ã§ã€
+		// map é¯–ã«æ¥ç¶šã—ã¦ã„ã‚‹ã‚­ãƒ£ãƒ©ã‚’å…¨ã¦åˆ‡æ–­ã™ã‚‹ã€‚
 		printf("chrif: connection to the char server was closed. kick all chars\n");
 		clif_foreachclient(chrif_disconnect_sub);
-		// ‘¼‚Ìmap I‚Ìƒf[ƒ^‚ğÁ‚·
+		// ä»–ã®map é¯–ã®ãƒ‡ãƒ¼ã‚¿ã‚’æ¶ˆã™
 		map_eraseallipport();
 
-		// ‘qŒÉƒLƒƒƒbƒVƒ…‚ğÁ‚·
+		// å€‰åº«ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’æ¶ˆã™
 		storage_clear_cache();
 	}
 	close(fd);
@@ -993,7 +970,7 @@ static int chrif_disconnect(int fd)
 }
 
 /*==========================================
- * ƒpƒPƒbƒg‚Ì‰ğÍ
+ * ãƒ‘ã‚±ãƒƒãƒˆã®è§£æ
  *------------------------------------------
  */
 int chrif_parse(int fd)
@@ -1004,12 +981,12 @@ int chrif_parse(int fd)
 		cmd = RFIFOW(fd,0);
 		if(cmd<0x2af8 || cmd>=0x2af8+(sizeof(packet_len_table)/sizeof(packet_len_table[0])) || packet_len_table[cmd-0x2af8]==0)
 		{
-			int r=intif_parse(fd);// intif‚É“n‚·
+			int r=intif_parse(fd);// intifã«æ¸¡ã™
 
-			if( r==1 )	continue;	// intif‚Åˆ—‚µ‚½
-			if( r==2 )	return 0;	// intif‚Åˆ—‚µ‚½‚ªAƒf[ƒ^‚ª‘«‚è‚È‚¢
+			if( r==1 )	continue;	// intifã§å‡¦ç†ã—ãŸ
+			if( r==2 )	return 0;	// intifã§å‡¦ç†ã—ãŸãŒã€ãƒ‡ãƒ¼ã‚¿ãŒè¶³ã‚Šãªã„
 
-			// intif‚Åˆ—‚Å‚«‚È‚©‚Á‚½
+			// intifã§å‡¦ç†ã§ããªã‹ã£ãŸ
 			printf("chrif_parse: unknown packet 0x%04x disconnect session #%d\n", cmd, fd);
 #ifdef DUMP_UNKNOWN_PACKET
 			hex_dump(stdout, RFIFOP(fd,0), RFIFOREST(fd));
@@ -1071,7 +1048,7 @@ int chrif_parse(int fd)
 }
 
 /*==========================================
- * ƒNƒ‰ƒCƒAƒ“ƒg”’Ê’m
+ * ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆæ•°é€šçŸ¥
  *------------------------------------------
  */
 static int send_users_tochar(int tid,unsigned int tick,int id,void *data)
@@ -1079,7 +1056,7 @@ static int send_users_tochar(int tid,unsigned int tick,int id,void *data)
 	if (char_fd < 0 || session[char_fd] == NULL || session[char_fd]->auth == 0)
 		return 0;
 
-	// ¡‚±‚ÌmapI‚ÉŒq‚ª‚Á‚Ä‚¢‚éƒNƒ‰ƒCƒAƒ“ƒgl”‚ğcharI‚Ö‘—‚é
+	// ä»Šã“ã®mapé¯–ã«ç¹‹ãŒã£ã¦ã„ã‚‹ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆäººæ•°ã‚’charé¯–ã¸é€ã‚‹
 	WFIFOW(char_fd,0)=0x2aff;
 	WFIFOL(char_fd,2)=clif_countusers();
 	WFIFOSET(char_fd,6);
@@ -1088,12 +1065,12 @@ static int send_users_tochar(int tid,unsigned int tick,int id,void *data)
 }
 
 /*==========================================
- * ©“®ÄÚ‘±
+ * è‡ªå‹•å†æ¥ç¶š
  *------------------------------------------
  */
 static int check_connect_char_server(int tid,unsigned int tick,int id,void *data)
 {
-	// charI‚Æ‚ÌÚ‘±‚ğŠm”F‚µA‚à‚µØ‚ê‚Ä‚¢‚½‚çÄ“xÚ‘±‚·‚é
+	// charé¯–ã¨ã®æ¥ç¶šã‚’ç¢ºèªã—ã€ã‚‚ã—åˆ‡ã‚Œã¦ã„ãŸã‚‰å†åº¦æ¥ç¶šã™ã‚‹
 	if (char_fd < 0 || session[char_fd] == NULL) {
 		chrif_state = 0;
 		char_fd = make_connection(char_ip,char_port);
@@ -1110,7 +1087,7 @@ static int check_connect_char_server(int tid,unsigned int tick,int id,void *data
 }
 
 /*==========================================
- * char,interƒT[ƒo‚Öƒf[ƒ^‘—M
+ * char,interã‚µãƒ¼ãƒã¸ãƒ‡ãƒ¼ã‚¿é€ä¿¡
  *------------------------------------------
  */
 int chrif_flush_fifo(void)
@@ -1124,7 +1101,7 @@ int chrif_flush_fifo(void)
 }
 
 /*==========================================
- * I—¹
+ * çµ‚äº†
  *------------------------------------------
  */
 int do_final_chrif(void)
@@ -1136,7 +1113,7 @@ int do_final_chrif(void)
 }
 
 /*==========================================
- * ‰Šú‰»
+ * åˆæœŸåŒ–
  *------------------------------------------
  */
 int do_init_chrif(void)

@@ -1,41 +1,20 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _INTIF_H_
+ï»¿#ifndef _INTIF_H_
 #define _INTIF_H_
 
 #include "utils.h"
 
 int intif_parse(int fd);
 
-// ƒƒbƒZ[ƒW‘—MŠÖ˜A
+// ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸é€ä¿¡é–¢é€£
 void intif_GMmessage(const char* mes, size_t len, int flag);
 int intif_announce(const char* mes,size_t len,unsigned int color,int type,int size,int align,int pos_y);
 void intif_wis_message(struct map_session_data *sd, const char *nick, const char *mes, size_t mes_len);
 
-// ƒAƒJƒEƒ“ƒg•Ï”ŠÖ˜A
+// ã‚¢ã‚«ã‚¦ãƒ³ãƒˆå¤‰æ•°é–¢é€£
 int intif_saveaccountreg(struct map_session_data *sd);
 int intif_request_accountreg(struct map_session_data *sd);
 
-// ‘qŒÉŠÖ˜A
+// å€‰åº«é–¢é€£
 int intif_request_storage(int account_id);
 int intif_send_storage(struct storage *stor);
 int intif_request_guild_storage(int account_id,int guild_id);
@@ -44,7 +23,7 @@ int intif_trylock_guild_storage(struct map_session_data *sd,int npc_id);
 int intif_unlock_guild_storage(int guild_id);
 int intif_deadlock_guild_storage(int guild_id);
 
-// ƒp[ƒeƒB[ŠÖ˜A
+// ãƒ‘ãƒ¼ãƒ†ã‚£ãƒ¼é–¢é€£
 void intif_create_party(struct map_session_data *sd, const char *name, int item, int item2);
 int intif_request_partyinfo(int party_id);
 void intif_party_addmember(struct map_session_data *sd);
@@ -56,7 +35,7 @@ int intif_party_message(int party_id,int account_id,const char *mes,size_t len);
 int intif_party_checkconflict(int party_id,int account_id,int char_id);
 int intif_party_leaderchange(int party_id,int account_id,int char_id);
 
-// ƒMƒ‹ƒhŠÖ˜A
+// ã‚®ãƒ«ãƒ‰é–¢é€£
 void intif_guild_create(const char *name, const struct guild_member *master);
 void intif_guild_request_info(int guild_id);
 int intif_guild_addmember(int guild_id,struct guild_member *m);
@@ -75,32 +54,32 @@ void intif_guild_emblem(int guild_id, unsigned short len, const char *data);
 int intif_guild_castle_dataload(int castle_id,int index);
 int intif_guild_castle_datasave(int castle_id,int index, int value);
 
-// ƒyƒbƒgŠÖ˜A
+// ãƒšãƒƒãƒˆé–¢é€£
 void intif_create_pet(int account_id, int char_id, short pet_type, short pet_lv, short pet_egg_id,
 	short pet_equip, short intimate, short hungry, char rename_flag, char incubate, const char *pet_name);
 void intif_request_petdata(int account_id, int char_id, int pet_id);
 void intif_save_petdata(int account_id, struct s_pet *p);
 void intif_delete_petdata(int pet_id);
 
-// ƒzƒ€ƒ“ƒNƒ‹ƒXŠÖ˜A
+// ãƒ›ãƒ ãƒ³ã‚¯ãƒ«ã‚¹é–¢é€£
 void intif_create_hom(int account_id, int char_id, struct mmo_homunstatus *h);
 void intif_request_homdata(int account_id, int char_id, int homun_id);
 void intif_save_homdata(int account_id, struct mmo_homunstatus *h);
 void intif_delete_homdata(int account_id, int char_id, int homun_id);
 
-// —b•ºŠÖ˜A
+// å‚­å…µé–¢é€£
 void intif_create_merc(int account_id, int char_id, struct mmo_mercstatus *m);
 void intif_request_mercdata(int account_id, int char_id, int merc_id);
 void intif_save_mercdata(int account_id, struct mmo_mercstatus *m);
 void intif_delete_mercdata(int account_id, int char_id, int merc_id);
 
-// ¸—ìŠÖ˜A
+// ç²¾éœŠé–¢é€£
 void intif_create_elem(int account_id, int char_id, struct mmo_elemstatus *e);
 void intif_request_elemdata(int account_id, int char_id, int elem_id);
 void intif_save_elemdata(int account_id, struct mmo_elemstatus *e);
 void intif_delete_elemdata(int account_id, int char_id, int elem_id);
 
-// ƒ[ƒ‹ŠÖ˜A
+// ãƒ¡ãƒ¼ãƒ«é–¢é€£
 int intif_mailbox(int char_id);
 int intif_sendmail(struct mail_data *md);
 int intif_deletemail(int char_id, int mail_num);
@@ -109,19 +88,19 @@ int intif_mail_getappend(int char_id, int mail_num);
 int intif_mail_checkmail(int accound_id, struct mail_data *md);
 int intif_mail_deleteappend(int char_id, int mail_num);
 
-// ó‘ÔˆÙíŠÖ˜A
+// çŠ¶æ…‹ç•°å¸¸é–¢é€£
 int intif_request_scdata(int account_id,int char_id);
 int intif_save_scdata(struct map_session_data *sd);
 
-// ƒNƒGƒXƒgƒŠƒXƒgŠÖ˜A
+// ã‚¯ã‚¨ã‚¹ãƒˆãƒªã‚¹ãƒˆé–¢é€£
 int intif_request_quest(int account_id,int char_id);
 int intif_save_quest(struct map_session_data *sd);
 
-// ÀÑŠÖ˜A
+// å®Ÿç¸¾é–¢é€£
 int intif_request_achieve(int account_id,int char_id);
 int intif_save_achieve(struct map_session_data *sd);
 
-// ‚»‚Ì‘¼
+// ãã®ä»–
 int intif_jumpto(int account_id,const char *name);
 int intif_where(int account_id,const char *name);
 int intif_charmovereq(struct map_session_data *sd,const char *name,int flag);

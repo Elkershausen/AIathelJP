@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _CLIF_H_
+﻿#ifndef _CLIF_H_
 #define _CLIF_H_
 
 #include "map.h"
@@ -47,99 +26,99 @@ enum {
 	WIDE_AREA
 };
 
-// clif_skill_fail�̃X�L�����sType
+// clif_skill_failのスキル失敗Type
 enum {
-	SKILLFAIL_LEVEL					= 0,	// �X�L���g�p���s�i�X�L�����x���s���j
-	SKILLFAIL_SP					= 1,	// SP������܂���B
-	SKILLFAIL_HP					= 2,	// HP������܂���B
-	SKILLFAIL_MATERIAL				= 3,	// �ޗ�������܂���B
-	SKILLFAIL_INTERVAL				= 4,	// �i�X�L���Ďg�p���Ԃ����o�߁j
-	SKILLFAIL_ZENY					= 5,	// ����������Ȃ��̂ŃX�L�����g�������ł��܂���B
-	SKILLFAIL_WEAPON				= 6,	// ���̑����ł͂��̃X�L�����g�p�ł��܂���B
-	SKILLFAIL_REDJEMSTONE			= 7,	// ���b�h�W�F���X�g�[�����K�v�ł��B
-	SKILLFAIL_BLUEJEMSTONE			= 8,	// �u���[�W�F���X�g�[�����K�v�ł��B
-	SKILLFAIL_WEIGHTOVER			= 9,	// Weight��90%���z���Ă��邽�߁A�X�L�����g���܂���B
-	SKILLFAIL_FAILED				= 10,	// �X�L���g�p���s�i�ėp�j
-	SKILLFAIL_TOTARGET				= 11,	// ���̋@�\���g�����Ƃ��ł��Ȃ��Ώۂł��B
-	SKILLFAIL_ANCILLAOVER			= 12,	// �A���V���̏��L���𒴂��ăX�L�����g�p�ł��܂���B
-	SKILLFAIL_HOLYWATER				= 13,	// �������K�v�ł��B
-	SKILLFAIL_ANCILLA				= 14,	// �A���V�����K�v�ł��B
-	SKILLFAIL_RESTRICT_POS			= 15,	// �����ɂ��A�ݒu�ł��܂���B
-	SKILLFAIL_OTHERSKILL			= 16,	// ���̃X�L�����g�p���邽�߂ɂ́A���̃X�L�����K�v�ł��B
-	SKILLFAIL_PARTNER				= 17,	// ���̃X�L���͈�l�Ŏg�p�ł��܂���B
-	SKILLFAIL_DIRECTION				= 18,	// ���̃X�L���͓�������̂ݎg�p�ł��܂��B
-	SKILLFAIL_SUMMON_OVER			= 19,	// ����ȏ�A�����ł��܂���B
-	SKILLFAIL_SUMMON_NOTHING		= 20,	// �������ꂽ�G�[�e�������݂��܂���B
-	SKILLFAIL_CLONESKILL			= 21,	// �g�p�\�ȃN���[���X�L�������݂��܂���B
-	SKILLFAIL_DUPLICATE				= 22,	// ���̃X�L���͏d���Ŏg�p�ł��܂���B
-	SKILLFAIL_CONDITION				= 23,	// �X�L���g�p���o���Ȃ���Ԃł��B
-	SKILLFAIL_PAINTBRUSH			= 24,	// �y�C���g�u���V���K�v�ł��B
-	SKILLFAIL_DRAGON				= 25,	// �h���S���R�掞�̂ݎg�p�\�ł��B
-	SKILLFAIL_POSITION				= 26,	// �w�肵���ʒu�ɃX�L�����g�p���邱�Ƃ��o���܂���B
+	SKILLFAIL_LEVEL					= 0,	// スキル使用失敗（スキルレベル不足）
+	SKILLFAIL_SP					= 1,	// SPが足りません。
+	SKILLFAIL_HP					= 2,	// HPが足りません。
+	SKILLFAIL_MATERIAL				= 3,	// 材料が足りません。
+	SKILLFAIL_INTERVAL				= 4,	// （スキル再使用時間が未経過）
+	SKILLFAIL_ZENY					= 5,	// お金が足りないのでスキルを使う事ができません。
+	SKILLFAIL_WEAPON				= 6,	// この装備ではこのスキルを使用できません。
+	SKILLFAIL_REDJEMSTONE			= 7,	// レッドジェムストーンが必要です。
+	SKILLFAIL_BLUEJEMSTONE			= 8,	// ブルージェムストーンが必要です。
+	SKILLFAIL_WEIGHTOVER			= 9,	// Weightが90%を越えているため、スキルを使えません。
+	SKILLFAIL_FAILED				= 10,	// スキル使用失敗（汎用）
+	SKILLFAIL_TOTARGET				= 11,	// この機能を使うことができない対象です。
+	SKILLFAIL_ANCILLAOVER			= 12,	// アンシラの所有個数を超えてスキルを使用できません。
+	SKILLFAIL_HOLYWATER				= 13,	// 聖水が必要です。
+	SKILLFAIL_ANCILLA				= 14,	// アンシラが必要です。
+	SKILLFAIL_RESTRICT_POS			= 15,	// 制限により、設置できません。
+	SKILLFAIL_OTHERSKILL			= 16,	// このスキルを使用するためには、他のスキルが必要です。
+	SKILLFAIL_PARTNER				= 17,	// このスキルは一人で使用できません。
+	SKILLFAIL_DIRECTION				= 18,	// このスキルは特定方向のみ使用できます。
+	SKILLFAIL_SUMMON_OVER			= 19,	// これ以上、召喚できません。
+	SKILLFAIL_SUMMON_NOTHING		= 20,	// 召喚されたエーテルが存在しません。
+	SKILLFAIL_CLONESKILL			= 21,	// 使用可能なクローンスキルが存在しません。
+	SKILLFAIL_DUPLICATE				= 22,	// このスキルは重複で使用できません。
+	SKILLFAIL_CONDITION				= 23,	// スキル使用が出来ない状態です。
+	SKILLFAIL_PAINTBRUSH			= 24,	// ペイントブラシが必要です。
+	SKILLFAIL_DRAGON				= 25,	// ドラゴン騎乗時のみ使用可能です。
+	SKILLFAIL_POSITION				= 26,	// 指定した位置にスキルを使用することが出来ません。
 
-	SKILLFAIL_NEERWALL				= 28,	// �ǂ̋߂��ł̂ݎg�p���邱�Ƃ��ł��܂��B
-	SKILLFAIL_EXP					= 29,	// ���̃X�L���́A1���̌o���l���K�v�ɂȂ�܂��B
-	SKILLFAIL_PARTNER_SP			= 30,	// �p�[�g�i�[��SP������܂���B
-	SKILLFAIL_GC_WEAPONBLOCKING		= 31,	// �E�F�|���u���b�L���O�̘A�g�Ƃ��Ă̂ݎg�p�\�ł��B
-	SKILLFAIL_GC_POISONINGWEAPON	= 32,	// �M���`���N���X�̓ł�h�������킪�K�v�ł��B
-	SKILLFAIL_MADOGEAR				= 33,	// �����M�A���掞�̂ݎg�p�\�ł��B
-	SKILLFAIL_KUNAI					= 34,	// �ꖳ�𑕔�������Ԃł̂ݎg�p�\�ł��B
-	SKILLFAIL_NOT_PLAYER			= 35,	// ���̃X�L���̓v���C���[�ɂ̂ݎg�p�\�ł��B
-	SKILLFAIL_GVGONLY				= 36,	// ���̃X�L���͍U���ł̂ݎg�p�\�ł��B
-	SKILLFAIL_CANONBALL				= 37,	// �L���m���{�[���𑕓U���Ă��������B
+	SKILLFAIL_NEERWALL				= 28,	// 壁の近くでのみ使用することができます。
+	SKILLFAIL_EXP					= 29,	// このスキルは、1％の経験値が必要になります。
+	SKILLFAIL_PARTNER_SP			= 30,	// パートナーのSPが足りません。
+	SKILLFAIL_GC_WEAPONBLOCKING		= 31,	// ウェポンブロッキングの連携としてのみ使用可能です。
+	SKILLFAIL_GC_POISONINGWEAPON	= 32,	// ギロチンクロスの毒を塗った武器が必要です。
+	SKILLFAIL_MADOGEAR				= 33,	// 魔導ギア搭乗時のみ使用可能です。
+	SKILLFAIL_KUNAI					= 34,	// 苦無を装備した状態でのみ使用可能です。
+	SKILLFAIL_NOT_PLAYER			= 35,	// このスキルはプレイヤーにのみ使用可能です。
+	SKILLFAIL_GVGONLY				= 36,	// このスキルは攻城戦でのみ使用可能です。
+	SKILLFAIL_CANONBALL				= 37,	// キャノンボールを装填してください。
 
-	SKILLFAIL_MADOGEAR_HOVERING		= 40,	// �z�o�����O��Ԃ̂ݎg�p�\�ł��B
+	SKILLFAIL_MADOGEAR_HOVERING		= 40,	// ホバリング状態のみ使用可能です。
 
-	SKILLFAIL_GC_POISON				= 43,	// �M���`���N���X�̓ł��K�v�ł��B
+	SKILLFAIL_GC_POISON				= 43,	// ギロチンクロスの毒が必要です。
 
-	SKILLFAIL_MADOGEAR_RIDE			= 50,	// �����M�A���掞�͎g�p�ł��܂���B
-	SKILLFAIL_SPELLBOOK				= 51,	// ���@�����K�v�ł��B
-	SKILLFAIL_SPELLBOOK_LEARN		= 52,	// ���@�����ƂĂ�������߁A�����Ȃ�܂��B
-	SKILLFAIL_SPELLBOOK_POINT		= 53,	// �ۑ��|�C���g������܂���B
-	SKILLFAIL_SPELLBOOK_OVER		= 54,	// ����ȏ�͖��@����ǂ߂܂���B
+	SKILLFAIL_MADOGEAR_RIDE			= 50,	// 魔導ギア搭乗時は使用できません。
+	SKILLFAIL_SPELLBOOK				= 51,	// 魔法書が必要です。
+	SKILLFAIL_SPELLBOOK_LEARN		= 52,	// 魔法書がとても難しいため、眠くなります。
+	SKILLFAIL_SPELLBOOK_POINT		= 53,	// 保存ポイントが足りません。
+	SKILLFAIL_SPELLBOOK_OVER		= 54,	// これ以上は魔法書を読めません。
 
-	SKILLFAIL_CART					= 57,	// �J�[�g�������̂ݎg�p�\�ł��B
+	SKILLFAIL_CART					= 57,	// カート装備時のみ使用可能です。
 
-	SKILLFAIL_MORESKILL				= 60,	// ����ȏ�̓X�L���g�p���ł��܂���B
+	SKILLFAIL_MORESKILL				= 60,	// これ以上はスキル使用ができません。
 
-	SKILLFAIL_NEED_ITEM				= 71,	// [%s]�� %d�K�v�ł��B
-	SKILLFAIL_NEED_EQUIP			= 72,	// [%s]�𑕔�������Ԃ̂݁A�g�p�ł��܂��B
-	SKILLFAIL_COMBOSKILL			= 73,	// ����X�L���̘A�g�X�L���ł��B -> [%s]�̘A�g�X�L���ł��B
-	SKILLFAIL_SPIRITBALL			= 74,	// �C�e���K�v�ł��B -> �C�e %d���K�v�ł��B
+	SKILLFAIL_NEED_ITEM				= 71,	// [%s]が %d個必要です。
+	SKILLFAIL_NEED_EQUIP			= 72,	// [%s]を装備した状態のみ、使用できます。
+	SKILLFAIL_COMBOSKILL			= 73,	// 特定スキルの連携スキルです。 -> [%s]の連携スキルです。
+	SKILLFAIL_SPIRITBALL			= 74,	// 気弾が必要です。 -> 気弾 %d個が必要です。
 
-	SKILLFAIL_EL_SUMMON				= 79,	// �������ꂽ���삪���܂���B
-	SKILLFAIL_INTIMATE				= 80,	// �e���x���s�����Ă��܂��B
-	SKILLFAIL_STYLE_FIGHTER			= 81,	// �X�^�C���`�F���W�t�@�C�^�[��Ԃł̂ݎg�p�\�ł��B
-	SKILLFAIL_STYLE_GRAPPLER		= 82,	// �X�^�C���`�F���W�O���b�v���[��Ԃł̂ݎg�p�\�ł��B
-	SKILLFAIL_NEARNPC				= 83,	// ���݂̍��W�ł́A�I�X�J�݁E����I�X�E�`���b�g���[���J�݂��ł��܂���BNPC�⃏�[�v�����N���痣��Ă��������B
-	SKILLFAIL_BULLET				= 84,	// �e�ۂ𑕔����ĉ������B
-	SKILLFAIL_COIN					= 85,	// �R�C�����K�v�ł��B -> �R�C���� %d���K�v�ł��B
-	SKILLFAIL_MSGID					= 86,	// �iMSG ID�w��j
-	SKILLFAIL_MAP					= 87,	// ���̃}�b�v�ł͎g�p�ł��Ȃ��X�L���ł��B
+	SKILLFAIL_EL_SUMMON				= 79,	// 召喚された精霊がいません。
+	SKILLFAIL_INTIMATE				= 80,	// 親密度が不足しています。
+	SKILLFAIL_STYLE_FIGHTER			= 81,	// スタイルチェンジファイター状態でのみ使用可能です。
+	SKILLFAIL_STYLE_GRAPPLER		= 82,	// スタイルチェンジグラップラー状態でのみ使用可能です。
+	SKILLFAIL_NEARNPC				= 83,	// 現在の座標では、露店開設・買取露店・チャットルーム開設ができません。NPCやワープリンクから離れてください。
+	SKILLFAIL_BULLET				= 84,	// 弾丸を装備して下さい。
+	SKILLFAIL_COIN					= 85,	// コインが必要です。 -> コインが %d枚必要です。
+	SKILLFAIL_MSGID					= 86,	// （MSG ID指定）
+	SKILLFAIL_MAP					= 87,	// このマップでは使用できないスキルです。
 
-	SKILLFAIL_VENDING				= 89,	// ���ɘI�X��ݒu���ł��B
-	SKILLFAIL_AMOUNT_BULLET			= 90,	// �X�L���������A%d�̒e�ۂ��K�v�ł��B
-	SKILLFAIL_AMOUNT_ARROW			= 91,	// �X�L���������A%d�̖�K�v�ł��B
-	// ���̃X�L���̓p�[�e�B�[��ԂŎg�p�\�ł��B
-	// ���̃X�L���̓p�[�e�B�[���[�_�[�������g�p�\�ł��B
-	// �p�[�g�i�[�����݂��Ȃ����A�p�[�g�i�[��SP���s��������A�X�L���g�p�s�̏�Ԃł��B
-	// ����𑕔����Ă��܂���B
-	SKILLFAIL_SOULENERGY			= 96,	// �\�E���G�i�W�[���K�v�ł��B
-	// �E�F�|���u���b�L���O�����㐧�����ԓ��Ɏg�p�\�ł��B
-	// %d�𒴂���ݒu�͂ł��܂���B
-	// ���[�f�B���O�X�y���u�b�N�ɕۑ����ꂽ���@������܂���B
-	SKILLFAIL_AP					= 100,	// AP������܂���B
-	SKILLFAIL_SERVANTWEAPOM			= 101,	// �T�[���@���g�E�F�|��%d���K�v�ł��B
-	SKILLFAIL_TWINKLINGGALAXY		= 102,	// ���̃X�L���͎��g���ݒu�����V�n�����͈͓̔��Ŏg�p�\�ł��B
-	SKILLFAIL_SOULCOLLECT			= 103,	// ���̃X�L���͍��̒~�Ϗ�ԂŎg�p�\�ł��B
-	SKILLFAIL_TALISMAN				= 104,	// �아���K�v�ł��B
-	// �V���b�g�K�����K�g�����O�K���𑕔����ĉ������B
-	// �n���h�K�����K�g�����O�K���𑕔����ĉ������B
-	// ���C�t�����O���l�[�h�K���𑕔����ĉ������B
-	// �n���h�K�����K�g�����O�K���𑕔����ĉ������B
-	// �V���b�g�K�����O���l�[�h�K���𑕔����ĉ������B
-	// ���𑕔����ĉ������B
-	// �ړ��ł��Ȃ��ꏊ�ׁ̈A�X�L�����g�p�ł��܂���B
+	SKILLFAIL_VENDING				= 89,	// 既に露店を設置中です。
+	SKILLFAIL_AMOUNT_BULLET			= 90,	// スキル発動時、%d個の弾丸が必要です。
+	SKILLFAIL_AMOUNT_ARROW			= 91,	// スキル発動時、%d個の矢が必要です。
+	// このスキルはパーティー状態で使用可能です。
+	// このスキルはパーティーリーダーだけが使用可能です。
+	// パートナーが存在しないか、パートナーのSPが不足したり、スキル使用不可の状態です。
+	// 武器を装備していません。
+	SKILLFAIL_SOULENERGY			= 96,	// ソウルエナジーが必要です。
+	// ウェポンブロッキング発動後制限時間内に使用可能です。
+	// %d個を超える設置はできません。
+	// リーディングスペルブックに保存された魔法がありません。
+	SKILLFAIL_AP					= 100,	// APが足りません。
+	SKILLFAIL_SERVANTWEAPOM			= 101,	// サーヴァントウェポン%d個が必要です。
+	SKILLFAIL_TWINKLINGGALAXY		= 102,	// このスキルは自身が設置した天地万星の範囲内で使用可能です。
+	SKILLFAIL_SOULCOLLECT			= 103,	// このスキルは魂の蓄積状態で使用可能です。
+	SKILLFAIL_TALISMAN				= 104,	// 護符が必要です。
+	// ショットガンかガトリングガンを装備して下さい。
+	// ハンドガンかガトリングガンを装備して下さい。
+	// ライフルかグレネードガンを装備して下さい。
+	// ハンドガンかガトリングガンを装備して下さい。
+	// ショットガンかグレネードガンを装備して下さい。
+	// 盾を装備して下さい。
+	// 移動できない場所の為、スキルを使用できません。
 };
 
 void clif_sethost(const char*);

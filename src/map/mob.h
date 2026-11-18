@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _MOB_H_
+ï»¿#ifndef _MOB_H_
 #define _MOB_H_
 
 #define MOB_ID_DEFAULT 1002
@@ -165,38 +144,38 @@ enum {
 };
 
 enum {
-	MSS_DISABLE     = 0,	// –³Œø
-	MSS_ANY         = 1,	// í”­“®
-	MSS_IDLE        = 2,	// ‘Ò‹@
-	MSS_WALK        = 3,	// ˆÚ“®
-	MSS_ATTACK      = 4,	// UŒ‚
-	MSS_DEAD        = 5,	// €–S
-	MSS_LOOT        = 6,	// ƒ‹[ƒg
-	MSS_CHASE       = 7,	// “ËŒ‚
-	MSS_COMMANDONLY = 8,	// –½—ßê—p
-	MSS_ANGRY       = 9,	// UŒ‚(”ñ‹¶‰»)
-	MSS_FOLLOW      = 10,	// “ËŒ‚(”ñ‹¶‰»)
+	MSS_DISABLE     = 0,	// ç„¡åŠ¹
+	MSS_ANY         = 1,	// å¸¸æ™‚ç™ºå‹•
+	MSS_IDLE        = 2,	// å¾…æ©Ÿ
+	MSS_WALK        = 3,	// ç§»å‹•
+	MSS_ATTACK      = 4,	// æ”»æ’ƒ
+	MSS_DEAD        = 5,	// æ­»äº¡
+	MSS_LOOT        = 6,	// ãƒ«ãƒ¼ãƒˆ
+	MSS_CHASE       = 7,	// çªæ’ƒ
+	MSS_COMMANDONLY = 8,	// å‘½ä»¤å°‚ç”¨
+	MSS_ANGRY       = 9,	// æ”»æ’ƒ(éç‹‚åŒ–)
+	MSS_FOLLOW      = 10,	// çªæ’ƒ(éç‹‚åŒ–)
 };
 
 enum {
-	MOB_AI_NONE    = 0,	// ‚È‚µ
-	MOB_AI_SUMMON  = 1,	// ¢Š«
-	MOB_AI_SPHERE1 = 2,	// ƒXƒtƒBƒAƒ}ƒCƒ“(‘Ò‹@)
-	MOB_AI_SPHERE2 = 3,	// ƒXƒtƒBƒAƒ}ƒCƒ“(©”š)
-	MOB_AI_LEGION  = 4,	// ƒTƒ‚ƒ“ƒŒƒMƒIƒ“
+	MOB_AI_NONE    = 0,	// ãªã—
+	MOB_AI_SUMMON  = 1,	// å¬å–š
+	MOB_AI_SPHERE1 = 2,	// ã‚¹ãƒ•ã‚£ã‚¢ãƒã‚¤ãƒ³(å¾…æ©Ÿ)
+	MOB_AI_SPHERE2 = 3,	// ã‚¹ãƒ•ã‚£ã‚¢ãƒã‚¤ãƒ³(è‡ªçˆ†)
+	MOB_AI_LEGION  = 4,	// ã‚µãƒ¢ãƒ³ãƒ¬ã‚®ã‚ªãƒ³
 	MOB_AI_ABR     = 5,	// ABR
-	MOB_AI_BIONIC  = 6,	// ƒoƒCƒIƒjƒbƒN
+	MOB_AI_BIONIC  = 6,	// ãƒã‚¤ã‚ªãƒ‹ãƒƒã‚¯
 };
 
 enum {
-	MOBID_ABR_BATTLE_WARIOR    = 20834,	// ƒoƒgƒ‹ƒEƒHƒŠƒA[
-	MOBID_ABR_DUAL_CANNON      = 20835,	// ƒfƒ…ƒAƒ‹ƒLƒƒƒmƒ“
-	MOBID_ABR_MOTHER_NET       = 20836,	// ƒ}ƒU[ƒlƒbƒg
-	MOBID_ABR_INFINITY         = 20837,	// ƒCƒ“ƒtƒBƒjƒeƒB
-	MOBID_SUMMON_WOODENWARRIOR = 20848,	// ƒEƒhƒDƒ“ƒEƒHƒŠƒA[
-	MOBID_SUMMON_WOODEN_FAIRY  = 20849,	// ƒEƒhƒDƒ“ƒtƒFƒAƒŠ[
-	MOBID_SUMMON_CREEPER       = 20850,	// ƒNƒŠ[ƒp[
-	MOBID_SUMMON_HELLTREE      = 20851,	// ƒwƒ‹ƒcƒŠ[
+	MOBID_ABR_BATTLE_WARIOR    = 20834,	// ãƒãƒˆãƒ«ã‚¦ã‚©ãƒªã‚¢ãƒ¼
+	MOBID_ABR_DUAL_CANNON      = 20835,	// ãƒ‡ãƒ¥ã‚¢ãƒ«ã‚­ãƒ£ãƒãƒ³
+	MOBID_ABR_MOTHER_NET       = 20836,	// ãƒã‚¶ãƒ¼ãƒãƒƒãƒˆ
+	MOBID_ABR_INFINITY         = 20837,	// ã‚¤ãƒ³ãƒ•ã‚£ãƒ‹ãƒ†ã‚£
+	MOBID_SUMMON_WOODENWARRIOR = 20848,	// ã‚¦ãƒ‰ã‚¥ãƒ³ã‚¦ã‚©ãƒªã‚¢ãƒ¼
+	MOBID_SUMMON_WOODEN_FAIRY  = 20849,	// ã‚¦ãƒ‰ã‚¥ãƒ³ãƒ•ã‚§ã‚¢ãƒªãƒ¼
+	MOBID_SUMMON_CREEPER       = 20850,	// ã‚¯ãƒªãƒ¼ãƒ‘ãƒ¼
+	MOBID_SUMMON_HELLTREE      = 20851,	// ãƒ˜ãƒ«ãƒ„ãƒªãƒ¼
 };
 
 struct mobdb_data* mobdb_exists(int mob_id);
@@ -215,7 +194,7 @@ int mob_spawn(int);
 int mob_damage(struct block_list *,struct mob_data*,int,int);
 int mob_heal(struct mob_data*,int);
 
-// Œ©‚©‚¯æ“¾
+// è¦‹ã‹ã‘å–å¾—
 #define mob_get_viewclass(a)     mobdb_search(a)->view_class
 #define mob_get_sex(a)           mobdb_search(a)->sex
 #define mob_get_hair(a)          mobdb_search(a)->hair

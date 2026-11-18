@@ -1,56 +1,35 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _BONUS_H_
+ï»¿#ifndef _BONUS_H_
 #define _BONUS_H_
 
 #include "map.h"
 
-// Šg’£ƒI[ƒgƒXƒyƒ‹
+// æ‹¡å¼µã‚ªãƒ¼ãƒˆã‚¹ãƒšãƒ«
 enum {
-	EAS_SHORT       = 0x00000001,	// ‹ß‹——£•¨—
-	EAS_LONG        = 0x00000002,	// ‰“‹——£•¨—
-	EAS_WEAPON      = 0x00000003,	// •¨—
-	EAS_MAGIC       = 0x00000004,	// –‚–@
-	EAS_MISC        = 0x00000008,	// misciã©E‘éE‰Î‰Š•r“™j
-	EAS_TARGET      = 0x00000010,	// ©•ª‚Ég‚¤
-	EAS_SELF        = 0x00000020,	// ©•ª‚Ég‚¤
-	EAS_TARGET_RAND = 0x00000040,	// ©•ª‚©UŒ‚‘ÎÛ‚Ég‚¤
-	//EAS_TARGET    = 0x00000080,	// ©•ª‚©UŒ‚‘ÎÛ‚Ég‚¤
-	EAS_FLUCT       = 0x00000100,	// ‹ŒAS—p 1`3‚Ì‚ ‚ê
-	EAS_RANDOM      = 0x00000200,	// 1`w’è‚Ü‚Åƒ‰ƒ“ƒ_ƒ€
-	EAS_USEMAX      = 0x00000400,	// MAXƒŒƒxƒ‹‚ª‚ ‚ê‚Î‚»‚ê‚ğ
-	EAS_USEBETTER   = 0x00000800,	// w’èˆÈã‚Ì‚à‚Ì‚ª‚ ‚ê‚Î‚»‚ê‚ğ(MAX‚¶‚á‚È‚­‚Ä‚à‰Â”\)
+	EAS_SHORT       = 0x00000001,	// è¿‘è·é›¢ç‰©ç†
+	EAS_LONG        = 0x00000002,	// é è·é›¢ç‰©ç†
+	EAS_WEAPON      = 0x00000003,	// ç‰©ç†
+	EAS_MAGIC       = 0x00000004,	// é­”æ³•
+	EAS_MISC        = 0x00000008,	// miscï¼ˆç½ ãƒ»é·¹ãƒ»ç«ç‚ç“¶ç­‰ï¼‰
+	EAS_TARGET      = 0x00000010,	// è‡ªåˆ†ã«ä½¿ã†
+	EAS_SELF        = 0x00000020,	// è‡ªåˆ†ã«ä½¿ã†
+	EAS_TARGET_RAND = 0x00000040,	// è‡ªåˆ†ã‹æ”»æ’ƒå¯¾è±¡ã«ä½¿ã†
+	//EAS_TARGET    = 0x00000080,	// è‡ªåˆ†ã‹æ”»æ’ƒå¯¾è±¡ã«ä½¿ã†
+	EAS_FLUCT       = 0x00000100,	// æ—§ASç”¨ 1ï½3ã®ã‚ã‚Œ
+	EAS_RANDOM      = 0x00000200,	// 1ï½æŒ‡å®šã¾ã§ãƒ©ãƒ³ãƒ€ãƒ 
+	EAS_USEMAX      = 0x00000400,	// MAXãƒ¬ãƒ™ãƒ«ãŒã‚ã‚Œã°ãã‚Œã‚’
+	EAS_USEBETTER   = 0x00000800,	// æŒ‡å®šä»¥ä¸Šã®ã‚‚ã®ãŒã‚ã‚Œã°ãã‚Œã‚’(MAXã˜ã‚ƒãªãã¦ã‚‚å¯èƒ½)
 	EAS_NOSP        = 0x00001000,	// SP0
 	EAS_SPCOST1     = 0x00002000,	// SP2/3
 	EAS_SPCOST2     = 0x00004000,	// SP1/2
-	EAS_SPCOST3     = 0x00008000,	// SP1.5”{
-	EAS_ATTACK      = 0x00010000,	// UŒ‚
-	EAS_REVENGE     = 0x00020000,	// ”½Œ‚
-	EAS_NORMAL      = 0x00040000,	// ’ÊíUŒ‚
-	EAS_SKILL       = 0x00080000,	// ƒXƒLƒ‹
-	EAS_CONDITION   = 0x00100000,	// g—pğŒ
+	EAS_SPCOST3     = 0x00008000,	// SP1.5å€
+	EAS_ATTACK      = 0x00010000,	// æ”»æ’ƒ
+	EAS_REVENGE     = 0x00020000,	// åæ’ƒ
+	EAS_NORMAL      = 0x00040000,	// é€šå¸¸æ”»æ’ƒ
+	EAS_SKILL       = 0x00080000,	// ã‚¹ã‚­ãƒ«
+	EAS_CONDITION   = 0x00100000,	// ä½¿ç”¨æ¡ä»¶
 };
 
-// ƒJ[ƒhŒø‰Ê‚ÌƒI[ƒgƒXƒyƒ‹
+// ã‚«ãƒ¼ãƒ‰åŠ¹æœã®ã‚ªãƒ¼ãƒˆã‚¹ãƒšãƒ«
 int bonus_autospell_start(struct block_list *src,struct block_list *bl,unsigned int mode,unsigned int tick,int flag);
 int bonus_autospellskill_start(struct block_list *src,struct block_list *bl,int skillid,unsigned int tick,int flag);
 

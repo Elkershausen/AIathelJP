@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -277,9 +256,9 @@ static int extra_timer(int tid, unsigned int tick, int id, void *data)
 		}
 		// write file
 		if ((fp = lock_fopen(extra_file_txt, &lock)) != NULL) {
-			fprintf(fp, "// ‚±‚Ìƒtƒ@ƒCƒ‹‚Ì“à—e‚Í•ÏX‚µ‚È‚¢‚Å‚­‚¾‚³‚¢I" NEWLINE
-			            "// MAPƒT[ƒo‚É‚æ‚Á‚Ä©“®“I‚ÉŠÇ—‚³‚ê‚Ä‚¢‚Ü‚·" NEWLINE
-			            "// ’Ç‰Á‚µ‚½‚¢ê‡‚Íu%sv‚ğ—˜—p‚µ‚Ä‚­‚¾‚³‚¢" NEWLINE
+			fprintf(fp, "// ã“ã®ãƒ•ã‚¡ã‚¤ãƒ«ã®å†…å®¹ã¯å¤‰æ›´ã—ãªã„ã§ãã ã•ã„ï¼" NEWLINE
+			            "// MAPã‚µãƒ¼ãƒã«ã‚ˆã£ã¦è‡ªå‹•çš„ã«ç®¡ç†ã•ã‚Œã¦ã„ã¾ã™" NEWLINE
+			            "// è¿½åŠ ã—ãŸã„å ´åˆã¯ã€Œ%sã€ã‚’åˆ©ç”¨ã—ã¦ãã ã•ã„" NEWLINE
 			            "//" NEWLINE, extra_add_file_txt);
 			for (i = 0; i < extra_num; i++)
 				fprintf(fp,"%d,%d,%s" NEWLINE, extra_dat[i].item_id, extra_dat[i].quantity, extra_dat[i].name);
@@ -291,7 +270,7 @@ static int extra_timer(int tid, unsigned int tick, int id, void *data)
 }
 
 /*==========================================
- * I—¹
+ * çµ‚äº†
  *------------------------------------------
  */
 int do_final_extra(void)
@@ -306,7 +285,7 @@ int do_final_extra(void)
 }
 
 /*==========================================
- * ‰Šú‰»
+ * åˆæœŸåŒ–
  *------------------------------------------
  */
 int do_init_extra(void)

@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _SKILL_H_
+ï»¿#ifndef _SKILL_H_
 #define _SKILL_H_
 
 #include "map.h"
@@ -44,7 +23,7 @@ struct skill_timerskill {
 	int flag;
 };
 
-// ƒXƒLƒ‹ƒf[ƒ^ƒx[ƒX
+// ã‚¹ã‚­ãƒ«ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹
 struct skill_db {
 	int id;
 	int range[MAX_SKILL_LEVEL],hit,inf,pl,nk,max;
@@ -78,7 +57,7 @@ struct skill_db {
 };
 
 #define MAX_SKILL_UNIT_LAYOUT	60
-#define MAX_SQUARE_LAYOUT		5	// 11*11‚Ìƒ†ƒjƒbƒg”z’u‚ªÅ‘å
+#define MAX_SQUARE_LAYOUT		5	// 11*11ã®ãƒ¦ãƒ‹ãƒƒãƒˆé…ç½®ãŒæœ€å¤§
 #define MAX_SKILL_UNIT_COUNT ((MAX_SQUARE_LAYOUT*2+1)*(MAX_SQUARE_LAYOUT*2+1))
 
 struct skill_unit_layout {
@@ -88,13 +67,13 @@ struct skill_unit_layout {
 };
 
 enum {
-	UF_DEFNOTENEMY   = 0x0001,	// defnotenemy Ý’è‚ÅBCT_NOENEMY‚ÉØ‚è‘Ö‚¦
-	UF_NOREITERATION = 0x0002,	// d•¡’u‚«‹ÖŽ~
-	UF_NOFOOTSET     = 0x0004,	// ‘«Œ³’u‚«‹ÖŽ~
-	UF_NOOVERLAP     = 0x0008,	// ƒ†ƒjƒbƒgŒø‰Ê‚ªd•¡‚µ‚È‚¢
-	UF_PATHCHECK     = 0x0010,	// ƒIƒuƒWƒFƒNƒg”­¶Žž‚ÉŽËüƒ`ƒFƒbƒN
-	UF_DANCE         = 0x0100,	// ƒ_ƒ“ƒXƒXƒLƒ‹
-	UF_ENSEMBLE      = 0x0200,	// ‡‘tƒXƒLƒ‹
+	UF_DEFNOTENEMY   = 0x0001,	// defnotenemy è¨­å®šã§BCT_NOENEMYã«åˆ‡ã‚Šæ›¿ãˆ
+	UF_NOREITERATION = 0x0002,	// é‡è¤‡ç½®ãç¦æ­¢
+	UF_NOFOOTSET     = 0x0004,	// è¶³å…ƒç½®ãç¦æ­¢
+	UF_NOOVERLAP     = 0x0008,	// ãƒ¦ãƒ‹ãƒƒãƒˆåŠ¹æžœãŒé‡è¤‡ã—ãªã„
+	UF_PATHCHECK     = 0x0010,	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç™ºç”Ÿæ™‚ã«å°„ç·šãƒã‚§ãƒƒã‚¯
+	UF_DANCE         = 0x0100,	// ãƒ€ãƒ³ã‚¹ã‚¹ã‚­ãƒ«
+	UF_ENSEMBLE      = 0x0200,	// åˆå¥ã‚¹ã‚­ãƒ«
 };
 
 enum {
@@ -122,7 +101,7 @@ enum {
 
 extern struct skill_db skill_db[MAX_SKILL_DB];
 
-// ƒAƒCƒeƒ€ì¬ƒf[ƒ^ƒx[ƒX
+// ã‚¢ã‚¤ãƒ†ãƒ ä½œæˆãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹
 struct skill_produce_db {
 	int nameid;
 	int req_skill,req_skilllv,itemlv;
@@ -131,14 +110,14 @@ struct skill_produce_db {
 };
 extern struct skill_produce_db skill_produce_db[MAX_SKILL_PRODUCE_DB];
 
-// –îì¬ƒf[ƒ^ƒx[ƒX
+// çŸ¢ä½œæˆãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹
 struct skill_arrow_db {
 	int nameid, trigger;
 	int cre_id[5],cre_amount[5];
 };
 extern struct skill_arrow_db skill_arrow_db[MAX_SKILL_ARROW_DB];
 
-// ƒAƒuƒ‰ƒJƒ_ƒuƒ‰ƒf[ƒ^ƒx[ƒX
+// ã‚¢ãƒ–ãƒ©ã‚«ãƒ€ãƒ–ãƒ©ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹
 struct skill_abra_db {
 	int nameid;
 	int req_lv;
@@ -146,7 +125,7 @@ struct skill_abra_db {
 };
 extern struct skill_abra_db skill_abra_db[MAX_SKILL_ABRA_DB];
 
-// ƒ‰ƒ“ƒ_ƒ€”­“®ƒXƒLƒ‹ƒf[ƒ^ƒx[ƒX
+// ãƒ©ãƒ³ãƒ€ãƒ ç™ºå‹•ã‚¹ã‚­ãƒ«ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹
 struct skill_rand_db {
 	struct {
 		int nameid;
@@ -156,7 +135,7 @@ struct skill_rand_db {
 };
 extern struct skill_rand_db skill_rand_db[MAX_SKILL_RAND_DB];
 
-// ƒ`ƒFƒ“ƒWƒ}ƒeƒŠƒAƒ‹‡¬ƒf[ƒ^ƒx[ƒX
+// ãƒã‚§ãƒ³ã‚¸ãƒžãƒ†ãƒªã‚¢ãƒ«åˆæˆãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹
 struct skill_material_db {
 	int nameid;
 	int amount[2];
@@ -229,16 +208,16 @@ int skill_get_fixed_range(struct block_list *bl,int id,int lv);
 
 int skill_searchrandomid(int type);
 
-// ƒXƒLƒ‹‚ÌŽg—p
+// ã‚¹ã‚­ãƒ«ã®ä½¿ç”¨
 void skill_castend_map(struct map_session_data *sd, int skill_num, const char *map);
 
 int skill_cleartimerskill(struct block_list *src);
 int skill_addtimerskill(struct block_list *src,unsigned int tick,int target,int x,int y,int skill_id,int skill_lv,int type,int flag);
 
-// ’Ç‰ÁŒø‰Ê
+// è¿½åŠ åŠ¹æžœ
 int skill_additional_effect( struct block_list* src, struct block_list *bl,int skillid,int skilllv,int attack_type,unsigned int tick);
 
-enum {	// ‚«”ò‚Î‚µƒtƒ‰ƒO
+enum {	// å¹ãé£›ã°ã—ãƒ•ãƒ©ã‚°
 	SAB_NOMALBLOW   = 0x00000,
 	SAB_REVERSEBLOW = 0x10000,
 	SAB_NODAMAGE    = 0x20000,
@@ -248,7 +227,7 @@ enum {	// ‚«”ò‚Î‚µƒtƒ‰ƒO
 
 int skill_add_blown( struct block_list *src, struct block_list *target,int skillid,int flag);
 
-// ƒ†ƒjƒbƒgƒXƒLƒ‹
+// ãƒ¦ãƒ‹ãƒƒãƒˆã‚¹ã‚­ãƒ«
 int skill_delunit(struct skill_unit *unit);
 int skill_delunitgroup(struct skill_unit_group *group);
 int skill_clear_unitgroup(struct block_list *src);
@@ -267,7 +246,7 @@ struct skill_unit_group *skill_unitsetting( struct block_list *src, int skillid,
 struct skill_unit_group *skill_check_dancing( struct block_list *src );
 void skill_stop_dancing(struct block_list *src, int flag);
 
-// ‰r¥ƒLƒƒƒ“ƒZƒ‹
+// è© å”±ã‚­ãƒ£ãƒ³ã‚»ãƒ«
 int skill_castcancel(struct block_list *bl,int type);
 
 int skill_sit(struct map_session_data *sd, int type);
@@ -290,14 +269,14 @@ int skill_fix_heal(struct block_list *src, struct block_list *bl, int skill_id, 
 int skill_castend_id(int tid, unsigned int tick, int id, void *data);
 int skill_castend_pos(int tid, unsigned int tick, int id, void *data);
 
-// ‚»‚Ì‘¼
+// ãã®ä»–
 int skill_check_cloaking(struct block_list *bl);
 int skill_detect(struct block_list *bl);
 
-// ƒXƒLƒ‹Žg—p‚©‚Ç‚¤‚©‚Ì”»’èB
+// ã‚¹ã‚­ãƒ«ä½¿ç”¨ã‹ã©ã†ã‹ã®åˆ¤å®šã€‚
 
-// ”»’èŠÖ”‚É“n‚·\‘¢‘ÌBŠÖ”“à•”‚Åƒf[ƒ^‚ªã‘‚«‚³‚ê‚é‚Ì‚ÅA
-// –ß‚Á‚½Œã‚É•ÏX‚·‚é‚Ì‚ð–Y‚ê‚È‚¢‚æ‚¤‚ÉB
+// åˆ¤å®šé–¢æ•°ã«æ¸¡ã™æ§‹é€ ä½“ã€‚é–¢æ•°å†…éƒ¨ã§ãƒ‡ãƒ¼ã‚¿ãŒä¸Šæ›¸ãã•ã‚Œã‚‹ã®ã§ã€
+// æˆ»ã£ãŸå¾Œã«å¤‰æ›´ã™ã‚‹ã®ã‚’å¿˜ã‚Œãªã„ã‚ˆã†ã«ã€‚
 struct skill_condition {
 	int id;
 	int lv;
@@ -309,7 +288,7 @@ struct skill_condition {
 int skill_check_condition(struct block_list *bl, int type);
 int skill_check_condition2(struct block_list *bl, struct skill_condition *cnd, int type);
 
-// ƒAƒCƒeƒ€ì¬
+// ã‚¢ã‚¤ãƒ†ãƒ ä½œæˆ
 int skill_can_produce_mix(struct map_session_data *sd, int idx, int trigger);
 void skill_produce_mix(struct map_session_data *sd, int nameid, int slot1, int slot2, int slot3);
 
@@ -322,7 +301,7 @@ void skill_autoshadowspell(struct map_session_data *sd, int skillid);
 void skill_changematerial(struct map_session_data *sd, int num, unsigned short *item_list);
 void skill_el_analysis(struct map_session_data *sd, int num, int skilllv, unsigned short *item_list);
 
-// mobƒXƒLƒ‹‚Ì‚½‚ß
+// mobã‚¹ã‚­ãƒ«ã®ãŸã‚
 int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,int skillid,int skilllv,unsigned int tick,int flag );
 int skill_castend_damage_id( struct block_list* src, struct block_list *bl,int skillid,int skilllv,unsigned int tick,int flag );
 int skill_castend_pos2( struct block_list *src, int x,int y,int skillid,int skilllv,unsigned int tick,int flag);
@@ -334,20 +313,20 @@ void skill_weapon_refine(struct map_session_data *sd, int idx);
 int skill_success_weaponrefine(struct map_session_data *sd,int idx);
 int skill_fail_weaponrefine(struct map_session_data *sd,int idx);
 
-// ƒXƒLƒ‹UŒ‚ˆêŠ‡ˆ—
+// ã‚¹ã‚­ãƒ«æ”»æ’ƒä¸€æ‹¬å‡¦ç†
 int skill_blown( struct block_list *src, struct block_list *target,int count);
 
 int skill_castend_delay(struct block_list* src, struct block_list *bl,int skillid,int skilllv,unsigned int tick,int flag);
 
-// ƒoƒVƒŠƒJ”­“®’âŽ~
+// ãƒã‚·ãƒªã‚«ç™ºå‹•åœæ­¢
 void skill_basilica_cancel( struct block_list *bl );
 
-// ã©ƒXƒLƒ‹‚©‚Ç‚¤‚©
+// ç½ ã‚¹ã‚­ãƒ«ã‹ã©ã†ã‹
 #define skill_unit_istrap(id) ((((id) >= UNT_BLASTMINE) && ((id) <= UNT_TALKIEBOX) && ((id) != UNT_VENOMDUST)) || ((id) >= UNT_MAGENTATRAP && (id) <= UNT_CLUSTERBOMB))
 
 void skill_reload(void);
 
-// ƒXƒLƒ‹ƒ^[ƒQƒbƒgƒe[ƒuƒ‹
+// ã‚¹ã‚­ãƒ«ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãƒ†ãƒ¼ãƒ–ãƒ«
 enum {
 	INF_PASSIVE  = 0x00,
 	INF_ATTACK   = 0x01,
@@ -358,7 +337,7 @@ enum {
 	INF_TRAP     = 0x20,
 };
 
-// ƒXƒLƒ‹ƒ^[ƒQƒbƒgƒe[ƒuƒ‹2
+// ã‚¹ã‚­ãƒ«ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãƒ†ãƒ¼ãƒ–ãƒ«2
 enum {
 	INF2_QUEST      = 0x00001,
 	INF2_NPC        = 0x00002,
@@ -2219,7 +2198,7 @@ enum {
 	ABR_NET_SUPPORT,
 	ABR_INFINITY_BUSTER,
 
-	// ƒMƒ‹ƒhƒXƒLƒ‹‚Ímmo.h‚Å’è‹`
+	// ã‚®ãƒ«ãƒ‰ã‚¹ã‚­ãƒ«ã¯mmo.hã§å®šç¾©
 
 	SYS_FIRSTJOBLV = 10100,
 	SYS_SECONDJOBLV,
@@ -2234,7 +2213,7 @@ enum {
 	UNT_SANCTUARY,
 	UNT_MAGNUS,
 	UNT_PNEUMA,
-	UNT_ATTACK_SKILLS,	// UŒ‚ŒnƒXƒLƒ‹‘S”Ê
+	UNT_ATTACK_SKILLS,	// æ”»æ’ƒç³»ã‚¹ã‚­ãƒ«å…¨èˆ¬
 	UNT_FIREPILLAR_WAITING,
 	UNT_FIREPILLAR_ACTIVE,
 	UNT_HIDDEN_TRAP,

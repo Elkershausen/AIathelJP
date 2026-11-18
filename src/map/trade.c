@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <string.h>
 
 #include "nullpo.h"
@@ -35,7 +14,7 @@
 #include "unit.h"
 
 /*==========================================
- * æˆø—v¿‚ğ‘Šè‚É‘—‚é
+ * å–å¼•è¦è«‹ã‚’ç›¸æ‰‹ã«é€ã‚‹
  *------------------------------------------
  */
 void trade_traderequest(struct map_session_data *sd,int target_id)
@@ -60,7 +39,7 @@ void trade_traderequest(struct map_session_data *sd,int target_id)
 		}
 		if(!battle_config.invite_request_check) {
 			if(target_sd->guild_invite > 0 || target_sd->party_invite > 0 || target_sd->adopt_invite) {
-				clif_tradestart(sd,2);	// ‘Šè‚ÍPT—v¿’†‚©Guild—v¿’†‚©—{q—v¿’†
+				clif_tradestart(sd,2);	// ç›¸æ‰‹ã¯PTè¦è«‹ä¸­ã‹Guildè¦è«‹ä¸­ã‹é¤Šå­è¦è«‹ä¸­
 				return;
 			}
 		}
@@ -88,7 +67,7 @@ void trade_traderequest(struct map_session_data *sd,int target_id)
 }
 
 /*==========================================
- * æˆø—v¿
+ * å–å¼•è¦è«‹
  *------------------------------------------
  */
 void trade_tradeack(struct map_session_data *sd, unsigned char type)
@@ -134,7 +113,7 @@ void trade_tradeack(struct map_session_data *sd, unsigned char type)
 }
 
 /*==========================================
- * ƒAƒCƒeƒ€’Ç‰Á
+ * ã‚¢ã‚¤ãƒ†ãƒ è¿½åŠ 
  *------------------------------------------
  */
 void trade_tradeadditem(struct map_session_data *sd, int idx, int amount)
@@ -149,7 +128,7 @@ void trade_tradeadditem(struct map_session_data *sd, int idx, int amount)
 			if (idx == 0 && amount > 0 && amount <= sd->status.zeny) {
 				if(
 					target_sd->status.zeny - target_sd->trade.zeny + amount <= MAX_ZENY &&
-					target_sd->status.zeny - target_sd->trade.zeny + amount >= 0 // overflow ‘Îô
+					target_sd->status.zeny - target_sd->trade.zeny + amount >= 0 // overflow å¯¾ç­–
 				) {
 					sd->trade.zeny=amount;
 					clif_tradeadditem(sd,target_sd,0,amount);
@@ -187,7 +166,7 @@ void trade_tradeadditem(struct map_session_data *sd, int idx, int amount)
 }
 
 /*==========================================
- * ƒAƒCƒeƒ€’Ç‰ÁŠ®—¹(ok‰Ÿ‚µ)
+ * ã‚¢ã‚¤ãƒ†ãƒ è¿½åŠ å®Œäº†(okæŠ¼ã—)
  *------------------------------------------
  */
 void trade_tradeok(struct map_session_data *sd)
@@ -214,7 +193,7 @@ void trade_tradeok(struct map_session_data *sd)
 }
 
 /*==========================================
- * æˆøƒLƒƒƒ“ƒZƒ‹
+ * å–å¼•ã‚­ãƒ£ãƒ³ã‚»ãƒ«
  *------------------------------------------
  */
 void trade_tradecancel(struct map_session_data *sd)
@@ -376,7 +355,7 @@ static int trade_check(struct map_session_data *sd, struct map_session_data *tar
 }
 
 /*==========================================
- * æˆø‹–‘ø(trade‰Ÿ‚µ)
+ * å–å¼•è¨±è«¾(tradeæŠ¼ã—)
  *------------------------------------------
  */
 void trade_tradecommit(struct map_session_data *sd)

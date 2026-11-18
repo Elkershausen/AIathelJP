@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _ITEMDB_H_
+ï»¿#ifndef _ITEMDB_H_
 #define _ITEMDB_H_
 
 #include "map.h"
@@ -78,14 +57,14 @@ struct item_data {
 	int group;
 	int delay;
 	int cooldown;
-	int upper; 	//0:all(7‚É‹­§•ÏŠ·) 1:“]¶‘O 2:“]¶ 4:—{q
-	int zone;	//0:§ŒÀ–³ 1:normal 2:pvp 4:gvg 8:pk 16:turbo 32:noteleport 64:noreturn 128:nobranch
+	int upper; 	//0:all(7ã«å¼·åˆ¶å¤‰æ›) 1:è»¢ç”Ÿå‰ 2:è»¢ç”Ÿ 4:é¤Šå­
+	int zone;	//0:åˆ¶é™ç„¡ 1:normal 2:pvp 4:gvg 8:pk 16:turbo 32:noteleport 64:noreturn 128:nobranch
 	int arrow_type;
 	int card_type;
 	short dropeffect;
 	struct {
-		int nameid;		// ƒAƒbƒvƒOƒŒ[ƒh‚É•K—v‚ÈƒAƒCƒeƒ€
-		int table;		// ƒAƒbƒvƒOƒŒ[ƒhƒe[ƒuƒ‹
+		int nameid;		// ã‚¢ãƒƒãƒ—ã‚°ãƒ¬ãƒ¼ãƒ‰ã«å¿…è¦ãªã‚¢ã‚¤ãƒ†ãƒ 
+		int table;		// ã‚¢ãƒƒãƒ—ã‚°ãƒ¬ãƒ¼ãƒ‰ãƒ†ãƒ¼ãƒ–ãƒ«
 	} upgrade[MAX_UPGRADE_LIST];
 };
 

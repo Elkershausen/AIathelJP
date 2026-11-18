@@ -1,27 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-// $Id: map.c,v 1.3 2004/09/15 00:20:52 running_pinata Exp $
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -75,7 +52,7 @@
 #include "extra.h"
 #include "luascript.h"
 
-// ‹É—Í static‚Åƒ[ƒJƒ‹‚Éû‚ß‚é
+// æ¥µåŠ› staticã§ãƒ­ãƒ¼ã‚«ãƒ«ã«åã‚ã‚‹
 static struct dbt *id_db        = NULL;
 static struct dbt *map_db       = NULL;
 static struct dbt *nick_db      = NULL;
@@ -108,8 +85,8 @@ static int map_pk_noteleport_flag = 0;
 
 extern int packet_parse_time;
 
-// ƒ}ƒbƒvƒLƒƒƒbƒVƒ…—˜—pƒtƒ‰ƒO(map_athana.conf“à‚Ìread_map_from_cache‚Åw’è)
-// 0:—˜—p‚µ‚È‚¢ 1:”ñˆ³k•Û‘¶ 2:ˆ³k•Û‘¶
+// ãƒãƒƒãƒ—ã‚­ãƒ£ãƒƒã‚·ãƒ¥åˆ©ç”¨ãƒ•ãƒ©ã‚°(map_athana.confå†…ã®read_map_from_cacheã§æŒ‡å®š)
+// 0:åˆ©ç”¨ã—ãªã„ 1:éåœ§ç¸®ä¿å­˜ 2:åœ§ç¸®ä¿å­˜
 static int map_read_flag = 0;
 
 char map_conf_filename[256]       = "conf/map_auriga.conf";
@@ -119,18 +96,18 @@ char script_conf_filename[256]    = "conf/script_auriga.conf";
 char msg_conf_filename[256]       = "conf/msg_auriga.conf";
 char luascript_conf_filename[256] = "conf/lua_auriga.conf";
 
-char map_server_tag[MAPSERVER_TAGNAME] = "map01";	// ƒ}ƒbƒvƒT[ƒoƒ^ƒO–¼
+char map_server_tag[MAPSERVER_TAGNAME] = "map01";	// ãƒãƒƒãƒ—ã‚µãƒ¼ãƒã‚¿ã‚°å
 char motd_txt[256]           = "conf/motd.txt";
 char help_txt[256]           = "conf/help.txt";
 char extra_add_file_txt[256] = "map_extra_add.txt"; // to add items from external software (use append to add a line)
 
-static char map_cache_file[256]   = "map.info";	// ƒ}ƒbƒvƒLƒƒƒbƒVƒ…ƒtƒ@ƒCƒ‹–¼
+static char map_cache_file[256]   = "map.info";	// ãƒãƒƒãƒ—ã‚­ãƒ£ãƒƒã‚·ãƒ¥ãƒ•ã‚¡ã‚¤ãƒ«å
 static char grf_path_txt[256]     = "conf/grf-files.txt";
 static char water_height_txt[256] = "conf/water_height.txt";
 
 /*==========================================
- * ‘SmapI‘Œv‚Å‚ÌÚ‘±”İ’è
- * (charI‚©‚ç‘—‚ç‚ê‚Ä‚­‚é)
+ * å…¨mapé¯–ç·è¨ˆã§ã®æ¥ç¶šæ•°è¨­å®š
+ * (charé¯–ã‹ã‚‰é€ã‚‰ã‚Œã¦ãã‚‹)
  *------------------------------------------
  */
 void map_setusers(int n)
@@ -139,7 +116,7 @@ void map_setusers(int n)
 }
 
 /*==========================================
- * ‘SmapI‘Œv‚Å‚ÌÚ‘±”æ“¾ (/w‚Ö‚Ì‰“š—p)
+ * å…¨mapé¯–ç·è¨ˆã§ã®æ¥ç¶šæ•°å–å¾— (/wã¸ã®å¿œç­”ç”¨)
  *------------------------------------------
  */
 int map_getusers(void)
@@ -148,12 +125,12 @@ int map_getusers(void)
 }
 
 //
-// blockíœ‚ÌˆÀ‘S«Šm•Ûˆ—
+// blockå‰Šé™¤ã®å®‰å…¨æ€§ç¢ºä¿å‡¦ç†
 //
 
 /*==========================================
- * block‚ğfree‚·‚é‚Æ‚«free‚Ì•Ï‚í‚è‚ÉŒÄ‚Ô
- * ƒƒbƒN‚³‚ê‚Ä‚¢‚é‚Æ‚«‚Íƒoƒbƒtƒ@‚É‚½‚ß‚é
+ * blockã‚’freeã™ã‚‹ã¨ãfreeã®å¤‰ã‚ã‚Šã«å‘¼ã¶
+ * ãƒ­ãƒƒã‚¯ã•ã‚Œã¦ã„ã‚‹ã¨ãã¯ãƒãƒƒãƒ•ã‚¡ã«ãŸã‚ã‚‹
  *------------------------------------------
  */
 int map_freeblock(void *bl)
@@ -169,7 +146,7 @@ int map_freeblock(void *bl)
 }
 
 /*==========================================
- * block‚Ìfree‚ğˆê“I‚É‹Ö~‚·‚é
+ * blockã®freeã‚’ä¸€æ™‚çš„ã«ç¦æ­¢ã™ã‚‹
  *------------------------------------------
  */
 int map_freeblock_lock(void)
@@ -178,9 +155,9 @@ int map_freeblock_lock(void)
 }
 
 /*==========================================
- * block‚Ìfree‚ÌƒƒbƒN‚ğ‰ğœ‚·‚é
- * ‚±‚Ì‚Æ‚«AƒƒbƒN‚ªŠ®‘S‚É‚È‚­‚È‚é‚Æ
- * ƒoƒbƒtƒ@‚É‚½‚Ü‚Á‚Ä‚¢‚½block‚ğ‘S•”íœ
+ * blockã®freeã®ãƒ­ãƒƒã‚¯ã‚’è§£é™¤ã™ã‚‹
+ * ã“ã®ã¨ãã€ãƒ­ãƒƒã‚¯ãŒå®Œå…¨ã«ãªããªã‚‹ã¨
+ * ãƒãƒƒãƒ•ã‚¡ã«ãŸã¾ã£ã¦ã„ãŸblockã‚’å…¨éƒ¨å‰Šé™¤
  *------------------------------------------
  */
 static int freeblock_db_final(void *key, void *data, va_list ap)
@@ -196,13 +173,13 @@ int map_freeblock_unlock(void)
 	} else if(block_free_lock < 0) {
 		if(battle_config.error_log)
 			printf("map_freeblock_unlock: lock count < 0 !\n");
-		block_free_lock = 0;	// Ÿ‰ñˆÈ~‚ÌƒƒbƒN‚Éxá‚ªo‚Ä‚­‚é‚Ì‚ÅƒŠƒZƒbƒg
+		block_free_lock = 0;	// æ¬¡å›ä»¥é™ã®ãƒ­ãƒƒã‚¯ã«æ”¯éšœãŒå‡ºã¦ãã‚‹ã®ã§ãƒªã‚»ãƒƒãƒˆ
 	}
 	return block_free_lock;
 }
 
 /*==========================================
- * ’èŠú“I‚Éblock_free_lock‚ğƒŠƒZƒbƒg
+ * å®šæœŸçš„ã«block_free_lockã‚’ãƒªã‚»ãƒƒãƒˆ
  *------------------------------------------
  */
 static int map_freeblock_timer(int tid,unsigned int tick,int id,void *data)
@@ -216,21 +193,21 @@ static int map_freeblock_timer(int tid,unsigned int tick,int id,void *data)
 }
 
 //
-// block‰»ˆ—
+// blockåŒ–å‡¦ç†
 //
 
 /*==========================================
- * map[]‚Ìblock_list‚©‚çŒq‚ª‚Á‚Ä‚¢‚éê‡‚É
- * bl->prev‚Ébl_head‚ÌƒAƒhƒŒƒX‚ğ“ü‚ê‚Ä‚¨‚­
+ * map[]ã®block_listã‹ã‚‰ç¹‹ãŒã£ã¦ã„ã‚‹å ´åˆã«
+ * bl->prevã«bl_headã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’å…¥ã‚Œã¦ãŠã
  *------------------------------------------
  */
 static struct block_list bl_head;
 
 /*==========================================
- * map[]‚Ìblock_list‚É’Ç‰Á
- * mob‚Í”‚ª‘½‚¢‚Ì‚Å•ÊƒŠƒXƒg
+ * map[]ã®block_listã«è¿½åŠ 
+ * mobã¯æ•°ãŒå¤šã„ã®ã§åˆ¥ãƒªã‚¹ãƒˆ
  *
- * Šù‚ÉlinkÏ‚İ‚©‚ÌŠm”F‚ª–³‚¢BŠëŒ¯‚©‚à
+ * æ—¢ã«linkæ¸ˆã¿ã‹ã®ç¢ºèªãŒç„¡ã„ã€‚å±é™ºã‹ã‚‚
  *------------------------------------------
  */
 int map_addblock(struct block_list *bl)
@@ -276,8 +253,8 @@ int map_addblock(struct block_list *bl)
 }
 
 /*==========================================
- * map[]‚Ìblock_list‚©‚çŠO‚·
- * prev‚ªNULL‚Ìê‡list‚ÉŒq‚ª‚Á‚Ä‚È‚¢
+ * map[]ã®block_listã‹ã‚‰å¤–ã™
+ * prevãŒNULLã®å ´åˆlistã«ç¹‹ãŒã£ã¦ãªã„
  *------------------------------------------
  */
 int map_delblock(struct block_list *bl)
@@ -286,10 +263,10 @@ int map_delblock(struct block_list *bl)
 
 	nullpo_retr(0, bl);
 
-	// Šù‚Éblocklist‚©‚ç”²‚¯‚Ä‚¢‚é
+	// æ—¢ã«blocklistã‹ã‚‰æŠœã‘ã¦ã„ã‚‹
 	if(bl->prev == NULL) {
 		if(bl->next != NULL) {
-			// prev‚ªNULL‚Ånext‚ªNULL‚Å‚È‚¢‚Ì‚Í—L‚Á‚Ä‚Í‚È‚ç‚È‚¢
+			// prevãŒNULLã§nextãŒNULLã§ãªã„ã®ã¯æœ‰ã£ã¦ã¯ãªã‚‰ãªã„
 			if(battle_config.error_log)
 				printf("map_delblock error : bl->next!=NULL\n");
 		}
@@ -304,7 +281,7 @@ int map_delblock(struct block_list *bl)
 		bl->next->prev = bl->prev;
 
 	if(bl->prev == &bl_head) {
-		// ƒŠƒXƒg‚Ì“ª‚È‚Ì‚ÅAmap[]‚Ìblock_list‚ğXV‚·‚é
+		// ãƒªã‚¹ãƒˆã®é ­ãªã®ã§ã€map[]ã®block_listã‚’æ›´æ–°ã™ã‚‹
 		if(bl->type == BL_MOB) {
 			map[bl->m].block_mob[b] = bl->next;
 		} else {
@@ -320,7 +297,7 @@ int map_delblock(struct block_list *bl)
 }
 
 /*==========================================
- * üˆÍ‚ÌPCl”‚ğ”‚¦‚é (Œ»İ–¢g—p)
+ * å‘¨å›²ã®PCäººæ•°ã‚’æ•°ãˆã‚‹ (ç¾åœ¨æœªä½¿ç”¨)
  *------------------------------------------
  */
 /*
@@ -351,7 +328,7 @@ int map_countnearpc(int m,int x,int y)
 }*/
 
 /*==========================================
- * ƒZƒ‹ã‚ÌPC‚ÆMOB‚Ì”‚ğ”‚¦‚é (”Ä—p)
+ * ã‚»ãƒ«ä¸Šã®PCã¨MOBã®æ•°ã‚’æ•°ãˆã‚‹ (æ±ç”¨)
  *------------------------------------------
  */
 int map_count_oncell(int m,int x,int y,int type)
@@ -384,8 +361,8 @@ int map_count_oncell(int m,int x,int y,int type)
 }
 
 /*==========================================
- * ƒZƒ‹ã‚ÌÅ‰‚ÉŒ©‚Â‚¯‚½ƒXƒLƒ‹ƒ†ƒjƒbƒg‚ğ•Ô‚·
- *   out_unit: ŒŸõ‘ÎÛŠO‚Æ‚·‚éƒ†ƒjƒbƒg
+ * ã‚»ãƒ«ä¸Šã®æœ€åˆã«è¦‹ã¤ã‘ãŸã‚¹ã‚­ãƒ«ãƒ¦ãƒ‹ãƒƒãƒˆã‚’è¿”ã™
+ *   out_unit: æ¤œç´¢å¯¾è±¡å¤–ã¨ã™ã‚‹ãƒ¦ãƒ‹ãƒƒãƒˆ
  *------------------------------------------
  */
 struct skill_unit *map_find_skill_unit_oncell(struct block_list *target,int x,int y,int skill_id,struct skill_unit *out_unit)
@@ -418,9 +395,9 @@ struct skill_unit *map_find_skill_unit_oncell(struct block_list *target,int x,in
 }
 
 /*==========================================
- * map m (x0,y0)-(x1,y1)“à‚Ì‘Sobj‚É‘Î‚µ‚Ä
- * func‚ğŒÄ‚Ô
- * type!=0 ‚È‚ç‚»‚Ìí—Ş‚Ì‚İ
+ * map m (x0,y0)-(x1,y1)å†…ã®å…¨objã«å¯¾ã—ã¦
+ * funcã‚’å‘¼ã¶
+ * type!=0 ãªã‚‰ãã®ç¨®é¡ã®ã¿
  *------------------------------------------
  */
 static int map_foreachinarea_sub(int (*func)(struct block_list*,va_list),int m,int x0,int y0,int x1,int y1,int type,va_list ap)
@@ -469,10 +446,10 @@ static int map_foreachinarea_sub(int (*func)(struct block_list*,va_list),int m,i
 			printf("map_foreachinarea: *WARNING* block count too many!\n");
 	}
 
-	map_freeblock_lock();	// ƒƒ‚ƒŠ‚©‚ç‚Ì‰ğ•ú‚ğ‹Ö~‚·‚é
+	map_freeblock_lock();	// ãƒ¡ãƒ¢ãƒªã‹ã‚‰ã®è§£æ”¾ã‚’ç¦æ­¢ã™ã‚‹
 
 	for(i = blockcount; i < bl_list_count; i++) {
-		if(bl_list[i]->prev) {	// —LŒø‚©‚Ç‚¤‚©ƒ`ƒFƒbƒN
+		if(bl_list[i]->prev) {	// æœ‰åŠ¹ã‹ã©ã†ã‹ãƒã‚§ãƒƒã‚¯
 			va_list apcopy;
 			va_copy(apcopy, ap);
 			ret += func(bl_list[i],apcopy);
@@ -480,7 +457,7 @@ static int map_foreachinarea_sub(int (*func)(struct block_list*,va_list),int m,i
 		}
 	}
 
-	map_freeblock_unlock();	// ‰ğ•ú‚ğ‹–‰Â‚·‚é
+	map_freeblock_unlock();	// è§£æ”¾ã‚’è¨±å¯ã™ã‚‹
 
 	bl_list_count = blockcount;
 
@@ -505,10 +482,10 @@ int map_foreachinarea(int (*func)(struct block_list*,va_list),int m,int x0,int y
 }
 
 /*==========================================
- * (x0,y0)‚©‚çdx,dy•ûŒü‚ÖËü‚Ì’Ê‚é”ÍˆÍ
- * (‹éŒ`‚©Î•ûŒÜŠpŒ`)“à‚Ìobj‚É‘Î‚µ‚Äfunc‚ğŒÄ‚Ô
+ * (x0,y0)ã‹ã‚‰dx,dyæ–¹å‘ã¸å°„ç·šã®é€šã‚‹ç¯„å›²
+ * (çŸ©å½¢ã‹æ–œæ–¹äº”è§’å½¢)å†…ã®objã«å¯¾ã—ã¦funcã‚’å‘¼ã¶
  *
- * dx,dy‚Í-1,0,1‚Ì‚İ‚Æ‚·‚é
+ * dx,dyã¯-1,0,1ã®ã¿ã¨ã™ã‚‹
  *------------------------------------------
  */
 #define swap(x,y) { int t; t = x; x = y; y = t; }
@@ -525,10 +502,10 @@ int map_foreachinshootpath(int (*func)(struct block_list*,va_list),
 	y1 = y0;
 
 	if(dx == 0 || dy == 0) {
-		// ‹éŒ`—Ìˆæ‚Ìê‡
+		// çŸ©å½¢é ˜åŸŸã®å ´åˆ
 		// map_foreachinarea + path_search_long
 
-		// Ëüã‚É•Ç‚ª‚ ‚é‚©ƒ`ƒFƒbƒNA•Ç‚ÌƒZƒ‹‚ÍË’ö‚ÉŠÜ‚Ü‚È‚¢
+		// å°„ç·šä¸Šã«å£ãŒã‚ã‚‹ã‹ãƒã‚§ãƒƒã‚¯ã€å£ã®ã‚»ãƒ«ã¯å°„ç¨‹ã«å«ã¾ãªã„
 		for(i = 0; i < range; i++) {
 			if(map_getcell(m,x1+dx,y1+dy,CELL_CHKWALL))
 				break;
@@ -592,19 +569,19 @@ int map_foreachinshootpath(int (*func)(struct block_list*,va_list),
 			}
 		}
 	} else {
-		// Î•ûŒÜŠpŒ`—Ìˆæ‚Ìê‡
-		// (x0,y0) ‚ğŒ´“_AËü•ûŒü‚ÌƒxƒNƒgƒ‹‚ğxu²A‚±‚ê‚É‘Î‚·‚é–@üƒxƒNƒgƒ‹‚ğyu²‚Æ‚µ‚½
-		// À•WŒn‚É•ÏŠ·‚µ‚Ä—Ìˆæƒ`ƒFƒbƒN‚ğs‚¤
-		// ‘ÎÛƒIƒuƒWƒFƒNƒg‚ÌÀ•W (x,y) ‚Í•½sˆÚ“®‚Æ‰ñ“]ˆÚ“®‚É‚æ‚Á‚Ä (xu,yu) ‚É•ÏŠ·‚Å‚«‚é
+		// æ–œæ–¹äº”è§’å½¢é ˜åŸŸã®å ´åˆ
+		// (x0,y0) ã‚’åŸç‚¹ã€å°„ç·šæ–¹å‘ã®ãƒ™ã‚¯ãƒˆãƒ«ã‚’xuè»¸ã€ã“ã‚Œã«å¯¾ã™ã‚‹æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«ã‚’yuè»¸ã¨ã—ãŸ
+		// åº§æ¨™ç³»ã«å¤‰æ›ã—ã¦é ˜åŸŸãƒã‚§ãƒƒã‚¯ã‚’è¡Œã†
+		// å¯¾è±¡ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®åº§æ¨™ (x,y) ã¯å¹³è¡Œç§»å‹•ã¨å›è»¢ç§»å‹•ã«ã‚ˆã£ã¦ (xu,yu) ã«å¤‰æ›ã§ãã‚‹
 		//   xu = (x-x0) * cos@ - (y-y0) * sin@
 		//   yu = (x-x0) * sin@ + (y-y0) * cos@
-		// xu²‚ªx²‚Éd‚È‚é‚Ü‚Å‰ñ“]‚µ‚Ä³‹K‰»‚·‚éA—á‚¦‚Îdx=1,dy=1‚È‚ç @ = -45“x
-		// ‚±‚Ì‚Æ‚«xu‚Í‹——£irangejAyu‚Í•iwidthj‚É‘Š“–‚·‚é
-		// ‚½‚¾‚µ•‚“®¬”“_‰‰Z‚ğ”ğ‚¯‚é‚½‚ß 1/sqrt(2) ‚ğÀ•W’PˆÊ‚Æ‚µ‚Ä‚¢‚é
+		// xuè»¸ãŒxè»¸ã«é‡ãªã‚‹ã¾ã§å›è»¢ã—ã¦æ­£è¦åŒ–ã™ã‚‹ã€ä¾‹ãˆã°dx=1,dy=1ãªã‚‰ @ = -45åº¦
+		// ã“ã®ã¨ãxuã¯è·é›¢ï¼ˆrangeï¼‰ã€yuã¯å¹…ï¼ˆwidthï¼‰ã«ç›¸å½“ã™ã‚‹
+		// ãŸã ã—æµ®å‹•å°æ•°ç‚¹æ¼”ç®—ã‚’é¿ã‘ã‚‹ãŸã‚ 1/sqrt(2) ã‚’åº§æ¨™å˜ä½ã¨ã—ã¦ã„ã‚‹
 
 		int xu, yu;
 
-		// Ëüã‚É•Ç‚ª‚ ‚é‚©ƒ`ƒFƒbƒNA•Ç‚ÌƒZƒ‹‚ÍË’ö‚ÉŠÜ‚Ş
+		// å°„ç·šä¸Šã«å£ãŒã‚ã‚‹ã‹ãƒã‚§ãƒƒã‚¯ã€å£ã®ã‚»ãƒ«ã¯å°„ç¨‹ã«å«ã‚€
 		for(i = 0; i < range; i++) {
 			if(map_getcell(m,x1,y1,CELL_CHKWALL))
 				break;
@@ -675,10 +652,10 @@ int map_foreachinshootpath(int (*func)(struct block_list*,va_list),
 			printf("map_foreachinpath: *WARNING* block count too many!\n");
 	}
 
-	map_freeblock_lock();	// ƒƒ‚ƒŠ‚©‚ç‚Ì‰ğ•ú‚ğ‹Ö~‚·‚é
+	map_freeblock_lock();	// ãƒ¡ãƒ¢ãƒªã‹ã‚‰ã®è§£æ”¾ã‚’ç¦æ­¢ã™ã‚‹
 
 	for(i = blockcount; i < bl_list_count; i++) {
-		if(bl_list[i]->prev) {	// —LŒø‚©‚Ç‚¤‚©ƒ`ƒFƒbƒN
+		if(bl_list[i]->prev) {	// æœ‰åŠ¹ã‹ã©ã†ã‹ãƒã‚§ãƒƒã‚¯
 			va_list ap;
 			va_start(ap, type);
 			ret += func(bl_list[i],ap);
@@ -686,7 +663,7 @@ int map_foreachinshootpath(int (*func)(struct block_list*,va_list),
 		}
 	}
 
-	map_freeblock_unlock();	// ‰ğ•ú‚ğ‹–‰Â‚·‚é
+	map_freeblock_unlock();	// è§£æ”¾ã‚’è¨±å¯ã™ã‚‹
 
 	bl_list_count = blockcount;
 
@@ -694,9 +671,9 @@ int map_foreachinshootpath(int (*func)(struct block_list*,va_list),
 }
 
 /*==========================================
- * ‹éŒ`(x0,y0)-(x1,y1)‚ª(dx,dy)ˆÚ“®‚µ‚½‚Ì
- * —ÌˆæŠO‚É‚È‚é—Ìˆæ(‹éŒ`‚©LšŒ`)“à‚Ìobj‚É
- * ‘Î‚µ‚Äfunc‚ğŒÄ‚Ô
+ * çŸ©å½¢(x0,y0)-(x1,y1)ãŒ(dx,dy)ç§»å‹•ã—ãŸæ™‚ã®
+ * é ˜åŸŸå¤–ã«ãªã‚‹é ˜åŸŸ(çŸ©å½¢ã‹Lå­—å½¢)å†…ã®objã«
+ * å¯¾ã—ã¦funcã‚’å‘¼ã¶
  *------------------------------------------
  */
 int map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,int y0,int x1,int y1,int dx,int dy,int type,...)
@@ -707,7 +684,7 @@ int map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,i
 	int ret = 0;
 
 	if(dx == 0 || dy == 0) {
-		// ‹éŒ`—Ìˆæ‚Ìê‡
+		// çŸ©å½¢é ˜åŸŸã®å ´åˆ
 		if(dx == 0) {
 			if(dy < 0) {
 				y0 = y1 + dy + 1;
@@ -726,11 +703,11 @@ int map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,i
 		// if(x1 >= map[m].xs) x1 = map[m].xs-1;
 		// if(y1 >= map[m].ys) y1 = map[m].ys-1;
 
-		// ‚±‚±‚ÅÀ•W•â³‚·‚é‚ÆAmap ‹÷‚ÌƒIƒuƒWƒFƒNƒg‚É‘Î‚µ‚ÄŠÖ”‚ª³‚µ‚­‹@”\‚µ‚È‚¢B
-		// (-10, 0) - (10, 10) ‚ª (10, 0) ˆÚ“®‚µ‚½”ÍˆÍŠO‚É‚È‚é—Ìˆæ‚ÆA•â³Œã‚Ì
-		// (  0, 0) - (10, 10) ‚ª (10, 0) ˆÚ“®‚µ‚½”ÍˆÍŠO‚É‚È‚é—Ìˆæ‚Í•Ê•¨‚É‚È‚éB
-		// •â³Œã‚Í (0, 0) - (10, 10) ‚É‚¢‚éƒIƒuƒWƒFƒNƒg‚É‘Î‚µ‚Ä‚àA‚±‚ÌŠÖ”‚ª
-		// ŒÄ‚Ño‚³‚ê‚é‚±‚Æ‚É‚È‚éB
+		// ã“ã“ã§åº§æ¨™è£œæ­£ã™ã‚‹ã¨ã€map éš…ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«å¯¾ã—ã¦é–¢æ•°ãŒæ­£ã—ãæ©Ÿèƒ½ã—ãªã„ã€‚
+		// (-10, 0) - (10, 10) ãŒ (10, 0) ç§»å‹•ã—ãŸæ™‚ç¯„å›²å¤–ã«ãªã‚‹é ˜åŸŸã¨ã€è£œæ­£å¾Œã®
+		// (  0, 0) - (10, 10) ãŒ (10, 0) ç§»å‹•ã—ãŸæ™‚ç¯„å›²å¤–ã«ãªã‚‹é ˜åŸŸã¯åˆ¥ç‰©ã«ãªã‚‹ã€‚
+		// è£œæ­£å¾Œã¯ (0, 0) - (10, 10) ã«ã„ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«å¯¾ã—ã¦ã‚‚ã€ã“ã®é–¢æ•°ãŒ
+		// å‘¼ã³å‡ºã•ã‚Œã‚‹ã“ã¨ã«ãªã‚‹ã€‚
 
 		x2 = (x0 < 0) ? 0 : x0 / BLOCK_SIZE;
 		y2 = (y0 < 0) ? 0 : y0 / BLOCK_SIZE;
@@ -766,18 +743,18 @@ int map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,i
 			}
 		}
 	} else {
-		// Lš—Ìˆæ‚Ìê‡
+		// Lå­—é ˜åŸŸã®å ´åˆ
 
 		// if(x0 < 0) x0 = 0;
 		// if(y0 < 0) y0 = 0;
 		// if(x1 >= map[m].xs) x1 = map[m].xs-1;
 		// if(y1 >= map[m].ys) y1 = map[m].ys-1;
 
-		// ‚±‚±‚ÅÀ•W•â³‚·‚é‚ÆAmap ‹÷‚ÌƒIƒuƒWƒFƒNƒg‚É‘Î‚µ‚ÄŠÖ”‚ª³‚µ‚­‹@”\‚µ‚È‚¢B
-		// (-10, -10) - (10, 10) ‚ª (10, 10) ˆÚ“®‚µ‚½”ÍˆÍŠO‚É‚È‚é—Ìˆæ‚ÆA•â³Œã‚Ì
-		// (  0,   0) - (10, 10) ‚ª (10, 10) ˆÚ“®‚µ‚½”ÍˆÍŠO‚É‚È‚é—Ìˆæ‚Í•Ê•¨‚É‚È‚éB
-		// •â³Œã‚Í (0, 0) - (10, 10) ‚É‚¢‚éƒIƒuƒWƒFƒNƒg‚É‘Î‚µ‚Ä‚àA‚±‚ÌŠÖ”‚ª
-		// ŒÄ‚Ño‚³‚ê‚é‚±‚Æ‚É‚È‚éB
+		// ã“ã“ã§åº§æ¨™è£œæ­£ã™ã‚‹ã¨ã€map éš…ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«å¯¾ã—ã¦é–¢æ•°ãŒæ­£ã—ãæ©Ÿèƒ½ã—ãªã„ã€‚
+		// (-10, -10) - (10, 10) ãŒ (10, 10) ç§»å‹•ã—ãŸæ™‚ç¯„å›²å¤–ã«ãªã‚‹é ˜åŸŸã¨ã€è£œæ­£å¾Œã®
+		// (  0,   0) - (10, 10) ãŒ (10, 10) ç§»å‹•ã—ãŸæ™‚ç¯„å›²å¤–ã«ãªã‚‹é ˜åŸŸã¯åˆ¥ç‰©ã«ãªã‚‹ã€‚
+		// è£œæ­£å¾Œã¯ (0, 0) - (10, 10) ã«ã„ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«å¯¾ã—ã¦ã‚‚ã€ã“ã®é–¢æ•°ãŒ
+		// å‘¼ã³å‡ºã•ã‚Œã‚‹ã“ã¨ã«ãªã‚‹ã€‚
 
 		x2 = (x0 < 0) ? 0 : x0 / BLOCK_SIZE;
 		y2 = (y0 < 0) ? 0 : y0 / BLOCK_SIZE;
@@ -828,10 +805,10 @@ int map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,i
 			printf("map_foreachinmovearea: *WARNING* block count too many!\n");
 	}
 
-	map_freeblock_lock();	// ƒƒ‚ƒŠ‚©‚ç‚Ì‰ğ•ú‚ğ‹Ö~‚·‚é
+	map_freeblock_lock();	// ãƒ¡ãƒ¢ãƒªã‹ã‚‰ã®è§£æ”¾ã‚’ç¦æ­¢ã™ã‚‹
 
 	for(i = blockcount; i < bl_list_count; i++) {
-		if(bl_list[i]->prev) {	// —LŒø‚©‚Ç‚¤‚©ƒ`ƒFƒbƒN
+		if(bl_list[i]->prev) {	// æœ‰åŠ¹ã‹ã©ã†ã‹ãƒã‚§ãƒƒã‚¯
 			va_list ap;
 			va_start(ap, type);
 			ret += func(bl_list[i],ap);
@@ -839,7 +816,7 @@ int map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,i
 		}
 	}
 
-	map_freeblock_unlock();	// ‰ğ•ú‚ğ‹–‰Â‚·‚é
+	map_freeblock_unlock();	// è§£æ”¾ã‚’è¨±å¯ã™ã‚‹
 
 	bl_list_count = blockcount;
 
@@ -848,13 +825,13 @@ int map_foreachinmovearea(int (*func)(struct block_list*,va_list),int m,int x0,i
 
 
 /*==========================================
- * ‹éŒ`(x[0],y[0])-(x[1],y[1])‚Æ‹éŒ`(x[2],y[2])-(x[3],y[3])‚Ì
- * ‹¤’Ê•”•ª‚É‘Î‚µ‚Äfunc‚ğŒÄ‚ÔB‚½‚¾‚µAx[0] < x[1], y[0] < y[1],
- * x[2] < x[3], y[2] < y[3]‚ğ‰¼’è‚µ‚Ä‚¢‚é
+ * çŸ©å½¢(x[0],y[0])-(x[1],y[1])ã¨çŸ©å½¢(x[2],y[2])-(x[3],y[3])ã®
+ * å…±é€šéƒ¨åˆ†ã«å¯¾ã—ã¦funcã‚’å‘¼ã¶ã€‚ãŸã ã—ã€x[0] < x[1], y[0] < y[1],
+ * x[2] < x[3], y[2] < y[3]ã‚’ä»®å®šã—ã¦ã„ã‚‹
  *------------------------------------------
  */
 
-// ³•ûŒ`‚Ì’†‚É“_(x,y) ‚ªŠÜ‚Ü‚ê‚Ä‚¢‚é‚©‚ğ’²‚×‚é
+// æ­£æ–¹å½¢ã®ä¸­ã«ç‚¹(x,y) ãŒå«ã¾ã‚Œã¦ã„ã‚‹ã‹ã‚’èª¿ã¹ã‚‹
 #define map_square_in(p, _x, _y) (x[p+0] <= (_x) && x[p+1] >= (_x) && y[p+0] <= (_y) && y[p+1] >= (_y))
 
 int map_foreachcommonarea(int (*func)(struct block_list*,va_list),int m,int x[4],int y[4],int type,...)
@@ -884,8 +861,8 @@ int map_foreachcommonarea(int (*func)(struct block_list*,va_list),int m,int x[4]
 }
 
 /*==========================================
- * °ƒAƒCƒeƒ€‚âƒGƒtƒFƒNƒg—p‚ÌˆêobjŠ„‚è“–‚Ä
- * object[]‚Ö‚Ì•Û‘¶
+ * åºŠã‚¢ã‚¤ãƒ†ãƒ ã‚„ã‚¨ãƒ•ã‚§ã‚¯ãƒˆç”¨ã®ä¸€æ™‚objå‰²ã‚Šå½“ã¦
+ * object[]ã¸ã®ä¿å­˜
  *------------------------------------------
  */
 int map_addobject(struct block_list *bl)
@@ -914,8 +891,8 @@ int map_addobject(struct block_list *bl)
 }
 
 /*==========================================
- * ˆêobject‚Ì‰ğ•ú
- *	map_delobject‚Ìfree‚µ‚È‚¢ƒo[ƒWƒ‡ƒ“
+ * ä¸€æ™‚objectã®è§£æ”¾
+ *	map_delobjectã®freeã—ãªã„ãƒãƒ¼ã‚¸ãƒ§ãƒ³
  *------------------------------------------
  */
 int map_delobjectnofree(int id)
@@ -930,11 +907,11 @@ int map_delobjectnofree(int id)
 }
 
 /*==========================================
- * ˆêobject‚Ì‰ğ•ú
- * block_list‚©‚ç‚ÌíœAid_db‚©‚ç‚Ìíœ
- * object data‚ÌfreeAobject[]‚Ö‚ÌNULL‘ã“ü
+ * ä¸€æ™‚objectã®è§£æ”¾
+ * block_listã‹ã‚‰ã®å‰Šé™¤ã€id_dbã‹ã‚‰ã®å‰Šé™¤
+ * object dataã®freeã€object[]ã¸ã®NULLä»£å…¥
  *
- * add‚Æ‚Ì‘ÎÌ«‚ª–³‚¢‚Ì‚ª‹C‚É‚È‚é
+ * addã¨ã®å¯¾ç§°æ€§ãŒç„¡ã„ã®ãŒæ°—ã«ãªã‚‹
  *------------------------------------------
  */
 int map_delobject(int id)
@@ -951,7 +928,7 @@ int map_delobject(int id)
 }
 
 /*==========================================
- * ‘Sˆêobj‘Šè‚Éfunc‚ğŒÄ‚Ô
+ * å…¨ä¸€æ™‚objç›¸æ‰‹ã«funcã‚’å‘¼ã¶
  *------------------------------------------
  */
 int map_foreachobject(int (*func)(struct block_list*,va_list),int type,...)
@@ -991,14 +968,14 @@ int map_foreachobject(int (*func)(struct block_list*,va_list),int type,...)
 }
 
 /*==========================================
- * °ƒAƒCƒeƒ€‚ğÁ‚·
+ * åºŠã‚¢ã‚¤ãƒ†ãƒ ã‚’æ¶ˆã™
  *
- * data==0‚Ì‚Ítimer‚ÅÁ‚¦‚½
- * data==1‚Ì‚ÍE‚¤“™‚ÅÁ‚¦‚½‚Æ‚µ‚Ä“®ì
- * data==2‚Ì‚ÍƒT[ƒo’â~
+ * data==0ã®æ™‚ã¯timerã§æ¶ˆãˆãŸæ™‚
+ * data==1ã®æ™‚ã¯æ‹¾ã†ç­‰ã§æ¶ˆãˆãŸæ™‚ã¨ã—ã¦å‹•ä½œ
+ * data==2ã®æ™‚ã¯ã‚µãƒ¼ãƒåœæ­¢æ™‚
  *
- * data==1‚ÍAmap_clearflooritem(id)‚Ö
- * map.h“à‚Å#define‚µ‚Ä‚ ‚é
+ * data==1ã¯ã€map_clearflooritem(id)ã¸
+ * map.hå†…ã§#defineã—ã¦ã‚ã‚‹
  *------------------------------------------
  */
 int map_clearflooritem_timer(int tid,unsigned int tick,int id,void *data)
@@ -1026,8 +1003,8 @@ int map_clearflooritem_timer(int tid,unsigned int tick,int id,void *data)
 }
 
 /*==========================================
- * (x0,y0)‚©‚ç(x1,y1)‚Ì‹ó‚«(=N“ü‰Â”\)
- * cell‚ğƒŠƒXƒg‚ÉŠi”[‚µ‚Ä‚»‚Ì”‚ğ•Ô‚·
+ * (x0,y0)ã‹ã‚‰(x1,y1)ã®ç©ºã(=ä¾µå…¥å¯èƒ½)
+ * cellã‚’ãƒªã‚¹ãƒˆã«æ ¼ç´ã—ã¦ãã®æ•°ã‚’è¿”ã™
  *------------------------------------------
  */
 int map_searchfreecell(struct cell_xy *list,int m,int x0,int y0,int x1,int y1)
@@ -1049,9 +1026,9 @@ int map_searchfreecell(struct cell_xy *list,int m,int x0,int y0,int x1,int y1)
 }
 
 /*==========================================
- * (m,x,y)‚ğ’†S‚É3x3ˆÈ“à‚É°ƒAƒCƒeƒ€İ’u
+ * (m,x,y)ã‚’ä¸­å¿ƒã«3x3ä»¥å†…ã«åºŠã‚¢ã‚¤ãƒ†ãƒ è¨­ç½®
  *
- * item_data‚ÍamountˆÈŠO‚ğcopy‚·‚é
+ * item_dataã¯amountä»¥å¤–ã‚’copyã™ã‚‹
  *------------------------------------------
  */
 int map_addflooritem(struct item *item_data,int amount,int m,int x,int y,int first_id,int second_id,int third_id,int type)
@@ -1127,7 +1104,7 @@ int map_addflooritem(struct item *item_data,int amount,int m,int x,int y,int fir
 }
 
 /*==========================================
- * ƒhƒƒbƒvƒfƒBƒŒƒCƒLƒ…[‚Öpush
+ * ãƒ‰ãƒ­ãƒƒãƒ—ãƒ‡ã‚£ãƒ¬ã‚¤ã‚­ãƒ¥ãƒ¼ã¸push
  *------------------------------------------
  */
 void map_push_delayitem_que(struct delay_item_drop2 *ditem)
@@ -1135,15 +1112,15 @@ void map_push_delayitem_que(struct delay_item_drop2 *ditem)
 	nullpo_retv(ditem);
 
 	if(delayitem_head == NULL && delayitem_tail == NULL) {
-		// Å‰‚ÌƒLƒ…[
+		// æœ€åˆã®ã‚­ãƒ¥ãƒ¼
 		delayitem_head = ditem;
 		delayitem_tail = ditem;
 	} else if(delayitem_tail) {
-		// ÅŒã”ö‚É˜AŒ‹
+		// æœ€å¾Œå°¾ã«é€£çµ
 		delayitem_tail->next = ditem;
 		delayitem_tail       = ditem;
 	} else {
-		// —L‚è“¾‚È‚¢ƒGƒ‰[
+		// æœ‰ã‚Šå¾—ãªã„ã‚¨ãƒ©ãƒ¼
 		printf("map_push_delayitem_que: delayitem_tail is NULL !!");
 		map_clear_delayitem_que();
 		map_push_delayitem_que(ditem);
@@ -1154,7 +1131,7 @@ void map_push_delayitem_que(struct delay_item_drop2 *ditem)
 }
 
 /*==========================================
- * ƒhƒƒbƒvƒfƒBƒŒƒCƒLƒ…[‚©‚çpop
+ * ãƒ‰ãƒ­ãƒƒãƒ—ãƒ‡ã‚£ãƒ¬ã‚¤ã‚­ãƒ¥ãƒ¼ã‹ã‚‰pop
  *------------------------------------------
  */
 struct delay_item_drop2 *map_pop_delayitem_que(void)
@@ -1170,7 +1147,7 @@ struct delay_item_drop2 *map_pop_delayitem_que(void)
 }
 
 /*==========================================
- * ƒhƒƒbƒvƒfƒBƒŒƒCƒLƒ…[‚ÌƒNƒŠƒA
+ * ãƒ‰ãƒ­ãƒƒãƒ—ãƒ‡ã‚£ãƒ¬ã‚¤ã‚­ãƒ¥ãƒ¼ã®ã‚¯ãƒªã‚¢
  *------------------------------------------
  */
 void map_clear_delayitem_que(void)
@@ -1191,7 +1168,7 @@ void map_clear_delayitem_que(void)
 }
 
 /*==========================================
- * charid_db‚ÌƒLƒƒƒ‰ƒf[ƒ^‚ğŒŸõ
+ * charid_dbã®ã‚­ãƒ£ãƒ©ãƒ‡ãƒ¼ã‚¿ã‚’æ¤œç´¢
  *------------------------------------------
  */
 struct charid2nick *char_search(int char_id)
@@ -1199,7 +1176,7 @@ struct charid2nick *char_search(int char_id)
 	struct charid2nick *p;
 
 	p = (struct charid2nick *)numdb_search(charid_db,char_id);
-	if(p == NULL) {	// ƒf[ƒ^ƒx[ƒX‚É‚È‚¢
+	if(p == NULL) {	// ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã«ãªã„
 		chrif_searchcharid(char_id);
 	}
 
@@ -1207,7 +1184,7 @@ struct charid2nick *char_search(int char_id)
 }
 
 /*==========================================
- * charid_db‚Ö’Ç‰Á(•ÔM‘Ò‚¿‚ª‚ ‚ê‚Î•ÔM)
+ * charid_dbã¸è¿½åŠ (è¿”ä¿¡å¾…ã¡ãŒã‚ã‚Œã°è¿”ä¿¡)
  *------------------------------------------
  */
 void map_addchariddb(int charid, const char *name, int account_id, unsigned long ip, unsigned short port)
@@ -1219,7 +1196,7 @@ void map_addchariddb(int charid, const char *name, int account_id, unsigned long
 		return;
 
 	p = (struct charid2nick *)numdb_search(charid_db,charid);
-	if(p == NULL) {	// ƒf[ƒ^ƒx[ƒX‚É‚È‚¢
+	if(p == NULL) {	// ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã«ãªã„
 		p = (struct charid2nick *)aCalloc(1,sizeof(struct charid2nick));
 		p->req = NULL;
 		numdb_insert(charid_db,charid,p);
@@ -1232,7 +1209,7 @@ void map_addchariddb(int charid, const char *name, int account_id, unsigned long
 	p->port       = port;
 	p->req        = NULL;
 
-	if(head) {	// •ÔM‘Ò‚¿‚ª‚ ‚ê‚Î‘Sˆõ‚É•ÔM
+	if(head) {	// è¿”ä¿¡å¾…ã¡ãŒã‚ã‚Œã°å…¨å“¡ã«è¿”ä¿¡
 		struct linkdb_node *node = head;
 		while(node) {
 			struct map_session_data *sd = map_id2sd(PTR2INT(node->key));
@@ -1251,7 +1228,7 @@ void map_addchariddb(int charid, const char *name, int account_id, unsigned long
 }
 
 /*==========================================
- * charid_db‚©‚çíœ
+ * charid_dbã‹ã‚‰å‰Šé™¤
  *------------------------------------------
  */
 void map_delchariddb(int charid)
@@ -1260,7 +1237,7 @@ void map_delchariddb(int charid)
 
 	p = (struct charid2nick *)numdb_search(charid_db,charid);
 	if(p) {
-		// ÀÛ‚Éíœ‚·‚é‚Æ•Ší‚Ì–¼‘O‚Æ‚©æ‚ê‚È‚­‚È‚é‚Ì‚Åmap-server‚ÌIP‚ÆPort‚¾‚¯íœ
+		// å®Ÿéš›ã«å‰Šé™¤ã™ã‚‹ã¨æ­¦å™¨ã®åå‰ã¨ã‹å–ã‚Œãªããªã‚‹ã®ã§map-serverã®IPã¨Portã ã‘å‰Šé™¤
 		p->ip   = 0;
 		p->port = 0;
 	}
@@ -1269,8 +1246,8 @@ void map_delchariddb(int charid)
 }
 
 /*==========================================
- * charid_db‚Ö’Ç‰Ái•ÔM—v‹‚Ì‚İj
- * V‹K’Ç‰Á‚Í1A‚»‚êˆÈŠO‚Í0‚ğ•Ô‚·
+ * charid_dbã¸è¿½åŠ ï¼ˆè¿”ä¿¡è¦æ±‚ã®ã¿ï¼‰
+ * æ–°è¦è¿½åŠ æ™‚ã¯1ã€ãã‚Œä»¥å¤–ã¯0ã‚’è¿”ã™
  *------------------------------------------
  */
 int map_reqchariddb(struct map_session_data *sd, int charid, int type)
@@ -1280,9 +1257,9 @@ int map_reqchariddb(struct map_session_data *sd, int charid, int type)
 	nullpo_retr(0, sd);
 
 	p = (struct charid2nick *)numdb_search(charid_db,charid);
-	if(p != NULL) {	// ƒf[ƒ^ƒx[ƒX‚É‚·‚Å‚É‚ ‚é
+	if(p != NULL) {	// ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã«ã™ã§ã«ã‚ã‚‹
 		if(p->req) {
-			// •ÔM‘Ò‚¿ó‘Ô‚È‚Ì‚ÅƒŠƒXƒgXV
+			// è¿”ä¿¡å¾…ã¡çŠ¶æ…‹ãªã®ã§ãƒªã‚¹ãƒˆæ›´æ–°
 			int data = PTR2INT(linkdb_search(&p->req, INT2PTR(sd->bl.id)));
 			linkdb_replace(&p->req, INT2PTR(sd->bl.id), INT2PTR(data | type));
 		}
@@ -1297,7 +1274,7 @@ int map_reqchariddb(struct map_session_data *sd, int charid, int type)
 }
 
 /*==========================================
- * id_db‚Öbl‚ğ’Ç‰Á
+ * id_dbã¸blã‚’è¿½åŠ 
  *------------------------------------------
  */
 void map_addiddb(struct block_list *bl)
@@ -1308,7 +1285,7 @@ void map_addiddb(struct block_list *bl)
 }
 
 /*==========================================
- * id_db‚©‚çbl‚ğíœ
+ * id_dbã‹ã‚‰blã‚’å‰Šé™¤
  *------------------------------------------
  */
 void map_deliddb(struct block_list *bl)
@@ -1319,7 +1296,7 @@ void map_deliddb(struct block_list *bl)
 }
 
 /*==========================================
- * nick_db‚Ösd‚ğ’Ç‰Á
+ * nick_dbã¸sdã‚’è¿½åŠ 
  *------------------------------------------
  */
 void map_addnickdb(struct map_session_data *sd)
@@ -1330,9 +1307,9 @@ void map_addnickdb(struct map_session_data *sd)
 }
 
 /*==========================================
- * PC‚Ìquitˆ— map.c“à•ª
+ * PCã®quitå‡¦ç† map.cå†…åˆ†
  *
- * quitˆ—‚Ìå‘Ì‚ªˆá‚¤‚æ‚¤‚È‹C‚à‚µ‚Ä‚«‚½
+ * quitå‡¦ç†ã®ä¸»ä½“ãŒé•ã†ã‚ˆã†ãªæ°—ã‚‚ã—ã¦ããŸ
  *------------------------------------------
  */
 int map_quit(struct map_session_data *sd)
@@ -1367,7 +1344,7 @@ int map_quit(struct map_session_data *sd)
 	status_free_sc_data(&sd->sc);
 #endif
 
-	// ‚QdƒƒOƒCƒ“AŒã‚ÉƒƒOƒCƒ“‚µ‚½ƒLƒƒƒ‰‚Ìid_db‚Ííœ‚µ‚È‚¢
+	// ï¼’é‡ãƒ­ã‚°ã‚¤ãƒ³æ™‚ã€å¾Œã«ãƒ­ã‚°ã‚¤ãƒ³ã—ãŸã‚­ãƒ£ãƒ©ã®id_dbã¯å‰Šé™¤ã—ãªã„
 	if(sd->new_fd != -1)
 		numdb_erase(id_db,sd->bl.id);
 
@@ -1381,7 +1358,7 @@ int map_quit(struct map_session_data *sd)
 }
 
 /*==========================================
- * id”Ô†‚ÌPC‚ğ’T‚·B‹‚È‚¯‚ê‚ÎNULL
+ * idç•ªå·ã®PCã‚’æ¢ã™ã€‚å±…ãªã‘ã‚Œã°NULL
  *------------------------------------------
  */
 struct map_session_data * map_id2sd(int id)
@@ -1397,7 +1374,7 @@ struct map_session_data * map_id2sd(int id)
 }
 
 /*==========================================
- * id”Ô†‚ÌMOB‚ğ’T‚·B‹‚È‚¯‚ê‚ÎNULL
+ * idç•ªå·ã®MOBã‚’æ¢ã™ã€‚å±…ãªã‘ã‚Œã°NULL
  *------------------------------------------
  */
 struct mob_data * map_id2md(int id)
@@ -1413,7 +1390,7 @@ struct mob_data * map_id2md(int id)
 }
 
 /*==========================================
- * id”Ô†‚ÌHOM‚ğ’T‚·B‹‚È‚¯‚ê‚ÎNULL
+ * idç•ªå·ã®HOMã‚’æ¢ã™ã€‚å±…ãªã‘ã‚Œã°NULL
  *------------------------------------------
  */
 struct homun_data * map_id2hd(int id)
@@ -1429,7 +1406,7 @@ struct homun_data * map_id2hd(int id)
 }
 
 /*==========================================
- * id”Ô†‚ÌMERC‚ğ’T‚·B‹‚È‚¯‚ê‚ÎNULL
+ * idç•ªå·ã®MERCã‚’æ¢ã™ã€‚å±…ãªã‘ã‚Œã°NULL
  *------------------------------------------
  */
 struct merc_data * map_id2mcd(int id)
@@ -1445,7 +1422,7 @@ struct merc_data * map_id2mcd(int id)
 }
 
 /*==========================================
- * id”Ô†‚ÌELEM‚ğ’T‚·B‹‚È‚¯‚ê‚ÎNULL
+ * idç•ªå·ã®ELEMã‚’æ¢ã™ã€‚å±…ãªã‘ã‚Œã°NULL
  *------------------------------------------
  */
 struct elem_data * map_id2eld(int id)
@@ -1461,7 +1438,7 @@ struct elem_data * map_id2eld(int id)
 }
 
 /*==========================================
- * id”Ô†‚ÌNPC‚ğ’T‚·B‹‚È‚¯‚ê‚ÎNULL
+ * idç•ªå·ã®NPCã‚’æ¢ã™ã€‚å±…ãªã‘ã‚Œã°NULL
  *------------------------------------------
  */
 struct npc_data * map_id2nd(int id)
@@ -1477,14 +1454,14 @@ struct npc_data * map_id2nd(int id)
 }
 
 /*==========================================
- * id”Ô†‚ÌCHAT‚ğ’T‚·B‹‚È‚¯‚ê‚ÎNULL
+ * idç•ªå·ã®CHATã‚’æ¢ã™ã€‚å±…ãªã‘ã‚Œã°NULL
  *------------------------------------------
  */
 struct chat_data * map_id2cd(int id)
 {
 	struct block_list *bl;
 
-	// ƒ`ƒƒƒbƒg‚Íˆêobject
+	// ãƒãƒ£ãƒƒãƒˆã¯ä¸€æ™‚object
 	if(id > 0 && id < MAX_FLOORITEM) {
 		bl = object[id];
 		if(bl && bl->type == BL_CHAT) {
@@ -1498,14 +1475,14 @@ struct chat_data * map_id2cd(int id)
 }
 
 /*==========================================
- * id”Ô†‚ÌSKILL‚ğ’T‚·B‹‚È‚¯‚ê‚ÎNULL
+ * idç•ªå·ã®SKILLã‚’æ¢ã™ã€‚å±…ãªã‘ã‚Œã°NULL
  *------------------------------------------
  */
 struct skill_unit * map_id2su(int id)
 {
 	struct block_list *bl;
 
-	// ƒXƒLƒ‹ƒ†ƒjƒbƒg‚Íˆêobject
+	// ã‚¹ã‚­ãƒ«ãƒ¦ãƒ‹ãƒƒãƒˆã¯ä¸€æ™‚object
 	if(id > 0 && id < MAX_FLOORITEM) {
 		bl = object[id];
 		if(bl && bl->type == BL_SKILL) {
@@ -1519,14 +1496,14 @@ struct skill_unit * map_id2su(int id)
 }
 
 /*==========================================
- * id”Ô†‚ÌGRP‚ğ’T‚·B‹‚È‚¯‚ê‚ÎNULL
+ * idç•ªå·ã®GRPã‚’æ¢ã™ã€‚å±…ãªã‘ã‚Œã°NULL
  *------------------------------------------
  */
 struct skill_unit_group * map_id2sg(int id)
 {
 	struct block_list *bl;
 
-	// ƒXƒLƒ‹ƒ†ƒjƒbƒgƒOƒ‹[ƒv‚Íˆêobject
+	// ã‚¹ã‚­ãƒ«ãƒ¦ãƒ‹ãƒƒãƒˆã‚°ãƒ«ãƒ¼ãƒ—ã¯ä¸€æ™‚object
 	if(id > 0 && id < MAX_FLOORITEM) {
 		bl = object[id];
 		if(bl && bl->type == BL_GRP) {
@@ -1540,8 +1517,8 @@ struct skill_unit_group * map_id2sg(int id)
 }
 
 /*==========================================
- * id”Ô†‚Ì•¨‚ğ’T‚·
- * ˆêobject‚Ìê‡‚Í”z—ñ‚ğˆø‚­‚Ì‚İ
+ * idç•ªå·ã®ç‰©ã‚’æ¢ã™
+ * ä¸€æ™‚objectã®å ´åˆã¯é…åˆ—ã‚’å¼•ãã®ã¿
  *------------------------------------------
  */
 struct block_list * map_id2bl(int id)
@@ -1556,7 +1533,7 @@ struct block_list * map_id2bl(int id)
 }
 
 /*==========================================
- * char_id”Ô†‚Ì–¼‘O‚ğ’T‚·
+ * char_idç•ªå·ã®åå‰ã‚’æ¢ã™
  *------------------------------------------
  */
 char * map_charid2nick(int id)
@@ -1570,7 +1547,7 @@ char * map_charid2nick(int id)
 }
 
 /*==========================================
- * char_id”Ô†‚ÌPC‚ğ’T‚·
+ * char_idç•ªå·ã®PCã‚’æ¢ã™
  *------------------------------------------
  */
 struct map_session_data * map_charid2sd(int id)
@@ -1584,7 +1561,7 @@ struct map_session_data * map_charid2sd(int id)
 }
 
 /*==========================================
- * –¼‘O‚ªnick‚ÌPC‚ğ’T‚·B‹‚È‚¯‚ê‚ÎNULL
+ * åå‰ãŒnickã®PCã‚’æ¢ã™ã€‚å±…ãªã‘ã‚Œã°NULL
  *------------------------------------------
  */
 struct map_session_data * map_nick2sd(const char *nick)
@@ -1596,7 +1573,7 @@ struct map_session_data * map_nick2sd(const char *nick)
 }
 
 /*==========================================
- * ƒ}ƒXƒ^[‚Ìsd‚ğ’T‚·B‹‚È‚¯‚ê‚ÎNULL
+ * ãƒã‚¹ã‚¿ãƒ¼ã®sdã‚’æ¢ã™ã€‚å±…ãªã‘ã‚Œã°NULL
  *------------------------------------------
  */
 struct map_session_data * map_bl2msd(struct block_list *bl)
@@ -1620,7 +1597,7 @@ struct map_session_data * map_bl2msd(struct block_list *bl)
 }
 
 /*==========================================
- * id_db“à‚Ì‘S‚Ä‚Éfunc‚ğÀs
+ * id_dbå†…ã®å…¨ã¦ã«funcã‚’å®Ÿè¡Œ
  *------------------------------------------
  */
 int map_foreachiddb(int (*func)(void*,void*,va_list),...)
@@ -1636,7 +1613,7 @@ int map_foreachiddb(int (*func)(void*,void*,va_list),...)
 }
 
 /*==========================================
- * map.npc‚Ö’Ç‰Á (warp“™‚Ì—Ìˆæ‚¿‚Ì‚İ)
+ * map.npcã¸è¿½åŠ  (warpç­‰ã®é ˜åŸŸæŒã¡ã®ã¿)
  *------------------------------------------
  */
 int map_addnpc(int m,struct npc_data *nd)
@@ -1668,7 +1645,7 @@ int map_addnpc(int m,struct npc_data *nd)
 }
 
 /*==========================================
- * ƒƒ‚ƒŠƒAƒ‹ƒ_ƒ“ƒWƒ‡ƒ“map’Ç‰Á
+ * ãƒ¡ãƒ¢ãƒªã‚¢ãƒ«ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³mapè¿½åŠ 
  *------------------------------------------
  */
 int map_addmdmap(const char *name, int id)
@@ -1691,23 +1668,23 @@ int map_addmdmap(const char *name, int id)
 			break;
 	}
 	if(i < map_num) {
-		// ‹Œƒƒ‚ƒŠƒAƒ‹ƒ_ƒ“ƒWƒ‡ƒ“íœÏ‚İ—Ìˆæ‚ğ—¬—p‚·‚é
+		// æ—§ãƒ¡ãƒ¢ãƒªã‚¢ãƒ«ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³å‰Šé™¤æ¸ˆã¿é ˜åŸŸã‚’æµç”¨ã™ã‚‹
 		dst_m = i;
 	}
 	else if(i < map_max) {
-		// map_num‚ğƒCƒ“ƒNƒŠƒƒ“ƒg
+		// map_numã‚’ã‚¤ãƒ³ã‚¯ãƒªãƒ¡ãƒ³ãƒˆ
 		dst_m = map_num++;
 	}
 	else {
-		// ’Ç‰Á—]—T‚È‚µ
+		// è¿½åŠ ä½™è£•ãªã—
 		printf("map_addmdmap failed. map_num(%d) > map_max(%d)\n",map_num, map_max);
 		return -1;
 	}
 
-	// ƒ}ƒbƒvî•ñ•¡»
+	// ãƒãƒƒãƒ—æƒ…å ±è¤‡è£½
 	memcpy(&map[dst_m], &map[src_m], sizeof(struct map_data));
 
-	// ƒ}ƒbƒvî•ñ•ÒW
+	// ãƒãƒƒãƒ—æƒ…å ±ç·¨é›†
 	snprintf(map[dst_m].name, sizeof(map[dst_m].name), "%03d%s", id, name);
 	map[dst_m].name[23] = '\0';
 
@@ -1733,7 +1710,7 @@ int map_addmdmap(const char *name, int id)
 }
 
 /*==========================================
- * ƒƒ‚ƒŠƒAƒ‹ƒ_ƒ“ƒWƒ‡ƒ“PC—£’E
+ * ãƒ¡ãƒ¢ãƒªã‚¢ãƒ«ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³PCé›¢è„±
  *------------------------------------------
  */
 static int map_mdmap_leave(struct block_list *bl, va_list ap)
@@ -1749,7 +1726,7 @@ static int map_mdmap_leave(struct block_list *bl, va_list ap)
 }
 
 /*==========================================
- * ƒƒ‚ƒŠƒAƒ‹ƒ_ƒ“ƒWƒ‡ƒ“blockŠÖ˜Aíœ
+ * ãƒ¡ãƒ¢ãƒªã‚¢ãƒ«ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³blocké–¢é€£å‰Šé™¤
  *------------------------------------------
  */
 static int map_mdmap_clean(struct block_list *bl, va_list ap)
@@ -1790,7 +1767,7 @@ static int map_mdmap_clean(struct block_list *bl, va_list ap)
 }
 
 /*==========================================
- * ƒƒ‚ƒŠƒAƒ‹ƒ_ƒ“ƒWƒ‡ƒ“mapíœ
+ * ãƒ¡ãƒ¢ãƒªã‚¢ãƒ«ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³mapå‰Šé™¤
  *------------------------------------------
  */
 int map_delmdmap(int m)
@@ -1800,13 +1777,13 @@ int map_delmdmap(int m)
 	if(map[m].memorial_id == 0)
 		return 0;
 
-	// ƒ}ƒbƒv“à‚ÌPC—£’E
+	// ãƒãƒƒãƒ—å†…ã®PCé›¢è„±
 	map_foreachinarea(map_mdmap_leave, m, 0, 0, map[m].xs, map[m].ys, BL_PC);
 
-	// ƒ}ƒbƒv“à‚Ìblocklist‰ğ•ú
+	// ãƒãƒƒãƒ—å†…ã®blocklistè§£æ”¾
 	map_foreachinarea(map_mdmap_clean, m, 0, 0, map[m].xs, map[m].ys, BL_ALL);
 
-	// ƒ}ƒbƒvî•ñ‰Šú‰»
+	// ãƒãƒƒãƒ—æƒ…å ±åˆæœŸåŒ–
 	if(map[m].gat) {
 		aFree(map[m].gat);
 		map[m].gat = NULL;
@@ -1823,7 +1800,7 @@ int map_delmdmap(int m)
 }
 
 /*==========================================
- * mapƒ^ƒCƒvæ“¾
+ * mapã‚¿ã‚¤ãƒ—å–å¾—
  *------------------------------------------
  */
 int map_getmaptype(int m)
@@ -1864,7 +1841,7 @@ int map_getmaptype(int m)
 }
 
 /*==========================================
- * map–¼‚©‚çmap”Ô†‚Ö•ÏŠ·
+ * mapåã‹ã‚‰mapç•ªå·ã¸å¤‰æ›
  *------------------------------------------
  */
 int map_mapname2mapid(const char *name)
@@ -1878,7 +1855,7 @@ int map_mapname2mapid(const char *name)
 }
 
 /*==========================================
- * ‘¼Imap–¼‚©‚çip,port•ÏŠ·
+ * ä»–é¯–mapåã‹ã‚‰ip,portå¤‰æ›
  *------------------------------------------
  */
 int map_mapname2ipport(const char *name,unsigned long *ip,unsigned short *port)
@@ -1894,9 +1871,9 @@ int map_mapname2ipport(const char *name,unsigned long *ip,unsigned short *port)
 	return 0;
 }
 
-// gatŒn
+// gatç³»
 /*==========================================
- * (m,x,y)‚Ìó‘Ô‚ğ’²‚×‚é
+ * (m,x,y)ã®çŠ¶æ…‹ã‚’èª¿ã¹ã‚‹
  *------------------------------------------
  */
 int map_getcell(int m,int x,int y,cell_t cellchk)
@@ -1945,7 +1922,7 @@ int map_getcellp(struct map_data* m,int x,int y,cell_t cellchk)
 }
 
 /*==========================================
- * (m,x,y)‚Ìó‘Ô‚ğİ’è‚·‚é
+ * (m,x,y)ã®çŠ¶æ…‹ã‚’è¨­å®šã™ã‚‹
  *------------------------------------------
  */
 void map_setcell(int m,int x,int y,int cell)
@@ -1980,7 +1957,7 @@ void map_setcell(int m,int x,int y,int cell)
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒ_ƒ€‚Éƒ}ƒbƒv‚Ì—LŒøƒZƒ‹ˆÊ’u‚ğ•Ô‚·
+ * ãƒ©ãƒ³ãƒ€ãƒ ã«ãƒãƒƒãƒ—ã®æœ‰åŠ¹ã‚»ãƒ«ä½ç½®ã‚’è¿”ã™
  *------------------------------------------
  */
 int map_random_freecell(int m,int *x,int *y)
@@ -2003,7 +1980,7 @@ int map_random_freecell(int m,int *x,int *y)
 }
 
 /*==========================================
- * ‘¼IŠÇ—‚Ìƒ}ƒbƒv‚ğdb‚É’Ç‰Á
+ * ä»–é¯–ç®¡ç†ã®ãƒãƒƒãƒ—ã‚’dbã«è¿½åŠ 
  *------------------------------------------
  */
 int map_setipport(const char *name,unsigned long ip,unsigned short port)
@@ -2013,7 +1990,7 @@ int map_setipport(const char *name,unsigned long ip,unsigned short port)
 
 	md = (struct map_data *)strdb_search(map_db,name);
 	if(md == NULL) {
-		// ‘¶İ‚µ‚È‚¢ƒf[ƒ^
+		// å­˜åœ¨ã—ãªã„ãƒ‡ãƒ¼ã‚¿
 		mdos = (struct map_data_other_server *)aCalloc(1,sizeof(struct map_data_other_server));
 		memcpy(mdos->name,name,24);
 		mdos->name[23] = '\0';	// force \0 terminal
@@ -2024,7 +2001,7 @@ int map_setipport(const char *name,unsigned long ip,unsigned short port)
 		strdb_insert(map_db,mdos->name,mdos);
 	} else if(md->gat) {
 		if(ip != clif_getip() || port != clif_getport()) {
-			// “Ç‚İ‚ñ‚Å‚¢‚½‚¯‚ÇA’S“–ŠO‚É‚È‚Á‚½ƒ}ƒbƒv
+			// èª­ã¿è¾¼ã‚“ã§ã„ãŸã‘ã©ã€æ‹…å½“å¤–ã«ãªã£ãŸãƒãƒƒãƒ—
 			mdos = (struct map_data_other_server *)aCalloc(1,sizeof(struct map_data_other_server));
 			memcpy(mdos->name,name,24);
 			mdos->name[23] = '\0';	// force \0 terminal
@@ -2034,25 +2011,25 @@ int map_setipport(const char *name,unsigned long ip,unsigned short port)
 			mdos->map  = md;
 			strdb_insert(map_db,mdos->name,mdos);
 		} else {
-			// “Ç‚İ‚ñ‚Å‚¢‚ÄA’S“–‚É‚È‚Á‚½ƒ}ƒbƒvi‰½‚à‚µ‚È‚¢j
+			// èª­ã¿è¾¼ã‚“ã§ã„ã¦ã€æ‹…å½“ã«ãªã£ãŸãƒãƒƒãƒ—ï¼ˆä½•ã‚‚ã—ãªã„ï¼‰
 			;
 		}
 	} else {
 		mdos = (struct map_data_other_server *)md;
 		if(ip == clif_getip() && port == clif_getport()) {
-			// ©•ª‚Ì’S“–‚É‚È‚Á‚½ƒ}ƒbƒv
+			// è‡ªåˆ†ã®æ‹…å½“ã«ãªã£ãŸãƒãƒƒãƒ—
 			if(mdos->map == NULL) {
-				// “Ç‚İ‚ñ‚Å‚¢‚È‚¢‚Ì‚ÅI—¹‚·‚é
+				// èª­ã¿è¾¼ã‚“ã§ã„ãªã„ã®ã§çµ‚äº†ã™ã‚‹
 				printf("map_setipport : %s is not loaded.\n",name);
 				exit(1);
 			} else {
-				// “Ç‚İ‚ñ‚Å‚¢‚é‚Ì‚Å’u‚«Š·‚¦‚é
+				// èª­ã¿è¾¼ã‚“ã§ã„ã‚‹ã®ã§ç½®ãæ›ãˆã‚‹
 				md = mdos->map;
 				strdb_insert(map_db,md->name,md);
 				aFree(mdos);
 			}
 		} else {
-			// ‘¼‚ÌI‚Ì’S“–ƒ}ƒbƒv‚È‚Ì‚Å’u‚«Š·‚¦‚é‚¾‚¯
+			// ä»–ã®é¯–ã®æ‹…å½“ãƒãƒƒãƒ—ãªã®ã§ç½®ãæ›ãˆã‚‹ã ã‘
 			mdos->ip   = ip;
 			mdos->port = port;
 		}
@@ -2061,7 +2038,7 @@ int map_setipport(const char *name,unsigned long ip,unsigned short port)
 }
 
 /*==========================================
- * ‘¼IŠÇ—‚Ìƒ}ƒbƒv‚ğ‘S‚Äíœ
+ * ä»–é¯–ç®¡ç†ã®ãƒãƒƒãƒ—ã‚’å…¨ã¦å‰Šé™¤
  *------------------------------------------
  */
 static int map_eraseallipport_sub(void *key,void *data,va_list va)
@@ -2081,7 +2058,7 @@ void map_eraseallipport(void)
 }
 
 /*==========================================
- * ‘¼IŠÇ—‚Ìƒ}ƒbƒv‚ğdb‚©‚çíœ
+ * ä»–é¯–ç®¡ç†ã®ãƒãƒƒãƒ—ã‚’dbã‹ã‚‰å‰Šé™¤
  *------------------------------------------
  */
 int map_eraseipport(const char *name,unsigned long ip,unsigned short port)
@@ -2096,8 +2073,8 @@ int map_eraseipport(const char *name,unsigned long ip,unsigned short port)
 		mdos = (struct map_data_other_server *)md;
 		if(mdos->ip == ip && mdos->port == port) {
 			if(mdos->map) {
-				// ‚±‚Ìƒ}ƒbƒvI‚Å‚à“Ç‚İ‚ñ‚Å‚¢‚é‚Ì‚ÅˆÚ“®‚Å‚«‚é
-				return 1; // ŒÄ‚Ño‚µŒ³‚Å chrif_sendmap() ‚ğ‚·‚é
+				// ã“ã®ãƒãƒƒãƒ—é¯–ã§ã‚‚èª­ã¿è¾¼ã‚“ã§ã„ã‚‹ã®ã§ç§»å‹•ã§ãã‚‹
+				return 1; // å‘¼ã³å‡ºã—å…ƒã§ chrif_sendmap() ã‚’ã™ã‚‹
 			}
 			strdb_erase(map_db,name);
 			aFree(mdos);
@@ -2111,9 +2088,9 @@ int map_eraseipport(const char *name,unsigned long ip,unsigned short port)
 	return 0;
 }
 
-// ‰Šú‰»ü‚è
+// åˆæœŸåŒ–å‘¨ã‚Š
 /*==========================================
- * …ê‚‚³İ’è
+ * æ°´å ´é«˜ã•è¨­å®š
  *------------------------------------------
  */
 static struct waterlist {
@@ -2145,13 +2122,13 @@ static int map_waterheight(const char *mapname)
 
 	idx = map_search_waterheight(mapname);
 	if(idx >= 0) {
-		// water_height.txt‚ğ—Dæ‚·‚é
+		// water_height.txtã‚’å„ªå…ˆã™ã‚‹
 		wh = waterlist[idx].waterheight;
 	} else {
 		char fn[32];
 		char *rsw;
 
-		// rswƒtƒ@ƒCƒ‹‚©‚ç“Ç‚İ‚İ
+		// rswãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰èª­ã¿è¾¼ã¿
 		sprintf(fn, "data\\%s", mapname);
 		memcpy(fn + strlen(fn) - 4, ".rsw", 4);
 		rsw = (char *)grfio_read(fn);
@@ -2211,27 +2188,27 @@ static void map_readwater(void)
 }
 
 /*==========================================
- * ƒ}ƒbƒvƒLƒƒƒbƒVƒ…‚É’Ç‰Á‚·‚é
+ * ãƒãƒƒãƒ—ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã«è¿½åŠ ã™ã‚‹
  *------------------------------------------
  */
-// ƒ}ƒbƒvƒLƒƒƒbƒVƒ…‚ÌÅ‘å’l
+// ãƒãƒƒãƒ—ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã®æœ€å¤§å€¤
 #define MAX_MAP_CACHE 768
 
-// Šeƒ}ƒbƒv‚²‚Æ‚ÌÅ¬ŒÀî•ñ‚ğ“ü‚ê‚é‚à‚ÌAREAD_FROM_BITMAP—p
+// å„ãƒãƒƒãƒ—ã”ã¨ã®æœ€å°é™æƒ…å ±ã‚’å…¥ã‚Œã‚‹ã‚‚ã®ã€READ_FROM_BITMAPç”¨
 struct map_cache_info {
-	char fn[32];		// ƒtƒ@ƒCƒ‹–¼
-	int xs,ys;		// •‚Æ‚‚³
+	char fn[32];		// ãƒ•ã‚¡ã‚¤ãƒ«å
+	int xs,ys;		// å¹…ã¨é«˜ã•
 	int water_height;
-	int pos;  		// ƒf[ƒ^‚ª“ü‚ê‚Ä‚ ‚éêŠ
-	int compressed;		// zilb’Ê‚¹‚é‚æ‚¤‚É‚·‚éˆ×‚Ì—\–ñ
-	unsigned int compressed_len;	// zilb’Ê‚¹‚é‚æ‚¤‚É‚·‚éˆ×‚Ì—\–ñ
+	int pos;  		// ãƒ‡ãƒ¼ã‚¿ãŒå…¥ã‚Œã¦ã‚ã‚‹å ´æ‰€
+	int compressed;		// zilbé€šã›ã‚‹ã‚ˆã†ã«ã™ã‚‹ç‚ºã®äºˆç´„
+	unsigned int compressed_len;	// zilbé€šã›ã‚‹ã‚ˆã†ã«ã™ã‚‹ç‚ºã®äºˆç´„
 }; // 56 byte
 
 struct map_cache_head {
 	unsigned int sizeof_header;
 	unsigned int sizeof_map;
-	// ã‚Ì‚Q‚Â‰ü•Ï•s‰Â
-	int nmaps; // ƒ}ƒbƒv‚ÌŒÂ”
+	// ä¸Šã®ï¼’ã¤æ”¹å¤‰ä¸å¯
+	int nmaps; // ãƒãƒƒãƒ—ã®å€‹æ•°
 	int filesize;
 };
 
@@ -2279,7 +2256,7 @@ static int map_cache_open(const char *fn)
 			map_cache.head.sizeof_map    == sizeof(struct map_cache_info) &&
 			map_cache.head.filesize      == size
 		) {
-			// ƒLƒƒƒbƒVƒ…“Ç‚İ‚İ¬Œ÷
+			// ã‚­ãƒ£ãƒƒã‚·ãƒ¥èª­ã¿è¾¼ã¿æˆåŠŸ
 			map_cache.map = (struct map_cache_info *)aMalloc(sizeof(struct map_cache_info) * map_cache.head.nmaps);
 			fseek(map_cache.fp,sizeof(struct map_cache_head),SEEK_SET);
 			fread(map_cache.map,sizeof(struct map_cache_info),map_cache.head.nmaps,map_cache.fp);
@@ -2287,7 +2264,7 @@ static int map_cache_open(const char *fn)
 		}
 		fclose(map_cache.fp);
 	}
-	// “Ç‚İ‚İ‚É¸”s‚µ‚½‚Ì‚ÅV‹K‚Éì¬‚·‚é
+	// èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ãŸã®ã§æ–°è¦ã«ä½œæˆã™ã‚‹
 	map_cache.fp = fopen(fn,"wb");
 	if(map_cache.fp) {
 		memset(&map_cache.head,0,sizeof(struct map_cache_head));
@@ -2314,21 +2291,21 @@ static int map_cache_read(struct map_data *m)
 		if(!strcmp(m->name,map_cache.map[i].fn)) {
 			int idx = map_search_waterheight(m->name);
 			if(idx >= 0 && map_cache.map[i].water_height != waterlist[idx].waterheight) {
-				// water_hegiht.txt‚Ì…ê‚Ì‚‚³‚Æˆá‚¤‚Ì‚Å“Ç‚İ’¼‚µ
+				// water_hegiht.txtã®æ°´å ´ã®é«˜ã•ã¨é•ã†ã®ã§èª­ã¿ç›´ã—
 				return 0;
 			}
 			if(map_cache.map[i].compressed == 0) {
-				// ”ñˆ³kƒtƒ@ƒCƒ‹
+				// éåœ§ç¸®ãƒ•ã‚¡ã‚¤ãƒ«
 				size_t size = map_cache.map[i].xs * map_cache.map[i].ys;
 				m->xs = map_cache.map[i].xs;
 				m->ys = map_cache.map[i].ys;
 				m->gat = (unsigned char *)aCalloc(m->xs * m->ys,sizeof(unsigned char));
 				fseek(map_cache.fp,map_cache.map[i].pos,SEEK_SET);
 				if(fread(m->gat,1,size,map_cache.fp) == size) {
-					// ¬Œ÷
+					// æˆåŠŸ
 					return 1;
 				}
-				// ‚È‚º‚©ƒtƒ@ƒCƒ‹Œã”¼‚ªŒ‡‚¯‚Ä‚é‚Ì‚Å“Ç‚İ’¼‚µ
+				// ãªãœã‹ãƒ•ã‚¡ã‚¤ãƒ«å¾ŒåŠãŒæ¬ ã‘ã¦ã‚‹ã®ã§èª­ã¿ç›´ã—
 				m->xs = 0;
 				m->ys = 0;
 				aFree(m->gat);
@@ -2336,7 +2313,7 @@ static int map_cache_read(struct map_data *m)
 				return 0;
 			}
 			if(map_cache.map[i].compressed == 1) {
-				// ˆ³kƒtƒ‰ƒO=1 : zlib
+				// åœ§ç¸®ãƒ•ãƒ©ã‚°=1 : zlib
 				unsigned char *buf;
 				unsigned long dest_len;
 				unsigned int size_compress = map_cache.map[i].compressed_len;
@@ -2346,7 +2323,7 @@ static int map_cache_read(struct map_data *m)
 				buf = (unsigned char*)aMalloc(size_compress);
 				fseek(map_cache.fp,map_cache.map[i].pos,SEEK_SET);
 				if(fread(buf,1,size_compress,map_cache.fp) != size_compress) {
-					// ‚È‚º‚©ƒtƒ@ƒCƒ‹Œã”¼‚ªŒ‡‚¯‚Ä‚é‚Ì‚Å“Ç‚İ’¼‚µ
+					// ãªãœã‹ãƒ•ã‚¡ã‚¤ãƒ«å¾ŒåŠãŒæ¬ ã‘ã¦ã‚‹ã®ã§èª­ã¿ç›´ã—
 					printf("fread error\n");
 					m->xs = 0;
 					m->ys = 0;
@@ -2358,7 +2335,7 @@ static int map_cache_read(struct map_data *m)
 				dest_len = m->xs * m->ys;
 				decode_zip(m->gat,&dest_len,buf,size_compress);
 				if(dest_len != map_cache.map[i].xs * map_cache.map[i].ys) {
-					// ³í‚É‰ğ“€‚ªo—ˆ‚Ä‚È‚¢
+					// æ­£å¸¸ã«è§£å‡ãŒå‡ºæ¥ã¦ãªã„
 					m->xs = 0;
 					m->ys = 0;
 					aFree(m->gat);
@@ -2385,18 +2362,18 @@ static int map_cache_write(struct map_data *m)
 
 	for(i = 0; i < map_cache.head.nmaps ; i++) {
 		if(!strcmp(m->name,map_cache.map[i].fn)) {
-			// “¯‚¶ƒGƒ“ƒgƒŠ[‚ª‚ ‚ê‚Îã‘‚«
+			// åŒã˜ã‚¨ãƒ³ãƒˆãƒªãƒ¼ãŒã‚ã‚Œã°ä¸Šæ›¸ã
 			if(map_cache.map[i].compressed == 0) {
 				len_old = map_cache.map[i].xs * map_cache.map[i].ys;
 			} else if(map_cache.map[i].compressed == 1) {
 				len_old = map_cache.map[i].compressed_len;
 			} else {
-				// ƒTƒ|[ƒg‚³‚ê‚Ä‚È‚¢Œ`®‚È‚Ì‚Å’·‚³‚O
+				// ã‚µãƒãƒ¼ãƒˆã•ã‚Œã¦ãªã„å½¢å¼ãªã®ã§é•·ã•ï¼
 				len_old = 0;
 			}
 			if(map_read_flag == 2) {
-				// ˆ³k•Û‘¶
-				// ‚³‚·‚ª‚É‚Q”{‚É–c‚ê‚é–‚Í‚È‚¢‚Æ‚¢‚¤–‚Å
+				// åœ§ç¸®ä¿å­˜
+				// ã•ã™ãŒã«ï¼’å€ã«è†¨ã‚Œã‚‹äº‹ã¯ãªã„ã¨ã„ã†äº‹ã§
 				write_buf = (char *)aMalloc(m->xs * m->ys * 2);
 				len_new = m->xs * m->ys * 2;
 				encode_zip(write_buf,&len_new,m->gat,m->xs * m->ys);
@@ -2409,11 +2386,11 @@ static int map_cache_write(struct map_data *m)
 				map_cache.map[i].compressed_len = 0;
 			}
 			if(len_new <= len_old) {
-				// ƒTƒCƒY‚ª“¯‚¶‚©¬‚³‚­‚È‚Á‚½‚Ì‚ÅêŠ‚Í•Ï‚í‚ç‚È‚¢
+				// ã‚µã‚¤ã‚ºãŒåŒã˜ã‹å°ã•ããªã£ãŸã®ã§å ´æ‰€ã¯å¤‰ã‚ã‚‰ãªã„
 				fseek(map_cache.fp,map_cache.map[i].pos,SEEK_SET);
 				fwrite(write_buf,1,len_new,map_cache.fp);
 			} else {
-				// V‚µ‚¢êŠ‚É“o˜^
+				// æ–°ã—ã„å ´æ‰€ã«ç™»éŒ²
 				fseek(map_cache.fp,map_cache.head.filesize,SEEK_SET);
 				fwrite(write_buf,1,len_new,map_cache.fp);
 				map_cache.map[i].pos = map_cache.head.filesize;
@@ -2429,10 +2406,10 @@ static int map_cache_write(struct map_data *m)
 			return 0;
 		}
 	}
-	// “¯‚¶ƒGƒ“ƒgƒŠ‚ª–³‚¯‚ê‚Î‘‚«‚ß‚éêŠ‚ğ’T‚·
+	// åŒã˜ã‚¨ãƒ³ãƒˆãƒªãŒç„¡ã‘ã‚Œã°æ›¸ãè¾¼ã‚ã‚‹å ´æ‰€ã‚’æ¢ã™
 	for(i = 0; i < map_cache.head.nmaps ; i++) {
 		if(map_cache.map[i].fn[0] == 0) {
-			// V‚µ‚¢êŠ‚É“o˜^
+			// æ–°ã—ã„å ´æ‰€ã«ç™»éŒ²
 			if(map_read_flag == 2) {
 				write_buf = (char *)aMalloc(m->xs * m->ys * 2);
 				len_new = m->xs * m->ys * 2;
@@ -2460,12 +2437,12 @@ static int map_cache_write(struct map_data *m)
 			return 0;
 		}
 	}
-	// ‘‚«‚ß‚È‚©‚Á‚½
+	// æ›¸ãè¾¼ã‚ãªã‹ã£ãŸ
 	return 1;
 }
 
 /*==========================================
- * “Ç‚İ‚Şmap‚ğ’Ç‰Á‚·‚é
+ * èª­ã¿è¾¼ã‚€mapã‚’è¿½åŠ ã™ã‚‹
  *------------------------------------------
  */
 static void map_addmap(const char *mapname)
@@ -2489,7 +2466,7 @@ static void map_addmap(const char *mapname)
 
 	for(i = 0; i < map_num; i++) {
 		if(strcmp(map[i].name, mapname) == 0)
-			return;		// Šù‚É’Ç‰ÁÏ‚İ‚ÌMAP
+			return;		// æ—¢ã«è¿½åŠ æ¸ˆã¿ã®MAP
 	}
 
 	if(map_num + MAX_MEMORIAL_MAP >= map_max) {
@@ -2504,7 +2481,7 @@ static void map_addmap(const char *mapname)
 }
 
 /*==========================================
- * “Ç‚İ‚Şmap‚ğíœ‚·‚é
+ * èª­ã¿è¾¼ã‚€mapã‚’å‰Šé™¤ã™ã‚‹
  *------------------------------------------
  */
 static void map_delmap(const char *mapname)
@@ -2533,7 +2510,7 @@ static void map_delmap(const char *mapname)
 }
 
 /*==========================================
- * ƒ}ƒbƒv1–‡“Ç‚İ‚İ
+ * ãƒãƒƒãƒ—1æšèª­ã¿è¾¼ã¿
  *------------------------------------------
  */
 static int map_readmap(int m,const char *fn,int *cache)
@@ -2544,7 +2521,7 @@ static int map_readmap(int m,const char *fn,int *cache)
 	fflush(stdout);
 
 	if(map_cache_read(&map[m])) {
-		// ƒLƒƒƒbƒVƒ…‚©‚ç“Ç‚İ‚ß‚½
+		// ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‹ã‚‰èª­ã¿è¾¼ã‚ãŸ
 		(*cache)++;
 	} else {
 		int wh;
@@ -2558,7 +2535,7 @@ static int map_readmap(int m,const char *fn,int *cache)
 		// read & convert fn
 		gat = (unsigned char *)grfio_read(fn);
 		if(gat == NULL) {
-			// ‚³‚·‚ª‚Éƒ}ƒbƒv‚ª“Ç‚ß‚È‚¢‚Ì‚Í‚Ü‚¸‚¢‚Ì‚ÅI—¹‚·‚é
+			// ã•ã™ãŒã«ãƒãƒƒãƒ—ãŒèª­ã‚ãªã„ã®ã¯ã¾ãšã„ã®ã§çµ‚äº†ã™ã‚‹
 			printf("Map '%s' not found: removed from maplist.\n", fn);
 			return -1;
 		}
@@ -2578,7 +2555,7 @@ static int map_readmap(int m,const char *fn,int *cache)
 			p = (struct gat_1cell*)(gat + y * xs * 20 + 14);
 			for(x = 0; x < xs; x++) {
 				if(wh != NO_WATER && p->type == 0) {
-					// …ê”»’è
+					// æ°´å ´åˆ¤å®š
 					map[m].gat[x+y*xs] = (wh == ALL_WATER || p->high[0] > wh || p->high[1] > wh || p->high[2] > wh || p->high[3] > wh) ? 3 : 0;
 				} else {
 					map[m].gat[x+y*xs] = p->type;
@@ -2605,7 +2582,7 @@ static int map_readmap(int m,const char *fn,int *cache)
 }
 
 /*==========================================
- * ‘S‚Ä‚Ìmapƒf[ƒ^‚ğ“Ç‚İ‚Ş
+ * å…¨ã¦ã®mapãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã‚€
  *------------------------------------------
  */
 static void map_readallmap(void)
@@ -2614,14 +2591,14 @@ static void map_readallmap(void)
 	int cache = 0;
 	int maps_removed = 0;
 
-	// ƒ}ƒbƒvƒLƒƒƒbƒVƒ…‚ğŠJ‚­
+	// ãƒãƒƒãƒ—ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’é–‹ã
 	if(map_read_flag) {
 		map_cache_open(map_cache_file);
 	}
 
 	map_readwater();
 
-	// ƒŠƒTƒCƒY
+	// ãƒªã‚µã‚¤ã‚º
 	map_max = map_num + MAX_MEMORIAL_MAP;
 	map = (struct map_data *)aRealloc(map, sizeof(struct map_data) * map_max);
 
@@ -2645,10 +2622,10 @@ static void map_readallmap(void)
 	}
 	printf("Map read done (%d map%s, %d map%s in cache). %24s\n", map_num, (map_num > 1) ? "s" : "", cache, (cache > 1) ? "s" : "", "");
 
-	// ƒƒ‚ƒŠƒAƒ‹ƒ_ƒ“ƒWƒ‡ƒ“ƒ}ƒbƒv¶¬ŠJnƒCƒ“ƒfƒbƒNƒX‚ğİ’è
+	// ãƒ¡ãƒ¢ãƒªã‚¢ãƒ«ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³ãƒãƒƒãƒ—ç”Ÿæˆé–‹å§‹ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’è¨­å®š
 	map_mdmap_start = map_num;
 
-	// ƒ}ƒbƒvƒLƒƒƒbƒVƒ…‚ğ•Â‚¶‚é
+	// ãƒãƒƒãƒ—ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã‚’é–‰ã˜ã‚‹
 	map_cache_close();
 
 	if(map_num <= 0) {
@@ -2660,7 +2637,7 @@ static void map_readallmap(void)
 }
 
 /*==========================================
- * @who‚ÌDB”Å
+ * @whoã®DBç‰ˆ
  *------------------------------------------
  */
 static int map_who_sub(void *key,void *data,va_list ap)
@@ -2687,7 +2664,7 @@ int map_who(int fd)
 }
 
 /*==========================================
- * PKƒT[ƒo[‚ÉˆêŠ‡•ÏX
+ * PKã‚µãƒ¼ãƒãƒ¼ã«ä¸€æ‹¬å¤‰æ›´
  *------------------------------------------
  */
 static int map_pk_server(int flag)
@@ -2715,7 +2692,7 @@ static int map_pk_server(int flag)
 }
 
 /*==========================================
- * PKƒtƒB[ƒ‹ƒh‚ÌƒAƒCƒeƒ€ƒhƒƒbƒv‚ğˆêŠ‡•ÏX
+ * PKãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã®ã‚¢ã‚¤ãƒ†ãƒ ãƒ‰ãƒ­ãƒƒãƒ—ã‚’ä¸€æ‹¬å¤‰æ›´
  *------------------------------------------
  */
 static int map_pk_nightmaredrop(int flag)
@@ -2738,7 +2715,7 @@ static int map_pk_nightmaredrop(int flag)
 				break;
 			}
 		}
-		if(i >= MAX_DROP_PER_MAP) {	// ‹ó‚«‚ª‚È‚¢ê‡‚Íƒ}ƒbƒvƒtƒ‰ƒO‚ğƒZƒbƒg‚µ‚È‚¢
+		if(i >= MAX_DROP_PER_MAP) {	// ç©ºããŒãªã„å ´åˆã¯ãƒãƒƒãƒ—ãƒ•ãƒ©ã‚°ã‚’ã‚»ãƒƒãƒˆã—ãªã„
 			printf("\nmap_pk_nightmaredrop: drop list is full (%s, size = %d)\a", map[m].name, i);
 			continue;
 		}
@@ -2750,7 +2727,7 @@ static int map_pk_nightmaredrop(int flag)
 }
 
 /*==========================================
- * PKƒtƒB[ƒ‹ƒh‚ÌƒeƒŒƒ|[ƒg•s‰Â‚ğˆêŠ‡•ÏX
+ * PKãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã®ãƒ†ãƒ¬ãƒãƒ¼ãƒˆä¸å¯ã‚’ä¸€æ‹¬å¤‰æ›´
  *------------------------------------------
  */
 static int map_pk_noteleport(int flag)
@@ -2772,7 +2749,7 @@ static int map_pk_noteleport(int flag)
 }
 
 /*==========================================
- * İ’èƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
+ * è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€
  *------------------------------------------
  */
 static int map_config_read(const char *cfgName)
@@ -2902,7 +2879,7 @@ static int map_config_read(const char *cfgName)
 }
 
 /*==========================================
- * ƒ}ƒbƒv‚ª’Êíƒ}ƒbƒv‚Å‚ ‚é‚©‚ğ”r‘¼“I‚Éİ’è
+ * ãƒãƒƒãƒ—ãŒé€šå¸¸ãƒãƒƒãƒ—ã§ã‚ã‚‹ã‹ã‚’æ’ä»–çš„ã«è¨­å®š
  *------------------------------------------
  */
 int map_field_setting(void)
@@ -2920,7 +2897,7 @@ int map_field_setting(void)
 }
 
 /*==========================================
- * socket ƒRƒ“ƒgƒ[ƒ‹ƒpƒlƒ‹‚©‚çŒÄ‚Î‚ê‚é
+ * socket ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ãƒ‘ãƒãƒ«ã‹ã‚‰å‘¼ã°ã‚Œã‚‹
  *------------------------------------------
  */
 static void map_socket_ctrl_panel_func(int fd,char* usage,char* user,char* status)
@@ -2939,19 +2916,19 @@ static void map_socket_ctrl_panel_func(int fd,char* usage,char* user,char* statu
 }
 
 /*==========================================
- * mapI³íI—¹’¼‘Oˆ—
+ * mapé¯–æ­£å¸¸çµ‚äº†ç›´å‰å‡¦ç†
  *------------------------------------------
  */
 void do_pre_final(void)
 {
-	// OnFinalƒCƒxƒ“ƒgÀs
+	// OnFinalã‚¤ãƒ™ãƒ³ãƒˆå®Ÿè¡Œ
 	printf("do_final: OnFinal Event done. (%d npc)\n", npc_event_doall("OnFinal"));
 
 	return;
 }
 
 /*==========================================
- * mapII—¹ˆ—
+ * mapé¯–çµ‚äº†æ™‚å‡¦ç†
  *------------------------------------------
  */
 static int nick_db_final(void *key,void *data,va_list ap)
@@ -2984,11 +2961,11 @@ void do_final(void)
 	int i;
 	unsigned int tick = gettick();
 
-	chrif_mapactive(0);	// ƒ}ƒbƒvƒT[ƒo[’â~’†
+	chrif_mapactive(0);	// ãƒãƒƒãƒ—ã‚µãƒ¼ãƒãƒ¼åœæ­¢ä¸­
 
-	guild_flush_expcache();				// ƒMƒ‹ƒhExp‚ğƒtƒ‰ƒbƒVƒ…
-	clif_foreachclient(chrif_disconnect_sub);	// ‚±‚±‚Åæ‚ÉƒLƒƒƒ‰‚ğ‘S‚ÄØ’f‚µ‚Ä‚¨‚­
-	chrif_flush_fifo();				// ƒpƒPƒbƒg‘—M
+	guild_flush_expcache();				// ã‚®ãƒ«ãƒ‰Expã‚’ãƒ•ãƒ©ãƒƒã‚·ãƒ¥
+	clif_foreachclient(chrif_disconnect_sub);	// ã“ã“ã§å…ˆã«ã‚­ãƒ£ãƒ©ã‚’å…¨ã¦åˆ‡æ–­ã—ã¦ãŠã
+	chrif_flush_fifo();				// ãƒ‘ã‚±ãƒƒãƒˆé€ä¿¡
 
 	do_final_extra();
 	do_final_battle();
@@ -3025,7 +3002,7 @@ void do_final(void)
 	}
 	map_clear_delayitem_que();
 
-	// ÅŒã‚É‚±‚Ì“à•”‚Åchar_fd‚ğ•Â‚¶‚é
+	// æœ€å¾Œã«ã“ã®å†…éƒ¨ã§char_fdã‚’é–‰ã˜ã‚‹
 	do_final_chrif();
 
 	for(i = 0; i < map_num; i++) {
@@ -3064,7 +3041,7 @@ void do_final(void)
 	if(id_db)
 		numdb_final(id_db, NULL);
 
-	// ƒƒbƒZ[ƒW‚Ì‰ğ•ú‚Íˆê”ÔÅŒã
+	// ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®è§£æ”¾ã¯ä¸€ç•ªæœ€å¾Œ
 	do_final_msg();
 
 	exit_dbn();
@@ -3072,7 +3049,7 @@ void do_final(void)
 }
 
 /*==========================================
- * mapI‰Šú‰»‚Ì‘åŒ³
+ * mapé¯–åˆæœŸåŒ–ã®å¤§å…ƒ
  *------------------------------------------
  */
 int do_init(int argc,char *argv[])
@@ -3117,7 +3094,7 @@ int do_init(int argc,char *argv[])
 		exit(1);
 	}
 
-	// ƒƒbƒZ[ƒW‚Ì“Ç‚İ‚İ‚Íˆê”ÔÅ‰
+	// ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®èª­ã¿è¾¼ã¿ã¯ä¸€ç•ªæœ€åˆ
 	msg_config_read(msg_conf_filename);
 
 	chrif_setip();
@@ -3149,11 +3126,11 @@ int do_init(int argc,char *argv[])
 	do_init_chrif();
 	do_init_luascript();
 	do_init_clif();
-	do_init_script();	// parse_script ‚ğŒÄ‚Ño‚·‘O‚É‚±‚ê‚ğŒÄ‚Ô
-	do_init_skill();	// skill_db‚ğQÆ‚·‚é‚Ì‚Åpc,homun,merc,guild,npc‚æ‚èæ
+	do_init_script();	// parse_script ã‚’å‘¼ã³å‡ºã™å‰ã«ã“ã‚Œã‚’å‘¼ã¶
+	do_init_skill();	// skill_dbã‚’å‚ç…§ã™ã‚‹ã®ã§pc,homun,merc,guild,npcã‚ˆã‚Šå…ˆ
 	do_init_itemdb();
 	do_init_quest();
-	do_init_mob();		// npc‚Ì‰Šú‰»“à‚Åmob_spawn‚µ‚ÄAmob_db‚ğQÆ‚·‚é‚Ì‚Åinit_npc‚æ‚èæ
+	do_init_mob();		// npcã®åˆæœŸåŒ–æ™‚å†…ã§mob_spawnã—ã¦ã€mob_dbã‚’å‚ç…§ã™ã‚‹ã®ã§init_npcã‚ˆã‚Šå…ˆ
 	do_init_npc();
 	do_init_memorial();
 	do_init_pc();
@@ -3178,7 +3155,7 @@ int do_init(int argc,char *argv[])
 	map_pk_nightmaredrop(map_pk_nightmaredrop_flag);
 	map_pk_noteleport(map_pk_noteleport_flag);
 	map_field_setting();
-	npc_event_do_oninit();	// npc‚ÌOnInitƒCƒxƒ“ƒgÀs
+	npc_event_do_oninit();	// npcã®OnInitã‚¤ãƒ™ãƒ³ãƒˆå®Ÿè¡Œ
 
 	// for httpd support
 	do_init_httpd();

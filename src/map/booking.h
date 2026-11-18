@@ -1,43 +1,22 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _BOOKING_H_
+ï»¿#ifndef _BOOKING_H_
 #define _BOOKING_H_
 
 #include "map.h"
 
-// ‹Œd—l‚Ìƒp[ƒeƒB[ƒuƒbƒLƒ“ƒO
+// æ—§ä»•æ§˜ã®ãƒ‘ãƒ¼ãƒ†ã‚£ãƒ¼ãƒ–ãƒƒã‚­ãƒ³ã‚°
 void booking_searchcond(struct map_session_data *sd, int lv, int map, int job, unsigned int last_index, int result_count);
 void booking_register(struct map_session_data *sd, int lv, int map, int *job);
 void booking_update(struct map_session_data *sd, int *job);
 
-// Vd—l‚Ìƒp[ƒeƒB[ƒuƒbƒLƒ“ƒO
+// æ–°ä»•æ§˜ã®ãƒ‘ãƒ¼ãƒ†ã‚£ãƒ¼ãƒ–ãƒƒã‚­ãƒ³ã‚°
 void booking_searchcond2(struct map_session_data *sd, int lv);
 void booking_register2(struct map_session_data *sd, int lv, const char *memo);
 void booking_update2(struct map_session_data *sd, const char *memo);
 
-// V‹Œd—l‚Ì‹¤’ÊŠÖ”
+// æ–°æ—§ä»•æ§˜ã®å…±é€šé–¢æ•°
 void booking_delete(struct map_session_data *sd);
 
-// ƒp[ƒeƒB[ƒuƒbƒLƒ“ƒOƒf[ƒ^‚Ìˆ——p
+// ãƒ‘ãƒ¼ãƒ†ã‚£ãƒ¼ãƒ–ãƒƒã‚­ãƒ³ã‚°ãƒ‡ãƒ¼ã‚¿ã®å‡¦ç†ç”¨
 void do_final_booking(void);
 void do_init_booking(void);
 

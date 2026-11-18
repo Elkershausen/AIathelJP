@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _ELEM_H_
+ï»¿#ifndef _ELEM_H_
 #define _ELEM_H_
 
 #include "map.h"
@@ -41,23 +20,23 @@ enum {
 };
 
 enum {
-	ELEMID_EL_AGNI_S		= 2114,		// ƒAƒOƒj(¬Œ^)
-	ELEMID_EL_AGNI_M		= 2115,		// ƒAƒOƒj(’†Œ^)
-	ELEMID_EL_AGNI_L		= 2116,		// ƒAƒOƒj(‘åŒ^)
-	ELEMID_EL_AQUA_S		= 2117,		// ƒAƒNƒA(¬Œ^)
-	ELEMID_EL_AQUA_M		= 2118,		// ƒAƒNƒA(’†Œ^)
-	ELEMID_EL_AQUA_L		= 2119,		// ƒAƒNƒA(‘åŒ^)
-	ELEMID_EL_VENTUS_S		= 2120,		// ƒxƒ“ƒgƒX(¬Œ^)
-	ELEMID_EL_VENTUS_M		= 2121,		// ƒxƒ“ƒgƒX(’†Œ^)
-	ELEMID_EL_VENTUS_L		= 2122,		// ƒxƒ“ƒgƒX(‘åŒ^)
-	ELEMID_EL_TERA_S		= 2123,		// ƒeƒ‰(¬Œ^)
-	ELEMID_EL_TERA_M		= 2124,		// ƒeƒ‰(’†Œ^)
-	ELEMID_EL_TERA_L		= 2125,		// ƒeƒ‰(‘åŒ^)
-	ELEMID_EM_DILUVIO		= 20816,	// ƒfƒBƒ‹ƒrƒI
-	ELEMID_EM_ARDOR			= 20817,	// ƒAƒ‹ƒh[ƒ‹
-	ELEMID_EM_PROCELLA		= 20818,	// ƒvƒƒZƒ‰
-	ELEMID_EM_TERREMOTUS	= 20819,	// ƒeƒŒƒ‚ƒgƒDƒX
-	ELEMID_EM_SERPENS		= 20820,	// ƒT[ƒyƒ“ƒX
+	ELEMID_EL_AGNI_S		= 2114,		// ã‚¢ã‚°ãƒ‹(å°å‹)
+	ELEMID_EL_AGNI_M		= 2115,		// ã‚¢ã‚°ãƒ‹(ä¸­å‹)
+	ELEMID_EL_AGNI_L		= 2116,		// ã‚¢ã‚°ãƒ‹(å¤§å‹)
+	ELEMID_EL_AQUA_S		= 2117,		// ã‚¢ã‚¯ã‚¢(å°å‹)
+	ELEMID_EL_AQUA_M		= 2118,		// ã‚¢ã‚¯ã‚¢(ä¸­å‹)
+	ELEMID_EL_AQUA_L		= 2119,		// ã‚¢ã‚¯ã‚¢(å¤§å‹)
+	ELEMID_EL_VENTUS_S		= 2120,		// ãƒ™ãƒ³ãƒˆã‚¹(å°å‹)
+	ELEMID_EL_VENTUS_M		= 2121,		// ãƒ™ãƒ³ãƒˆã‚¹(ä¸­å‹)
+	ELEMID_EL_VENTUS_L		= 2122,		// ãƒ™ãƒ³ãƒˆã‚¹(å¤§å‹)
+	ELEMID_EL_TERA_S		= 2123,		// ãƒ†ãƒ©(å°å‹)
+	ELEMID_EL_TERA_M		= 2124,		// ãƒ†ãƒ©(ä¸­å‹)
+	ELEMID_EL_TERA_L		= 2125,		// ãƒ†ãƒ©(å¤§å‹)
+	ELEMID_EM_DILUVIO		= 20816,	// ãƒ‡ã‚£ãƒ«ãƒ“ã‚ª
+	ELEMID_EM_ARDOR			= 20817,	// ã‚¢ãƒ«ãƒ‰ãƒ¼ãƒ«
+	ELEMID_EM_PROCELLA		= 20818,	// ãƒ—ãƒ­ã‚»ãƒ©
+	ELEMID_EM_TERREMOTUS	= 20819,	// ãƒ†ãƒ¬ãƒ¢ãƒˆã‚¥ã‚¹
+	ELEMID_EM_SERPENS		= 20820,	// ã‚µãƒ¼ãƒšãƒ³ã‚¹
 };
 
 struct elem_db {

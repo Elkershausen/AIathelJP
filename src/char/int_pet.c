@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#define _INT_PET_C_
+ï»¿#define _INT_PET_C_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -208,11 +187,11 @@ int mapif_parse_DeletePet(int fd)
 	return 0;
 }
 
-// map server ‚©‚ç‚Ì’ÊM
-// E‚PƒpƒPƒbƒg‚Ì‚İ‰ğÍ‚·‚é‚±‚Æ
-// EƒpƒPƒbƒg’·ƒf[ƒ^‚Íinter.c‚ÉƒZƒbƒg‚µ‚Ä‚¨‚­‚±‚Æ
-// EƒpƒPƒbƒg’·ƒ`ƒFƒbƒN‚âARFIFOSKIP‚ÍŒÄ‚Ño‚µŒ³‚Ås‚í‚ê‚é‚Ì‚Ås‚Á‚Ä‚Í‚È‚ç‚È‚¢
-// EƒGƒ‰[‚È‚ç0(false)A‚»‚¤‚Å‚È‚¢‚È‚ç1(true)‚ğ‚©‚¦‚³‚È‚¯‚ê‚Î‚È‚ç‚È‚¢
+// map server ã‹ã‚‰ã®é€šä¿¡
+// ãƒ»ï¼‘ãƒ‘ã‚±ãƒƒãƒˆã®ã¿è§£æã™ã‚‹ã“ã¨
+// ãƒ»ãƒ‘ã‚±ãƒƒãƒˆé•·ãƒ‡ãƒ¼ã‚¿ã¯inter.cã«ã‚»ãƒƒãƒˆã—ã¦ãŠãã“ã¨
+// ãƒ»ãƒ‘ã‚±ãƒƒãƒˆé•·ãƒã‚§ãƒƒã‚¯ã‚„ã€RFIFOSKIPã¯å‘¼ã³å‡ºã—å…ƒã§è¡Œã‚ã‚Œã‚‹ã®ã§è¡Œã£ã¦ã¯ãªã‚‰ãªã„
+// ãƒ»ã‚¨ãƒ©ãƒ¼ãªã‚‰0(false)ã€ãã†ã§ãªã„ãªã‚‰1(true)ã‚’ã‹ãˆã•ãªã‘ã‚Œã°ãªã‚‰ãªã„
 int inter_pet_parse_frommap(int fd)
 {
 	switch(RFIFOW(fd,0)){

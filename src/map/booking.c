@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -33,13 +12,13 @@
 #include "map.h"
 #include "party.h"
 
-// 1ƒy[ƒW‚ÌÅ‘åŒŸõ”
+// 1ãƒšãƒ¼ã‚¸ã®æœ€å¤§æ¤œç´¢æ•°
 #define MAX_RESULT 10
 
-// Å‘åMAPID
+// æœ€å¤§MAPID
 #define MAX_BOOKING_MAPID 193
 
-// Å‘åJOBID
+// æœ€å¤§JOBID
 #define MAX_BOOKING_JOBID 64
 
 static struct dbt *booking_db = NULL;
@@ -48,11 +27,11 @@ static int booking_jobid[MAX_BOOKING_JOBID];
 static unsigned int booking_id = 0;
 
 /*==========================================
- * MAPID‚ª—LŒø‚©ƒ`ƒFƒbƒN
+ * MAPIDãŒæœ‰åŠ¹ã‹ãƒã‚§ãƒƒã‚¯
  *
  * @note private
- * @param map ƒNƒ‰ƒCƒAƒ“ƒg‚©‚çóM‚µ‚½MapID
- * @return —LŒø‚Å‚ ‚ê‚Î1 –³Œø‚Å‚ ‚ê‚Î0
+ * @param map ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã‹ã‚‰å—ä¿¡ã—ãŸMapID
+ * @return æœ‰åŠ¹ã§ã‚ã‚Œã°1 ç„¡åŠ¹ã§ã‚ã‚Œã°0
  *------------------------------------------
  */
 static int booking_search_mapid(int map)
@@ -78,12 +57,12 @@ static int booking_search_mapid(int map)
 }
 
 /*==========================================
- * JOBID‚ª—LŒø‚©ƒ`ƒFƒbƒN
+ * JOBIDãŒæœ‰åŠ¹ã‹ãƒã‚§ãƒƒã‚¯
  *
  * @note private
- * @param job ƒNƒ‰ƒCƒAƒ“ƒg‚©‚çóM‚µ‚½JobID
- * @return —LŒø‚Å‚ ‚ê‚Î1
- *         –³Œø‚Å‚ ‚ê‚Î0
+ * @param job ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã‹ã‚‰å—ä¿¡ã—ãŸJobID
+ * @return æœ‰åŠ¹ã§ã‚ã‚Œã°1
+ *         ç„¡åŠ¹ã§ã‚ã‚Œã°0
  *------------------------------------------
  */
 static int booking_search_jobid(int job)
@@ -109,12 +88,12 @@ static int booking_search_jobid(int job)
 }
 
 /*==========================================
- * ŠY“–ID‚ÌƒuƒbƒLƒ“ƒOƒŠƒXƒgŒŸõ
+ * è©²å½“IDã®ãƒ–ãƒƒã‚­ãƒ³ã‚°ãƒªã‚¹ãƒˆæ¤œç´¢
  *
  * @note private
- * @param booking_id ŒŸõ‘ÎÛƒp[ƒeƒB[ƒuƒbƒLƒ“ƒOID
- * @return booking_db‚ÉŠi”[‚³‚ê‚Ä‚¢‚ébooking_data\‘¢‘Ì
- *         Œ©‚Â‚©‚ç‚È‚¯‚ê‚ÎNULL
+ * @param booking_id æ¤œç´¢å¯¾è±¡ãƒ‘ãƒ¼ãƒ†ã‚£ãƒ¼ãƒ–ãƒƒã‚­ãƒ³ã‚°ID
+ * @return booking_dbã«æ ¼ç´ã•ã‚Œã¦ã„ã‚‹booking_dataæ§‹é€ ä½“
+ *         è¦‹ã¤ã‹ã‚‰ãªã‘ã‚Œã°NULL
  *------------------------------------------
  */
 static struct booking_data *booking_search(unsigned int booking_id)
@@ -123,21 +102,21 @@ static struct booking_data *booking_search(unsigned int booking_id)
 }
 
 /*==========================================
- * ğŒ‚ÅƒuƒbƒLƒ“ƒOƒŠƒXƒgŒŸõ(‹Œd—l)
+ * æ¡ä»¶ã§ãƒ–ãƒƒã‚­ãƒ³ã‚°ãƒªã‚¹ãƒˆæ¤œç´¢(æ—§ä»•æ§˜)
  *
  * @note private
- * @param key booking_searchcond_sub‚Å‚Í–¢g—p
- * @param data booking_db‚ÉŠi”[‚³‚ê‚Ä‚¢‚ébooking_data\‘¢‘Ì
- * @param ap ‰Â•Ï’·ˆø”
- *           lv :ŒŸõğŒ‚ÌƒŒƒxƒ‹
- *           map:ŒŸõğŒ‚Ìƒ}ƒbƒv
- *           job:ŒŸõğŒ‚ÌE‹Æ
- *           last_index:ŒŸõƒy[ƒW‚ÌƒCƒ“ƒfƒbƒNƒX––”ö
- *           result_count:Å‘åŒŸõs‰ñ”
- *           count:ŒŸõ”ƒJƒEƒ“ƒ^
- *           booking_data:ŒŸõŒ‹‰ÊŠi”[—pbooking_data\‘¢‘Ì
- * @return ŒŸõ‚ªI—¹‚·‚ê‚Î0
- *         ŒŸõ‚ğ’†’f‚µ‚½‚Ì‚È‚ç1
+ * @param key booking_searchcond_subã§ã¯æœªä½¿ç”¨
+ * @param data booking_dbã«æ ¼ç´ã•ã‚Œã¦ã„ã‚‹booking_dataæ§‹é€ ä½“
+ * @param ap å¯å¤‰é•·å¼•æ•°
+ *           lv :æ¤œç´¢æ¡ä»¶ã®ãƒ¬ãƒ™ãƒ«
+ *           map:æ¤œç´¢æ¡ä»¶ã®ãƒãƒƒãƒ—
+ *           job:æ¤œç´¢æ¡ä»¶ã®è·æ¥­
+ *           last_index:æ¤œç´¢ãƒšãƒ¼ã‚¸ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹æœ«å°¾
+ *           result_count:æœ€å¤§æ¤œç´¢è©¦è¡Œå›æ•°
+ *           count:æ¤œç´¢æ•°ã‚«ã‚¦ãƒ³ã‚¿
+ *           booking_data:æ¤œç´¢çµæœæ ¼ç´ç”¨booking_dataæ§‹é€ ä½“
+ * @return æ¤œç´¢ãŒçµ‚äº†ã™ã‚Œã°0
+ *         æ¤œç´¢ã‚’ä¸­æ–­ã—ãŸã®ãªã‚‰1
  *------------------------------------------
  */
 static int booking_searchcond_sub(void *key, void *data, va_list ap)
@@ -151,16 +130,16 @@ static int booking_searchcond_sub(void *key, void *data, va_list ap)
 	int *count       = va_arg(ap,int *);
 	struct booking_data **list = va_arg(ap,struct booking_data **);
 
-	if(lv > 0 && (bd->lv < lv - battle_config.party_booking_lv || bd->lv > lv))	// Lv‚ªğŒ‚Æ‡‚í‚È‚¢
+	if(lv > 0 && (bd->lv < lv - battle_config.party_booking_lv || bd->lv > lv))	// LvãŒæ¡ä»¶ã¨åˆã‚ãªã„
 		return 0;
 
-	if(bd->id < last_index)	// last_index‚æ‚è’á‚¢‚È‚ç–³‹
+	if(bd->id < last_index)	// last_indexã‚ˆã‚Šä½ã„ãªã‚‰ç„¡è¦–
 		return 0;
 
-	if((*count) >= result_count)	// result_count‚Ü‚Å‚ÅŒŸõI—¹
+	if((*count) >= result_count)	// result_countã¾ã§ã§æ¤œç´¢çµ‚äº†
 		return 1;
 
-	if(map == 0) {	// •åWMAP‚ª–³ğŒ
+	if(map == 0) {	// å‹Ÿé›†MAPãŒç„¡æ¡ä»¶
 		if(job == 0xffff) {
 			list[(*count)++] = bd;
 		} else {
@@ -172,7 +151,7 @@ static int booking_searchcond_sub(void *key, void *data, va_list ap)
 				}
 			}
 		}
-	} else if(job == 0xffff) {	// •åWE‹Æ‚ªw’è–³‚µ
+	} else if(job == 0xffff) {	// å‹Ÿé›†è·æ¥­ãŒæŒ‡å®šç„¡ã—
 		if(bd->map == map)
 			list[(*count)++] = bd;
 	}
@@ -181,18 +160,18 @@ static int booking_searchcond_sub(void *key, void *data, va_list ap)
 }
 
 /*==========================================
- * ğŒ‚ÅƒuƒbƒLƒ“ƒOƒŠƒXƒgŒŸõ(Vd—l)
+ * æ¡ä»¶ã§ãƒ–ãƒƒã‚­ãƒ³ã‚°ãƒªã‚¹ãƒˆæ¤œç´¢(æ–°ä»•æ§˜)
  *
  * @note private
- * @param key –¢g—p
- * @param data booking_db‚ÉŠi”[‚³‚ê‚Ä‚¢‚ébooking_data\‘¢‘Ì
- * @param ap ‰Â•Ï’·ˆø”
- *           lv :ŒŸõğŒ‚ÌƒŒƒxƒ‹
- *           result_count:Å‘åŒŸõs‰ñ”
- *           count:ŒŸõ”ƒJƒEƒ“ƒ^
- *           booking_data:ŒŸõŒ‹‰ÊŠi”[—pbooking_data\‘¢‘Ì
- * @return ŒŸõ‚ªI—¹‚·‚ê‚Î0
- *         ŒŸõ‚ğ’†’f‚µ‚½‚Ì‚È‚ç1
+ * @param key æœªä½¿ç”¨
+ * @param data booking_dbã«æ ¼ç´ã•ã‚Œã¦ã„ã‚‹booking_dataæ§‹é€ ä½“
+ * @param ap å¯å¤‰é•·å¼•æ•°
+ *           lv :æ¤œç´¢æ¡ä»¶ã®ãƒ¬ãƒ™ãƒ«
+ *           result_count:æœ€å¤§æ¤œç´¢è©¦è¡Œå›æ•°
+ *           count:æ¤œç´¢æ•°ã‚«ã‚¦ãƒ³ã‚¿
+ *           booking_data:æ¤œç´¢çµæœæ ¼ç´ç”¨booking_dataæ§‹é€ ä½“
+ * @return æ¤œç´¢ãŒçµ‚äº†ã™ã‚Œã°0
+ *         æ¤œç´¢ã‚’ä¸­æ–­ã—ãŸã®ãªã‚‰1
  *------------------------------------------
  */
 static int booking_searchcond_sub2(void *key, void *data, va_list ap)
@@ -203,10 +182,10 @@ static int booking_searchcond_sub2(void *key, void *data, va_list ap)
 	int *count       = va_arg(ap,int *);
 	struct booking_data **list = va_arg(ap,struct booking_data **);
 
-	if(lv > 0 && (bd->lv < lv - battle_config.party_booking_lv || bd->lv > lv))	// Lv‚ªğŒ‚Æ‡‚í‚È‚¢
+	if(lv > 0 && (bd->lv < lv - battle_config.party_booking_lv || bd->lv > lv))	// LvãŒæ¡ä»¶ã¨åˆã‚ãªã„
 		return 0;
 
-	if((*count) >= result_count)	// result_count‚Ü‚Å‚ÅŒŸõI—¹
+	if((*count) >= result_count)	// result_countã¾ã§ã§æ¤œç´¢çµ‚äº†
 		return 1;
 
 	list[(*count)++] = bd;
@@ -215,29 +194,29 @@ static int booking_searchcond_sub2(void *key, void *data, va_list ap)
 }
 
 /*==========================================
- * ŠY“–ID‚ÌƒuƒbƒLƒ“ƒOƒŠƒXƒgŒŸõ(‹Œd—l)
+ * è©²å½“IDã®ãƒ–ãƒƒã‚­ãƒ³ã‚°ãƒªã‚¹ãƒˆæ¤œç´¢(æ—§ä»•æ§˜)
  *
  * @note public
- * @param lv ŒŸõ‘ÎÛ‚ÌƒŒƒxƒ‹
- * @param map ŒŸõ‘ÎÛ‚Ìƒ}ƒbƒv
- * @param job ŒŸõ‘ÎÛ‚ÌE‹Æ
- * @param last_index ŒŸõƒy[ƒW‚ÌƒCƒ“ƒfƒbƒNƒX––”ö
- * @param result_count Å‘åŒŸõs‰ñ”
+ * @param lv æ¤œç´¢å¯¾è±¡ã®ãƒ¬ãƒ™ãƒ«
+ * @param map æ¤œç´¢å¯¾è±¡ã®ãƒãƒƒãƒ—
+ * @param job æ¤œç´¢å¯¾è±¡ã®è·æ¥­
+ * @param last_index æ¤œç´¢ãƒšãƒ¼ã‚¸ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹æœ«å°¾
+ * @param result_count æœ€å¤§æ¤œç´¢è©¦è¡Œå›æ•°
  *------------------------------------------
  */
 void booking_searchcond(struct map_session_data *sd, int lv, int map, int job, unsigned int last_index, int result_count)
 {
 	int flag;
 	int count=0;
-	struct booking_data *list[MAX_RESULT];	// result_count‚ÉÅ‘åŒŸõ”‚ªŠi”[‚³‚ê‚Ä‚¢‚é‚ªA’l‚ª‚Ç‚ñ‚È‚É•Ï‚í‚é‚Ì‚©(0xa‚µ‚©‘—‚ç‚ê‚Ä‚±‚È‚¢)•s–¾‚È‚Ì‚ÅA•s³‘Îô‚Ì‚½‚ß‚Æ‚è‚ ‚¦‚¸’è”‚ğ—pˆÓ
+	struct booking_data *list[MAX_RESULT];	// result_countã«æœ€å¤§æ¤œç´¢æ•°ãŒæ ¼ç´ã•ã‚Œã¦ã„ã‚‹ãŒã€å€¤ãŒã©ã‚“ãªæ™‚ã«å¤‰ã‚ã‚‹ã®ã‹(0xaã—ã‹é€ã‚‰ã‚Œã¦ã“ãªã„)ä¸æ˜ãªã®ã§ã€ä¸æ­£å¯¾ç­–ã®ãŸã‚ã¨ã‚Šã‚ãˆãšå®šæ•°ã‚’ç”¨æ„
 
 	nullpo_retv(sd);
 
-	if(lv > MAX_LEVEL || lv < 0)	// ƒŒƒxƒ‹‚ª•s³
+	if(lv > MAX_LEVEL || lv < 0)	// ãƒ¬ãƒ™ãƒ«ãŒä¸æ­£
 		return;
-	if(!booking_search_mapid(map))	// —LŒø‚ÈMAPID‚Å‚Í‚È‚¢
+	if(!booking_search_mapid(map))	// æœ‰åŠ¹ãªMAPIDã§ã¯ãªã„
 		return;
-	if(!booking_search_jobid(job))	// —LŒø‚ÈJOBID‚Å‚Í‚È‚¢
+	if(!booking_search_jobid(job))	// æœ‰åŠ¹ãªJOBIDã§ã¯ãªã„
 		return;
 
 	memset(list,0,sizeof(list));
@@ -249,21 +228,21 @@ void booking_searchcond(struct map_session_data *sd, int lv, int map, int job, u
 }
 
 /*==========================================
- * ŠY“–ID‚ÌƒuƒbƒLƒ“ƒOƒŠƒXƒgŒŸõ(Vd—l)
+ * è©²å½“IDã®ãƒ–ãƒƒã‚­ãƒ³ã‚°ãƒªã‚¹ãƒˆæ¤œç´¢(æ–°ä»•æ§˜)
  *
  * @note public
- * @param lv ŒŸõ‘ÎÛ‚ÌƒŒƒxƒ‹
+ * @param lv æ¤œç´¢å¯¾è±¡ã®ãƒ¬ãƒ™ãƒ«
  *------------------------------------------
  */
 void booking_searchcond2(struct map_session_data *sd, int lv)
 {
 	int flag;
 	int count=0;
-	struct booking_data *list[MAX_RESULT];	// TODO:b’è“I‚È‚Ì‚Åd—l‚ª•ª‚©‚èŸ‘æC³‚·‚é
+	struct booking_data *list[MAX_RESULT];	// TODO:æš«å®šçš„ãªã®ã§ä»•æ§˜ãŒåˆ†ã‹ã‚Šæ¬¡ç¬¬ä¿®æ­£ã™ã‚‹
 
 	nullpo_retv(sd);
 
-	if(lv > MAX_LEVEL || lv < 0)	// ƒŒƒxƒ‹‚ª•s³
+	if(lv > MAX_LEVEL || lv < 0)	// ãƒ¬ãƒ™ãƒ«ãŒä¸æ­£
 		return;
 
 	memset(list,0,sizeof(list));
@@ -275,13 +254,13 @@ void booking_searchcond2(struct map_session_data *sd, int lv)
 }
 
 /*==========================================
- * ƒp[ƒeƒB[ƒuƒbƒLƒ“ƒO“o˜^(‹Œd—l)
+ * ãƒ‘ãƒ¼ãƒ†ã‚£ãƒ¼ãƒ–ãƒƒã‚­ãƒ³ã‚°ç™»éŒ²(æ—§ä»•æ§˜)
  *
  * @note public
- * @param sd “o˜^—v‹Ò
- * @param lv •åWƒŒƒxƒ‹
- * @param map •åWƒ}ƒbƒv
- * @param job •åWE‹Æ
+ * @param sd ç™»éŒ²è¦æ±‚è€…
+ * @param lv å‹Ÿé›†ãƒ¬ãƒ™ãƒ«
+ * @param map å‹Ÿé›†ãƒãƒƒãƒ—
+ * @param job å‹Ÿé›†è·æ¥­
  *------------------------------------------
  */
 void booking_register(struct map_session_data *sd, int lv, int map, int *job)
@@ -291,18 +270,18 @@ void booking_register(struct map_session_data *sd, int lv, int map, int *job)
 
 	nullpo_retv(sd);
 
-	if(sd->booking_id > 0)	// Šù‚É“o˜^’†
+	if(sd->booking_id > 0)	// æ—¢ã«ç™»éŒ²ä¸­
 		return;
-	if(lv > MAX_LEVEL || lv < 0)	// ƒŒƒxƒ‹‚ª•s³
+	if(lv > MAX_LEVEL || lv < 0)	// ãƒ¬ãƒ™ãƒ«ãŒä¸æ­£
 		return;
-	if(!booking_search_mapid(map))	// —LŒø‚ÈMAPID‚Å‚Í‚È‚¢
+	if(!booking_search_mapid(map))	// æœ‰åŠ¹ãªMAPIDã§ã¯ãªã„
 		return;
 	for(i=0; i<6; i++) {
-		if(!booking_search_jobid(job[i]))	// —LŒø‚ÈJOBID‚Å‚Í‚È‚¢
+		if(!booking_search_jobid(job[i]))	// æœ‰åŠ¹ãªJOBIDã§ã¯ãªã„
 			return;
 	}
 
-	// PTƒuƒbƒLƒ“ƒOƒŠƒXƒg‚É“o˜^
+	// PTãƒ–ãƒƒã‚­ãƒ³ã‚°ãƒªã‚¹ãƒˆã«ç™»éŒ²
 	bd = (struct booking_data *)aCalloc(1,sizeof(struct booking_data));
 	bd->id = ++booking_id;
 	numdb_insert(booking_db,booking_id,bd);
@@ -320,7 +299,7 @@ void booking_register(struct map_session_data *sd, int lv, int map, int *job)
 
 	sd->booking_id = bd->id;
 
-	// ‰“šƒpƒPƒbƒg‘—M
+	// å¿œç­”ãƒ‘ã‚±ãƒƒãƒˆé€ä¿¡
 	clif_bookingregack(sd,0);
 	clif_insertbookinglist(sd,bd);
 
@@ -328,12 +307,12 @@ void booking_register(struct map_session_data *sd, int lv, int map, int *job)
 }
 
 /*==========================================
- * ƒp[ƒeƒB[ƒuƒbƒLƒ“ƒO“o˜^(Vd—l)
+ * ãƒ‘ãƒ¼ãƒ†ã‚£ãƒ¼ãƒ–ãƒƒã‚­ãƒ³ã‚°ç™»éŒ²(æ–°ä»•æ§˜)
  *
  * @note public
- * @param sd “o˜^—v‹Ò
- * @param lv •åWƒŒƒxƒ‹
- * @param memo •åW‚ÌƒƒbƒZ[ƒW
+ * @param sd ç™»éŒ²è¦æ±‚è€…
+ * @param lv å‹Ÿé›†ãƒ¬ãƒ™ãƒ«
+ * @param memo å‹Ÿé›†æ™‚ã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸
  *------------------------------------------
  */
 void booking_register2(struct map_session_data *sd, int lv, const char *memo)
@@ -344,7 +323,7 @@ void booking_register2(struct map_session_data *sd, int lv, const char *memo)
 
 	nullpo_retv(sd);
 
-	// “o˜^—v‹Ò‚ªƒp[ƒeƒB[ƒŠ[ƒ_[‚©ƒ`ƒFƒbƒN
+	// ç™»éŒ²è¦æ±‚è€…ãŒãƒ‘ãƒ¼ãƒ†ã‚£ãƒ¼ãƒªãƒ¼ãƒ€ãƒ¼ã‹ãƒã‚§ãƒƒã‚¯
 	if( (party = party_search(sd->status.party_id)) == NULL )
 		return;
 	for( i = 0; i < MAX_PARTY; i++ )
@@ -359,19 +338,19 @@ void booking_register2(struct map_session_data *sd, int lv, const char *memo)
 		}
 	}
 
-	// Šù‚É“o˜^’†
+	// æ—¢ã«ç™»éŒ²ä¸­
 	if(sd->booking_id > 0) {
 		clif_bookingregack(sd,2);
 		return;
 	}
 
-	// ƒŒƒxƒ‹‚ª•s³
+	// ãƒ¬ãƒ™ãƒ«ãŒä¸æ­£
 	if(lv > MAX_LEVEL || lv < 0) {
 		clif_bookingregack(sd,1);
 		return;
 	}
 
-	// PTƒuƒbƒLƒ“ƒOƒŠƒXƒg‚É“o˜^
+	// PTãƒ–ãƒƒã‚­ãƒ³ã‚°ãƒªã‚¹ãƒˆã«ç™»éŒ²
 	bd = (struct booking_data *)aCalloc(1,sizeof(struct booking_data));
 	bd->id = ++booking_id;
 	numdb_insert(booking_db,booking_id,bd);
@@ -383,7 +362,7 @@ void booking_register2(struct map_session_data *sd, int lv, const char *memo)
 
 	sd->booking_id = bd->id;
 
-	// ‰“šƒpƒPƒbƒg‘—M
+	// å¿œç­”ãƒ‘ã‚±ãƒƒãƒˆé€ä¿¡
 	clif_bookingregack(sd,0);
 	clif_insertbookinglist(sd,bd);
 
@@ -391,11 +370,11 @@ void booking_register2(struct map_session_data *sd, int lv, const char *memo)
 }
 
 /*==========================================
- * ƒp[ƒeƒB[ƒuƒbƒLƒ“ƒO“o˜^î•ñC³(‹Œd—l)
+ * ãƒ‘ãƒ¼ãƒ†ã‚£ãƒ¼ãƒ–ãƒƒã‚­ãƒ³ã‚°ç™»éŒ²æƒ…å ±ä¿®æ­£(æ—§ä»•æ§˜)
  *
  * @note public
- * @param sd “o˜^î•ñC³—v‹Ò
- * @param job •åWE‹Æ
+ * @param sd ç™»éŒ²æƒ…å ±ä¿®æ­£è¦æ±‚è€…
+ * @param job å‹Ÿé›†è·æ¥­
  *------------------------------------------
  */
 void booking_update(struct map_session_data *sd, int *job)
@@ -410,7 +389,7 @@ void booking_update(struct map_session_data *sd, int *job)
 		return;
 
 	for(i=0; i<6; i++) {
-		if(!booking_search_jobid(job[i]))	// —LŒø‚ÈJOBID‚Å‚Í‚È‚¢
+		if(!booking_search_jobid(job[i]))	// æœ‰åŠ¹ãªJOBIDã§ã¯ãªã„
 			return;
 		if(job[i] != 0xffff)
 			bd->job[i] = job[i];
@@ -425,11 +404,11 @@ void booking_update(struct map_session_data *sd, int *job)
 }
 
 /*==========================================
- * ƒp[ƒeƒB[ƒuƒbƒLƒ“ƒO“o˜^î•ñC³(Vd—l)
+ * ãƒ‘ãƒ¼ãƒ†ã‚£ãƒ¼ãƒ–ãƒƒã‚­ãƒ³ã‚°ç™»éŒ²æƒ…å ±ä¿®æ­£(æ–°ä»•æ§˜)
  *
  * @note public
- * @param sd “o˜^î•ñC³—v‹Ò
- * @param memo •åW‚ÌƒƒbƒZ[ƒW
+ * @param sd ç™»éŒ²æƒ…å ±ä¿®æ­£è¦æ±‚è€…
+ * @param memo å‹Ÿé›†æ™‚ã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸
  *------------------------------------------
  */
 void booking_update2(struct map_session_data *sd, const char *memo)
@@ -438,12 +417,12 @@ void booking_update2(struct map_session_data *sd, const char *memo)
 
 	nullpo_retv(sd);
 
-	// ©g‚Ì“o˜^î•ñ‚ğŒŸõ
+	// è‡ªèº«ã®ç™»éŒ²æƒ…å ±ã‚’æ¤œç´¢
 	bd = booking_search(sd->booking_id);
 	if(bd == NULL)
 		return;
 
-	// “o˜^î•ñC³
+	// ç™»éŒ²æƒ…å ±ä¿®æ­£
 	bd->time = (unsigned int)time(NULL);
 	strncpy(bd->memo,memo,MAX_BOOKING_MEMO_LENGTH);
 	bd->memo[MAX_BOOKING_MEMO_LENGTH-1] = '\0';
@@ -454,10 +433,10 @@ void booking_update2(struct map_session_data *sd, const char *memo)
 }
 
 /*==========================================
- * ƒp[ƒeƒB[ƒuƒbƒLƒ“ƒOƒŠƒXƒgíœ(‹Œd—l)
+ * ãƒ‘ãƒ¼ãƒ†ã‚£ãƒ¼ãƒ–ãƒƒã‚­ãƒ³ã‚°ãƒªã‚¹ãƒˆå‰Šé™¤(æ—§ä»•æ§˜)
  *
  * @note public
- * @param sd “o˜^î•ñíœ—v‹Ò
+ * @param sd ç™»éŒ²æƒ…å ±å‰Šé™¤è¦æ±‚è€…
  *------------------------------------------
  */
 void booking_delete(struct map_session_data *sd)
@@ -478,11 +457,11 @@ void booking_delete(struct map_session_data *sd)
 }
 
 /*==========================================
- * ƒp[ƒeƒB[ƒuƒbƒLƒ“ƒOƒf[ƒ^“Ç‚İ‚İ
+ * ãƒ‘ãƒ¼ãƒ†ã‚£ãƒ¼ãƒ–ãƒƒã‚­ãƒ³ã‚°ãƒ‡ãƒ¼ã‚¿èª­ã¿è¾¼ã¿
  *
  * @note private
- * @return ¬Œ÷‚Å‚ ‚ê‚Î1
- *         ¸”s‚Å‚ ‚ê‚Î-1
+ * @return æˆåŠŸã§ã‚ã‚Œã°1
+ *         å¤±æ•—ã§ã‚ã‚Œã°-1
  *------------------------------------------
  */
 static int read_booking_db(void)
@@ -524,7 +503,7 @@ static int read_booking_db(void)
 			count++;
 
 		if(i > 0 && id < booking_mapid[i-1]) {
-			// MAPID‚Ì¸‡‚É•À‚ñ‚Å‚È‚¢ê‡
+			// MAPIDã®æ˜‡é †ã«ä¸¦ã‚“ã§ãªã„å ´åˆ
 			int max = i;
 			while(i > 0 && id < booking_mapid[i-1]) {
 				i--;
@@ -569,7 +548,7 @@ static int read_booking_db(void)
 			count++;
 
 		if(i > 0 && id < booking_jobid[i-1]) {
-			// JOBID‚Ì¸‡‚É•À‚ñ‚Å‚È‚¢ê‡
+			// JOBIDã®æ˜‡é †ã«ä¸¦ã‚“ã§ãªã„å ´åˆ
 			int max = i;
 			while(i > 0 && id < booking_jobid[i-1]) {
 				i--;
@@ -586,13 +565,13 @@ static int read_booking_db(void)
 }
 
 /*==========================================
- * I—¹
+ * çµ‚äº†
  *
  * @note private
- * @param key –¢g—p
- * @aram data ƒƒ‚ƒŠ‰ğ•ú‚·‚éƒf[ƒ^
- * @param ap –¢g—p
- * @return í‚É0‚ğ•Ô‹p
+ * @param key æœªä½¿ç”¨
+ * @aram data ãƒ¡ãƒ¢ãƒªè§£æ”¾ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
+ * @param ap æœªä½¿ç”¨
+ * @return å¸¸ã«0ã‚’è¿”å´
  *------------------------------------------
  */
 static int booking_db_final(void *key, void *data, va_list ap)
@@ -611,7 +590,7 @@ void do_final_booking(void)
 }
 
 /*==========================================
- * ‰Šú‰»
+ * åˆæœŸåŒ–
  *
  * @note private
  *------------------------------------------

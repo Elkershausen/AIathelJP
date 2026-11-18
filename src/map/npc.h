@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _NPC_H_
+ï»¿#ifndef _NPC_H_
 #define _NPC_H_
 
 #define WARP_CLASS 45
@@ -71,11 +50,11 @@ int npc_timeout_stop(struct map_session_data *sd);
 int npc_dynamicnpc_start(struct map_session_data *sd);
 int npc_dynamicnpc_stop(struct map_session_data *sd);
 
-// ƒƒ‚ƒŠƒAƒ‹ƒ_ƒ“ƒWƒ‡ƒ“ŠÖ˜A
+// ãƒ¡ãƒ¢ãƒªã‚¢ãƒ«ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³é–¢é€£
 int npc_addmdnpc(struct npc_data *src_nd, int m);
 int npc_free(struct npc_data *nd);
 
-// •àsNPCŠÖ˜A
+// æ­©è¡ŒNPCé–¢é€£
 int npc_unit_move(struct npc_data *nd, int flag);
 
 #endif

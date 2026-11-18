@@ -1,25 +1,4 @@
-/* 
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <time.h>
+﻿#include <time.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,28 +34,28 @@
 
 #define SI_MADOGEAR 192
 
-static int atkmods[MAX_SIZE_FIX][WT_MAX];	// +a2ZWaA-ATK+MLUwpDC6T+5rYw-(size_fix.txt)
+static int atkmods[MAX_SIZE_FIX][WT_MAX];	// 武器ATKサイズ修正(size_fix.txt)
 
 static struct refine_db {
 	int safety_bonus[MAX_REFINE];
 	int over_bonus;
 	int limit;
 	int per[MAX_REFINE];
-} refine_db[MAX_WEAPON_LEVEL+-1];
+} refine_db[MAX_WEAPON_LEVEL+1];
 
 struct job_db job_db[PC_JOB_MAX];
 
-int current_equip_item_index;	// +MLkwxjD8ML8wuYoIe5d1KA-
+int current_equip_item_index;	// ステータス計算用
 int current_equip_name_id;
 
 #ifdef DYNAMIC_SC_DATA
 struct status_change_data dummy_sc_data[MAX_STATUSCHANGE];
 #endif
 
-static int status_calc_amotion_pc(struct map_session_data *sd);	// PC+dSg-amotion+igh7lw-
-static int status_calc_speed_pc(struct map_session_data *sd,int speed);	// PC+dSg-speed+igh7lw-
+static int status_calc_amotion_pc(struct map_session_data *sd);	// PC用amotion計算
+static int status_calc_speed_pc(struct map_session_data *sd,int speed);	// PC用speed計算
 
-static struct scdata_db scdata_db[MAX_STATUSCHANGE];	// +MLkwxjD8ML8wuXVwXjgwxzD8ML8w2TD8MLk-
+static struct scdata_db scdata_db[MAX_STATUSCHANGE];	// ステータス異常データベース
 
 static int StatusIconChangeTable[MAX_STATUSCHANGE] = {
 	/* 0- */
@@ -262,7 +241,7 @@ static int StatusIconChangeTable[MAX_STATUSCHANGE] = {
 };
 
 /*==========================================
- * +kE5ScHy+kyww3DD8MMowuQ-
+ * 過剰精錬ボーナス
  *------------------------------------------
  */
 int status_get_overrefine_bonus(int lv)
@@ -273,7 +252,7 @@ int status_get_overrefine_bonus(int lv)
 }
 
 /*==========================================
- * +fL6TLGIQUp9zhw-
+ * 精錬成功率
  *------------------------------------------
  */
 int status_percentrefinery(struct map_session_data *sd,struct item *item)
@@ -282,15 +261,15 @@ int status_percentrefinery(struct map_session_data *sd,struct item *item)
 
 	nullpo_retr(0, item);
 
-	if(item->refine < 0 || item->refine >= MAX_REFINE)	// +UCQwTDCoMOkw/DCCMFcwTzBvZeIwa2cAWSdQJDBqMIk-0%
+	if(item->refine < 0 || item->refine >= MAX_REFINE)	// 値がエラーもしくは既に最大値なら0%
 		return 0;
 
 	percent = refine_db[itemdb_wlv(item->nameid)].per[(int)item->refine];
 
 	if(battle_config.refinery_research_lv)
-		percent +-= pc_checkskill(sd,BS_WEAPONRESEARCH);	// +a2ZWaHgUenYwuTCtMOtiQGMB-
+		percent += pc_checkskill(sd,BS_WEAPONRESEARCH);	// 武器研究スキル所持
 
-	// +eLpzhzBuZwlSuXvEVvIwwTCnMMMwrw-
+	// 確率の有効範囲チェック
 	if(percent > 100) {
 		percent = 100;
 	}
@@ -302,7 +281,7 @@ int status_percentrefinery(struct map_session_data *sd,struct item *item)
 }
 
 /*==========================================
- * +fL6TLGIQUp9zhw- +U0NSBnOH-
+ * 精錬成功率 千分率
  *------------------------------------------
  */
 int status_percentrefinery_weaponrefine(struct map_session_data *sd,struct item *item)
@@ -314,7 +293,7 @@ int status_percentrefinery_weaponrefine(struct map_session_data *sd,struct item 
 	nullpo_retr(0, sd);
 	nullpo_retr(0, item);
 
-	if(item->refine < 0 || item->refine >= MAX_REFINE)	// +UCQwTDCoMOkw/DCCMFcwTzBvZeIwa2cAWSdQJDBqMIk-0%
+	if(item->refine < 0 || item->refine >= MAX_REFINE)	// 値がエラーもしくは既に最大値なら0%
 		return 0;
 
 	if(sd->status.class_ == PC_CLASS_NC || sd->status.class_ == PC_CLASS_NC_H || sd->status.class_ == PC_CLASS_NC_B)
@@ -325,12 +304,12 @@ int status_percentrefinery_weaponrefine(struct map_session_data *sd,struct item 
 		joblv = sd->status.job_level;
 
 	diff = joblv - 50;
-	percent = refine_db[itemdb_wlv(item->nameid)].per[(int)item->refine]*10 +- diff +- 4 * diff;
+	percent = refine_db[itemdb_wlv(item->nameid)].per[(int)item->refine]*10 + diff + 4 * diff;
 
 	if(battle_config.allow_weaponrearch_to_weaponrefine)
-		percent +-= pc_checkskill(sd,BS_WEAPONRESEARCH)*10;	// +a2ZWaHgUenYwuTCtMOtiQGMB-
+		percent += pc_checkskill(sd,BS_WEAPONRESEARCH)*10;	// 武器研究スキル所持
 
-	// +eLpzhzBuZwlSuXvEVvIwwTCnMMMwrw-
+	// 確率の有効範囲チェック
 	if(percent > 1000) {
 		percent = 1000;
 	}
@@ -342,7 +321,7 @@ int status_percentrefinery_weaponrefine(struct map_session_data *sd,struct item 
 }
 
 /*==========================================
- * +MLsw/DDWU++A/TBqMLkwxjD8ML8wuXVwXjgwSzBpMEYwSw-
+ * セーブ可能なステータス異常かどうか
  *------------------------------------------
  */
 int status_can_save(int type)
@@ -355,7 +334,7 @@ int status_can_save(int type)
 }
 
 /*==========================================
- * diable+MGowuTDGMPwwvzC5dXBeODBLMGkwRjBL-
+ * diableなステータス異常かどうか
  *------------------------------------------
  */
 int status_is_disable(int type,int mask)
@@ -368,15 +347,15 @@ int status_is_disable(int type,int mask)
 }
 
 /*==========================================
- * +MNEw6TDhMPwwv4oIe5c-
- * first==0+MG5mQjABigh7l1v+jGEwbjDRMOkw4TD8ML8wTFR8MHNR+jBXUk0wSzCJ-
- * +WQlTFjBXMF9YNFQIgepS1TBn-send+MFkwizBMMAE-
- * +gP1S1XaEMGtZCVMWMFUwWzBfMNEw6TDhMPwwvzBvgepSTTBn-send+MFkwizCIMEYwaw-
+ * パラメータ計算
+ * first==0の時、計算対象のパラメータが呼び出し前から
+ * 変化した場合自動でsendするが、
+ * 能動的に変化させたパラメータは自前でsendするように
  *------------------------------------------
  */
 int status_calc_pc(struct map_session_data* sd,int first)
 {
-	// +bOhhD/8aMFMwUzBnMG9ZCWVwMG5bo4oAMG4wfzBrMGgwaTCBMAFSHWcfUxYwbw-L_RECALC+MG5fjDBrMIQwizBTMGgwAg-
+	// 注意：ここでは変数の宣言のみにとどめ、初期化はL_RECALCの後にやること。
 	int b_speed,b_max_hp,b_max_sp,b_hp,b_sp,b_weight,b_max_weight,b_paramb[12],b_paramc[12],b_hit,b_flee;
 	int b_aspd,b_watk,b_def,b_watk2,b_def2,b_flee2,b_critical,b_attackrange,b_matk1,b_matk2,b_mdef,b_mdef2,b_class;
 	int b_base_atk;
@@ -388,7 +367,7 @@ int status_calc_pc(struct map_session_data* sd,int first)
 	int skill,wele,wele_,def_ele,refinedef;
 	int pele,pdef_ele;
 	int str,dstr,dex;
-	int calclimit = 2; // +Uh1W3jBv-use script+j7wwfzBnW5+ITA-
+	int calclimit = 2; // 初回はuse script込みで実行
 #ifndef PRE_RENEWAL
 	int b_plus_atk,b_plus_matk;
 #endif
@@ -397,19 +376,19 @@ int status_calc_pc(struct map_session_data* sd,int first)
 
 	if(sd->stop_status_calc_pc)
 	{
-		sd->call_status_calc_pc_while_stopping+-+-;
+		sd->call_status_calc_pc_while_stopping++;
 		return 0;
 	}
 
 	sd->call_status_calc_pc_while_stopping = 0;
 
-	// status_calc_pc +MG5R5nQGTi0waw-status_calc_pc+MExUfDBzUfowVTCMMIswaGcAUh0wa4oIe5cwVzBmMEQwiw-
-	// +UCQwTHLCMEZT74D9YCcwTDBCMIswAjB+MF8wATBTMG6VomVwMExUfDBwMIwwizBoMEQwRjBTMGgwbzABMK0w4zDpMG5ytmFLMEw-
-	// +WQlTFjBXMGYwRDCLMFMwaDCSZpd5OjBXMGYwRDCLMG4wZzABigh7l31QZ5wwkmNoMGYwZlGNigh7lzBXMGowUTCMMHAwRDBRMGowRDAC-
-	// +laJlcDBufUJOhmZCcLkwZ1R8MHNR+jBXMEwwQjCMMHAwAQ-L_RECALC+MGuY2zBwMFkwiDBGMGswWTCLMAI-
-	if( sd->status_calc_pc_process+-+- ) return 0;
+	// status_calc_pc の処理中にstatus_calc_pcが呼び出されると最初に計算している
+	// 値が狂う可能性がある。また、この関数が呼ばれるということは、キャラの状態が
+	// 変化していることを暗示しているので、計算結果を捨てて再計算しなければいけない。
+	// 関数の終了時点で呼び出しがあれば、L_RECALCに飛ばすようにする。
+	if( sd->status_calc_pc_process++ ) return 0;
 
-	// +TuVSTTBucrZhSzBuT91bWA-
+	// 以前の状態の保存
 	b_speed      = sd->speed;
 	b_max_hp     = sd->status.max_hp;
 	b_max_sp     = sd->status.max_sp;
@@ -455,8 +434,8 @@ int status_calc_pc(struct map_session_data* sd,int first)
 #endif
 
 L_RECALC:
-	// +ZyxnZTBuigh7l5WLWcs-(+UUMwbjDRMOkw4TD8ML8wkmb0ZbAwVzBqMEQwbjBvMAGKCHuXTi0wa4oIe5dR5nQGMExUfDBwMIwwXzBoME0wbg-
-	// +U81mIFIGMIJlsDBfMGuQAU/hMFkwizBfMIE-)+MAI-
+	// 本来の計算開始(元のパラメータを更新しないのは、計算中に計算処理が呼ばれたときの
+	// 反映分も新たに送信するため)。
 
 	pele      = ELE_NEUTRAL;
 	pdef_ele  = ELE_NEUTRAL;
@@ -471,9 +450,9 @@ L_RECALC:
 	sd->special_state.infinite_tigereye = 0;
 	sd->special_state.infinite_endure   = 0;
 
-	pc_calc_skilltree(sd);	// +MLkwrTDrMMQw6jD8MG6KCHuX-
+	pc_calc_skilltree(sd);	// スキルツリーの計算
 
-	sd->max_weight = job_db[sd->s_class.job].max_weight_base+-sd->status.str*battle_config.str_weight;
+	sd->max_weight = job_db[sd->s_class.job].max_weight_base+sd->status.str*battle_config.str_weight;
 
 	if(battle_config.baby_weight_rate != 100 && pc_isbaby(sd))
 		sd->max_weight = sd->max_weight*battle_config.baby_weight_rate/100;
@@ -482,47 +461,47 @@ L_RECALC:
 	else if(battle_config.normal_weight_rate != 100)
 		sd->max_weight = sd->max_weight*battle_config.normal_weight_rate/100;
 
-	// +MNows5oOTldmQliXMEgwizCIMEZ5+1LV-
-	if(pc_isriding(sd))	// +MNowszDaMLMw+zCwMOow1TCpMPM-
-		sd->max_weight +-= battle_config.riding_weight;
+	// ペコ騎乗時増えるよう移動
+	if(pc_isriding(sd))	// ペコペコ・グリフォン
+		sd->max_weight += battle_config.riding_weight;
 
-	if(pc_isdragon(sd) && (skill =  pc_checkskill(sd,RK_DRAGONTRAINING)) > 0)	// +MMkw6TC0MPOaDk5XMEswZDDJMOkwtDDzMMgw7DD8MMsw8zCwf9Jfl24IMH8-
-		sd->max_weight +-= 5000 +- 2000 * skill;
+	if(pc_isdragon(sd) && (skill =  pc_checkskill(sd,RK_DRAGONTRAINING)) > 0)	// ドラゴン騎乗かつドラゴントレーニング習得済み
+		sd->max_weight += 5000 + 2000 * skill;
 
-	if((skill = pc_checkskill(sd,MC_INCCARRY)) > 0)	// +YkBjAZHPWJdSoA-
-		sd->max_weight +-= skill*2000;
+	if((skill = pc_checkskill(sd,MC_INCCARRY)) > 0)	// 所持量増加
+		sd->max_weight += skill*2000;
 
-	if((skill = pc_checkskill(sd,ALL_INCCARRAY)) > 0)	// +YkBjAZHPWJdSoA-R
-		sd->max_weight +-= skill*2000;
+	if((skill = pc_checkskill(sd,ALL_INCCARRAY)) > 0)	// 所持量増加R
+		sd->max_weight += skill*2000;
 
-	if((skill = pc_checkskill(sd,SG_KNOWLEDGE)) > 0)	// +WSqWfTBoZwgwaGYfMG535YtY-
+	if((skill = pc_checkskill(sd,SG_KNOWLEDGE)) > 0)	// 太陽と月と星の知識
 	{
-	 	if(battle_config.check_knowlege_map) {	// +WDRiQDDBMKcwwzCvMJKITDBqMEY-
+	 	if(battle_config.check_knowlege_map) {	// 場所チェックを行なう
 			if(sd->bl.m == sd->feel_index[0] || sd->bl.m == sd->feel_index[1] || sd->bl.m == sd->feel_index[2])
-				sd->max_weight +-= sd->max_weight*skill/10;
+				sd->max_weight += sd->max_weight*skill/10;
 		} else {
-			sd->max_weight +-= sd->max_weight*skill/10;
+			sd->max_weight += sd->max_weight*skill/10;
 		}
 	}
 
 	if(first&1) {
 		sd->weight = 0;
-		for(i=0; i<MAX_INVENTORY; i+-+-) {
+		for(i=0; i<MAX_INVENTORY; i++) {
 			if(sd->status.inventory[i].nameid == 0 || sd->inventory_data[i] == NULL)
 				continue;
-			sd->weight +-= sd->inventory_data[i]->weight*sd->status.inventory[i].amount;
+			sd->weight += sd->inventory_data[i]->weight*sd->status.inventory[i].amount;
 		}
 		sd->cart_max_weight = battle_config.max_cart_weight;
-		if((skill = pc_checkskill(sd,GN_REMODELING_CART)) > 0)	// +MKsw/DDIZTmQIA-
-			sd->cart_max_weight +-= skill*5000;
+		if((skill = pc_checkskill(sd,GN_REMODELING_CART)) > 0)	// カート改造
+			sd->cart_max_weight += skill*5000;
 		sd->cart_weight     = 0;
 		sd->cart_max_num    = MAX_CART;
 		sd->cart_num        = 0;
-		for(i=0; i<MAX_CART; i+-+-) {
+		for(i=0; i<MAX_CART; i++) {
 			if(sd->status.cart[i].nameid == 0)
 				continue;
-			sd->cart_weight +-= itemdb_weight(sd->status.cart[i].nameid)*sd->status.cart[i].amount;
-			sd->cart_num+-+-;
+			sd->cart_weight += itemdb_weight(sd->status.cart[i].nameid)*sd->status.cart[i].amount;
+			sd->cart_num++;
 		}
 	}
 
@@ -598,7 +577,7 @@ L_RECALC:
 	memset(sd->auto_status_calc_pc,0,sizeof(sd->auto_status_calc_pc));
 	memset(sd->eternal_status_change,0,sizeof(sd->eternal_status_change));
 
-	sd->watk_       = 0;	// +ToxSAG1BdSg-
+	sd->watk_       = 0;	// 二刀流用
 	sd->watk_2      = 0;
 	sd->atk_ele_    = ELE_NEUTRAL;
 	sd->star_       = 0;
@@ -732,11 +711,11 @@ L_RECALC:
 	sd->sp_rate_penalty_time  = 0;
 	sd->sp_rate_penalty_value = 0;
 
-	for(i=0; i<EQUIP_INDEX_MAX; i+-+-) {
+	for(i=0; i<EQUIP_INDEX_MAX; i++) {
 		if(i == EQUIP_INDEX_ARROW)
 			continue;
 		idx = sd->equip_index[i];
-		current_equip_item_index = i;	// +kOhPTTDBMKcwwzCvdSg-
+		current_equip_item_index = i;	// 部位チェック用
 		if(idx < 0)
 			continue;
 		if(i == EQUIP_INDEX_RARM && sd->equip_index[EQUIP_INDEX_LARM] == idx)
@@ -755,12 +734,12 @@ L_RECALC:
 				int j;
 				if( !itemdb_isspecial(sd->status.inventory[idx].card[0]) ) {
 					int c;
-					for(j=0; j<4; j+-+-) {	// +MKsw/DDJ-
+					for(j=0; j<4; j++) {	// カード
 						if((c = sd->status.inventory[idx].card[j]) <= 0)
 							continue;
 						if(sd->inventory_data[idx]->slot < j && itemdb_cardtype(c) != 2)
 							continue;
-						current_equip_name_id = c;		// +MKow/DDIMLkw2jDr-(+kc2JBzDBMKcwwzCvdSg-)
+						current_equip_name_id = c;		// オートスペル(重複チェック用)
 						if(i == EQUIP_INDEX_LARM && sd->status.inventory[idx].equip == LOC_LARM)
 							sd->state.lr_flag = 1;
 						if(calclimit == 2)
@@ -769,7 +748,7 @@ L_RECALC:
 						sd->state.lr_flag = 0;
 					}
 				}
-				for(j=0; j<5; j+-+-) {	// +MOkw8zDAMOAwqjDXMLcw5zDz-
+				for(j=0; j<5; j++) {	// ランダムオプション
 					if(sd->status.inventory[idx].opt[j].id <= 0)
 						continue;
 					if(i == EQUIP_INDEX_LARM && sd->status.inventory[idx].equip == LOC_LARM)
@@ -778,22 +757,22 @@ L_RECALC:
 					sd->state.lr_flag = 0;
 				}
 			}
-			else if(itemdb_isarmor(sd->inventory_data[idx]->nameid)) { // +ljJRdw-
+			else if(itemdb_isarmor(sd->inventory_data[idx]->nameid)) { // 防具
 				int j;
 				if( !itemdb_isspecial(sd->status.inventory[idx].card[0]) ) {
 					int c;
-					for(j=0; j<4; j+-+-) {	// +MKsw/DDJ-
+					for(j=0; j<4; j++) {	// カード
 						if((c = sd->status.inventory[idx].card[j]) <= 0)
 							continue;
 						if(sd->inventory_data[idx]->slot < j && itemdb_cardtype(c) != 2)
 							continue;
-						current_equip_name_id = c;		// +MKow/DDIMLkw2jDr-(+kc2JBzDBMKcwwzCvdSg-)
+						current_equip_name_id = c;		// オートスペル(重複チェック用)
 						if(calclimit == 2)
 							run_script(itemdb_usescript(c),0,sd->bl.id,0);
 						run_script(itemdb_equipscript(c),0,sd->bl.id,0);
 					}
 				}
-				for(j=0; j<5; j+-+-) {	// +MOkw8zDAMOAwqjDXMLcw5zDz-
+				for(j=0; j<5; j++) {	// ランダムオプション
 					if(sd->status.inventory[idx].opt[j].id <= 0)
 						continue;
 					bonus_randopt(sd, sd->status.inventory[idx].opt[j].id, sd->status.inventory[idx].opt[j].val);
@@ -802,7 +781,7 @@ L_RECALC:
 		}
 	}
 
-	for(i = 0; i < sd->activeitem.count; i+-+-)
+	for(i = 0; i < sd->activeitem.count; i++)
 	{
 		if(sd->activeitem_timer[i] == -1)
 			continue;
@@ -825,12 +804,12 @@ L_RECALC:
 	}
 	memcpy(sd->paramcard,sd->parame,sizeof(sd->paramcard));
 
-	// +iMVQmVTBMGswiDCLMLkwxjD8ML8wuVkJUxYwbzBTMFMwZ1ufiEw-
-	for(i=0; i<EQUIP_INDEX_MAX; i+-+-) {
+	// 装備品によるステータス変化はここで実行
+	for(i=0; i<EQUIP_INDEX_MAX; i++) {
 		if(i == EQUIP_INDEX_ARROW)
 			continue;
 		idx = sd->equip_index[i];
-		current_equip_item_index = i;	// +kOhPTTDBMKcwwzCvdSg-
+		current_equip_item_index = i;	// 部位チェック用
 		if(idx < 0)
 			continue;
 		if(i == EQUIP_INDEX_RARM && sd->equip_index[EQUIP_INDEX_LARM] == idx)
@@ -845,71 +824,71 @@ L_RECALC:
 			continue;
 		if(sd->inventory_data[idx]) {
 			current_equip_name_id = sd->inventory_data[idx]->nameid;
-			sd->matk1 +-= sd->inventory_data[idx]->matk;
+			sd->matk1 += sd->inventory_data[idx]->matk;
 #ifdef PRE_RENEWAL
-			sd->matk2 +-= sd->inventory_data[idx]->matk;
+			sd->matk2 += sd->inventory_data[idx]->matk;
 #endif
-			sd->def +-= sd->inventory_data[idx]->def;
-			sd->mdef +-= sd->inventory_data[idx]->mdef;
+			sd->def += sd->inventory_data[idx]->def;
+			sd->mdef += sd->inventory_data[idx]->mdef;
 			if(itemdb_isweapon(sd->inventory_data[idx]->nameid)) {
 				int r,wlv = sd->inventory_data[idx]->wlv;
 				if(i == EQUIP_INDEX_LARM && sd->status.inventory[idx].equip == LOC_LARM) {
-					// +ToxSAG1BdSgwxzD8ML9RZVKb-
-					sd->watk_ +-= sd->inventory_data[idx]->atk;
+					// 二刀流用データ入力
+					sd->watk_ += sd->inventory_data[idx]->atk;
 					if((r = sd->status.inventory[idx].refine) > 0)
-						sd->watk_2 = refine_db[wlv].safety_bonus[r-1];	// +fL6TLGU7ZINSmw-
+						sd->watk_2 = refine_db[wlv].safety_bonus[r-1];	// 精錬攻撃力
 #ifndef PRE_RENEWAL
-					if(sd->status.weapon != WT_BOW && r > 0)	// +XxMwazBvfL6TLA-MATK+MNww/DDKMLkwTDBqMEQ-
-						sd->matk1 +-= refine_db[wlv].safety_bonus[r-1];
+					if(sd->status.weapon != WT_BOW && r > 0)	// 弓には精錬MATKボーナスがない
+						sd->matk1 += refine_db[wlv].safety_bonus[r-1];
 #endif
-					if((r -= refine_db[wlv].limit) > 0)	// +kE5ScHy+kyww3DD8MMowuQ-
+					if((r -= refine_db[wlv].limit) > 0)	// 過剰精錬ボーナス
 						sd->overrefine_ = r*refine_db[wlv].over_bonus;
 
-					if(sd->status.inventory[idx].card[0] == 0x00ff) {	// +iP2QIGtmVmg-
-						sd->star_ = (sd->status.inventory[idx].card[1]>>8);	// +Zh8wbjBLMFEwiQ-
+					if(sd->status.inventory[idx].card[0] == 0x00ff) {	// 製造武器
+						sd->star_ = (sd->status.inventory[idx].card[1]>>8);	// 星のかけら
 						if(sd->star_ == 15)
 							sd->star_ = 40;
-						wele_= sd->status.inventory[idx].card[1] & 0x0f;	// +XF4- +YCc-
-						// +MOkw8zCtMPMwsDDcMPwwyjC5-
+						wele_= sd->status.inventory[idx].card[1] & 0x0f;	// 属 性
+						// ランキングボーナス
 						if(ranking_get_id2rank(*((int *)(&sd->status.inventory[idx].card[2])), RK_BLACKSMITH))
 							sd->ranker_weapon_bonus_ = battle_config.ranker_weapon_bonus;
 					}
-					sd->range.attackrange_ +-= sd->inventory_data[idx]->range;
+					sd->range.attackrange_ += sd->inventory_data[idx]->range;
 					sd->state.lr_flag = 1;
 					if(calclimit == 2)
 						run_script(sd->inventory_data[idx]->use_script,0,sd->bl.id,0);
 					run_script(sd->inventory_data[idx]->equip_script,0,sd->bl.id,0);
 					sd->state.lr_flag = 0;
 				} else {
-					// +ToxSAG1Ba2ZWaE7lWRY-
-					sd->watk  +-= sd->inventory_data[idx]->atk;
+					// 二刀流武器以外
+					sd->watk  += sd->inventory_data[idx]->atk;
 					if((r = sd->status.inventory[idx].refine) > 0)
-						sd->watk2 +-= refine_db[wlv].safety_bonus[r-1];	// +fL6TLGU7ZINSmw-
+						sd->watk2 += refine_db[wlv].safety_bonus[r-1];	// 精錬攻撃力
 #ifndef PRE_RENEWAL
-					if(sd->status.weapon != WT_BOW && r > 0)	// +XxMwazBvfL6TLA-MATK+MNww/DDKMLkwTDBqMEQ-
-						sd->matk1 +-= refine_db[wlv].safety_bonus[r-1];
+					if(sd->status.weapon != WT_BOW && r > 0)	// 弓には精錬MATKボーナスがない
+						sd->matk1 += refine_db[wlv].safety_bonus[r-1];
 #endif
-					if((r -= refine_db[wlv].limit) > 0)	// +kE5ScHy+kyww3DD8MMowuQ-
-						sd->overrefine +-= r*refine_db[wlv].over_bonus;
+					if((r -= refine_db[wlv].limit) > 0)	// 過剰精錬ボーナス
+						sd->overrefine += r*refine_db[wlv].over_bonus;
 
-					if(sd->status.inventory[idx].card[0] == 0x00ff) {	// +iP2QIGtmVmg-
-						sd->star +-= (sd->status.inventory[idx].card[1]>>8);	// +Zh8wbjBLMFEwiQ-
+					if(sd->status.inventory[idx].card[0] == 0x00ff) {	// 製造武器
+						sd->star += (sd->status.inventory[idx].card[1]>>8);	// 星のかけら
 						if(sd->star == 15)
 							sd->star = 40;
-						wele = sd->status.inventory[idx].card[1] & 0x0f;	// +XF4- +YCc-
-						// +MOkw8zCtMPMwsDDcMPwwyjC5-
+						wele = sd->status.inventory[idx].card[1] & 0x0f;	// 属 性
+						// ランキングボーナス
 						if(ranking_get_id2rank(*((int *)(&sd->status.inventory[idx].card[2])),RK_BLACKSMITH))
 							sd->ranker_weapon_bonus = battle_config.ranker_weapon_bonus;
 					}
-					sd->range.attackrange +-= sd->inventory_data[idx]->range;
+					sd->range.attackrange += sd->inventory_data[idx]->range;
 					if(calclimit == 2)
 						run_script(sd->inventory_data[idx]->use_script,0,sd->bl.id,0);
 					run_script(sd->inventory_data[idx]->equip_script,0,sd->bl.id,0);
 				}
 			} else if(itemdb_isarmor(sd->inventory_data[idx]->nameid)) {
-				sd->watk  +-= sd->inventory_data[idx]->atk;
+				sd->watk  += sd->inventory_data[idx]->atk;
 				if(sd->status.inventory[idx].refine > 0)
-					refinedef +-= refine_db[0].safety_bonus[sd->status.inventory[idx].refine - 1];
+					refinedef += refine_db[0].safety_bonus[sd->status.inventory[idx].refine - 1];
 				if(calclimit == 2)
 					run_script(sd->inventory_data[idx]->use_script,0,sd->bl.id,0);
 				run_script(sd->inventory_data[idx]->equip_script,0,sd->bl.id,0);
@@ -917,25 +896,25 @@ L_RECALC:
 		}
 	}
 
-	if(sd->equip_index[EQUIP_INDEX_ARROW] >= 0) { // +d+I-
+	if(sd->equip_index[EQUIP_INDEX_ARROW] >= 0) { // 矢
 		idx = sd->equip_index[EQUIP_INDEX_ARROW];
-		if(sd->inventory_data[idx]) {		// +MH4wYFxeYCcwTFFlMGMwZjBEMGowRA-
+		if(sd->inventory_data[idx]) {		// まだ属性が入っていない
 			current_equip_name_id = sd->inventory_data[idx]->nameid;
 			sd->state.lr_flag = 2;
 			run_script(sd->inventory_data[idx]->equip_script,0,sd->bl.id,0);
 			sd->state.lr_flag = 0;
-			sd->arrow_atk +-= sd->inventory_data[idx]->atk;
+			sd->arrow_atk += sd->inventory_data[idx]->atk;
 		}
 	}
 
-	sd->def +-= (refinedef+-50)/100;
+	sd->def += (refinedef+50)/100;
 
 	if(sd->range.attackrange < 1)  sd->range.attackrange  = 1;
 	if(sd->range.attackrange_ < 1) sd->range.attackrange_ = 1;
 	if(sd->range.attackrange < sd->range.attackrange_)
 		sd->range.attackrange = sd->range.attackrange_;
 	if(sd->status.weapon == WT_BOW)
-		sd->range.attackrange +-= sd->arrow_range;
+		sd->range.attackrange += sd->arrow_range;
 	if(wele > ELE_NEUTRAL)
 		sd->atk_ele = wele;
 	if(wele_ > ELE_NEUTRAL)
@@ -948,318 +927,318 @@ L_RECALC:
 		if(pdef_ele > ELE_NEUTRAL && !sd->def_ele)
 			sd->def_ele = pdef_ele;
 	}
-	sd->double_rate +-= sd->double_add_rate;
-	sd->perfect_hit +-= sd->perfect_hit_add;
-	sd->get_zeny_num = (sd->get_zeny_num +- sd->get_zeny_add_num > 100) ? 100 : (sd->get_zeny_num +- sd->get_zeny_add_num);
-	sd->get_zeny_num2 = (sd->get_zeny_num2 +- sd->get_zeny_add_num2 > 100) ? 100 : (sd->get_zeny_num2 +- sd->get_zeny_add_num2);
-	sd->splash_range +-= sd->splash_add_range;
+	sd->double_rate += sd->double_add_rate;
+	sd->perfect_hit += sd->perfect_hit_add;
+	sd->get_zeny_num = (sd->get_zeny_num + sd->get_zeny_add_num > 100) ? 100 : (sd->get_zeny_num + sd->get_zeny_add_num);
+	sd->get_zeny_num2 = (sd->get_zeny_num2 + sd->get_zeny_add_num2 > 100) ? 100 : (sd->get_zeny_num2 + sd->get_zeny_add_num2);
+	sd->splash_range += sd->splash_add_range;
 
-	// +a2ZWaA-ATK+MLUwpDC6iNxrYw-
-	for(i=0; i<MAX_SIZE_FIX; i+-+-) {
-		sd->atkmods[i]  = atkmods[i][sd->weapontype1];	// +U/NiSw-
-		sd->atkmods_[i] = atkmods[i][sd->weapontype2];	// +XeZiSw-
+	// 武器ATKサイズ補正
+	for(i=0; i<MAX_SIZE_FIX; i++) {
+		sd->atkmods[i]  = atkmods[i][sd->weapontype1];	// 右手
+		sd->atkmods_[i] = atkmods[i][sd->weapontype2];	// 左手
 	}
 
-	// job+MNww/DDKMLlSBg-
-	for(i=0; i<sd->status.job_level && i<MAX_LEVEL; i+-+-) {
+	// jobボーナス分
+	for(i=0; i<sd->status.job_level && i<MAX_LEVEL; i++) {
 		if(job_db[sd->s_class.job].bonus[sd->s_class.upper][i] & 0x01)
-			sd->paramb[0]+-+-;
+			sd->paramb[0]++;
 		if(job_db[sd->s_class.job].bonus[sd->s_class.upper][i] & 0x02)
-			sd->paramb[1]+-+-;
+			sd->paramb[1]++;
 		if(job_db[sd->s_class.job].bonus[sd->s_class.upper][i] & 0x04)
-			sd->paramb[2]+-+-;
+			sd->paramb[2]++;
 		if(job_db[sd->s_class.job].bonus[sd->s_class.upper][i] & 0x08)
-			sd->paramb[3]+-+-;
+			sd->paramb[3]++;
 		if(job_db[sd->s_class.job].bonus[sd->s_class.upper][i] & 0x10)
-			sd->paramb[4]+-+-;
+			sd->paramb[4]++;
 		if(job_db[sd->s_class.job].bonus[sd->s_class.upper][i] & 0x20)
-			sd->paramb[5]+-+-;
+			sd->paramb[5]++;
 		if(job_db[sd->s_class.job].bonus[sd->s_class.upper][i] & 0x040)
-			sd->paramb[6]+-+-;
+			sd->paramb[6]++;
 		if(job_db[sd->s_class.job].bonus[sd->s_class.upper][i] & 0x080)
-			sd->paramb[7]+-+-;
+			sd->paramb[7]++;
 		if(job_db[sd->s_class.job].bonus[sd->s_class.upper][i] & 0x100)
-			sd->paramb[8]+-+-;
+			sd->paramb[8]++;
 		if(job_db[sd->s_class.job].bonus[sd->s_class.upper][i] & 0x200)
-			sd->paramb[9]+-+-;
+			sd->paramb[9]++;
 		if(job_db[sd->s_class.job].bonus[sd->s_class.upper][i] & 0x400)
-			sd->paramb[10]+-+-;
+			sd->paramb[10]++;
 		if(job_db[sd->s_class.job].bonus[sd->s_class.upper][i] & 0x800)
-			sd->paramb[11]+-+-;
+			sd->paramb[11]++;
 	}
 
-	if((skill = pc_checkskill(sd,AC_OWL)) > 0) {	// +MHUwTzCNMEYwbnbu-
-		sd->paramb[4] +-= skill;
+	if((skill = pc_checkskill(sd,AC_OWL)) > 0) {	// ふくろうの目
+		sd->paramb[4] += skill;
 	}
-	if(pc_checkskill(sd,BS_HILTBINDING)) {	// +MNIw6zDIMNAwpDDzMMcwozDzMLA-
-		sd->paramb[0] +-= 1;
-		// +Zyyb1mcqW5+IxTBuMF8wgTCzMOEw8zDIMKIwpjDI-
-		//sd->watk +-= 4;
+	if(pc_checkskill(sd,BS_HILTBINDING)) {	// ヒルトバインディング
+		sd->paramb[0] += 1;
+		// 本鯖未実装のためコメントアウト
+		//sd->watk += 4;
 	}
-	if((skill = pc_checkskill(sd,SA_DRAGONOLOGY)) > 0) {	// +MMkw6TC0MM4w7TC4MPw-
-		sd->paramb[3] +-= (skill+-1)>>1;
+	if((skill = pc_checkskill(sd,SA_DRAGONOLOGY)) > 0) {	// ドラゴノロジー
+		sd->paramb[3] += (skill+1)>>1;
 	}
-	if((skill = pc_checkskill(sd,RA_RESEARCHTRAP)) > 0) {	// +MMgw6TDDMNd4FHp2-
-		sd->paramb[3] +-= skill;
+	if((skill = pc_checkskill(sd,RA_RESEARCHTRAP)) > 0) {	// トラップ研究
+		sd->paramb[3] += skill;
 	}
-	if(pc_checkskill(sd,SU_POWEROFLAND) > 0) {	// +WSdXMDBuUps-
-		sd->paramb[3] +-= 7;
+	if(pc_checkskill(sd,SU_POWEROFLAND) > 0) {	// 大地の力
+		sd->paramb[3] += 7;
 	}
-	if((skill = pc_checkskill(sd,NW_GRENADE_MASTERY)) > 0) {	// +MLAw7DDNMPwwyTDeMLkwvzDqMPw-
-		sd->paramb[10] +-= skill;
+	if((skill = pc_checkskill(sd,NW_GRENADE_MASTERY)) > 0) {	// グレネードマスタリー
+		sd->paramb[10] += skill;
 	}
-	if((skill = pc_checkskill(sd,SOA_SOUL_MASTERY)) > 0) {	// +lwqQU4hTT+599A-
-		sd->paramb[9] +-= skill;
+	if((skill = pc_checkskill(sd,SOA_SOUL_MASTERY)) > 0) {	// 霊道術修練
+		sd->paramb[9] += skill;
 	}
 #ifndef PRE_RENEWAL
-	if((skill = pc_checkskill(sd,SG_STAR_BLESS)) > 0 && (battle_config.allow_skill_without_day || is_day_of_star())) {	// +Zh8wbnldeY8-
-		sd->paramb[0] +-= skill * 2;
-		sd->paramb[1] +-= skill * 2;
-		sd->paramb[2] +-= skill * 2;
-		sd->paramb[3] +-= skill * 2;
-		sd->paramb[4] +-= skill * 2;
-		sd->paramb[5] +-= skill * 2;
-	} else if((skill = pc_checkskill(sd,SG_SUN_BLESS)) > 0 && (battle_config.allow_skill_without_day || is_day_of_sun())) {	// +WSqWfTBueV15jw-
-		sd->paramb[0] +-= skill * 2;
-		sd->paramb[2] +-= skill * 2;
-		sd->paramb[4] +-= skill * 2;
-	} else if((skill = pc_checkskill(sd,SG_MOON_BLESS)) > 0 && (battle_config.allow_skill_without_day || is_day_of_moon())) {	// +ZwgwbnldeY8-
-		sd->paramb[1] +-= skill * 2;
-		sd->paramb[3] +-= skill * 2;
-		sd->paramb[5] +-= skill * 2;
+	if((skill = pc_checkskill(sd,SG_STAR_BLESS)) > 0 && (battle_config.allow_skill_without_day || is_day_of_star())) {	// 星の祝福
+		sd->paramb[0] += skill * 2;
+		sd->paramb[1] += skill * 2;
+		sd->paramb[2] += skill * 2;
+		sd->paramb[3] += skill * 2;
+		sd->paramb[4] += skill * 2;
+		sd->paramb[5] += skill * 2;
+	} else if((skill = pc_checkskill(sd,SG_SUN_BLESS)) > 0 && (battle_config.allow_skill_without_day || is_day_of_sun())) {	// 太陽の祝福
+		sd->paramb[0] += skill * 2;
+		sd->paramb[2] += skill * 2;
+		sd->paramb[4] += skill * 2;
+	} else if((skill = pc_checkskill(sd,SG_MOON_BLESS)) > 0 && (battle_config.allow_skill_without_day || is_day_of_moon())) {	// 月の祝福
+		sd->paramb[1] += skill * 2;
+		sd->paramb[3] += skill * 2;
+		sd->paramb[5] += skill * 2;
 	}
 #endif
 
-	// +MN4w/DDAMOkw/DDcMPwwyjC5-
+	// マーダラーボーナス
 	if(battle_config.pk_murderer_point > 0) {
 		int point = ranking_get_point(sd,RK_PK);
 		if(point >= battle_config.pk_murderer_point * 4) {
-			sd->paramb[0] +-= 5;
-			sd->paramb[1] +-= 5;
-			sd->paramb[2] +-= 5;
-			sd->paramb[3] +-= 5;
-			sd->paramb[4] +-= 5;
-			sd->paramb[5] +-= 5;
-			sd->atk_rate  +-= 10;
-			sd->matk_rate +-= 10;
+			sd->paramb[0] += 5;
+			sd->paramb[1] += 5;
+			sd->paramb[2] += 5;
+			sd->paramb[3] += 5;
+			sd->paramb[4] += 5;
+			sd->paramb[5] += 5;
+			sd->atk_rate  += 10;
+			sd->matk_rate += 10;
 		} else if(point >= battle_config.pk_murderer_point) {
-			sd->paramb[0] +-= 3;
-			sd->paramb[1] +-= 3;
-			sd->paramb[2] +-= 3;
-			sd->paramb[3] +-= 3;
-			sd->paramb[4] +-= 3;
-			sd->paramb[5] +-= 3;
-			sd->atk_rate  +-= 10;
-			sd->matk_rate +-= 10;
+			sd->paramb[0] += 3;
+			sd->paramb[1] += 3;
+			sd->paramb[2] += 3;
+			sd->paramb[3] += 3;
+			sd->paramb[4] += 3;
+			sd->paramb[5] += 3;
+			sd->atk_rate  += 10;
+			sd->matk_rate += 10;
 		}
 	}
-	// 1+XqYwgmt7MJMwZzBqMEQ-Job70+MLkw0TDOMNM-or+YuFfNTC5MNEwzjDTMGsAKw-10
+	// 1度も死んでないJob70スパノビor拡張スパノビに+10
 	if(((sd->s_class.job == PC_JOB_SNV && sd->status.job_level >= 70) || sd->s_class.job == PC_JOB_ESNV) && sd->status.die_counter == 0) {
-		sd->paramb[0] +-= 10;
-		sd->paramb[1] +-= 10;
-		sd->paramb[2] +-= 10;
-		sd->paramb[3] +-= 10;
-		sd->paramb[4] +-= 10;
-		sd->paramb[5] +-= 10;
+		sd->paramb[0] += 10;
+		sd->paramb[1] += 10;
+		sd->paramb[2] += 10;
+		sd->paramb[3] += 10;
+		sd->paramb[4] += 10;
+		sd->paramb[5] += 10;
 	}
 
-	// +MK4w6zDJMLkwrTDr-
+	// ギルドスキル
 	if(battle_config.guild_hunting_skill_available)
 	{
-		struct guild *g = guild_search(sd->status.guild_id);	// +MK4w6zDJU9Zflw-
+		struct guild *g = guild_search(sd->status.guild_id);	// ギルド取得
 		struct map_session_data *gmsd = NULL;
 
 		if(g)
 			gmsd = guild_get_guildmaster_sd(g);
 
-		// +MK4w6zDJZwk- && +MN4wuTC/MPxjpX2a- && +gepSBg-!=+MN4wuTC/MPw- && +VAwwWDDeMMMw1w-
+		// ギルド有 && マスター接続 && 自分!=マスター && 同じマップ
 		if(g && gmsd && (battle_config.allow_me_guild_skill == 1 || gmsd != sd) && sd->bl.m == gmsd->bl.m)
 		{
-			if(battle_config.guild_skill_check_range) {	// +jd2W4lIkW5owkohMMEY-
+			if(battle_config.guild_skill_check_range) {	// 距離判定を行う
 				int dx = abs(sd->bl.x - gmsd->bl.x);
 				int dy = abs(sd->bl.y - gmsd->bl.y);
 				int range;
 
-				if(battle_config.guild_skill_effective_range > 0) {	// +VAxOAI3dluIwZ4oIe5c-
+				if(battle_config.guild_skill_effective_range > 0) {	// 同一距離で計算
 					range = battle_config.guild_skill_effective_range;
 					if(dx <= range && dy <= range) {
-						sd->paramb[0] +-= guild_checkskill(g,GD_LEADERSHIP);	// str
-						sd->paramb[1] +-= guild_checkskill(g,GD_SOULCOLD);	// agi
-						sd->paramb[2] +-= guild_checkskill(g,GD_GLORYWOUNDS);	// vit
-						sd->paramb[4] +-= guild_checkskill(g,GD_HAWKEYES);	// dex
-						sd->under_the_influence_of_the_guild_skill = range+-1;	// 0>+MGdfcZf/Tgs-,+kc0wajCLWDRUCDCCMEIwizBuMGcAKw-1
+						sd->paramb[0] += guild_checkskill(g,GD_LEADERSHIP);	// str
+						sd->paramb[1] += guild_checkskill(g,GD_SOULCOLD);	// agi
+						sd->paramb[2] += guild_checkskill(g,GD_GLORYWOUNDS);	// vit
+						sd->paramb[4] += guild_checkskill(g,GD_HAWKEYES);	// dex
+						sd->under_the_influence_of_the_guild_skill = range+1;	// 0>で影響下,重なる場合もあるので+1
 					} else {
 						sd->under_the_influence_of_the_guild_skill = 0;
 					}
-				} else {	// +UAtSJY3dluI-
+				} else {	// 個別距離
 					int min_range = 0x7fffffff;
 					range = skill_get_range(GD_LEADERSHIP,guild_skill_get_lv(g,GD_LEADERSHIP));
 					if(dx <= range && dy <= range) {
-						sd->paramb[0] +-= guild_checkskill(g,GD_LEADERSHIP);	// str
+						sd->paramb[0] += guild_checkskill(g,GD_LEADERSHIP);	// str
 						if(min_range > range) min_range = range;
 					}
 					range = skill_get_range(GD_SOULCOLD,guild_skill_get_lv(g,GD_SOULCOLD));
 					if(dx <= range && dy <= range) {
-						sd->paramb[1] +-= guild_checkskill(g,GD_SOULCOLD);	// agi
+						sd->paramb[1] += guild_checkskill(g,GD_SOULCOLD);	// agi
 						if(min_range > range) min_range = range;
 					}
 					range = skill_get_range(GD_GLORYWOUNDS,guild_skill_get_lv(g,GD_GLORYWOUNDS));
 					if(dx <= range && dy <= range) {
-						sd->paramb[2] +-= guild_checkskill(g,GD_GLORYWOUNDS);	// vit
+						sd->paramb[2] += guild_checkskill(g,GD_GLORYWOUNDS);	// vit
 						if(min_range > range) min_range = range;
 					}
 
 					range = skill_get_range(GD_HAWKEYES,guild_skill_get_lv(g,GD_HAWKEYES));
 					if(dx <= range && dy <= range) {
-						sd->paramb[4] +-= guild_checkskill(g,GD_HAWKEYES);	// dex
+						sd->paramb[4] += guild_checkskill(g,GD_HAWKEYES);	// dex
 						if(min_range > range) min_range = range;
 					}
 					if(min_range == 0x7fffffff)
 						sd->under_the_influence_of_the_guild_skill = 0;
 					else
-						sd->under_the_influence_of_the_guild_skill = min_range+-1;
+						sd->under_the_influence_of_the_guild_skill = min_range+1;
 				}
-			} else {	// +MN4wwzDXUWhPUw-
-				sd->paramb[0] +-= guild_checkskill(g,GD_LEADERSHIP);	// str
-				sd->paramb[1] +-= guild_checkskill(g,GD_SOULCOLD);	// agi
-				sd->paramb[2] +-= guild_checkskill(g,GD_GLORYWOUNDS);	// vit
-				sd->paramb[4] +-= guild_checkskill(g,GD_HAWKEYES);	// dex
-				sd->under_the_influence_of_the_guild_skill = battle_config.guild_skill_effective_range+-1;
+			} else {	// マップ全体
+				sd->paramb[0] += guild_checkskill(g,GD_LEADERSHIP);	// str
+				sd->paramb[1] += guild_checkskill(g,GD_SOULCOLD);	// agi
+				sd->paramb[2] += guild_checkskill(g,GD_GLORYWOUNDS);	// vit
+				sd->paramb[4] += guild_checkskill(g,GD_HAWKEYES);	// dex
+				sd->under_the_influence_of_the_guild_skill = battle_config.guild_skill_effective_range+1;
 			}
 		} else {
 			sd->under_the_influence_of_the_guild_skill = 0;
 		}
-	} else {	// +MN4wwzDXMEyQVTBjMF8wiiAmcSFSuTBgMGMwXzCK-
+	} else {	// マップが違ったり…無効だったり
 		sd->under_the_influence_of_the_guild_skill = 0;
 	}
 
-	// +MLkwxjD8ML8wuVkJUxYwazCIMItX+mcsMNEw6TDhMPwwv4jca2M-
+	// ステータス変化による基本パラメータ補正
 	if(sd->sc.count) {
-		// +lsZOLVKbVBFOCg-
+		// 集中力向上
 		if(sd->sc.data[SC_CONCENTRATE].timer != -1 && sd->sc.data[SC_QUAGMIRE].timer == -1) {
-			sd->paramb[1] +-= (sd->status.agi+-sd->paramb[1]+-sd->parame[1]-sd->paramcard[1])*(2+-sd->sc.data[SC_CONCENTRATE].val1)/100;
-			sd->paramb[4] +-= (sd->status.dex+-sd->paramb[4]+-sd->parame[4]-sd->paramcard[4])*(2+-sd->sc.data[SC_CONCENTRATE].val1)/100;
+			sd->paramb[1] += (sd->status.agi+sd->paramb[1]+sd->parame[1]-sd->paramcard[1])*(2+sd->sc.data[SC_CONCENTRATE].val1)/100;
+			sd->paramb[4] += (sd->status.dex+sd->paramb[4]+sd->parame[4]-sd->paramcard[4])*(2+sd->sc.data[SC_CONCENTRATE].val1)/100;
 		}
-		// +MLQwuTDaMOs-ALL+-20
+		// ゴスペルALL+20
 		if(sd->sc.data[SC_INCALLSTATUS].timer != -1) {
-			sd->paramb[0] +-= sd->sc.data[SC_INCALLSTATUS].val1;
-			sd->paramb[1] +-= sd->sc.data[SC_INCALLSTATUS].val1;
-			sd->paramb[2] +-= sd->sc.data[SC_INCALLSTATUS].val1;
-			sd->paramb[3] +-= sd->sc.data[SC_INCALLSTATUS].val1;
-			sd->paramb[4] +-= sd->sc.data[SC_INCALLSTATUS].val1;
-			sd->paramb[5] +-= sd->sc.data[SC_INCALLSTATUS].val1;
+			sd->paramb[0] += sd->sc.data[SC_INCALLSTATUS].val1;
+			sd->paramb[1] += sd->sc.data[SC_INCALLSTATUS].val1;
+			sd->paramb[2] += sd->sc.data[SC_INCALLSTATUS].val1;
+			sd->paramb[3] += sd->sc.data[SC_INCALLSTATUS].val1;
+			sd->paramb[4] += sd->sc.data[SC_INCALLSTATUS].val1;
+			sd->paramb[5] += sd->sc.data[SC_INCALLSTATUS].val1;
 		}
 
-		// +TgpPTU4AayGAdzBum0I-
+		// 上位一次職の魂
 		if(sd->sc.data[SC_HIGH].timer != -1) {
 			if(sd->status.base_level < 60) {
-				if(sd->status.str < sd->status.base_level-10)  sd->paramb[0] +-= sd->status.base_level-10 - sd->status.str;
-				if(sd->status.agi < sd->status.base_level-10)  sd->paramb[1] +-= sd->status.base_level-10 - sd->status.agi;
-				if(sd->status.vit < sd->status.base_level-10)  sd->paramb[2] +-= sd->status.base_level-10 - sd->status.vit;
-				if(sd->status.int_ < sd->status.base_level-10) sd->paramb[3] +-= sd->status.base_level-10 - sd->status.int_;
-				if(sd->status.dex < sd->status.base_level-10)  sd->paramb[4] +-= sd->status.base_level-10 - sd->status.dex;
-				if(sd->status.luk < sd->status.base_level-10)  sd->paramb[5] +-= sd->status.base_level-10 - sd->status.luk;
+				if(sd->status.str < sd->status.base_level-10)  sd->paramb[0] += sd->status.base_level-10 - sd->status.str;
+				if(sd->status.agi < sd->status.base_level-10)  sd->paramb[1] += sd->status.base_level-10 - sd->status.agi;
+				if(sd->status.vit < sd->status.base_level-10)  sd->paramb[2] += sd->status.base_level-10 - sd->status.vit;
+				if(sd->status.int_ < sd->status.base_level-10) sd->paramb[3] += sd->status.base_level-10 - sd->status.int_;
+				if(sd->status.dex < sd->status.base_level-10)  sd->paramb[4] += sd->status.base_level-10 - sd->status.dex;
+				if(sd->status.luk < sd->status.base_level-10)  sd->paramb[5] += sd->status.base_level-10 - sd->status.luk;
 			}
 			else {
-				if(sd->status.str < 50)  sd->paramb[0] +-= 50 - sd->status.str;
-				if(sd->status.agi < 50)  sd->paramb[1] +-= 50 - sd->status.agi;
-				if(sd->status.vit < 50)  sd->paramb[2] +-= 50 - sd->status.vit;
-				if(sd->status.int_ < 50) sd->paramb[3] +-= 50 - sd->status.int_;
-				if(sd->status.dex < 50)  sd->paramb[4] +-= 50 - sd->status.dex;
-				if(sd->status.luk < 50)  sd->paramb[5] +-= 50 - sd->status.luk;
+				if(sd->status.str < 50)  sd->paramb[0] += 50 - sd->status.str;
+				if(sd->status.agi < 50)  sd->paramb[1] += 50 - sd->status.agi;
+				if(sd->status.vit < 50)  sd->paramb[2] += 50 - sd->status.vit;
+				if(sd->status.int_ < 50) sd->paramb[3] += 50 - sd->status.int_;
+				if(sd->status.dex < 50)  sd->paramb[4] += 50 - sd->status.dex;
+				if(sd->status.luk < 50)  sd->paramb[5] += 50 - sd->status.luk;
 			}
 		}
 
-		// +mN9Oi3Uo-
+		// 食事用
 		if(sd->sc.data[SC_MEAL_INCSTR2].timer != -1)
-			sd->paramb[0] +-= sd->sc.data[SC_MEAL_INCSTR2].val1;
+			sd->paramb[0] += sd->sc.data[SC_MEAL_INCSTR2].val1;
 		else if(sd->sc.data[SC_MEAL_INCSTR].timer != -1)
-			sd->paramb[0] +-= sd->sc.data[SC_MEAL_INCSTR].val1;
+			sd->paramb[0] += sd->sc.data[SC_MEAL_INCSTR].val1;
 		if(sd->sc.data[SC_MEAL_INCAGI2].timer != -1)
-			sd->paramb[1] +-= sd->sc.data[SC_MEAL_INCAGI2].val1;
+			sd->paramb[1] += sd->sc.data[SC_MEAL_INCAGI2].val1;
 		else if(sd->sc.data[SC_MEAL_INCAGI].timer != -1)
-			sd->paramb[1] +-= sd->sc.data[SC_MEAL_INCAGI].val1;
+			sd->paramb[1] += sd->sc.data[SC_MEAL_INCAGI].val1;
 		if(sd->sc.data[SC_MEAL_INCVIT2].timer != -1)
-			sd->paramb[2] +-= sd->sc.data[SC_MEAL_INCVIT2].val1;
+			sd->paramb[2] += sd->sc.data[SC_MEAL_INCVIT2].val1;
 		else if(sd->sc.data[SC_MEAL_INCVIT].timer != -1)
-			sd->paramb[2] +-= sd->sc.data[SC_MEAL_INCVIT].val1;
+			sd->paramb[2] += sd->sc.data[SC_MEAL_INCVIT].val1;
 		if(sd->sc.data[SC_MEAL_INCINT2].timer != -1)
-			sd->paramb[3] +-= sd->sc.data[SC_MEAL_INCINT2].val1;
+			sd->paramb[3] += sd->sc.data[SC_MEAL_INCINT2].val1;
 		else if(sd->sc.data[SC_MEAL_INCINT].timer != -1)
-			sd->paramb[3] +-= sd->sc.data[SC_MEAL_INCINT].val1;
+			sd->paramb[3] += sd->sc.data[SC_MEAL_INCINT].val1;
 		if(sd->sc.data[SC_MEAL_INCDEX2].timer != -1)
-			sd->paramb[4] +-= sd->sc.data[SC_MEAL_INCDEX2].val1;
+			sd->paramb[4] += sd->sc.data[SC_MEAL_INCDEX2].val1;
 		else if(sd->sc.data[SC_MEAL_INCDEX].timer != -1)
-			sd->paramb[4] +-= sd->sc.data[SC_MEAL_INCDEX].val1;
+			sd->paramb[4] += sd->sc.data[SC_MEAL_INCDEX].val1;
 		if(sd->sc.data[SC_MEAL_INCLUK2].timer != -1)
-			sd->paramb[5] +-= sd->sc.data[SC_MEAL_INCLUK2].val1;
+			sd->paramb[5] += sd->sc.data[SC_MEAL_INCLUK2].val1;
 		else if(sd->sc.data[SC_MEAL_INCLUK].timer != -1)
-			sd->paramb[5] +-= sd->sc.data[SC_MEAL_INCLUK].val1;
+			sd->paramb[5] += sd->sc.data[SC_MEAL_INCLUK].val1;
 
-		// +ML8wpDDqMK4wbjC5MNEw/DDIcrZhSw- STR+-10
+		// タイリギのスパート状態 STR+10
 		if(sd->sc.data[SC_SPURT].timer != -1)
-			sd->paramb[0] +-= 10;
+			sd->paramb[0] += 10;
 
-		// +MK4w6zDJMLkwrTDr- +gehiJmFLUuI-
+		// ギルドスキル 臨戦態勢
 		if(sd->sc.data[SC_BATTLEORDER].timer != -1) {
-			sd->paramb[0] +-= 5*sd->sc.data[SC_BATTLEORDER].val1;
-			sd->paramb[3] +-= 5*sd->sc.data[SC_BATTLEORDER].val1;
-			sd->paramb[4] +-= 5*sd->sc.data[SC_BATTLEORDER].val1;
+			sd->paramb[0] += 5*sd->sc.data[SC_BATTLEORDER].val1;
+			sd->paramb[3] += 5*sd->sc.data[SC_BATTLEORDER].val1;
+			sd->paramb[4] += 5*sd->sc.data[SC_BATTLEORDER].val1;
 		}
 
 		if(sd->sc.data[SC_CHASEWALK_STR].timer != -1)
-			sd->paramb[0] +-= sd->sc.data[SC_CHASEWALK_STR].val1;
+			sd->paramb[0] += sd->sc.data[SC_CHASEWALK_STR].val1;
 
-		if(sd->sc.data[SC_INCREASEAGI].timer != -1)	// +kB9epliXUqA-
-			sd->paramb[1] +-= 2+-sd->sc.data[SC_INCREASEAGI].val1;
+		if(sd->sc.data[SC_INCREASEAGI].timer != -1)	// 速度増加
+			sd->paramb[1] += 2+sd->sc.data[SC_INCREASEAGI].val1;
 
-		if(sd->sc.data[SC_DECREASEAGI].timer != -1)	// +kB9epm4bXBH/CDCqMPww0DD8MLkwrTDrTtVp2DBv-AGI-50+/wk-
-			sd->paramb[1] -= (sd->sc.data[SC_DECREASEAGI].val2)? 50: 2+-sd->sc.data[SC_DECREASEAGI].val1;
+		if(sd->sc.data[SC_DECREASEAGI].timer != -1)	// 速度減少（オーバースキル仕様はAGI-50）
+			sd->paramb[1] -= (sd->sc.data[SC_DECREASEAGI].val2)? 50: 2+sd->sc.data[SC_DECREASEAGI].val1;
 
-		if(sd->sc.data[SC_ADORAMUS].timer != -1)	// +MKIwyTDpMOAwuQ-
-			sd->paramb[1] -= 2+-sd->sc.data[SC_ADORAMUS].val1;
+		if(sd->sc.data[SC_ADORAMUS].timer != -1)	// アドラムス
+			sd->paramb[1] -= 2+sd->sc.data[SC_ADORAMUS].val1;
 
-		if(sd->sc.data[SC_ARCLOUSEDASH].timer != -1)	// +MKIwrzDpMKYwuTDAMMMwtzDl-
-			sd->paramb[1] +-= sd->sc.data[SC_ARCLOUSEDASH].val2;
+		if(sd->sc.data[SC_ARCLOUSEDASH].timer != -1)	// アクラウスダッシュ
+			sd->paramb[1] += sd->sc.data[SC_ARCLOUSEDASH].val2;
 
-		if(sd->sc.data[SC_BLESSING].timer != -1) {	// +MNYw7DDDMLcw8zCw-
-			sd->paramb[0] +-= sd->sc.data[SC_BLESSING].val1;
-			sd->paramb[3] +-= sd->sc.data[SC_BLESSING].val1;
-			sd->paramb[4] +-= sd->sc.data[SC_BLESSING].val1;
+		if(sd->sc.data[SC_BLESSING].timer != -1) {	// ブレッシング
+			sd->paramb[0] += sd->sc.data[SC_BLESSING].val1;
+			sd->paramb[3] += sd->sc.data[SC_BLESSING].val1;
+			sd->paramb[4] += sd->sc.data[SC_BLESSING].val1;
 		}
-		if(sd->sc.data[SC_NEN].timer != -1) {	// +X/U-
-			sd->paramb[0] +-= sd->sc.data[SC_NEN].val1;
-			sd->paramb[3] +-= sd->sc.data[SC_NEN].val1;
+		if(sd->sc.data[SC_NEN].timer != -1) {	// 念
+			sd->paramb[0] += sd->sc.data[SC_NEN].val1;
+			sd->paramb[3] += sd->sc.data[SC_NEN].val1;
 		}
-		if(sd->sc.data[SC_SUITON].timer != -1) {	// +bDSQQQ-
+		if(sd->sc.data[SC_SUITON].timer != -1) {	// 水遁
 			if(sd->sc.data[SC_SUITON].val3)
-				sd->paramb[1] +-= sd->sc.data[SC_SUITON].val3;
+				sd->paramb[1] += sd->sc.data[SC_SUITON].val3;
 		}
 
-		if(sd->sc.data[SC_GLORIA].timer != -1)	// +MLAw7TDqMKI-
-			sd->paramb[5] +-= 30;
+		if(sd->sc.data[SC_GLORIA].timer != -1)	// グロリア
+			sd->paramb[5] += 30;
 
-		if(sd->sc.data[SC_LOUD].timer != -1 && sd->sc.data[SC_QUAGMIRE].timer == -1)	// +MOkwpjDJMNwwpDC5-
-			sd->paramb[0] +-= 4;
+		if(sd->sc.data[SC_LOUD].timer != -1 && sd->sc.data[SC_QUAGMIRE].timer == -1)	// ラウドボイス
+			sd->paramb[0] += 4;
 
-		if(sd->sc.data[SC_TRUESIGHT].timer != -1) {	// +MMgwpTDrMPwwtTCkMMg-
-			sd->paramb[0] +-= 5;
-			sd->paramb[1] +-= 5;
-			sd->paramb[2] +-= 5;
-			sd->paramb[3] +-= 5;
-			sd->paramb[4] +-= 5;
-			sd->paramb[5] +-= 5;
+		if(sd->sc.data[SC_TRUESIGHT].timer != -1) {	// トゥルーサイト
+			sd->paramb[0] += 5;
+			sd->paramb[1] += 5;
+			sd->paramb[2] += 5;
+			sd->paramb[3] += 5;
+			sd->paramb[4] += 5;
+			sd->paramb[5] += 5;
 		}
-		if(sd->sc.data[SC_INCREASING].timer != -1) { // +MKQw8zCvMOow/DC4MPMwsDCiMK0w5TDpMLcw/A-
-			sd->paramb[1] +-= 4;
-			sd->paramb[4] +-= 4;
+		if(sd->sc.data[SC_INCREASING].timer != -1) { // インクリージングアキュラシー
+			sd->paramb[1] += 4;
+			sd->paramb[4] += 4;
 		}
 
-		// +MMcwozDVMKcw8zC5-
+		// ディフェンス
 		if(sd->sc.data[SC_DEFENCE].timer != -1)
-			sd->paramb[2] +-= sd->sc.data[SC_DEFENCE].val1*2;
+			sd->paramb[2] += sd->sc.data[SC_DEFENCE].val1*2;
 
-		if(sd->sc.data[SC_QUAGMIRE].timer != -1) {	// +MK8woTCwMN4wpDCi-
+		if(sd->sc.data[SC_QUAGMIRE].timer != -1) {	// クァグマイア
 			short subagi = 0;
 			short subdex = 0;
 #ifdef PRE_RENEWAL
@@ -1277,7 +1256,7 @@ L_RECALC:
 			sd->paramb[4] -= subdex;
 		}
 
-		// +MN4w/DC3MOUwqjDWMKIw0zC5-
+		// マーシュオブアビス
 		if(sd->sc.data[SC_MARSHOFABYSS].timer != -1) {
 			sd->paramb[1] -= sd->status.agi * (sd->sc.data[SC_MARSHOFABYSS].val3 / 2) / 100;
 			sd->paramb[4] -= sd->status.dex * (sd->sc.data[SC_MARSHOFABYSS].val3 / 2) / 100;
@@ -1297,194 +1276,194 @@ L_RECALC:
 			struct map_session_data* ssd = map_id2sd(sd->sc.data[SC_MARIONETTE2].val2);
 			if(ssd) {
 				if(battle_config.marionette_type) {
-					sd->paramb[0] +-= ssd->status.str/2;
-					sd->paramb[1] +-= ssd->status.agi/2;
-					sd->paramb[2] +-= ssd->status.vit/2;
-					sd->paramb[3] +-= ssd->status.int_/2;
-					sd->paramb[4] +-= ssd->status.dex/2;
-					sd->paramb[5] +-= ssd->status.luk/2;
+					sd->paramb[0] += ssd->status.str/2;
+					sd->paramb[1] += ssd->status.agi/2;
+					sd->paramb[2] += ssd->status.vit/2;
+					sd->paramb[3] += ssd->status.int_/2;
+					sd->paramb[4] += ssd->status.dex/2;
+					sd->paramb[5] += ssd->status.luk/2;
 				} else if(map[sd->bl.m].flag.pk) {
-					// +/zD/KzDeMMMw1zBu-MC+UjaWUA-
+					// ＰＫマップのMC制限
 					// str
-					if(sd->paramb[0]+-sd->parame[0]+-sd->status.str < battle_config.max_marionette_pk_str)
+					if(sd->paramb[0]+sd->parame[0]+sd->status.str < battle_config.max_marionette_pk_str)
 					{
-						sd->paramb[0] +-= ssd->status.str/2;
-						if(sd->paramb[0]+-sd->parame[0]+-sd->status.str > battle_config.max_marionette_pk_str)
+						sd->paramb[0] += ssd->status.str/2;
+						if(sd->paramb[0]+sd->parame[0]+sd->status.str > battle_config.max_marionette_pk_str)
 							sd->paramb[0] = battle_config.max_marionette_pk_str - sd->status.str;
 					}
 					// agi
-					if(sd->paramb[1]+-sd->parame[1]+-sd->status.agi < battle_config.max_marionette_pk_agi)
+					if(sd->paramb[1]+sd->parame[1]+sd->status.agi < battle_config.max_marionette_pk_agi)
 					{
-						sd->paramb[1] +-= ssd->status.agi/2;
-						if(sd->paramb[1]+-sd->parame[1]+-sd->status.agi > battle_config.max_marionette_pk_agi)
+						sd->paramb[1] += ssd->status.agi/2;
+						if(sd->paramb[1]+sd->parame[1]+sd->status.agi > battle_config.max_marionette_pk_agi)
 							sd->paramb[1] = battle_config.max_marionette_pk_agi - sd->status.agi;
 					}
 					// vit
-					if(sd->paramb[2]+-sd->parame[2]+-sd->status.vit < battle_config.max_marionette_pk_vit)
+					if(sd->paramb[2]+sd->parame[2]+sd->status.vit < battle_config.max_marionette_pk_vit)
 					{
-						sd->paramb[2] +-= ssd->status.vit/2;
-						if(sd->paramb[2]+-sd->parame[2]+-sd->status.vit > battle_config.max_marionette_pk_vit)
+						sd->paramb[2] += ssd->status.vit/2;
+						if(sd->paramb[2]+sd->parame[2]+sd->status.vit > battle_config.max_marionette_pk_vit)
 							sd->paramb[2] = battle_config.max_marionette_pk_vit - sd->status.vit;
 					}
 					// int
-					if(sd->paramb[3]+-sd->parame[3]+-sd->status.int_ < battle_config.max_marionette_pk_int)
+					if(sd->paramb[3]+sd->parame[3]+sd->status.int_ < battle_config.max_marionette_pk_int)
 					{
-						sd->paramb[3] +-= ssd->status.int_/2;
-						if(sd->paramb[3]+-sd->parame[3]+-sd->status.int_ > battle_config.max_marionette_pk_int)
+						sd->paramb[3] += ssd->status.int_/2;
+						if(sd->paramb[3]+sd->parame[3]+sd->status.int_ > battle_config.max_marionette_pk_int)
 							sd->paramb[3] = battle_config.max_marionette_pk_int - sd->status.int_;
 					}
 					// dex
-					if(sd->paramb[4]+-sd->parame[4]+-sd->status.dex < battle_config.max_marionette_pk_dex)
+					if(sd->paramb[4]+sd->parame[4]+sd->status.dex < battle_config.max_marionette_pk_dex)
 					{
-						sd->paramb[4] +-= ssd->status.dex/2;
-						if(sd->paramb[4]+-sd->parame[4]+-sd->status.dex > battle_config.max_marionette_pk_dex)
+						sd->paramb[4] += ssd->status.dex/2;
+						if(sd->paramb[4]+sd->parame[4]+sd->status.dex > battle_config.max_marionette_pk_dex)
 							sd->paramb[4] = battle_config.max_marionette_pk_dex - sd->status.dex;
 					}
 					// luk
-					if(sd->paramb[5]+-sd->parame[5]+-sd->status.luk < battle_config.max_marionette_pk_luk)
+					if(sd->paramb[5]+sd->parame[5]+sd->status.luk < battle_config.max_marionette_pk_luk)
 					{
-						sd->paramb[5] +-= ssd->status.luk/2;
-						if(sd->paramb[5]+-sd->parame[5]+-sd->status.luk > battle_config.max_marionette_pk_luk)
+						sd->paramb[5] += ssd->status.luk/2;
+						if(sd->paramb[5]+sd->parame[5]+sd->status.luk > battle_config.max_marionette_pk_luk)
 							sd->paramb[5] = battle_config.max_marionette_pk_luk - sd->status.luk;
 					}
 				} else if(map[sd->bl.m].flag.pvp) {
-					// +/zD/Nv8wMN4wwzDXMG4-MC+UjaWUA-
+					// ＰＶＰマップのMC制限
 					// str
-					if(sd->paramb[0]+-sd->parame[0]+-sd->status.str < battle_config.max_marionette_pvp_str)
+					if(sd->paramb[0]+sd->parame[0]+sd->status.str < battle_config.max_marionette_pvp_str)
 					{
-						sd->paramb[0] +-= ssd->status.str/2;
-						if(sd->paramb[0]+-sd->parame[0]+-sd->status.str > battle_config.max_marionette_pvp_str)
+						sd->paramb[0] += ssd->status.str/2;
+						if(sd->paramb[0]+sd->parame[0]+sd->status.str > battle_config.max_marionette_pvp_str)
 							sd->paramb[0] = battle_config.max_marionette_pvp_str - sd->status.str;
 					}
 					// agi
-					if(sd->paramb[1]+-sd->parame[1]+-sd->status.agi < battle_config.max_marionette_pvp_agi)
+					if(sd->paramb[1]+sd->parame[1]+sd->status.agi < battle_config.max_marionette_pvp_agi)
 					{
-						sd->paramb[1] +-= ssd->status.agi/2;
-						if(sd->paramb[1]+-sd->parame[1]+-sd->status.agi > battle_config.max_marionette_pvp_agi)
+						sd->paramb[1] += ssd->status.agi/2;
+						if(sd->paramb[1]+sd->parame[1]+sd->status.agi > battle_config.max_marionette_pvp_agi)
 							sd->paramb[1] = battle_config.max_marionette_pvp_agi - sd->status.agi;
 					}
 					// vit
-					if(sd->paramb[2]+-sd->parame[2]+-sd->status.vit < battle_config.max_marionette_pvp_vit)
+					if(sd->paramb[2]+sd->parame[2]+sd->status.vit < battle_config.max_marionette_pvp_vit)
 					{
-						sd->paramb[2] +-= ssd->status.vit/2;
-						if(sd->paramb[2]+-sd->parame[2]+-sd->status.vit > battle_config.max_marionette_pvp_vit)
+						sd->paramb[2] += ssd->status.vit/2;
+						if(sd->paramb[2]+sd->parame[2]+sd->status.vit > battle_config.max_marionette_pvp_vit)
 							sd->paramb[2] = battle_config.max_marionette_pvp_vit - sd->status.vit;
 					}
 					// int
-					if(sd->paramb[3]+-sd->parame[3]+-sd->status.int_ < battle_config.max_marionette_pvp_int)
+					if(sd->paramb[3]+sd->parame[3]+sd->status.int_ < battle_config.max_marionette_pvp_int)
 					{
-						sd->paramb[3] +-= ssd->status.int_/2;
-						if(sd->paramb[3]+-sd->parame[3]+-sd->status.int_ > battle_config.max_marionette_pvp_int)
+						sd->paramb[3] += ssd->status.int_/2;
+						if(sd->paramb[3]+sd->parame[3]+sd->status.int_ > battle_config.max_marionette_pvp_int)
 							sd->paramb[3] = battle_config.max_marionette_pvp_int - sd->status.int_;
 					}
 					// dex
-					if(sd->paramb[4]+-sd->parame[4]+-sd->status.dex < battle_config.max_marionette_pvp_dex)
+					if(sd->paramb[4]+sd->parame[4]+sd->status.dex < battle_config.max_marionette_pvp_dex)
 					{
-						sd->paramb[4] +-= ssd->status.dex/2;
-						if(sd->paramb[4]+-sd->parame[4]+-sd->status.dex > battle_config.max_marionette_pvp_dex)
+						sd->paramb[4] += ssd->status.dex/2;
+						if(sd->paramb[4]+sd->parame[4]+sd->status.dex > battle_config.max_marionette_pvp_dex)
 							sd->paramb[4] = battle_config.max_marionette_pvp_dex - sd->status.dex;
 					}
 					// luk
-					if(sd->paramb[5]+-sd->parame[5]+-sd->status.luk < battle_config.max_marionette_pvp_luk)
+					if(sd->paramb[5]+sd->parame[5]+sd->status.luk < battle_config.max_marionette_pvp_luk)
 					{
-						sd->paramb[5] +-= ssd->status.luk/2;
-						if(sd->paramb[5]+-sd->parame[5]+-sd->status.luk > battle_config.max_marionette_pvp_luk)
+						sd->paramb[5] += ssd->status.luk/2;
+						if(sd->paramb[5]+sd->parame[5]+sd->status.luk > battle_config.max_marionette_pvp_luk)
 							sd->paramb[5] = battle_config.max_marionette_pvp_luk - sd->status.luk;
 					}
 				} else if(map[sd->bl.m].flag.gvg) {
-					// +/yf/Nv8nMN4wwzDXMG4-MC+UjaWUA-
+					// ＧＶＧマップのMC制限
 					// str
-					if(sd->paramb[0]+-sd->parame[0]+-sd->status.str < battle_config.max_marionette_gvg_str)
+					if(sd->paramb[0]+sd->parame[0]+sd->status.str < battle_config.max_marionette_gvg_str)
 					{
-						sd->paramb[0] +-= ssd->status.str/2;
-						if(sd->paramb[0]+-sd->parame[0]+-sd->status.str > battle_config.max_marionette_gvg_str)
+						sd->paramb[0] += ssd->status.str/2;
+						if(sd->paramb[0]+sd->parame[0]+sd->status.str > battle_config.max_marionette_gvg_str)
 							sd->paramb[0] = battle_config.max_marionette_gvg_str - sd->status.str;
 					}
 					// agi
-					if(sd->paramb[1]+-sd->parame[1]+-sd->status.agi < battle_config.max_marionette_gvg_agi)
+					if(sd->paramb[1]+sd->parame[1]+sd->status.agi < battle_config.max_marionette_gvg_agi)
 					{
-						sd->paramb[1] +-= ssd->status.agi/2;
-						if(sd->paramb[1]+-sd->parame[1]+-sd->status.agi > battle_config.max_marionette_gvg_agi)
+						sd->paramb[1] += ssd->status.agi/2;
+						if(sd->paramb[1]+sd->parame[1]+sd->status.agi > battle_config.max_marionette_gvg_agi)
 							sd->paramb[1] = battle_config.max_marionette_gvg_agi - sd->status.agi;
 					}
 					// vit
-					if(sd->paramb[2]+-sd->parame[2]+-sd->status.vit < battle_config.max_marionette_gvg_vit)
+					if(sd->paramb[2]+sd->parame[2]+sd->status.vit < battle_config.max_marionette_gvg_vit)
 					{
-						sd->paramb[2] +-= ssd->status.vit/2;
-						if(sd->paramb[2]+-sd->parame[2]+-sd->status.vit > battle_config.max_marionette_gvg_vit)
+						sd->paramb[2] += ssd->status.vit/2;
+						if(sd->paramb[2]+sd->parame[2]+sd->status.vit > battle_config.max_marionette_gvg_vit)
 							sd->paramb[2] = battle_config.max_marionette_gvg_vit - sd->status.vit;
 					}
 					// int
-					if(sd->paramb[3]+-sd->parame[3]+-sd->status.int_ < battle_config.max_marionette_gvg_int)
+					if(sd->paramb[3]+sd->parame[3]+sd->status.int_ < battle_config.max_marionette_gvg_int)
 					{
-						sd->paramb[3] +-= ssd->status.int_/2;
-						if(sd->paramb[3]+-sd->parame[3]+-sd->status.int_ > battle_config.max_marionette_gvg_int)
+						sd->paramb[3] += ssd->status.int_/2;
+						if(sd->paramb[3]+sd->parame[3]+sd->status.int_ > battle_config.max_marionette_gvg_int)
 							sd->paramb[3] = battle_config.max_marionette_gvg_int - sd->status.int_;
 					}
 					// dex
-					if(sd->paramb[4]+-sd->parame[4]+-sd->status.dex < battle_config.max_marionette_gvg_dex)
+					if(sd->paramb[4]+sd->parame[4]+sd->status.dex < battle_config.max_marionette_gvg_dex)
 					{
-						sd->paramb[4] +-= ssd->status.dex/2;
-						if(sd->paramb[4]+-sd->parame[4]+-sd->status.dex > battle_config.max_marionette_gvg_dex)
+						sd->paramb[4] += ssd->status.dex/2;
+						if(sd->paramb[4]+sd->parame[4]+sd->status.dex > battle_config.max_marionette_gvg_dex)
 							sd->paramb[4] = battle_config.max_marionette_gvg_dex - sd->status.dex;
 					}
 					// luk
-					if(sd->paramb[5]+-sd->parame[5]+-sd->status.luk < battle_config.max_marionette_gvg_luk)
+					if(sd->paramb[5]+sd->parame[5]+sd->status.luk < battle_config.max_marionette_gvg_luk)
 					{
-						sd->paramb[5] +-= ssd->status.luk/2;
-						if(sd->paramb[5]+-sd->parame[5]+-sd->status.luk > battle_config.max_marionette_gvg_luk)
+						sd->paramb[5] += ssd->status.luk/2;
+						if(sd->paramb[5]+sd->parame[5]+sd->status.luk > battle_config.max_marionette_gvg_luk)
 							sd->paramb[5] = battle_config.max_marionette_gvg_luk - sd->status.luk;
 					}
 				} else {
-					// +kBpeODBu-MC+UjaWUA-
+					// 通常のMC制限
 					// str
-					if(sd->paramb[0]+-sd->parame[0]+-sd->status.str < battle_config.max_marionette_str)
+					if(sd->paramb[0]+sd->parame[0]+sd->status.str < battle_config.max_marionette_str)
 					{
-						sd->paramb[0] +-= ssd->status.str/2;
-						if(sd->paramb[0]+-sd->parame[0]+-sd->status.str > battle_config.max_marionette_str)
+						sd->paramb[0] += ssd->status.str/2;
+						if(sd->paramb[0]+sd->parame[0]+sd->status.str > battle_config.max_marionette_str)
 							sd->paramb[0] = battle_config.max_marionette_str - sd->status.str;
 					}
 					// agi
-					if(sd->paramb[1]+-sd->parame[1]+-sd->status.agi < battle_config.max_marionette_agi)
+					if(sd->paramb[1]+sd->parame[1]+sd->status.agi < battle_config.max_marionette_agi)
 					{
-						sd->paramb[1] +-= ssd->status.agi/2;
-						if(sd->paramb[1]+-sd->parame[1]+-sd->status.agi > battle_config.max_marionette_agi)
+						sd->paramb[1] += ssd->status.agi/2;
+						if(sd->paramb[1]+sd->parame[1]+sd->status.agi > battle_config.max_marionette_agi)
 							sd->paramb[1] = battle_config.max_marionette_agi - sd->status.agi;
 					}
 					// vit
-					if(sd->paramb[2]+-sd->parame[2]+-sd->status.vit < battle_config.max_marionette_vit)
+					if(sd->paramb[2]+sd->parame[2]+sd->status.vit < battle_config.max_marionette_vit)
 					{
-						sd->paramb[2] +-= ssd->status.vit/2;
-						if(sd->paramb[2]+-sd->parame[2]+-sd->status.vit > battle_config.max_marionette_vit)
+						sd->paramb[2] += ssd->status.vit/2;
+						if(sd->paramb[2]+sd->parame[2]+sd->status.vit > battle_config.max_marionette_vit)
 							sd->paramb[2] = battle_config.max_marionette_vit - sd->status.vit;
 					}
 					// int
-					if(sd->paramb[3]+-sd->parame[3]+-sd->status.int_ < battle_config.max_marionette_int)
+					if(sd->paramb[3]+sd->parame[3]+sd->status.int_ < battle_config.max_marionette_int)
 					{
-						sd->paramb[3] +-= ssd->status.int_/2;
-						if(sd->paramb[3]+-sd->parame[3]+-sd->status.int_ > battle_config.max_marionette_int)
+						sd->paramb[3] += ssd->status.int_/2;
+						if(sd->paramb[3]+sd->parame[3]+sd->status.int_ > battle_config.max_marionette_int)
 							sd->paramb[3] = battle_config.max_marionette_int - sd->status.int_;
 					}
 					// dex
-					if(sd->paramb[4]+-sd->parame[4]+-sd->status.dex < battle_config.max_marionette_dex)
+					if(sd->paramb[4]+sd->parame[4]+sd->status.dex < battle_config.max_marionette_dex)
 					{
-						sd->paramb[4] +-= ssd->status.dex/2;
-						if(sd->paramb[4]+-sd->parame[4]+-sd->status.dex > battle_config.max_marionette_dex)
+						sd->paramb[4] += ssd->status.dex/2;
+						if(sd->paramb[4]+sd->parame[4]+sd->status.dex > battle_config.max_marionette_dex)
 							sd->paramb[4] = battle_config.max_marionette_dex - sd->status.dex;
 					}
 					// luk
-					if(sd->paramb[5]+-sd->parame[5]+-sd->status.luk < battle_config.max_marionette_luk)
+					if(sd->paramb[5]+sd->parame[5]+sd->status.luk < battle_config.max_marionette_luk)
 					{
-						sd->paramb[5] +-= ssd->status.luk/2;
-						if(sd->paramb[5]+-sd->parame[5]+-sd->status.luk > battle_config.max_marionette_luk)
+						sd->paramb[5] += ssd->status.luk/2;
+						if(sd->paramb[5]+sd->parame[5]+sd->status.luk > battle_config.max_marionette_luk)
 							sd->paramb[5] = battle_config.max_marionette_luk - sd->status.luk;
 					}
 				}
 			}
 		}
-		if(sd->sc.data[SC_WE_FEMALE].timer != -1) {	// +MEIwajBfMGtcPTBPMFcwfjBZ-
+		if(sd->sc.data[SC_WE_FEMALE].timer != -1) {	// あなたに尽くします
 			if(sd->sc.data[SC_WE_FEMALE].val2 == 1) {
-				// +gepSBjBvUWgwZg--1
+				// 自分は全て-1
 				sd->paramb[0]--;
 				sd->paramb[1]--;
 				sd->paramb[2]--;
@@ -1492,47 +1471,47 @@ L_RECALC:
 				sd->paramb[4]--;
 				sd->paramb[5]--;
 			} else if(sd->sc.data[SC_WE_FEMALE].val2 == 2) {
-				// +dvhiSzBvUWgwZgAr-1
-				sd->paramb[0]+-+-;
-				sd->paramb[1]+-+-;
-				sd->paramb[2]+-+-;
-				sd->paramb[3]+-+-;
-				sd->paramb[4]+-+-;
-				sd->paramb[5]+-+-;
+				// 相手は全て+1
+				sd->paramb[0]++;
+				sd->paramb[1]++;
+				sd->paramb[2]++;
+				sd->paramb[3]++;
+				sd->paramb[4]++;
+				sd->paramb[5]++;
 			}
 		}
-		if(sd->sc.data[SC_GIANTGROWTH].timer != -1)	// +MLgw4zCkMKIw8zDIMLAw7TD8MLk-
-			sd->paramb[0] +-= 30;
-		if(sd->sc.data[SC_LAUDAAGNUS].timer != -1)	// +MOkwpjDAMKIwsDDMMLk-
-			sd->paramb[2] +-= sd->sc.data[SC_LAUDAAGNUS].val2;
-		if(sd->sc.data[SC_LAUDARAMUS].timer != -1)	// +MOkwpjDAMOkw4DC5-
-			sd->paramb[5] +-= sd->sc.data[SC_LAUDARAMUS].val2;
-		if(sd->sc.data[SC_INSPIRATION].timer != -1) {	// +MKQw8zC5MNQw7DD8MLcw5zDz-
-			int param = sd->status.base_level / 10 +- sd->status.job_level / 5;
-			sd->paramb[0] +-= param;
-			sd->paramb[1] +-= param;
-			sd->paramb[2] +-= param;
-			sd->paramb[3] +-= param;
-			sd->paramb[4] +-= param;
-			sd->paramb[5] +-= param;
+		if(sd->sc.data[SC_GIANTGROWTH].timer != -1)	// ジャイアントグロース
+			sd->paramb[0] += 30;
+		if(sd->sc.data[SC_LAUDAAGNUS].timer != -1)	// ラウダアグヌス
+			sd->paramb[2] += sd->sc.data[SC_LAUDAAGNUS].val2;
+		if(sd->sc.data[SC_LAUDARAMUS].timer != -1)	// ラウダラムス
+			sd->paramb[5] += sd->sc.data[SC_LAUDARAMUS].val2;
+		if(sd->sc.data[SC_INSPIRATION].timer != -1) {	// インスピレーション
+			int param = sd->status.base_level / 10 + sd->status.job_level / 5;
+			sd->paramb[0] += param;
+			sd->paramb[1] += param;
+			sd->paramb[2] += param;
+			sd->paramb[3] += param;
+			sd->paramb[4] += param;
+			sd->paramb[5] += param;
 		}
-		if(sd->sc.data[SC_MANDRAGORA].timer != -1)	// +MM8wpjDqMPMwsDCqMNYw3jDzMMkw6TC0MOk-
+		if(sd->sc.data[SC_MANDRAGORA].timer != -1)	// ハウリングオブマンドラゴラ
 			sd->paramb[3] -= sd->sc.data[SC_MANDRAGORA].val2;
-		if(sd->sc.data[SC_BANANA_BOMB].timer != -1)		// +MNAwyjDKcgZfPg-
+		if(sd->sc.data[SC_BANANA_BOMB].timer != -1)		// バナナ爆弾
 			sd->paramb[5] -= sd->paramb[5] * sd->sc.data[SC_BANANA_BOMB].val1 / 100;
-		if(sd->sc.data[SC_SAVAGE_STEAK].timer != -1)			// +MLUw2TD8MLgwbk44cTwwTQ-
-			sd->paramb[0] +-= sd->sc.data[SC_SAVAGE_STEAK].val1;
-		if(sd->sc.data[SC_DROCERA_HERB_STEAMED].timer != -1)	// +MMkw7TC7MOkwbjDPMPww1nFu-
-			sd->paramb[1] +-= sd->sc.data[SC_DROCERA_HERB_STEAMED].val1;
-		if(sd->sc.data[SC_MINOR_BBQ].timer != -1)				// +MN8wzjC/MKYw7TC5MG5yWzCrMOsw0w-
-			sd->paramb[2] +-= sd->sc.data[SC_MINOR_BBQ].val1;
-		if(sd->sc.data[SC_COCKTAIL_WARG_BLOOD].timer != -1)		// +MKswrzDGMOswpjCpMPwwsDDWMOkwwzDJ-
-			sd->paramb[3] +-= sd->sc.data[SC_COCKTAIL_WARG_BLOOD].val1;
-		if(sd->sc.data[SC_SIROMA_ICE_TEA].timer != -1)			// +MLcw7TDeMKIwpDC5MMYwozD8-
-			sd->paramb[4] +-= sd->sc.data[SC_SIROMA_ICE_TEA].val1;
-		if(sd->sc.data[SC_PUTTI_TAILS_NOODLES].timer != -1)		// +MNcwxjCjMMMwyDBuMFcwYzB9nro-
-			sd->paramb[5] +-= sd->sc.data[SC_PUTTI_TAILS_NOODLES].val1;
-		if(sd->sc.data[SC_STOMACHACHE].timer != -1) {		// +gXl12w-
+		if(sd->sc.data[SC_SAVAGE_STEAK].timer != -1)			// サベージの丸焼き
+			sd->paramb[0] += sd->sc.data[SC_SAVAGE_STEAK].val1;
+		if(sd->sc.data[SC_DROCERA_HERB_STEAMED].timer != -1)	// ドロセラのハーブ煮
+			sd->paramb[1] += sd->sc.data[SC_DROCERA_HERB_STEAMED].val1;
+		if(sd->sc.data[SC_MINOR_BBQ].timer != -1)				// ミノタウロスの牛カルビ
+			sd->paramb[2] += sd->sc.data[SC_MINOR_BBQ].val1;
+		if(sd->sc.data[SC_COCKTAIL_WARG_BLOOD].timer != -1)		// カクテルウォーグブラッド
+			sd->paramb[3] += sd->sc.data[SC_COCKTAIL_WARG_BLOOD].val1;
+		if(sd->sc.data[SC_SIROMA_ICE_TEA].timer != -1)			// シロマアイスティー
+			sd->paramb[4] += sd->sc.data[SC_SIROMA_ICE_TEA].val1;
+		if(sd->sc.data[SC_PUTTI_TAILS_NOODLES].timer != -1)		// プティットのしっぽ麺
+			sd->paramb[5] += sd->sc.data[SC_PUTTI_TAILS_NOODLES].val1;
+		if(sd->sc.data[SC_STOMACHACHE].timer != -1) {		// 腹痛
 			sd->paramb[0] -= sd->sc.data[SC_STOMACHACHE].val1;
 			sd->paramb[1] -= sd->sc.data[SC_STOMACHACHE].val1;
 			sd->paramb[2] -= sd->sc.data[SC_STOMACHACHE].val1;
@@ -1540,7 +1519,7 @@ L_RECALC:
 			sd->paramb[4] -= sd->sc.data[SC_STOMACHACHE].val1;
 			sd->paramb[5] -= sd->sc.data[SC_STOMACHACHE].val1;
 		}
-		if(sd->sc.data[SC_HARMONIZE].timer != -1) {	// +MM8w/DDiMMowpDC6-
+		if(sd->sc.data[SC_HARMONIZE].timer != -1) {	// ハーモナイズ
 			sd->paramb[0] -= sd->sc.data[SC_HARMONIZE].val2;
 			sd->paramb[1] -= sd->sc.data[SC_HARMONIZE].val2;
 			sd->paramb[2] -= sd->sc.data[SC_HARMONIZE].val2;
@@ -1548,7 +1527,7 @@ L_RECALC:
 			sd->paramb[4] -= sd->sc.data[SC_HARMONIZE].val2;
 			sd->paramb[5] -= sd->sc.data[SC_HARMONIZE].val2;
 		}
-		if(sd->sc.data[SC_KYOUGAKU].timer != -1) {	// +XnuIUw- -+mlphFQ--
+		if(sd->sc.data[SC_KYOUGAKU].timer != -1) {	// 幻術 -驚愕-
 			sd->paramb[0] -= sd->sc.data[SC_KYOUGAKU].val2;
 			sd->paramb[1] -= sd->sc.data[SC_KYOUGAKU].val2;
 			sd->paramb[2] -= sd->sc.data[SC_KYOUGAKU].val2;
@@ -1556,13 +1535,13 @@ L_RECALC:
 			sd->paramb[4] -= sd->sc.data[SC_KYOUGAKU].val2;
 			sd->paramb[5] -= sd->sc.data[SC_KYOUGAKU].val2;
 		}
-		if(sd->sc.data[SC_BEYOND_OF_WARCRY].timer != -1) {	// +MNMw6DDzMMkwqjDWMKYwqTD8MK8w6TCk-
-			sd->paramb[0] +-= sd->sc.data[SC_BEYOND_OF_WARCRY].val4;
+		if(sd->sc.data[SC_BEYOND_OF_WARCRY].timer != -1) {	// ビヨンドオブウォークライ
+			sd->paramb[0] += sd->sc.data[SC_BEYOND_OF_WARCRY].val4;
 		}
-		if(sd->sc.data[SC_MELODYOFSINK].timer != -1) {	// +MOEw7TDHMKMw/DCqMNYwtzDzMK8-
+		if(sd->sc.data[SC_MELODYOFSINK].timer != -1) {	// メロディーオブシンク
 			sd->paramb[3] -= sd->sc.data[SC_MELODYOFSINK].val4;
 		}
-		if(sd->sc.data[SC_ALL_STAT_DOWN].timer != -1) {	// +MKow/DDrMLkwxjD8ML8wuTDAMKYw8w-
+		if(sd->sc.data[SC_ALL_STAT_DOWN].timer != -1) {	// オールステータスダウン
 			sd->paramb[0] -= sd->sc.data[SC_ALL_STAT_DOWN].val2;
 			sd->paramb[1] -= sd->sc.data[SC_ALL_STAT_DOWN].val2;
 			sd->paramb[2] -= sd->sc.data[SC_ALL_STAT_DOWN].val2;
@@ -1570,68 +1549,68 @@ L_RECALC:
 			sd->paramb[4] -= sd->sc.data[SC_ALL_STAT_DOWN].val2;
 			sd->paramb[5] -= sd->sc.data[SC_ALL_STAT_DOWN].val2;
 		}
-		if(sd->sc.data[SC_FULL_THROTTLE].timer != -1) {	// +MNUw6zC5MO0wwzDIMOs-
-			sd->paramb[0] +-= sd->status.str  * sd->sc.data[SC_FULL_THROTTLE].val2 / 100;
-			sd->paramb[1] +-= sd->status.agi  * sd->sc.data[SC_FULL_THROTTLE].val2 / 100;
-			sd->paramb[2] +-= sd->status.vit  * sd->sc.data[SC_FULL_THROTTLE].val2 / 100;
-			sd->paramb[3] +-= sd->status.int_ * sd->sc.data[SC_FULL_THROTTLE].val2 / 100;
-			sd->paramb[4] +-= sd->status.dex  * sd->sc.data[SC_FULL_THROTTLE].val2 / 100;
-			sd->paramb[5] +-= sd->status.luk  * sd->sc.data[SC_FULL_THROTTLE].val2 / 100;
+		if(sd->sc.data[SC_FULL_THROTTLE].timer != -1) {	// フルスロットル
+			sd->paramb[0] += sd->status.str  * sd->sc.data[SC_FULL_THROTTLE].val2 / 100;
+			sd->paramb[1] += sd->status.agi  * sd->sc.data[SC_FULL_THROTTLE].val2 / 100;
+			sd->paramb[2] += sd->status.vit  * sd->sc.data[SC_FULL_THROTTLE].val2 / 100;
+			sd->paramb[3] += sd->status.int_ * sd->sc.data[SC_FULL_THROTTLE].val2 / 100;
+			sd->paramb[4] += sd->status.dex  * sd->sc.data[SC_FULL_THROTTLE].val2 / 100;
+			sd->paramb[5] += sd->status.luk  * sd->sc.data[SC_FULL_THROTTLE].val2 / 100;
 		}
-		if(sd->sc.data[SC_UNIVERSESTANCE].timer != -1) {	// +W4dbmTBuacswSA-
+		if(sd->sc.data[SC_UNIVERSESTANCE].timer != -1) {	// 宇宙の構え
 			int add = sd->sc.data[SC_UNIVERSESTANCE].val2;
-			sd->paramb[0] +-= add;
-			sd->paramb[1] +-= add;
-			sd->paramb[2] +-= add;
-			sd->paramb[3] +-= add;
-			sd->paramb[4] +-= add;
-			sd->paramb[5] +-= add;
+			sd->paramb[0] += add;
+			sd->paramb[1] += add;
+			sd->paramb[2] += add;
+			sd->paramb[3] += add;
+			sd->paramb[4] += add;
+			sd->paramb[5] += add;
 		}
-		// +MOww6jCuMKo-
+		// レリギオ
 		if(sd->sc.data[SC_RELIGIO].timer != -1) {
-			sd->paramb[7] +-= sd->sc.data[SC_RELIGIO].val2;
-			sd->paramb[8] +-= sd->sc.data[SC_RELIGIO].val3;
-			sd->paramb[9] +-= sd->sc.data[SC_RELIGIO].val4;
+			sd->paramb[7] += sd->sc.data[SC_RELIGIO].val2;
+			sd->paramb[8] += sd->sc.data[SC_RELIGIO].val3;
+			sd->paramb[9] += sd->sc.data[SC_RELIGIO].val4;
 		}
-		// +MNkwzTDHMKMwrzDIMKUw4A-
+		// ベネディクトゥム
 		if(sd->sc.data[SC_BENEDICTUM].timer != -1) {
-			sd->paramb[6] +-= sd->sc.data[SC_BENEDICTUM].val2;
-			sd->paramb[10] +-= sd->sc.data[SC_BENEDICTUM].val3;
-			sd->paramb[11] +-= sd->sc.data[SC_BENEDICTUM].val4;
+			sd->paramb[6] += sd->sc.data[SC_BENEDICTUM].val2;
+			sd->paramb[10] += sd->sc.data[SC_BENEDICTUM].val3;
+			sd->paramb[11] += sd->sc.data[SC_BENEDICTUM].val4;
 		}
-		// +MN4w6jDzMNUwpzC5MMYwozDQMOs-
+		// マリンフェスティバル
 		if(sd->sc.data[SC_MARINE_FESTIVAL].timer != -1) {
-			sd->paramb[6] +-= sd->sc.data[SC_MARINE_FESTIVAL].val2;
-			sd->paramb[10] +-= sd->sc.data[SC_MARINE_FESTIVAL].val3;
-			sd->paramb[11] +-= sd->sc.data[SC_MARINE_FESTIVAL].val4;
+			sd->paramb[6] += sd->sc.data[SC_MARINE_FESTIVAL].val2;
+			sd->paramb[10] += sd->sc.data[SC_MARINE_FESTIVAL].val3;
+			sd->paramb[11] += sd->sc.data[SC_MARINE_FESTIVAL].val4;
 		}
-		// +MLUw8zDJMNUwpzC5MMYwozDQMOs-
+		// サンドフェスティバル
 		if(sd->sc.data[SC_SANDY_FESTIVAL].timer != -1) {
-			sd->paramb[7] +-= sd->sc.data[SC_SANDY_FESTIVAL].val2;
-			sd->paramb[8] +-= sd->sc.data[SC_SANDY_FESTIVAL].val3;
-			sd->paramb[9] +-= sd->sc.data[SC_SANDY_FESTIVAL].val4;
+			sd->paramb[7] += sd->sc.data[SC_SANDY_FESTIVAL].val2;
+			sd->paramb[8] += sd->sc.data[SC_SANDY_FESTIVAL].val3;
+			sd->paramb[9] += sd->sc.data[SC_SANDY_FESTIVAL].val4;
 		}
 	}
 
-	sd->paramc[0]  = sd->status.str  +- sd->paramb[0]  +- sd->parame[0];
-	sd->paramc[1]  = sd->status.agi  +- sd->paramb[1]  +- sd->parame[1];
-	sd->paramc[2]  = sd->status.vit  +- sd->paramb[2]  +- sd->parame[2];
-	sd->paramc[3]  = sd->status.int_ +- sd->paramb[3]  +- sd->parame[3];
-	sd->paramc[4]  = sd->status.dex  +- sd->paramb[4]  +- sd->parame[4];
-	sd->paramc[5]  = sd->status.luk  +- sd->paramb[5]  +- sd->parame[5];
-	sd->paramc[6]  = sd->status.pow  +- sd->paramb[6]  +- sd->parame[6];
-	sd->paramc[7]  = sd->status.sta  +- sd->paramb[7]  +- sd->parame[7];
-	sd->paramc[8]  = sd->status.wis  +- sd->paramb[8]  +- sd->parame[8];
-	sd->paramc[9]  = sd->status.spl  +- sd->paramb[9]  +- sd->parame[9];
-	sd->paramc[10] = sd->status.con  +- sd->paramb[10] +- sd->parame[10];
-	sd->paramc[11] = sd->status.crt  +- sd->paramb[11] +- sd->parame[11];
+	sd->paramc[0]  = sd->status.str  + sd->paramb[0]  + sd->parame[0];
+	sd->paramc[1]  = sd->status.agi  + sd->paramb[1]  + sd->parame[1];
+	sd->paramc[2]  = sd->status.vit  + sd->paramb[2]  + sd->parame[2];
+	sd->paramc[3]  = sd->status.int_ + sd->paramb[3]  + sd->parame[3];
+	sd->paramc[4]  = sd->status.dex  + sd->paramb[4]  + sd->parame[4];
+	sd->paramc[5]  = sd->status.luk  + sd->paramb[5]  + sd->parame[5];
+	sd->paramc[6]  = sd->status.pow  + sd->paramb[6]  + sd->parame[6];
+	sd->paramc[7]  = sd->status.sta  + sd->paramb[7]  + sd->parame[7];
+	sd->paramc[8]  = sd->status.wis  + sd->paramb[8]  + sd->parame[8];
+	sd->paramc[9]  = sd->status.spl  + sd->paramb[9]  + sd->parame[9];
+	sd->paramc[10] = sd->status.con  + sd->paramb[10] + sd->parame[10];
+	sd->paramc[11] = sd->status.crt  + sd->paramb[11] + sd->parame[11];
 
-	for(i=0; i<6; i+-+-) {
+	for(i=0; i<6; i++) {
 		if(sd->paramc[i] < 0)
 			sd->paramc[i] = 0;
 	}
 
-	// BASEATK+igh7lw-
+	// BASEATK計算
 	if( sd->status.weapon == WT_BOW ||
 	    sd->status.weapon == WT_MUSICAL ||
 	    sd->status.weapon == WT_WHIP ||
@@ -1645,9 +1624,9 @@ L_RECALC:
 #ifdef PRE_RENEWAL
 	dstr = str/10;
 
-	sd->base_atk +-= str +- dstr*dstr +- dex/5 +- sd->paramc[5]/5 +- sd->paramc[6]*5;
-	sd->matk1 +-= sd->paramc[3]+-(sd->paramc[3]/5)*(sd->paramc[3]/5)+-sd->paramc[9]*5;
-	sd->matk2 +-= sd->paramc[3]+-(sd->paramc[3]/7)*(sd->paramc[3]/7)+-sd->paramc[9]*5;
+	sd->base_atk += str + dstr*dstr + dex/5 + sd->paramc[5]/5 + sd->paramc[6]*5;
+	sd->matk1 += sd->paramc[3]+(sd->paramc[3]/5)*(sd->paramc[3]/5)+sd->paramc[9]*5;
+	sd->matk2 += sd->paramc[3]+(sd->paramc[3]/7)*(sd->paramc[3]/7)+sd->paramc[9]*5;
 
 	if(sd->matk1 < sd->matk2) {
 		int temp = sd->matk2;
@@ -1655,79 +1634,79 @@ L_RECALC:
 		sd->matk1 = temp;
 	}
 
-	sd->hit      +-= sd->paramc[4] +- sd->status.base_level +- sd->paramc[10]*2;
-	sd->flee     +-= sd->paramc[1] +- sd->status.base_level +- sd->paramc[10]*2;
-	sd->def2     +-= sd->paramc[2];
-	sd->mdef2    +-= sd->paramc[3];
-	sd->flee2    +-= sd->paramc[5] +- 10;
-	sd->critical +-= sd->paramc[5] * 3 +- 10;
+	sd->hit      += sd->paramc[4] + sd->status.base_level + sd->paramc[10]*2;
+	sd->flee     += sd->paramc[1] + sd->status.base_level + sd->paramc[10]*2;
+	sd->def2     += sd->paramc[2];
+	sd->mdef2    += sd->paramc[3];
+	sd->flee2    += sd->paramc[5] + 10;
+	sd->critical += sd->paramc[5] * 3 + 10;
 #else
 	dstr = sd->paramc[3]/7;
 
-	sd->base_atk +-= (int)(str +- dex/5. +- sd->paramc[5]/3. +- sd->paramc[6]*5);
-	sd->matk2    +-= sd->paramc[3] +- (dstr*dstr)/3 +- sd->paramc[4]/5 +- sd->paramc[5]/3 +- sd->paramc[9]*5;
+	sd->base_atk += (int)(str + dex/5. + sd->paramc[5]/3. + sd->paramc[6]*5);
+	sd->matk2    += sd->paramc[3] + (dstr*dstr)/3 + sd->paramc[4]/5 + sd->paramc[5]/3 + sd->paramc[9]*5;
 
-	sd->hit      +-= 175 +- sd->paramc[4] +- sd->paramc[5]/3 +- sd->paramc[10]*2 +- sd->status.base_level;
-	sd->flee     +-= 100 +- sd->paramc[1] +- sd->paramc[5]/5 +- sd->paramc[10]*2 +- sd->status.base_level;
-	sd->def2     +-= (int)(sd->paramc[2]/2. +- sd->status.base_level/2. +- sd->paramc[1]/5.);
-	sd->mdef2    +-= (int)(sd->paramc[3] +- sd->status.base_level/4. +- sd->paramc[2]/5. +- sd->paramc[4]/5.);
+	sd->hit      += 175 + sd->paramc[4] + sd->paramc[5]/3 + sd->paramc[10]*2 + sd->status.base_level;
+	sd->flee     += 100 + sd->paramc[1] + sd->paramc[5]/5 + sd->paramc[10]*2 + sd->status.base_level;
+	sd->def2     += (int)(sd->paramc[2]/2. + sd->status.base_level/2. + sd->paramc[1]/5.);
+	sd->mdef2    += (int)(sd->paramc[3] + sd->status.base_level/4. + sd->paramc[2]/5. + sd->paramc[4]/5.);
 	if(pc_isdoram(sd))
-		sd->flee2    +-= sd->paramc[5] * 120 / 100 +- 10;
+		sd->flee2    += sd->paramc[5] * 120 / 100 + 10;
 	else
-		sd->flee2    +-= sd->paramc[5] +- 10;
-	sd->critical +-= sd->paramc[5] / 3 * 10 +- 10;
+		sd->flee2    += sd->paramc[5] + 10;
+	sd->critical += sd->paramc[5] / 3 * 10 + 10;
 #endif
-	sd->patk     +-= sd->paramc[6]/3 +- sd->paramc[10]/5;
-	sd->smatk    +-= sd->paramc[9]/3 +- sd->paramc[10]/5;
-	sd->res      +-= sd->paramc[7] +- (sd->paramc[7]/3*5);
-	sd->mres     +-= sd->paramc[8] +- (sd->paramc[8]/3*5);
-	sd->hplus    +-= sd->paramc[11];
-	sd->crate    +-= sd->paramc[11]/3;
+	sd->patk     += sd->paramc[6]/3 + sd->paramc[10]/5;
+	sd->smatk    += sd->paramc[9]/3 + sd->paramc[10]/5;
+	sd->res      += sd->paramc[7] + (sd->paramc[7]/3*5);
+	sd->mres     += sd->paramc[8] + (sd->paramc[8]/3*5);
+	sd->hplus    += sd->paramc[11];
+	sd->crate    += sd->paramc[11]/3;
 
-	// +MKIwpDDGMOCI3Gtj-
+	// アイテム補正
 	if(sd->sc.count > 0) {
 		if(sd->sc.data[SC_MEAL_INCATK].timer != -1)
-			sd->base_atk +-= sd->sc.data[SC_MEAL_INCATK].val1;
+			sd->base_atk += sd->sc.data[SC_MEAL_INCATK].val1;
 		if(sd->sc.data[SC_MEAL_INCMATK].timer != -1) {
-			sd->matk1 +-= sd->sc.data[SC_MEAL_INCMATK].val1;
-			sd->matk2 +-= sd->sc.data[SC_MEAL_INCMATK].val1;
+			sd->matk1 += sd->sc.data[SC_MEAL_INCMATK].val1;
+			sd->matk2 += sd->sc.data[SC_MEAL_INCMATK].val1;
 		}
 		if(sd->sc.data[SC_MEAL_INCHIT].timer != -1)
-			sd->hit +-= sd->sc.data[SC_MEAL_INCHIT].val1;
+			sd->hit += sd->sc.data[SC_MEAL_INCHIT].val1;
 		if(sd->sc.data[SC_MEAL_INCFLEE].timer != -1)
-			sd->flee +-= sd->sc.data[SC_MEAL_INCFLEE].val1;
+			sd->flee += sd->sc.data[SC_MEAL_INCFLEE].val1;
 		if(sd->sc.data[SC_MEAL_INCFLEE2].timer != -1)
-			sd->flee2 +-= sd->sc.data[SC_MEAL_INCFLEE2].val1;
+			sd->flee2 += sd->sc.data[SC_MEAL_INCFLEE2].val1;
 		if(sd->sc.data[SC_MEAL_INCCRITICAL].timer != -1)
-			sd->critical +-= sd->sc.data[SC_MEAL_INCCRITICAL].val1*10;
+			sd->critical += sd->sc.data[SC_MEAL_INCCRITICAL].val1*10;
 		if(sd->sc.data[SC_MEAL_INCDEF].timer != -1)
-			sd->def +-= sd->sc.data[SC_MEAL_INCDEF].val1;
+			sd->def += sd->sc.data[SC_MEAL_INCDEF].val1;
 		if(sd->sc.data[SC_MEAL_INCMDEF].timer != -1)
-			sd->mdef +-= sd->sc.data[SC_MEAL_INCMDEF].val1;
+			sd->mdef += sd->sc.data[SC_MEAL_INCMDEF].val1;
 		if(sd->sc.data[SC_MONSTER_TRANSFORM].timer != -1 && sd->sc.data[SC_MONSTER_TRANSFORM].val1 == 1109)
-			sd->hit +-= 5;
+			sd->hit += 5;
 	}
 
-	if(sd->sc.data[SC_MADNESSCANCEL].timer != -1) {	// +MN4wwzDJMM0wuTCtMOMw8zC7MOkw/A-
-		sd->base_atk +-= 100;
+	if(sd->sc.data[SC_MADNESSCANCEL].timer != -1) {	// マッドネスキャンセラー
+		sd->base_atk += 100;
 	}
-	if(sd->sc.data[SC_GATLINGFEVER].timer != -1) {	// +MKwwyDDqMPMwsDDVMKMw/DDQMPw-
-		sd->base_atk +-= 20+-(sd->sc.data[SC_GATLINGFEVER].val1*10);
+	if(sd->sc.data[SC_GATLINGFEVER].timer != -1) {	// ガトリングフィーバー
+		sd->base_atk += 20+(sd->sc.data[SC_GATLINGFEVER].val1*10);
 	}
 	if(sd->sc.data[SC_VOLCANO].timer != -1
 #ifdef PRE_RENEWAL
 		&& sd->def_ele == ELE_FIRE
 #endif
-	) {	// +MNww6zCxMPwwzg-
-		sd->base_atk +-= sd->sc.data[SC_VOLCANO].val3;
+	) {	// ボルケーノ
+		sd->base_atk += sd->sc.data[SC_VOLCANO].val3;
 	}
 #ifdef PRE_RENEWAL
-	if(sd->sc.data[SC_DRUMBATTLE].timer != -1) {	// +YiZZKp8TMG6X/zBN-
-		sd->base_atk +-= sd->sc.data[SC_DRUMBATTLE].val2;
+	if(sd->sc.data[SC_DRUMBATTLE].timer != -1) {	// 戦太鼓の響き
+		sd->base_atk += sd->sc.data[SC_DRUMBATTLE].val2;
 		//idx = sd->equip_index[EQUIP_INDEX_LARM];
-		// +XeZiSzBrMG+QaXUoMFcwajBE-
+		// 左手には適用しない
 		//if(idx >= 0 && sd->inventory_data[idx] && sd->inventory_data[idx]->type == ITEMTYPE_ARMOR)
-		//	sd->watk_ +-= sd->sc.data[SC_DRUMBATTLE].val2;
+		//	sd->watk_ += sd->sc.data[SC_DRUMBATTLE].val2;
 	}
 #endif
 
@@ -1757,21 +1736,21 @@ L_RECALC:
 		sd->mdef2 = (sd->mdef2*sd->mdef2_rate)/100;
 	if(sd->mdef2 < 1) sd->mdef2 = 1;
 
-	// +MLcw8zCwMOswojCvMLcw5zDz-
+	// シングルアクション
 	if(sd->status.weapon >= WT_HANDGUN && sd->status.weapon <= WT_GRENADE && (skill = pc_checkskill(sd,GS_SINGLEACTION)) > 0)
 	{
-		sd->hit +-= skill*2;
+		sd->hit += skill*2;
 	}
-	// +WSqWfTBoZwgwaGYfMG5gqptU-
+	// 太陽と月と星の悪魔
 	if((skill = pc_checkskill(sd,SG_DEVIL)) > 0 && sd->status.job_level >= 50)
 	{
 		clif_status_load_id(sd,SI_DEVIL,1);
 	}
 
-	// +WSqWfTBoZwgwaGYfMG6HjVQI-
+	// 太陽と月と星の融合
 	if(sd->sc.data[SC_FUSION].timer != -1)
 	{
-		sd->perfect_hit +-= 100;
+		sd->perfect_hit += 100;
 	}
 
 	if(sd->sc.data[SC_WEDDING].timer != -1)
@@ -1781,57 +1760,57 @@ L_RECALC:
 	else if(sd->sc.data[SC_SUMMER].timer != -1)
 		b_class = PC_CLASS_SU;
 
-	if((skill = pc_checkskill(sd,AC_VULTURE)) > 0) {	// +MO8wtzBudu4-
-		sd->hit +-= skill;
+	if((skill = pc_checkskill(sd,AC_VULTURE)) > 0) {	// ワシの目
+		sd->hit += skill;
 		if(sd->status.weapon == WT_BOW)
-			sd->range.attackrange +-= skill;
+			sd->range.attackrange += skill;
 	}
-	if((skill = pc_checkskill(sd,GS_SNAKEEYE)) > 0) {	// +MLkwzTD8MK8wojCk-
+	if((skill = pc_checkskill(sd,GS_SNAKEEYE)) > 0) {	// スネークアイ
 		if(sd->status.weapon >= WT_HANDGUN && sd->status.weapon <= WT_GRENADE)
 		{
-			sd->range.attackrange +-= skill;
-			sd->hit +-= skill;
+			sd->range.attackrange += skill;
+			sd->hit += skill;
 		}
 	}
-	if((skill = pc_checkskill(sd,SU_SOULATTACK)) > 0) {	// +ML0wpjDrMKIwvzDDMK8-
+	if((skill = pc_checkskill(sd,SU_SOULATTACK)) > 0) {	// ソウルアタック
 		sd->range.attackrange = 13;
 	}
-	if((skill = pc_checkskill(sd,BS_WEAPONRESEARCH)) > 0)	// +a2ZWaHgUenYwblR9Ti1zh1iXUqA-
-		sd->hit +-= skill*2;
-	if((sd->status.weapon == WT_DAGGER || sd->status.weapon == WT_1HSWORD) && ((skill = pc_checkskill(sd,GN_TRAINING_SWORD)) > 0))	// +UmNP7n30MG5UfU4tc4dYl1Kg-
-		sd->hit +-= skill*3;
+	if((skill = pc_checkskill(sd,BS_WEAPONRESEARCH)) > 0)	// 武器研究の命中率増加
+		sd->hit += skill*2;
+	if((sd->status.weapon == WT_DAGGER || sd->status.weapon == WT_1HSWORD) && ((skill = pc_checkskill(sd,GN_TRAINING_SWORD)) > 0))	// 剣修練の命中率増加
+		sd->hit += skill*3;
 
-	if((sd->status.weapon == WT_1HSWORD || sd->status.weapon == WT_1HSPEAR || sd->status.weapon == WT_2HSPEAR) && (skill = pc_checkskill(sd,IG_SPEAR_SWORD_M)) > 0) {		// +ac3/BnJHYktSY0/uffQ-
-		sd->hit +-= skill*10;
+	if((sd->status.weapon == WT_1HSWORD || sd->status.weapon == WT_1HSPEAR || sd->status.weapon == WT_2HSPEAR) && (skill = pc_checkskill(sd,IG_SPEAR_SWORD_M)) > 0) {		// 槍＆片手剣修練
+		sd->hit += skill*10;
 	}
 
-	if((skill = pc_checkskill(sd,CR_TRUST)) > 0) { // +MNUwpzCkMLk-
-		sd->status.max_hp    +-= skill*200;
-		sd->subele[ELE_HOLY] +-= skill*5;
+	if((skill = pc_checkskill(sd,CR_TRUST)) > 0) { // フェイス
+		sd->status.max_hp    += skill*200;
+		sd->subele[ELE_HOLY] += skill*5;
 	}
 
-	if((skill = pc_checkskill(sd,BS_SKINTEMPER)) > 0) { // +MLkwrTDzMMYw8zDRMOow8zCw-
-		sd->subele[ELE_FIRE]    +-= skill*4;
-		sd->subele[ELE_NEUTRAL] +-= skill*1;
+	if((skill = pc_checkskill(sd,BS_SKINTEMPER)) > 0) { // スキンテンパリング
+		sd->subele[ELE_FIRE]    += skill*4;
+		sd->subele[ELE_NEUTRAL] += skill*1;
 	}
 
-	if(pc_checkskill(sd,SU_SPRITEMABLE) > 0) {	// +MGswgzCTm0I-
-		sd->status.max_hp +-= 2000;
-		sd->status.max_sp +-= 200;
+	if(pc_checkskill(sd,SU_SPRITEMABLE) > 0) {	// にゃん魂
+		sd->status.max_hp += 2000;
+		sd->status.max_sp += 200;
 		clif_status_load_id(sd,SI_SPRITEMABLE,1);
 	}
-	if(pc_checkskill(sd,SU_POWEROFSEA) > 0) {	// +bXcwblKb-
-		sd->status.max_hp +-= 1000;
-		sd->status.max_sp +-= 100;
+	if(pc_checkskill(sd,SU_POWEROFSEA) > 0) {	// 海の力
+		sd->status.max_hp += 1000;
+		sd->status.max_sp += 100;
 		if(pc_checkskill_summoner(sd, SU_POWEROFSEA) >= 20) {
-			sd->status.max_hp +-= 3000;
-			sd->status.max_sp +-= 300;
+			sd->status.max_hp += 3000;
+			sd->status.max_sp += 300;
 		}
 	}
 
-	// bAtkRange2,bAtkRangeRate2+MG5cBHoLigh7lw-
-	sd->range.attackrange  +-= sd->range.add_attackrange;
-	sd->range.attackrange_ +-= sd->range.add_attackrange;
+	// bAtkRange2,bAtkRangeRate2の射程計算
+	sd->range.attackrange  += sd->range.add_attackrange;
+	sd->range.attackrange_ += sd->range.add_attackrange;
 	sd->range.attackrange  = sd->range.attackrange  * sd->range.add_attackrange_rate / 100;
 	sd->range.attackrange_ = sd->range.attackrange_ * sd->range.add_attackrange_rate / 100;
 	if(sd->range.attackrange < 1)  sd->range.attackrange  = 1;
@@ -1841,150 +1820,150 @@ L_RECALC:
 
 	blv = (sd->status.base_level > 0)? sd->status.base_level - 1: 0;
 
-	// +ZwBZJw-HP+igh7lw-
-	calc_val = job_db[sd->s_class.job].hp_base[blv] * (100 +- sd->paramc[2]) / 100;
+	// 最大HP計算
+	calc_val = job_db[sd->s_class.job].hp_base[blv] * (100 + sd->paramc[2]) / 100;
 
-	if(pc_isupper(sd))	// +juJ1H4B3MG5YNFQIZwBZJw-HP25%UP
-		sd->status.max_hp +-= calc_val * battle_config.upper_hp_rate / 100;
-	else if(pc_isbaby(sd))	// +mQpbUDBuWDRUCGcAWSc-HP70%
-		sd->status.max_hp +-= calc_val * battle_config.baby_hp_rate / 100;
+	if(pc_isupper(sd))	// 転生職の場合最大HP25%UP
+		sd->status.max_hp += calc_val * battle_config.upper_hp_rate / 100;
+	else if(pc_isbaby(sd))	// 養子の場合最大HP70%
+		sd->status.max_hp += calc_val * battle_config.baby_hp_rate / 100;
 	else
-		sd->status.max_hp +-= calc_val * battle_config.normal_hp_rate / 100;
+		sd->status.max_hp += calc_val * battle_config.normal_hp_rate / 100;
 
-	sd->status.max_hp +-= sd->parame[2] - sd->paramcard[2];
+	sd->status.max_hp += sd->parame[2] - sd->paramcard[2];
 
 	if(sd->hprate != 100)
 		sd->status.max_hp = sd->status.max_hp * sd->hprate / 100;
 
-	if((skill = pc_checkskill(sd,NV_BREAKTHROUGH)) > 0)	// +MNYw7DCkMK8wuTDrMPw-
-		sd->status.max_hp +-= (skill<5)? skill*350: 2000;
-	if((skill = pc_checkskill(sd,NV_TRANSCENDENCE)) > 0)	// +MMgw6TDzMLsw8zDHMPMwuQ-
-		sd->status.max_hp +-= (skill<5)? skill*350: 2000;
+	if((skill = pc_checkskill(sd,NV_BREAKTHROUGH)) > 0)	// ブレイクスルー
+		sd->status.max_hp += (skill<5)? skill*350: 2000;
+	if((skill = pc_checkskill(sd,NV_TRANSCENDENCE)) > 0)	// トランセンデンス
+		sd->status.max_hp += (skill<5)? skill*350: 2000;
 
-	if(sd->sc.data[SC_VENOMBLEED].timer != -1) {	// +MNkwyjDgMNYw6jD8MMk-
+	if(sd->sc.data[SC_VENOMBLEED].timer != -1) {	// ベナムブリード
 		sd->status.max_hp -= (int)((atn_bignumber)sd->status.max_hp * sd->sc.data[SC_VENOMBLEED].val2 / 100);
 	}
-	if(sd->sc.data[SC__WEAKNESS].timer != -1) {	// +MN4wuTCrMOww/DDJ/xowpjCjMPwwrzDNMLk-
+	if(sd->sc.data[SC__WEAKNESS].timer != -1) {	// マスカレード：ウィークネス
 		sd->status.max_hp -= (int)((atn_bignumber)sd->status.max_hp * (sd->sc.data[SC__WEAKNESS].val1 * 10) / 100);
 	}
-	if(sd->sc.data[SC_BERSERK].timer != -1) {	// +MNAw/DC1MPwwrw-
+	if(sd->sc.data[SC_BERSERK].timer != -1) {	// バーサーク
 		sd->status.max_hp *= 3;
 	}
 	if(sd->sc.data[SC_INCMHP2].timer != -1) {
-		sd->status.max_hp = (int)((atn_bignumber)sd->status.max_hp * (100 +- sd->sc.data[SC_INCMHP2].val1) / 100);
+		sd->status.max_hp = (int)((atn_bignumber)sd->status.max_hp * (100 + sd->sc.data[SC_INCMHP2].val1) / 100);
 	}
 	if(sd->sc.data[SC_SUPPORT_HPSP].timer != -1) {
-		sd->status.max_hp = (int)((atn_bignumber)sd->status.max_hp * (100 +- sd->sc.data[SC_SUPPORT_HPSP].val1) / 100);
+		sd->status.max_hp = (int)((atn_bignumber)sd->status.max_hp * (100 + sd->sc.data[SC_SUPPORT_HPSP].val1) / 100);
 	}
-	if(sd->sc.data[SC_EPICLESIS].timer != -1) {		// +MKgw1DCvMOwwtzC5-
-		sd->status.max_hp = (int)((atn_bignumber)sd->status.max_hp * (100 +- sd->sc.data[SC_EPICLESIS].val2) / 100);
+	if(sd->sc.data[SC_EPICLESIS].timer != -1) {		// エピクレシス
+		sd->status.max_hp = (int)((atn_bignumber)sd->status.max_hp * (100 + sd->sc.data[SC_EPICLESIS].val2) / 100);
 	}
 	if(sd->sc.data[SC_EQC].timer != -1)
 		sd->status.max_hp -= (int)((atn_bignumber)sd->status.max_hp * sd->sc.data[SC_EQC].val3 / 100);
-	if(sd->sc.data[SC_LUNARSTANCE].timer != -1) {		// +ZwgwbmnLMEg-
-		sd->status.max_hp = (int)((atn_bignumber)sd->status.max_hp * (100 +- sd->sc.data[SC_LUNARSTANCE].val2) / 100);
+	if(sd->sc.data[SC_LUNARSTANCE].timer != -1) {		// 月の構え
+		sd->status.max_hp = (int)((atn_bignumber)sd->status.max_hp * (100 + sd->sc.data[SC_LUNARSTANCE].val2) / 100);
 	}
 
-	// +ZwBZJw-SP+igh7lw-
-	calc_val = job_db[sd->s_class.job].sp_base[blv] * (100 +- sd->paramc[3]) / 100 +- (sd->parame[3] - sd->paramcard[3]);
+	// 最大SP計算
+	calc_val = job_db[sd->s_class.job].sp_base[blv] * (100 + sd->paramc[3]) / 100 + (sd->parame[3] - sd->paramcard[3]);
 
-	if(pc_isupper(sd))	// +juJ1H4B3MG5YNFQIZwBZJw-SP125%
-		sd->status.max_sp +-= calc_val * battle_config.upper_sp_rate / 100;
-	else if(pc_isbaby(sd))	// +mQpbUDBuWDRUCGcAWSc-SP70%
-		sd->status.max_sp +-= calc_val * battle_config.baby_sp_rate / 100;
+	if(pc_isupper(sd))	// 転生職の場合最大SP125%
+		sd->status.max_sp += calc_val * battle_config.upper_sp_rate / 100;
+	else if(pc_isbaby(sd))	// 養子の場合最大SP70%
+		sd->status.max_sp += calc_val * battle_config.baby_sp_rate / 100;
 	else
-		sd->status.max_sp +-= calc_val * battle_config.normal_sp_rate / 100;
+		sd->status.max_sp += calc_val * battle_config.normal_sp_rate / 100;
 
 	if(sd->sprate != 100)
 		sd->status.max_sp = sd->status.max_sp * sd->sprate / 100;
 
-	if((skill = pc_checkskill(sd,HP_MEDITATIO)) > 0) // +MOEwxzCjML8wxjCjMKo-
-		sd->status.max_sp +-= sd->status.max_sp * skill / 100;
-	if((skill = pc_checkskill(sd,HW_SOULDRAIN)) > 0) // +ML0wpjDrMMkw7DCkMPM-
-		sd->status.max_sp +-= sd->status.max_sp * 2 * skill / 100;
-	if((skill = pc_checkskill(sd,SL_KAINA)) > 0)	// +MKswpDDK-
-		sd->status.max_sp +-= 30 * skill;
-	if((skill = pc_checkskill(sd,RA_RESEARCHTRAP)) > 0)	// +MMgw6TDDMNd4FHp2-
-		sd->status.max_sp +-= 200 +- (skill*20);
-	if((skill = pc_checkskill(sd,WM_LESSON)) > 0)	// +MOwwwzC5MPM-
-		sd->status.max_sp +-= skill * 30;
-	if((skill = pc_checkskill(sd,NV_BREAKTHROUGH)) > 0)	// +MNYw7DCkMK8wuTDrMPw-
-		sd->status.max_sp +-= (skill<5)? skill*30: 200;
-	if((skill = pc_checkskill(sd,NV_TRANSCENDENCE)) > 0)	// +MMgw6TDzMLsw8zDHMPMwuQ-
-		sd->status.max_sp +-= (skill<5)? skill*30: 200;
+	if((skill = pc_checkskill(sd,HP_MEDITATIO)) > 0) // メディタティオ
+		sd->status.max_sp += sd->status.max_sp * skill / 100;
+	if((skill = pc_checkskill(sd,HW_SOULDRAIN)) > 0) // ソウルドレイン
+		sd->status.max_sp += sd->status.max_sp * 2 * skill / 100;
+	if((skill = pc_checkskill(sd,SL_KAINA)) > 0)	// カイナ
+		sd->status.max_sp += 30 * skill;
+	if((skill = pc_checkskill(sd,RA_RESEARCHTRAP)) > 0)	// トラップ研究
+		sd->status.max_sp += 200 + (skill*20);
+	if((skill = pc_checkskill(sd,WM_LESSON)) > 0)	// レッスン
+		sd->status.max_sp += skill * 30;
+	if((skill = pc_checkskill(sd,NV_BREAKTHROUGH)) > 0)	// ブレイクスルー
+		sd->status.max_sp += (skill<5)? skill*30: 200;
+	if((skill = pc_checkskill(sd,NV_TRANSCENDENCE)) > 0)	// トランセンデンス
+		sd->status.max_sp += (skill<5)? skill*30: 200;
 
 	if(sd->sc.data[SC_INCMSP2].timer != -1) {
-		sd->status.max_sp = (int)((atn_bignumber)sd->status.max_sp * (100 +- sd->sc.data[SC_INCMSP2].val1) / 100);
+		sd->status.max_sp = (int)((atn_bignumber)sd->status.max_sp * (100 + sd->sc.data[SC_INCMSP2].val1) / 100);
 	}
 	if(sd->sc.data[SC_SUPPORT_HPSP].timer != -1) {
-		sd->status.max_sp = (int)((atn_bignumber)sd->status.max_sp * (100 +- sd->sc.data[SC_SUPPORT_HPSP].val1) / 100);
+		sd->status.max_sp = (int)((atn_bignumber)sd->status.max_sp * (100 + sd->sc.data[SC_SUPPORT_HPSP].val1) / 100);
 	}
 
-	// +ZwBZJw-AP
+	// 最大AP
 	sd->status.max_ap = job_db[sd->s_class.job].max_ap;
 
-	// SP+bYiMuw-
-	if((skill = pc_checkskill(sd,HP_MANARECHARGE)) > 0) {	// +MN4wyjDqMMEw4zD8MLg-
+	// SP消費
+	if((skill = pc_checkskill(sd,HP_MANARECHARGE)) > 0) {	// マナリチャージ
 		sd->dsprate -= skill * 4;
 		if(sd->dsprate < 0)
 			sd->dsprate = 0;
 	}
 
-	// +gepxNlbeX6k-HP
-	sd->nhealhp = 1 +- (sd->paramc[2]/5) +- (sd->status.max_hp/200);
-	if((skill = pc_checkskill(sd,SM_RECOVERY)) > 0) {	// HP+Vt5fqVKbVBFOCg-
-		sd->nshealhp = skill * 5 +- sd->status.max_hp * skill / 500;
+	// 自然回復HP
+	sd->nhealhp = 1 + (sd->paramc[2]/5) + (sd->status.max_hp/200);
+	if((skill = pc_checkskill(sd,SM_RECOVERY)) > 0) {	// HP回復力向上
+		sd->nshealhp = skill * 5 + sd->status.max_hp * skill / 500;
 		if(sd->nshealhp > 0x7fff)
 			sd->nshealhp = 0x7fff;
 	}
-	if((skill = pc_checkskill(sd,TK_HPTIME)) > 0) {	// +W4kwiTBLMGpPEWBv-
-		sd->regen.tk_hp = skill*30 +- (sd->status.max_hp*skill/500);
+	if((skill = pc_checkskill(sd,TK_HPTIME)) > 0) {	// 安らかな休息
+		sd->regen.tk_hp = skill*30 + (sd->status.max_hp*skill/500);
 		if(sd->regen.tk_hp > 0x7fff)
 			sd->regen.tk_hp = 0x7fff;
 	}
-	if(sd->sc.data[SC_GENTLETOUCH_REVITALIZE].timer != -1) {	// +cLl6dA- -+bTs--
-		sd->nhealhp +-= sd->nhealhp * (50 +- sd->sc.data[SC_GENTLETOUCH_REVITALIZE].val1 * 30) / 100;
+	if(sd->sc.data[SC_GENTLETOUCH_REVITALIZE].timer != -1) {	// 点穴 -活-
+		sd->nhealhp += sd->nhealhp * (50 + sd->sc.data[SC_GENTLETOUCH_REVITALIZE].val1 * 30) / 100;
 		if(sd->nhealhp > 0x7fff)
 			sd->nhealhp = 0x7fff;
 	}
-	if(sd->sc.data[SC_EXTRACT_WHITE_POTION_Z].timer != -1) {	// +b8N+LjDbMO8wpDDIMN0w/DC3MOcw8w-Z
-		sd->nhealhp +-= sd->nhealhp * sd->sc.data[SC_EXTRACT_WHITE_POTION_Z].val1 / 100;
+	if(sd->sc.data[SC_EXTRACT_WHITE_POTION_Z].timer != -1) {	// 濃縮ホワイトポーションZ
+		sd->nhealhp += sd->nhealhp * sd->sc.data[SC_EXTRACT_WHITE_POTION_Z].val1 / 100;
 		if(sd->nhealhp > 0x7fff)
 			sd->nhealhp = 0x7fff;
 	}
 	if(sd->sc.data[SC_BERSERK].timer != -1) {
 		sd->nhealhp = 0;
 	}
-	// +gepxNlbeX6k-SP
-	sd->nhealsp = 1 +- (sd->paramc[3]/6) +- (sd->status.max_sp/100);
+	// 自然回復SP
+	sd->nhealsp = 1 + (sd->paramc[3]/6) + (sd->status.max_sp/100);
 	if(sd->paramc[3] >= 120)
-		sd->nhealsp +-= ((sd->paramc[3]-120)>>1) +- 4;
-	if((skill = pc_checkskill(sd,MG_SRECOVERY)) > 0) {	// SP+Vt5fqVKbVBFOCg-
-		sd->nshealsp = skill*3 +- (sd->status.max_sp*skill/500);
+		sd->nhealsp += ((sd->paramc[3]-120)>>1) + 4;
+	if((skill = pc_checkskill(sd,MG_SRECOVERY)) > 0) {	// SP回復力向上
+		sd->nshealsp = skill*3 + (sd->status.max_sp*skill/500);
 		if(sd->nshealsp > 0x7fff)
 			sd->nshealsp = 0x7fff;
 	}
-	if((skill = pc_checkskill(sd,NJ_NINPOU)) > 0) {	// +X81s1U/uffQ-
-		sd->nshealsp = skill*3 +- (sd->status.max_sp*skill/500);
+	if((skill = pc_checkskill(sd,NJ_NINPOU)) > 0) {	// 忍法修練
+		sd->nshealsp = skill*3 + (sd->status.max_sp*skill/500);
 		if(sd->nshealsp > 0x7fff)
 			sd->nshealsp = 0x7fff;
 	}
-	if((skill = pc_checkskill(sd,WM_LESSON)) > 0) {	// +MOwwwzC5MPM-
-		sd->nshealsp = 3 +- skill * 3;
+	if((skill = pc_checkskill(sd,WM_LESSON)) > 0) {	// レッスン
+		sd->nshealsp = 3 + skill * 3;
 		if(sd->nshealsp > 0x7fff)
 			sd->nshealsp = 0x7fff;
 	}
 
 	if((skill = pc_checkskill(sd,MO_SPIRITSRECOVERY)) > 0) {
-		sd->nsshealhp = skill*4 +- (sd->status.max_hp*skill/500);
-		sd->nsshealsp = skill*2 +- (sd->status.max_sp*skill/500);
+		sd->nsshealhp = skill*4 + (sd->status.max_hp*skill/500);
+		sd->nsshealsp = skill*2 + (sd->status.max_sp*skill/500);
 		if(sd->nsshealhp > 0x7fff)
 			sd->nsshealhp = 0x7fff;
 		if(sd->nsshealsp > 0x7fff)
 			sd->nsshealsp = 0x7fff;
 	}
-	if((skill = pc_checkskill(sd,TK_SPTIME)) > 0) { // +aX0wVzBETxFgbw-
-		sd->regen.tk_sp = skill*3 +- (sd->status.max_sp*skill/500);
+	if((skill = pc_checkskill(sd,TK_SPTIME)) > 0) { // 楽しい休息
+		sd->regen.tk_sp = skill*3 + (sd->status.max_sp*skill/500);
 		if(sd->regen.tk_sp > 0x7fff)
 			sd->regen.tk_sp = 0x7fff;
 	}
@@ -1999,274 +1978,274 @@ L_RECALC:
 			sd->nhealsp = 1;
 	}
 	if((skill = pc_checkskill(sd,HP_MEDITATIO)) > 0) {
-		// +MOEwxzCjML8wxjCjMKowbw-SPR+MGcwbzBqME+B6nE2Vt5fqTBrMEswSzCL-
-		sd->nhealsp +-= (sd->nhealsp)*3*skill/100;
+		// メディタティオはSPRではなく自然回復にかかる
+		sd->nhealsp += (sd->nhealsp)*3*skill/100;
 		if(sd->nhealsp > 0x7fff)
 			sd->nhealsp = 0x7fff;
 	}
-	if(sd->sc.data[SC_VITATA_500].timer != -1) {	// +MNMwvzC/-500
-		sd->nhealsp +-= sd->nhealsp * sd->sc.data[SC_VITATA_500].val1 / 100;
+	if(sd->sc.data[SC_VITATA_500].timer != -1) {	// ビタタ500
+		sd->nhealsp += sd->nhealsp * sd->sc.data[SC_VITATA_500].val1 / 100;
 		if(sd->nhealsp > 0x7fff)
 			sd->nhealsp = 0x7fff;
 	}
-	if(sd->sc.data[SC_REBOUND].timer != -1) {	// +MOow0DCmMPMwyQ-
+	if(sd->sc.data[SC_REBOUND].timer != -1) {	// リバウンド
 		sd->nhealhp = sd->nhealsp = 0;
 	}
 
-	// +m1Rs1TDAMOEw/DC4WJdSoA-
-	if((skill = pc_checkskill(sd,CD_FIDUS_ANIMUS)) > 0) {		// +MNUwozDJMLkwojDLMOAwuQ-
+	// 魔法ダメージ増加
+	if((skill = pc_checkskill(sd,CD_FIDUS_ANIMUS)) > 0) {		// フィドスアニムス
 		const int add_list[10] = { 1,2,3,4,5,7,9,12,15,20 };
 		if(skill > 10) skill = 10;
-		sd->skill_elemagic_dmgup[ELE_HOLY] +-= add_list[skill-1];
+		sd->skill_elemagic_dmgup[ELE_HOLY] += add_list[skill-1];
 	}
-	if(sd->status.weapon == WT_BOOK && (skill = pc_checkskill(sd,EM_MAGIC_BOOK_M)) > 0) {		// +m1Rs1WcsT+599A-
+	if(sd->status.weapon == WT_BOOK && (skill = pc_checkskill(sd,EM_MAGIC_BOOK_M)) > 0) {		// 魔法本修練
 		const int add_list[10] = { 1,2,3,4,5,8,11,14,17,20 };
 		if(skill > 10) skill = 10;
-		sd->skill_elemagic_dmgup[ELE_FIRE]  +-= add_list[skill-1];
-		sd->skill_elemagic_dmgup[ELE_WATER] +-= add_list[skill-1];
-		sd->skill_elemagic_dmgup[ELE_WIND]  +-= add_list[skill-1];
-		sd->skill_elemagic_dmgup[ELE_EARTH] +-= add_list[skill-1];
+		sd->skill_elemagic_dmgup[ELE_FIRE]  += add_list[skill-1];
+		sd->skill_elemagic_dmgup[ELE_WATER] += add_list[skill-1];
+		sd->skill_elemagic_dmgup[ELE_WIND]  += add_list[skill-1];
+		sd->skill_elemagic_dmgup[ELE_EARTH] += add_list[skill-1];
 	}
 
-	// +ei5lz3J5ZTs-
-	if(sd->status.weapon == WT_KNUCKLE && (skill = pc_checkskill(sd,IQ_WILL_OF_FAITH)) > 0) {		// +T+FO8DBuYQ9f1w-
+	// 種族特攻
+	if(sd->status.weapon == WT_KNUCKLE && (skill = pc_checkskill(sd,IQ_WILL_OF_FAITH)) > 0) {		// 信仰の意志
 		const int add_list[10] = { 1,2,3,4,5,7,9,11,15,20 };
 		if(skill > 10) skill = 10;
-		sd->addrace[RCT_UNDEAD] +-= add_list[skill-1];
-		sd->addrace[RCT_DEMON] +-= add_list[skill-1];
+		sd->addrace[RCT_UNDEAD] += add_list[skill-1];
+		sd->addrace[RCT_DEMON] += add_list[skill-1];
 	}
 
-	// +ei5lz4AQYCc-
-	if((skill = pc_checkskill(sd,SA_DRAGONOLOGY)) > 0) {	// +MMkw6TC0MM4w7TC4MPw-
+	// 種族耐性
+	if((skill = pc_checkskill(sd,SA_DRAGONOLOGY)) > 0) {	// ドラゴノロジー
 		skill = skill*4;
-		sd->subrace[RCT_DRAGON]  +-= skill;
-		sd->magic_subrace[RCT_DRAGON]  +-= skill;
+		sd->subrace[RCT_DRAGON]  += skill;
+		sd->magic_subrace[RCT_DRAGON]  += skill;
 	}
 
-	// +MLUwpDC6cnllOw-
-	if((sd->status.weapon == WT_MACE || sd->status.weapon == WT_BOOK) && (skill = pc_checkskill(sd,CD_MACE_BOOK_M)) > 0) {		// +kg1WaP8GZyxP7n30-
+	// サイズ特攻
+	if((sd->status.weapon == WT_MACE || sd->status.weapon == WT_BOOK) && (skill = pc_checkskill(sd,CD_MACE_BOOK_M)) > 0) {		// 鈍器＆本修練
 		const int add_list[10] = { 1,2,3,4,5,7,9,11,15,20 };
 		if(skill > 10) skill = 10;
-		sd->addsize[0] +-= add_list[skill-1];
-		sd->addsize[1] +-= add_list[skill-1];
-		sd->addsize[2] +-= add_list[skill-1];
+		sd->addsize[0] += add_list[skill-1];
+		sd->addsize[1] += add_list[skill-1];
+		sd->addsize[2] += add_list[skill-1];
 	}
-	if((sd->status.weapon == WT_DAGGER || sd->status.weapon == WT_BOW) && (skill = pc_checkskill(sd,ABC_DAGGER_AND_BOW_M)) > 0) {		// +d+1SY/8GXxNP7n30-
+	if((sd->status.weapon == WT_DAGGER || sd->status.weapon == WT_BOW) && (skill = pc_checkskill(sd,ABC_DAGGER_AND_BOW_M)) > 0) {		// 短剣＆弓修練
 		const int add_list[10] = { 1,2,3,4,5,6,7,9,12,15 };
 		if(skill > 10) skill = 10;
-		sd->addsize[0] +-= add_list[skill-1];
-		sd->addsize[1] +-= add_list[skill-1];
-		sd->addsize[2] +-= add_list[skill-1];
+		sd->addsize[0] += add_list[skill-1];
+		sd->addsize[1] += add_list[skill-1];
+		sd->addsize[2] += add_list[skill-1];
 	}
 
-	// +MLUwpDC6m1Rs1XJ5ZTs-
-	if((sd->status.weapon == WT_DAGGER || sd->status.weapon == WT_1HSWORD) && (skill = pc_checkskill(sd,ABC_MAGIC_SWORD_M)) > 0) {		// +m1Rs1VJjT+599A-
+	// サイズ魔法特攻
+	if((sd->status.weapon == WT_DAGGER || sd->status.weapon == WT_1HSWORD) && (skill = pc_checkskill(sd,ABC_MAGIC_SWORD_M)) > 0) {		// 魔法剣修練
 		const int add_list[10] = { 1,2,3,4,5,7,9,11,13,15 };
 		if(skill > 10) skill = 10;
-		sd->magic_addsize[0] +-= add_list[skill-1];
-		sd->magic_addsize[1] +-= add_list[skill-1];
-		sd->magic_addsize[2] +-= add_list[skill-1];
+		sd->magic_addsize[0] += add_list[skill-1];
+		sd->magic_addsize[1] += add_list[skill-1];
+		sd->magic_addsize[2] += add_list[skill-1];
 	}
 
-	// +MLUwpDC6gBBgJw-
-	if((sd->status.weapon == WT_2HSWORD || sd->status.weapon == WT_2HSPEAR || sd->status.weapon == WT_2HAXE) && (skill = pc_checkskill(sd,DK_TWOHANDDEF)) > 0) {		// +MMQw/DDPMPMwyTDHMKMw1TCnMPMwxzCjMPMwsA-
-		sd->subsize[0] +-= skill;
-		sd->subsize[1] +-= skill;
-		sd->subsize[2] +-= skill;
+	// サイズ耐性
+	if((sd->status.weapon == WT_2HSWORD || sd->status.weapon == WT_2HSPEAR || sd->status.weapon == WT_2HAXE) && (skill = pc_checkskill(sd,DK_TWOHANDDEF)) > 0) {		// ツーハンドディフェンディング
+		sd->subsize[0] += skill;
+		sd->subsize[1] += skill;
+		sd->subsize[2] += skill;
 	}
-	if(sd->status.weapon == WT_2HAXE && (skill = pc_checkskill(sd,MT_TWOAXEDEF)) > 0) {		// +MMQw/DCiMMMwrzC5MMcwozDVMKcw8zDHMKMw8zCw-
-		sd->subsize[0] +-= skill;
-		sd->subsize[1] +-= skill;
-		sd->subsize[2] +-= skill;
+	if(sd->status.weapon == WT_2HAXE && (skill = pc_checkskill(sd,MT_TWOAXEDEF)) > 0) {		// ツーアックスディフェンディング
+		sd->subsize[0] += skill;
+		sd->subsize[1] += skill;
+		sd->subsize[2] += skill;
 	}
 
-	// +ei5lz4otW5o-
+	// 種族設定
 	if(pc_isdoram(sd)) {
-		sd->critical_race[RCT_DEMIHUMAN] +-= 20;
+		sd->critical_race[RCT_DEMIHUMAN] += 20;
 		sd->subrace[RCT_DEMIHUMAN] -= 10;
 	}
 	else {
-		sd->addrace[RCT_PLAYER_DORAM]  +-= 10;
-		sd->addrace_[RCT_PLAYER_DORAM] +-= 10;
+		sd->addrace[RCT_PLAYER_DORAM]  += 10;
+		sd->addrace_[RCT_PLAYER_DORAM] += 10;
 	}
-	// Flee+TgpmBw-
-	if((skill = pc_checkskill(sd,TF_MISS)) > 0) {	// +Vt6Qf3OHWJdSoA-
+	// Flee上昇
+	if((skill = pc_checkskill(sd,TF_MISS)) > 0) {	// 回避率増加
 		if(sd->s_class.job == PC_JOB_AS || sd->s_class.job == PC_JOB_RG || sd->s_class.job == PC_JOB_GC || sd->s_class.job == PC_JOB_SC)
-			sd->flee +-= skill*4;
+			sd->flee += skill*4;
 		else
-			sd->flee +-= skill*3;
+			sd->flee += skill*3;
 	}
-	if((skill = pc_checkskill(sd,MO_DODGE)) > 0)	// +iYtSBzCK-
-		sd->flee +-= (skill*3)>>1;
+	if((skill = pc_checkskill(sd,MO_DODGE)) > 0)	// 見切り
+		sd->flee += (skill*3)>>1;
 	if(sd->sc.count > 0) {
 		if(sd->sc.data[SC_INCFLEE].timer != -1)
-			sd->flee +-= sd->sc.data[SC_INCFLEE].val1;
+			sd->flee += sd->sc.data[SC_INCFLEE].val1;
 		if(sd->sc.data[SC_INCFLEE2].timer != -1)
-			sd->flee +-= sd->sc.data[SC_INCFLEE2].val1;
-		if(sd->sc.data[SC_GROOMING].timer != -1)	// +MLAw6zD8MN8w8zCw-
-			sd->flee +-= sd->sc.data[SC_GROOMING].val2;
+			sd->flee += sd->sc.data[SC_INCFLEE2].val1;
+		if(sd->sc.data[SC_GROOMING].timer != -1)	// グルーミング
+			sd->flee += sd->sc.data[SC_GROOMING].val2;
 	}
-	if(pc_isdoram(sd) && pc_checkskill(sd,SU_POWEROFLIFE) > 0) {	// +dR9UfTBuUps-
-		sd->hit +-= 50;
-		sd->flee +-= 50;
-		sd->critical +-= 200;
+	if(pc_isdoram(sd) && pc_checkskill(sd,SU_POWEROFLIFE) > 0) {	// 生命の力
+		sd->hit += 50;
+		sd->flee += 50;
+		sd->critical += 200;
 	}
-	if((skill = pc_checkskill(sd,SHC_SHADOW_SENSE)) > 0) {		// +MLcw4zDJMKYwuzDzMLk-
+	if((skill = pc_checkskill(sd,SHC_SHADOW_SENSE)) > 0) {		// シャドウセンス
 		const int add_fleelist[10] = { 10,20,30,40,50,60,70,85,100,150 };
 		if(skill > 10) skill = 10;
-		sd->flee +-= add_fleelist[skill-1];
+		sd->flee += add_fleelist[skill-1];
 		if(sd->weapontype1 == WT_DAGGER) {
 			const int add_crilist[10] = { 2,4,6,8,10,12,14,20,30,50 };
-			sd->critical +-= add_crilist[skill-1];
+			sd->critical += add_crilist[skill-1];
 		} else if(sd->status.weapon == WT_KATAR) {
 			const int add_crilist[10] = { 1,2,3,4,5,6,7,10,15,25 };
-			sd->critical +-= add_crilist[skill-1];
+			sd->critical += add_crilist[skill-1];
 		}
 	}
 	// Def
-	if(pc_isgear(sd) && (skill = pc_checkskill(sd,NC_MAINFRAME)) > 0) {		// +m1RcDjCuMKL/BjDhMKQw8zDVMOww/DDgZTmQIA-
+	if(pc_isgear(sd) && (skill = pc_checkskill(sd,NC_MAINFRAME)) > 0) {		// 魔導ギア＆メインフレーム改造
 		if(skill == 1)
-			sd->def +-= 4;
+			sd->def += 4;
 		else
-			sd->def +-= (skill*4) - 1;
+			sd->def += (skill*4) - 1;
 	}
 
 	// P.Atk
-	if((sd->status.weapon == WT_BOW || sd->status.weapon == WT_MUSICAL || sd->status.weapon == WT_WHIP) && (skill = pc_checkskill(sd,TR_STAGE_MANNER)) > 0) {		// +MLkwxjD8MLgw3jDKMPw-
+	if((sd->status.weapon == WT_BOW || sd->status.weapon == WT_MUSICAL || sd->status.weapon == WT_WHIP) && (skill = pc_checkskill(sd,TR_STAGE_MANNER)) > 0) {		// ステージマナー
 		const int add_manner_list[5] = { 1,3,5,10,15 };
 		if(skill > 5) skill = 5;
-		sd->patk  +-= add_manner_list[skill-1];
-		sd->smatk +-= add_manner_list[skill-1];
+		sd->patk  += add_manner_list[skill-1];
+		sd->smatk += add_manner_list[skill-1];
 	}
 	if((sd->status.weapon >= WT_HANDGUN && sd->status.weapon <= WT_GRENADE) && (skill = pc_checkskill(sd,NW_P_F_I)) > 0) {		// P.F.I
-		sd->patk +-= skill;
+		sd->patk += skill;
 	}
-	if((skill = pc_checkskill(sd,SH_MYSTICAL_CREATURE_MASTERY)) > 0) {		// +MLkw1DDqMMMwyDDeMLkwvzDqMPw-
-		sd->patk  +-= skill +- ((skill >= 10)? 5: (skill >= 9)? 3: 0);
-		sd->smatk +-= skill +- ((skill >= 10)? 5: (skill >= 9)? 3: 0);
+	if((skill = pc_checkskill(sd,SH_MYSTICAL_CREATURE_MASTERY)) > 0) {		// スピリットマスタリー
+		sd->patk  += skill + ((skill >= 10)? 5: (skill >= 9)? 3: 0);
+		sd->smatk += skill + ((skill >= 10)? 5: (skill >= 9)? 3: 0);
 	}
-	if((skill = pc_checkskill(sd,HN_SELFSTUDY_TATICS)) > 0) {		// +cuxbZg- -+YiaV2Ftm--
+	if((skill = pc_checkskill(sd,HN_SELFSTUDY_TATICS)) > 0) {		// 独学 -戦闘学-
 		const int add_list[10] = { 1,2,3,4,5,6,7,9,12,15 };
 		if(skill > 10) skill = 10;
-		sd->patk +-= add_list[skill-1];
+		sd->patk += add_list[skill-1];
 	}
-	if((skill = pc_checkskill(sd,SKE_WAR_BOOK_MASTERY)) > 0) {		// +UXVs1U/uffQ-
+	if((skill = pc_checkskill(sd,SKE_WAR_BOOK_MASTERY)) > 0) {		// 兵法修練
 		const int add_hit_list[10]  = { 3, 6, 9,12,15,20,25,30,40,50 };
 		const int add_patk_list[10] = { 1, 2, 3, 4, 5, 7, 9,11,13,15 };
 		if(skill > 10) skill = 10;
-		sd->hit  +-= add_hit_list[skill-1];
-		sd->patk +-= add_patk_list[skill-1];
+		sd->hit  += add_hit_list[skill-1];
+		sd->patk += add_patk_list[skill-1];
 	}
 
 	// S.Matk
-	if(sd->status.weapon == WT_2HSTAFF && (skill = pc_checkskill(sd,AG_TWOHANDSTAFF)) > 0) {		// +TiFiS2dWT+599A-
+	if(sd->status.weapon == WT_2HSTAFF && (skill = pc_checkskill(sd,AG_TWOHANDSTAFF)) > 0) {		// 両手杖修練
 		const int add_2hstaff_list[10] = { 1,3,5,8,11,14,17,21,25,30 };
 		if(skill > 10) skill = 10;
-		sd->smatk +-= add_2hstaff_list[skill-1];
+		sd->smatk += add_2hstaff_list[skill-1];
 	}
-	if((skill = pc_checkskill(sd,SOA_TALISMAN_MASTERY)) > 0) {		// +i3d7Jk/uffQ-
-		sd->smatk +-= skill;
+	if((skill = pc_checkskill(sd,SOA_TALISMAN_MASTERY)) > 0) {		// 護符修練
+		sd->smatk += skill;
 	}
-	if((skill = pc_checkskill(sd,HN_SELFSTUDY_SOCERY)) > 0) {		// +cuxbZg- -+m1RcDltm--
+	if((skill = pc_checkskill(sd,HN_SELFSTUDY_SOCERY)) > 0) {		// 独学 -魔導学-
 		const int add_list[10] = { 1,2,3,4,5,6,7,9,12,15 };
 		if(skill > 10) skill = 10;
-		sd->smatk +-= add_list[skill-1];
+		sd->smatk += add_list[skill-1];
 	}
 
 	// Res
-	if(sd->status.shield > 0 && (skill = pc_checkskill(sd,IG_SHIELD_MASTERY)) > 0) {		// +dv5P7n30-
-		sd->res +-= skill*10;
+	if(sd->status.shield > 0 && (skill = pc_checkskill(sd,IG_SHIELD_MASTERY)) > 0) {		// 盾修練
+		sd->res += skill*10;
 	}
 
 #ifdef PRE_RENEWAL
-	// MATK+Tld7l1HmdAY-(+Z1aI3GtjTuVZFg-)
+	// MATK乗算処理(杖補正以外)
 	if(sd->matk_rate != 100) {
 		sd->matk1 = sd->matk1 * sd->matk_rate / 100;
 		sd->matk2 = sd->matk2 * sd->matk_rate / 100;
 	}
 #endif
-	// amotion+MG6KCHuX-
+	// amotionの計算
 	sd->amotion = status_calc_amotion_pc(sd);
 	sd->aspd = sd->amotion<<1;
-	// speed+MG6KCHuX-
+	// speedの計算
 	sd->speed = status_calc_speed_pc(sd,sd->speed);
 
-	// +MLkwrTDrMIQwuTDGMPwwvzC5dXBeODBrMIgwi2uLMIowbjDRMOkw4TD8ML+I3Gtj-
-	if((skill = pc_checkskill(sd,NV_BREAKTHROUGH)) > 0) {	// +MNYw7DCkMK8wuTDrMPw-
+	// スキルやステータス異常による残りのパラメータ補正
+	if((skill = pc_checkskill(sd,NV_BREAKTHROUGH)) > 0) {	// ブレイクスルー
 #ifdef PRE_RENEWAL
-		sd->watk +-= (skill<5)? skill*15: 100;
+		sd->watk += (skill<5)? skill*15: 100;
 #else
-		sd->plus_atk +-= (skill<5)? skill*15: 100;
+		sd->plus_atk += (skill<5)? skill*15: 100;
 #endif
 	}
-	if((skill = pc_checkskill(sd,NV_TRANSCENDENCE)) > 0) {	// +MMgw6TDzMLsw8zDHMPMwuQ-
+	if((skill = pc_checkskill(sd,NV_TRANSCENDENCE)) > 0) {	// トランセンデンス
 #ifdef PRE_RENEWAL
-		sd->matk1 +-= (skill<5)? skill*15: 100;
-		sd->matk2 +-= (skill<5)? skill*15: 100;
+		sd->matk1 += (skill<5)? skill*15: 100;
+		sd->matk2 += (skill<5)? skill*15: 100;
 #else
-		sd->plus_matk +-= (skill<5)? skill*15: 100;
+		sd->plus_matk += (skill<5)? skill*15: 100;
 #endif
 	}
 	if(sd->sc.count > 0) {
-		// +WSqWfTBuW4lpfQ- DEF+WJdSoA-
+		// 太陽の安楽 DEF増加
 		if(sd->sc.data[SC_SUN_COMFORT].timer != -1)
-			sd->def2 +-= (sd->status.base_level +- sd->status.dex +- sd->status.luk)/2;
-			//sd->def +-= (sd->status.base_level +- sd->status.dex +- sd->status.luk +- sd->paramb[4] +- sd->paramb[5])/10;
+			sd->def2 += (sd->status.base_level + sd->status.dex + sd->status.luk)/2;
+			//sd->def += (sd->status.base_level + sd->status.dex + sd->status.luk + sd->paramb[4] + sd->paramb[5])/10;
 
-		// +ZwgwbluJaX0-
+		// 月の安楽
 		if(sd->sc.data[SC_MOON_COMFORT].timer != -1 && (sd->bl.m == sd->feel_index[1] || sd->sc.data[SC_MIRACLE].timer != -1))
-			sd->flee +-= (sd->status.base_level +- sd->status.dex +- sd->status.luk)/10;
-			//sd->flee +-= (sd->status.base_level +- sd->status.dex +- sd->status.luk +- sd->paramb[4] +- sd->paramb[5])/10;
+			sd->flee += (sd->status.base_level + sd->status.dex + sd->status.luk)/10;
+			//sd->flee += (sd->status.base_level + sd->status.dex + sd->status.luk + sd->paramb[4] + sd->paramb[5])/10;
 
-		// +MK8w7TD8MLowszDzMNUwoTCkMPM-
+		// クローズコンファイン
 		if(sd->sc.data[SC_CLOSECONFINE].timer != -1)
-			sd->flee +-= 10;
+			sd->flee += 10;
 
-		// ATK/DEF+WQlTFl9i-
-		if(sd->sc.data[SC_ANGELUS].timer != -1) {	// +MKgw8zC4MKcw6TC5-
+		// ATK/DEF変化形
+		if(sd->sc.data[SC_ANGELUS].timer != -1) {	// エンジェラス
 #ifdef PRE_RENEWAL
-			sd->def2 = sd->def2*(110+-5*sd->sc.data[SC_ANGELUS].val1)/100;
+			sd->def2 = sd->def2*(110+5*sd->sc.data[SC_ANGELUS].val1)/100;
 #else
-			sd->def2 = sd->def2+-sd->paramc[2]/2*(100+-5*sd->sc.data[SC_ANGELUS].val1)/100;
+			sd->def2 = sd->def2+sd->paramc[2]/2*(100+5*sd->sc.data[SC_ANGELUS].val1)/100;
 #endif
 		}
 #ifdef PRE_RENEWAL
-		if(sd->sc.data[SC_IMPOSITIO].timer != -1) {// +MKQw4DDdMLcwxjCjMKow3jDMMLk-
-			sd->watk +-= sd->sc.data[SC_IMPOSITIO].val1*5;
-			// +XeZiSzBrMG+QaXUoMFcwajBE-
+		if(sd->sc.data[SC_IMPOSITIO].timer != -1) {// イムポシティオマヌス
+			sd->watk += sd->sc.data[SC_IMPOSITIO].val1*5;
+			// 左手には適用しない
 			//idx = sd->equip_index[EQUIP_INDEX_LARM];
 			//if(idx >= 0 && sd->inventory_data[idx] && sd->inventory_data[idx]->type == ITEMTYPE_ARMOR)
-			//	sd->watk_ +-= sd->sc.data[SC_IMPOSITIO].val1*5;
+			//	sd->watk_ += sd->sc.data[SC_IMPOSITIO].val1*5;
 		}
 #endif
-		if(sd->sc.data[SC__BLOODYLUST].timer != -1) {	// +MNYw6TDDMMcwozDpMLkwyA-
+		if(sd->sc.data[SC__BLOODYLUST].timer != -1) {	// ブラッディラスト
 			sd->def2 = sd->def2*(100 - 55) / 100;
 #ifdef PRE_RENEWAL
-			sd->base_atk = sd->base_atk*(100 +- 32) / 100;
-			sd->watk = sd->watk*(100 +- 32) / 100;
+			sd->base_atk = sd->base_atk*(100 + 32) / 100;
+			sd->watk = sd->watk*(100 + 32) / 100;
 #endif
-			// +XeZiSzBrMG+QaXUoMFcwajBE-
+			// 左手には適用しない
 			//idx = sd->equip_index[EQUIP_INDEX_LARM];
 			//if(idx >= 0 && sd->inventory_data[idx] && sd->inventory_data[idx]->type == ITEMTYPE_ARMOR)
-			//	sd->watk_ = sd->watk_*(100+-32)/100;
+			//	sd->watk_ = sd->watk_*(100+32)/100;
 		}
-		else if(sd->sc.data[SC_PROVOKE].timer != -1) {	// +MNcw7TDcMMMwrw-
+		else if(sd->sc.data[SC_PROVOKE].timer != -1) {	// プロボック
 			sd->def2 = sd->def2*(100 - 5 - 5 * sd->sc.data[SC_PROVOKE].val1) / 100;
 #ifdef PRE_RENEWAL
-			sd->base_atk = sd->base_atk*(100 +- 2 +- 3 * sd->sc.data[SC_PROVOKE].val1) / 100;
-			sd->watk = sd->watk*(100 +- 2 +- 3 * sd->sc.data[SC_PROVOKE].val1) / 100;
+			sd->base_atk = sd->base_atk*(100 + 2 + 3 * sd->sc.data[SC_PROVOKE].val1) / 100;
+			sd->watk = sd->watk*(100 + 2 + 3 * sd->sc.data[SC_PROVOKE].val1) / 100;
 #endif
-			// +XeZiSzBrMG+QaXUoMFcwajBE-
+			// 左手には適用しない
 			//idx = sd->equip_index[EQUIP_INDEX_LARM];
 			//if(idx >= 0 && sd->inventory_data[idx] && sd->inventory_data[idx]->type == ITEMTYPE_ARMOR)
-			//	sd->watk_ = sd->watk_*(100+-2+-3*sd->sc.data[SC_PROVOKE].val1)/100;
+			//	sd->watk_ = sd->watk_*(100+2+3*sd->sc.data[SC_PROVOKE].val1)/100;
 		}
-		if(sd->sc.data[SC_POISON].timer != -1)	// +a9JytmFL-
+		if(sd->sc.data[SC_POISON].timer != -1)	// 毒状態
 			sd->def2 = sd->def2*75/100;
 
-		// +kEtUfTBuML8w7TDDMMgwqzD8MMk-
+		// 運命のタロットカード
 		if(sd->sc.data[SC_THE_MAGICIAN].timer != -1) {
-			// ATK+U0puGw-
+			// ATK半減
 			sd->base_atk = sd->base_atk * 50/100;
 			sd->watk = sd->watk * 50/100;
 			idx = sd->equip_index[EQUIP_INDEX_LARM];
@@ -2274,12 +2253,12 @@ L_RECALC:
 				sd->watk_ = sd->watk_ * 50/100;
 		}
 		if(sd->sc.data[SC_STRENGTH].timer != -1) {
-			// MATK+U0puGw-
+			// MATK半減
 			sd->matk1 = sd->matk1*50/100;
 			sd->matk2 = sd->matk2*50/100;
 		}
 		if(sd->sc.data[SC_THE_DEVIL].timer != -1) {
-			// ATK+U0puGzAB-MATK+U0puGw-
+			// ATK半減、MATK半減
 			sd->base_atk = sd->base_atk * 50/100;
 			sd->watk = sd->watk * 50/100;
 			idx = sd->equip_index[EQUIP_INDEX_LARM];
@@ -2290,7 +2269,7 @@ L_RECALC:
 			sd->matk2 = sd->matk2*50/100;
 		}
 		if(sd->sc.data[SC_THE_SUN].timer != -1) {
-			// ATK+MAE-MATK+MAFW3pB/MAFUfU4tMAGWMl+hUpswTFFoMGY-20%+MFowZE4LhD0wWTCL-
+			// ATK、MATK、回避、命中、防御力が全て20%ずつ下落する
 			sd->base_atk = sd->base_atk * 80/100;
 			sd->watk = sd->watk * 80/100;
 			idx = sd->equip_index[EQUIP_INDEX_LARM];
@@ -2306,162 +2285,162 @@ L_RECALC:
 			sd->def2 = sd->def2 * 80/100;
 		}
 
-		if(sd->sc.data[SC_DRUMBATTLE].timer != -1) {	// +YiZZKp8TMG6X/zBN-
-			sd->def  +-= sd->sc.data[SC_DRUMBATTLE].val3;
+		if(sd->sc.data[SC_DRUMBATTLE].timer != -1) {	// 戦太鼓の響き
+			sd->def  += sd->sc.data[SC_DRUMBATTLE].val3;
 		}
 #ifdef PRE_RENEWAL
-		if(sd->sc.data[SC_NIBELUNGEN].timer != -1) {	// +MMsw/DDZMOsw8zCwMG5jB48q-
+		if(sd->sc.data[SC_NIBELUNGEN].timer != -1) {	// ニーベルングの指輪
 			idx = sd->equip_index[EQUIP_INDEX_RARM];
 			if(idx >= 0 && sd->inventory_data[idx] && sd->inventory_data[idx]->wlv >= 4)
-				sd->watk +-= sd->sc.data[SC_NIBELUNGEN].val2;
-			// +XeZiSzBrMG+QaXUoMFcwajBE-
+				sd->watk += sd->sc.data[SC_NIBELUNGEN].val2;
+			// 左手には適用しない
 			//idx = sd->equip_index[EQUIP_INDEX_LARM];
 			//if(idx >= 0 && sd->inventory_data[idx] && sd->inventory_data[idx]->wlv >= 4)
-			//	sd->watk_ +-= sd->sc.data[SC_NIBELUNGEN].val2;
+			//	sd->watk_ += sd->sc.data[SC_NIBELUNGEN].val2;
 		}
 
 		if(sd->sc.data[SC_INCATK2].timer != -1) {
-			sd->watk = sd->watk*(100+-sd->sc.data[SC_INCATK2].val1)/100;
+			sd->watk = sd->watk*(100+sd->sc.data[SC_INCATK2].val1)/100;
 		}
 #endif
 
 		if(sd->sc.data[SC_SIGNUMCRUCIS].timer != -1)
 			sd->def = sd->def * (100 - sd->sc.data[SC_SIGNUMCRUCIS].val2)/100;
-		if(sd->sc.data[SC_ETERNALCHAOS].timer != -1)	// +MKgwvzD8MMow6zCrMKowuQ-
+		if(sd->sc.data[SC_ETERNALCHAOS].timer != -1)	// エターナルカオス
 			sd->def2 = 0;
 
-		if(sd->sc.data[SC_CONCENTRATION].timer != -1) {	// +MLMw8zC7MPMwyDDsMPwwtzDnMPM-
+		if(sd->sc.data[SC_CONCENTRATION].timer != -1) {	// コンセントレーション
 #ifdef PRE_RENEWAL
-			sd->base_atk = sd->base_atk * (100 +- 5*sd->sc.data[SC_CONCENTRATION].val1)/100;
-			sd->watk = sd->watk * (100 +- 5*sd->sc.data[SC_CONCENTRATION].val1)/100;
+			sd->base_atk = sd->base_atk * (100 + 5*sd->sc.data[SC_CONCENTRATION].val1)/100;
+			sd->watk = sd->watk * (100 + 5*sd->sc.data[SC_CONCENTRATION].val1)/100;
 			idx = sd->equip_index[EQUIP_INDEX_LARM];
 			if(idx >= 0 && sd->inventory_data[idx] && itemdb_isweapon(sd->inventory_data[idx]->nameid))
-				sd->watk_ = sd->watk_ * (100 +- 5*sd->sc.data[SC_CONCENTRATION].val1)/100;
+				sd->watk_ = sd->watk_ * (100 + 5*sd->sc.data[SC_CONCENTRATION].val1)/100;
 #endif
 			sd->def = sd->def * (100 - 5*sd->sc.data[SC_CONCENTRATION].val1)/100;
 			sd->def2 = sd->def2 * (100 - 5*sd->sc.data[SC_CONCENTRATION].val1)/100;
 		}
 
-		if(sd->sc.data[SC_INCATK].timer != -1) {	// ATK+TgpmBw- (+eV6RUnUo-)
-			sd->watk +-= sd->sc.data[SC_INCATK].val1;
+		if(sd->sc.data[SC_INCATK].timer != -1) {	// ATK上昇 (神酒用)
+			sd->watk += sd->sc.data[SC_INCATK].val1;
 		}
-		if(sd->sc.data[SC_ATKPOTION].timer != -1) {	// ATK+TgpmBw-
+		if(sd->sc.data[SC_ATKPOTION].timer != -1) {	// ATK上昇
 #ifdef PRE_RENEWAL
-			sd->watk +-= sd->sc.data[SC_ATKPOTION].val1;
+			sd->watk += sd->sc.data[SC_ATKPOTION].val1;
 #else
-			sd->plus_atk +-= sd->sc.data[SC_ATKPOTION].val1;
+			sd->plus_atk += sd->sc.data[SC_ATKPOTION].val1;
 #endif
 		}
-		if(sd->sc.data[SC_ALMIGHTY].timer != -1) {	// ATK+TgpmBw- (+mN9Oi3Uo-)
+		if(sd->sc.data[SC_ALMIGHTY].timer != -1) {	// ATK上昇 (食事用)
 #ifdef PRE_RENEWAL
-			sd->watk +-= sd->sc.data[SC_ALMIGHTY].val1;
+			sd->watk += sd->sc.data[SC_ALMIGHTY].val1;
 #else
-			sd->plus_atk +-= sd->sc.data[SC_ALMIGHTY].val1;
+			sd->plus_atk += sd->sc.data[SC_ALMIGHTY].val1;
 #endif
 		}
-		if(sd->sc.data[SC_INCMATK].timer != -1) {	// MATK+TgpmBw- (+eV552DBug0l1KA-)
-			sd->matk1 +-= sd->sc.data[SC_INCMATK].val1;
-			sd->matk2 +-= sd->sc.data[SC_INCMATK].val1;
+		if(sd->sc.data[SC_INCMATK].timer != -1) {	// MATK上昇 (神秘の草用)
+			sd->matk1 += sd->sc.data[SC_INCMATK].val1;
+			sd->matk2 += sd->sc.data[SC_INCMATK].val1;
 		}
-		if(sd->sc.data[SC_MATKPOTION].timer != -1) {	// MATK+TgpmBw-
+		if(sd->sc.data[SC_MATKPOTION].timer != -1) {	// MATK上昇
 #ifdef PRE_RENEWAL
-			sd->matk1 +-= sd->sc.data[SC_MATKPOTION].val1;
-			sd->matk2 +-= sd->sc.data[SC_MATKPOTION].val1;
+			sd->matk1 += sd->sc.data[SC_MATKPOTION].val1;
+			sd->matk2 += sd->sc.data[SC_MATKPOTION].val1;
 #else
-			sd->plus_matk +-= sd->sc.data[SC_MATKPOTION].val1;
+			sd->plus_matk += sd->sc.data[SC_MATKPOTION].val1;
 #endif
 		}
-		if(sd->sc.data[SC_ALMIGHTY].timer != -1) {	// MATK+TgpmBw- (+mN9Oi3Uo-)
+		if(sd->sc.data[SC_ALMIGHTY].timer != -1) {	// MATK上昇 (食事用)
 #ifdef PRE_RENEWAL
-			sd->matk1 +-= sd->sc.data[SC_ALMIGHTY].val2;
-			sd->matk2 +-= sd->sc.data[SC_ALMIGHTY].val2;
+			sd->matk1 += sd->sc.data[SC_ALMIGHTY].val2;
+			sd->matk2 += sd->sc.data[SC_ALMIGHTY].val2;
 #else
-			sd->plus_matk +-= sd->sc.data[SC_ALMIGHTY].val2;
+			sd->plus_matk += sd->sc.data[SC_ALMIGHTY].val2;
 #endif
 		}
 		if(sd->sc.data[SC_MINDBREAKER].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->matk1 +-= (sd->matk1*20*sd->sc.data[SC_MINDBREAKER].val1)/100;
-			sd->matk2 +-= (sd->matk2*20*sd->sc.data[SC_MINDBREAKER].val1)/100;
+			sd->matk1 += (sd->matk1*20*sd->sc.data[SC_MINDBREAKER].val1)/100;
+			sd->matk2 += (sd->matk2*20*sd->sc.data[SC_MINDBREAKER].val1)/100;
 #endif
 			sd->mdef2 -= (sd->mdef2*12*sd->sc.data[SC_MINDBREAKER].val1)/100;
 		}
-		// MATK+TgpmBw- (+MOIw8zC5ML8w/FkJjqswbjDeMOswyTClMPwwrzABMNAw8zC3MPx1KA-)
+		// MATK上昇 (モンスター変身のマルドゥーク、バンシー用)
 		if(sd->sc.data[SC_MONSTER_TRANSFORM].timer != -1 && (sd->sc.data[SC_MONSTER_TRANSFORM].val1 == 1140 || sd->sc.data[SC_MONSTER_TRANSFORM].val1 == 1867)) {
-			sd->matk1 +-= 25;
-			sd->matk2 +-= 25;
+			sd->matk1 += 25;
+			sd->matk2 += 25;
 		}
 		if(sd->sc.data[SC_CHATTERING].timer != -1) {
-			sd->base_atk +-= sd->sc.data[SC_CHATTERING].val2;
+			sd->base_atk += sd->sc.data[SC_CHATTERING].val2;
 #ifdef PRE_RENEWAL
-			sd->matk1 +-= sd->sc.data[SC_CHATTERING].val2;
+			sd->matk1 += sd->sc.data[SC_CHATTERING].val2;
 #endif
-			sd->matk2 +-= sd->sc.data[SC_CHATTERING].val2;
+			sd->matk2 += sd->sc.data[SC_CHATTERING].val2;
 		}
-		// +MK8w6TCkMN4wwzCvMLkwzzDqMLEw/DDz-
+		// クライマックスハリケーン
 		if(sd->sc.data[SC_CLIMAX_DES_HU].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->matk1 +-= sd->sc.data[SC_CLIMAX_DES_HU].val2;
-			sd->matk2 +-= sd->sc.data[SC_CLIMAX_DES_HU].val2;
+			sd->matk1 += sd->sc.data[SC_CLIMAX_DES_HU].val2;
+			sd->matk2 += sd->sc.data[SC_CLIMAX_DES_HU].val2;
 #else
-			sd->plus_matk +-= sd->sc.data[SC_CLIMAX_DES_HU].val2;
+			sd->plus_matk += sd->sc.data[SC_CLIMAX_DES_HU].val2;
 #endif
-			sd->skill_elemagic_dmgup[ELE_WIND] +-= sd->sc.data[SC_CLIMAX_DES_HU].val3;
+			sd->skill_elemagic_dmgup[ELE_WIND] += sd->sc.data[SC_CLIMAX_DES_HU].val3;
 		}
 		if(sd->sc.data[SC_ENDURE].timer != -1) {
-			sd->mdef +-= sd->sc.data[SC_ENDURE].val1;
+			sd->mdef += sd->sc.data[SC_ENDURE].val1;
 		}
-		// +MK8w6TCkMN4wwzCvMLkwpDDzMNEwrzDI-
+		// クライマックスインパクト
 		if(sd->sc.data[SC_CLIMAX_CRYIMP].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->def2 +-= sd->sc.data[SC_CLIMAX_CRYIMP].val2;
-			sd->mdef2 +-= sd->sc.data[SC_CLIMAX_CRYIMP].val3;
+			sd->def2 += sd->sc.data[SC_CLIMAX_CRYIMP].val2;
+			sd->mdef2 += sd->sc.data[SC_CLIMAX_CRYIMP].val3;
 #else
-			sd->def +-= sd->sc.data[SC_CLIMAX_CRYIMP].val2;
-			sd->mdef +-= sd->sc.data[SC_CLIMAX_CRYIMP].val3;
+			sd->def += sd->sc.data[SC_CLIMAX_CRYIMP].val2;
+			sd->mdef += sd->sc.data[SC_CLIMAX_CRYIMP].val3;
 #endif
-			sd->skill_elemagic_dmgup[ELE_WATER] +-= sd->sc.data[SC_CLIMAX_CRYIMP].val4;
-			sd->subele[ELE_WATER] +-= sd->sc.data[SC_CLIMAX_CRYIMP].val4;
+			sd->skill_elemagic_dmgup[ELE_WATER] += sd->sc.data[SC_CLIMAX_CRYIMP].val4;
+			sd->subele[ELE_WATER] += sd->sc.data[SC_CLIMAX_CRYIMP].val4;
 		}
 
-		if(sd->sc.data[SC_ANALYZE].timer != -1) {	// +MKIwyjDpMKQwug-
+		if(sd->sc.data[SC_ANALYZE].timer != -1) {	// アナライズ
 			sd->def2  -= (sd->def2 * 14 * sd->sc.data[SC_ANALYZE].val1) / 100;
 			sd->mdef2 -= (sd->mdef2 * 14 * sd->sc.data[SC_ANALYZE].val1) / 100;
 		}
-		if(sd->sc.data[SC_NEUTRALBARRIER].timer != -1) {	// +MMsw5TD8MMgw6TDrMNAw6jCiMPw-
-			sd->def2  +-= (sd->def2 * (10 +- 5 * sd->sc.data[SC_NEUTRALBARRIER].val1)) / 100;
-			sd->mdef2 +-= (sd->mdef2 * (10 +- 5 * sd->sc.data[SC_NEUTRALBARRIER].val1)) / 100;
+		if(sd->sc.data[SC_NEUTRALBARRIER].timer != -1) {	// ニュートラルバリアー
+			sd->def2  += (sd->def2 * (10 + 5 * sd->sc.data[SC_NEUTRALBARRIER].val1)) / 100;
+			sd->mdef2 += (sd->mdef2 * (10 + 5 * sd->sc.data[SC_NEUTRALBARRIER].val1)) / 100;
 		}
-		if(sd->sc.data[SC_SUNSTANCE].timer != -1) {	// +WSqWfTBuacswSA-
-			sd->watk +-= sd->watk * sd->sc.data[SC_SUNSTANCE].val2 / 100;
+		if(sd->sc.data[SC_SUNSTANCE].timer != -1) {	// 太陽の構え
+			sd->watk += sd->watk * sd->sc.data[SC_SUNSTANCE].val2 / 100;
 		}
 
-		// HIT/FLEE+WQlTFnz7-
+		// HIT/FLEE変化系
 #ifdef PRE_RENEWAL
-		if(sd->sc.data[SC_WHISTLE].timer != -1) {  // +U+N7Gw-
-			sd->flee +-= sd->sc.data[SC_WHISTLE].val1 +- sd->sc.data[SC_WHISTLE].val2 +- sd->sc.data[SC_WHISTLE].val3;
-		} else if(sd->sc.data[SC_WHISTLE_].timer != -1) {  // +U+N7Gw-
-			sd->flee +-= sd->sc.data[SC_WHISTLE_].val1 +- sd->sc.data[SC_WHISTLE_].val2 +- sd->sc.data[SC_WHISTLE_].val3;
+		if(sd->sc.data[SC_WHISTLE].timer != -1) {  // 口笛
+			sd->flee += sd->sc.data[SC_WHISTLE].val1 + sd->sc.data[SC_WHISTLE].val2 + sd->sc.data[SC_WHISTLE].val3;
+		} else if(sd->sc.data[SC_WHISTLE_].timer != -1) {  // 口笛
+			sd->flee += sd->sc.data[SC_WHISTLE_].val1 + sd->sc.data[SC_WHISTLE_].val2 + sd->sc.data[SC_WHISTLE_].val3;
 		}
 #else
-		if(sd->sc.data[SC_WHISTLE].timer != -1) {  // +U+N7Gw-
-			sd->flee +-= sd->sc.data[SC_WHISTLE].val1*3 +- sd->sc.data[SC_WHISTLE].val2 +- sd->sc.data[SC_WHISTLE].val3;
-		} else if(sd->sc.data[SC_WHISTLE_].timer != -1) {  // +U+N7Gw-
-			sd->flee +-= sd->sc.data[SC_WHISTLE_].val1*3 +- sd->sc.data[SC_WHISTLE_].val2 +- sd->sc.data[SC_WHISTLE_].val3;
+		if(sd->sc.data[SC_WHISTLE].timer != -1) {  // 口笛
+			sd->flee += sd->sc.data[SC_WHISTLE].val1*3 + sd->sc.data[SC_WHISTLE].val2 + sd->sc.data[SC_WHISTLE].val3;
+		} else if(sd->sc.data[SC_WHISTLE_].timer != -1) {  // 口笛
+			sd->flee += sd->sc.data[SC_WHISTLE_].val1*3 + sd->sc.data[SC_WHISTLE_].val2 + sd->sc.data[SC_WHISTLE_].val3;
 		}
 #endif
 
 #ifdef PRE_RENEWAL
-		if(sd->sc.data[SC_HUMMING].timer != -1) {  // +MM8w3zDzMLA-
-			sd->hit +-= 10+-sd->sc.data[SC_HUMMING].val1*2+-sd->sc.data[SC_HUMMING].val2+-sd->sc.data[SC_HUMMING].val3;
-		} else if(sd->sc.data[SC_HUMMING_].timer != -1) {  // +MM8w3zDzMLA-
-			sd->hit +-= 10+-sd->sc.data[SC_HUMMING_].val1*2+-sd->sc.data[SC_HUMMING_].val2+-sd->sc.data[SC_HUMMING_].val3;
+		if(sd->sc.data[SC_HUMMING].timer != -1) {  // ハミング
+			sd->hit += 10+sd->sc.data[SC_HUMMING].val1*2+sd->sc.data[SC_HUMMING].val2+sd->sc.data[SC_HUMMING].val3;
+		} else if(sd->sc.data[SC_HUMMING_].timer != -1) {  // ハミング
+			sd->hit += 10+sd->sc.data[SC_HUMMING_].val1*2+sd->sc.data[SC_HUMMING_].val2+sd->sc.data[SC_HUMMING_].val3;
 		}
 #else
-		if(sd->sc.data[SC_HUMMING].timer != -1) {  // +MM8w3zDzMLA-
-			sd->hit +-= 20+-sd->sc.data[SC_HUMMING].val1*2+-sd->sc.data[SC_HUMMING].val2+-sd->sc.data[SC_HUMMING].val3;
-		} else if(sd->sc.data[SC_HUMMING_].timer != -1) {  // +MM8w3zDzMLA-
-			sd->hit +-= 20+-sd->sc.data[SC_HUMMING_].val1*2+-sd->sc.data[SC_HUMMING_].val2+-sd->sc.data[SC_HUMMING_].val3;
+		if(sd->sc.data[SC_HUMMING].timer != -1) {  // ハミング
+			sd->hit += 20+sd->sc.data[SC_HUMMING].val1*2+sd->sc.data[SC_HUMMING].val2+sd->sc.data[SC_HUMMING].val3;
+		} else if(sd->sc.data[SC_HUMMING_].timer != -1) {  // ハミング
+			sd->hit += 20+sd->sc.data[SC_HUMMING_].val1*2+sd->sc.data[SC_HUMMING_].val2+sd->sc.data[SC_HUMMING_].val3;
 		}
 #endif
 
@@ -2469,530 +2448,530 @@ L_RECALC:
 #ifdef PRE_RENEWAL
 			&& sd->def_ele == ELE_WIND
 #endif
-		) {	// +MNAwpDCqMOww8zDIMLIwpDDr-
-			sd->flee +-= sd->flee*sd->sc.data[SC_VIOLENTGALE].val3/100;
+		) {	// バイオレントゲイル
+			sd->flee += sd->flee*sd->sc.data[SC_VIOLENTGALE].val3/100;
 		}
-		if(sd->sc.data[SC_BLIND].timer != -1) {	// +Zpee0g-
+		if(sd->sc.data[SC_BLIND].timer != -1) {	// 暗黒
 			sd->hit  -= sd->hit*25/100;
 			sd->flee -= sd->flee*25/100;
 		}
-		if(sd->sc.data[SC_WINDWALK].timer != -1)	// +MKYwozDzMMkwpjCpMPwwrw-
-			sd->flee +-= sd->sc.data[SC_WINDWALK].val2;
-		if(sd->sc.data[SC_SPIDERWEB].timer != -1)	// +MLkw0TCkMMAw/DCmMKcw1g-
+		if(sd->sc.data[SC_WINDWALK].timer != -1)	// ウィンドウォーク
+			sd->flee += sd->sc.data[SC_WINDWALK].val2;
+		if(sd->sc.data[SC_SPIDERWEB].timer != -1)	// スパイダーウェブ
 			sd->flee -= 50;
-		if(sd->sc.data[SC_TRUESIGHT].timer != -1)	// +MMgwpTDrMPwwtTCkMMg-
-			sd->hit +-= 3*(sd->sc.data[SC_TRUESIGHT].val1);
-		if(sd->sc.data[SC_CONCENTRATION].timer != -1)	// +MLMw8zC7MPMwyDDsMPwwtzDnMPM-
-			sd->hit +-= 10*(sd->sc.data[SC_CONCENTRATION].val1);
+		if(sd->sc.data[SC_TRUESIGHT].timer != -1)	// トゥルーサイト
+			sd->hit += 3*(sd->sc.data[SC_TRUESIGHT].val1);
+		if(sd->sc.data[SC_CONCENTRATION].timer != -1)	// コンセントレーション
+			sd->hit += 10*(sd->sc.data[SC_CONCENTRATION].val1);
 		if(sd->sc.data[SC_INCHIT].timer != -1)
-			sd->hit +-= sd->sc.data[SC_INCHIT].val1;
+			sd->hit += sd->sc.data[SC_INCHIT].val1;
 		if(sd->sc.data[SC_INCHIT2].timer != -1)
-			sd->hit = sd->hit * (100+-sd->sc.data[SC_INCHIT2].val1)/100;
+			sd->hit = sd->hit * (100+sd->sc.data[SC_INCHIT2].val1)/100;
 		if(sd->sc.data[SC_BERSERK].timer != -1)
 			sd->flee -= sd->flee*50/100;
-		if(sd->sc.data[SC_INCFLEE].timer != -1)	// +kB9epl83UxY-
-			sd->flee +-= sd->flee*(sd->sc.data[SC_INCFLEE].val2)/100;
-		if(sd->sc.data[SC_HALLUCINATIONWALK].timer != -1)	// +MM8w6zC3MM0w/DC3MOcw8zCmMKkw/DCv-
-			sd->flee +-= sd->sc.data[SC_HALLUCINATIONWALK].val1 * 50;
-		if(sd->sc.data[SC_INFRAREDSCAN].timer != -1)	// +MKQw8zDVMOkw7DDDMMkwuTCtMOMw8w-
+		if(sd->sc.data[SC_INCFLEE].timer != -1)	// 速度強化
+			sd->flee += sd->flee*(sd->sc.data[SC_INCFLEE].val2)/100;
+		if(sd->sc.data[SC_HALLUCINATIONWALK].timer != -1)	// ハルシネーションウォーク
+			sd->flee += sd->sc.data[SC_HALLUCINATIONWALK].val1 * 50;
+		if(sd->sc.data[SC_INFRAREDSCAN].timer != -1)	// インフラレッドスキャン
 			sd->flee -= sd->flee*30/100;
 #ifndef PRE_RENEWAL
-		if(sd->sc.data[SC_SPEARQUICKEN].timer != -1)   // +MLkw1DCiMK8wpDDDMLEw8w-
-			sd->flee +-= 2*(sd->sc.data[SC_SPEARQUICKEN].val1);
+		if(sd->sc.data[SC_SPEARQUICKEN].timer != -1)   // スピアクイッケン
+			sd->flee += 2*(sd->sc.data[SC_SPEARQUICKEN].val1);
 #endif
-		if(sd->sc.data[SC_C_MARKER].timer != -1)  // +MK8w6jDgML4w8zDeMPwwqzD8-
+		if(sd->sc.data[SC_C_MARKER].timer != -1)  // クリムゾンマーカー
 			sd->flee -= sd->sc.data[SC_C_MARKER].val1 * 10;
-		if(sd->sc.data[SC_HEAT_BARREL].timer != -1)  // +MNIw/DDIMNAw7DDr-
+		if(sd->sc.data[SC_HEAT_BARREL].timer != -1)  // ヒートバレル
 			sd->hit -= sd->sc.data[SC_HEAT_BARREL].val4;
 
-		// +MKww8zC5MOow8zCsMPwwuTCtMOs-
-		if(sd->sc.data[SC_FLING].timer != -1) {		// +MNUw6TCkMPMwsA-
+		// ガンスリンガースキル
+		if(sd->sc.data[SC_FLING].timer != -1) {		// フライング
 			sd->def = sd->def * (100 - 5*sd->sc.data[SC_FLING].val2)/100;
 		}
-		if(sd->sc.data[SC_ADJUSTMENT].timer != -1) {	// +MKIwuDDjMLkwyDDhMPMwyA-
+		if(sd->sc.data[SC_ADJUSTMENT].timer != -1) {	// アジャストメント
 			sd->hit  -= 30;
-			sd->flee +-= 30;
+			sd->flee += 30;
 		}
-		if(sd->sc.data[SC_INCREASING].timer != -1) {	// +MKQw8zCvMOow/DC4MPMwsDCiMK0w5TDpMLcw/A-
-			sd->hit +-= 20;
+		if(sd->sc.data[SC_INCREASING].timer != -1) {	// インクリージングアキュラシー
+			sd->hit += 20;
 		}
-		if(sd->sc.data[SC_GATLINGFEVER].timer != -1) {	// +MKwwyDDqMPMwsDDVMKMw/DDQMPw-
+		if(sd->sc.data[SC_GATLINGFEVER].timer != -1) {	// ガトリングフィーバー
 			sd->flee -= sd->sc.data[SC_GATLINGFEVER].val1*5;
 		}
-		if(sd->sc.data[SC_VOLCANIC_ASH].timer != -1) 	// +cGtccXBw-
+		if(sd->sc.data[SC_VOLCANIC_ASH].timer != -1) 	// 火山灰
 			sd->hit -= sd->hit * sd->sc.data[SC_VOLCANIC_ASH].val2 / 100;
 
 #ifdef PRE_RENEWAL
-		// +MLkwyDD8MPMwuTCtMPM-
+		// ストーンスキン
 		if(sd->sc.data[SC_STONESKIN].timer != -1) {
-			sd->def  = sd->def  * (100 +- 20 * sd->sc.data[SC_STONESKIN].val1) / 100;
+			sd->def  = sd->def  * (100 + 20 * sd->sc.data[SC_STONESKIN].val1) / 100;
 			sd->mdef = sd->mdef * (100 - 20 * sd->sc.data[SC_STONESKIN].val1) / 100;
 		}
-		// +MKIw8zDBMN4wuDDDMK8-
+		// アンチマジック
 		if(sd->sc.data[SC_ANTIMAGIC].timer != -1) {
 			sd->def  = sd->def  * (100 - 20 * sd->sc.data[SC_ANTIMAGIC].val1) / 100;
-			sd->mdef = sd->mdef * (100 +- 20 * sd->sc.data[SC_ANTIMAGIC].val1) / 100;
+			sd->mdef = sd->mdef * (100 + 20 * sd->sc.data[SC_ANTIMAGIC].val1) / 100;
 		}
 #endif
 
-		// +gBBgJw-
+		// 耐性
 		if(sd->sc.data[SC_RESISTWATER].timer != -1)
-			sd->subele[ELE_WATER] +-= sd->sc.data[SC_RESISTWATER].val1;
+			sd->subele[ELE_WATER] += sd->sc.data[SC_RESISTWATER].val1;
 		if(sd->sc.data[SC_RESISTGROUND].timer != -1)
-			sd->subele[ELE_EARTH] +-= sd->sc.data[SC_RESISTGROUND].val1;
+			sd->subele[ELE_EARTH] += sd->sc.data[SC_RESISTGROUND].val1;
 		if(sd->sc.data[SC_RESISTFIRE].timer != -1)
-			sd->subele[ELE_FIRE] +-= sd->sc.data[SC_RESISTFIRE].val1;
+			sd->subele[ELE_FIRE] += sd->sc.data[SC_RESISTFIRE].val1;
 		if(sd->sc.data[SC_RESISTWIND].timer != -1)
-			sd->subele[ELE_WIND] +-= sd->sc.data[SC_RESISTWIND].val1;
+			sd->subele[ELE_WIND] += sd->sc.data[SC_RESISTWIND].val1;
 		if(sd->sc.data[SC_RESISTPOISON].timer != -1)
-			sd->subele[ELE_POISON] +-= sd->sc.data[SC_RESISTPOISON].val1;
+			sd->subele[ELE_POISON] += sd->sc.data[SC_RESISTPOISON].val1;
 		if(sd->sc.data[SC_RESISTHOLY].timer != -1)
-			sd->subele[ELE_HOLY] +-= sd->sc.data[SC_RESISTHOLY].val1;
+			sd->subele[ELE_HOLY] += sd->sc.data[SC_RESISTHOLY].val1;
 		if(sd->sc.data[SC_RESISTDARK].timer != -1)
-			sd->subele[ELE_DARK] +-= sd->sc.data[SC_RESISTDARK].val1;
+			sd->subele[ELE_DARK] += sd->sc.data[SC_RESISTDARK].val1;
 		if(sd->sc.data[SC_RESISTTELEKINESIS].timer != -1)
-			sd->subele[ELE_GHOST] +-= sd->sc.data[SC_RESISTTELEKINESIS].val1;
+			sd->subele[ELE_GHOST] += sd->sc.data[SC_RESISTTELEKINESIS].val1;
 		if(sd->sc.data[SC_RESISTUNDEAD].timer != -1)
-			sd->subele[ELE_UNDEAD] +-= sd->sc.data[SC_RESISTUNDEAD].val1;
+			sd->subele[ELE_UNDEAD] += sd->sc.data[SC_RESISTUNDEAD].val1;
 
-		// +gBBgJw-
+		// 耐性
 		if(sd->sc.data[SC_RESISTALL].timer != -1) {
-			for(i=ELE_WATER; i<ELE_MAX; i+-+-)
-				sd->subele[i] +-= sd->sc.data[SC_RESISTALL].val1;	// +UWgwZjBrgBBgJ1iXUqA-
+			for(i=ELE_WATER; i<ELE_MAX; i++)
+				sd->subele[i] += sd->sc.data[SC_RESISTALL].val1;	// 全てに耐性増加
 		}
-		// +Tg1re46rMG4wuDD8MK8w1TDqMPwwyQ-
+		// 不死身のジークフリード
 		if(sd->sc.data[SC_SIEGFRIED].timer != -1) {
-			for(i=ELE_WATER; i<ELE_MAX; i+-+-)
-				sd->subele[i] +-= sd->sc.data[SC_SIEGFRIED].val2;	// +UWgwZjBrgBBgJ1iXUqA-
+			for(i=ELE_WATER; i<ELE_MAX; i++)
+				sd->subele[i] += sd->sc.data[SC_SIEGFRIED].val2;	// 全てに耐性増加
 		}
-		// +MNcw7TD0MKMwxzDzMLk-
+		// プロヴィデンス
 		if(sd->sc.data[SC_PROVIDENCE].timer != -1) {
-			sd->subele[ELE_HOLY]   +-= sd->sc.data[SC_PROVIDENCE].val2;	// +W/6AVlxeYCc-
-			sd->subrace[RCT_DEMON] +-= sd->sc.data[SC_PROVIDENCE].val2;	// +W/5gqptU-
+			sd->subele[ELE_HOLY]   += sd->sc.data[SC_PROVIDENCE].val2;	// 対聖属性
+			sd->subrace[RCT_DEMON] += sd->sc.data[SC_PROVIDENCE].val2;	// 対悪魔
 		}
 
-		// +c0RwjlRq-
+		// 獄炎呪
 		if(sd->sc.data[SC_BURNT].timer != -1) {
 			sd->subele[ELE_FIRE]       -= sd->sc.data[SC_BURNT].val1 * 20;
 			sd->def_eleenemy[ELE_FIRE] -= sd->sc.data[SC_BURNT].val1 * 20;
 		}
 
-		// +MF0wbk7W-
-		if(sd->sc.data[SC_BERSERK].timer != -1) {	// +MNAw/DC1MPwwrw-
+		// その他
+		if(sd->sc.data[SC_BERSERK].timer != -1) {	// バーサーク
 			sd->def   = 0;
 			sd->def2  = 0;
 			sd->mdef  = 0;
 			sd->mdef2 = 0;
 		}
-		if(sd->sc.data[SC_JOINTBEAT].timer != -1) {	// +MLgw5zCkMPMwyDDTMPwwyA-
+		if(sd->sc.data[SC_JOINTBEAT].timer != -1) {	// ジョイントビート
 			switch (sd->sc.data[SC_JOINTBEAT].val4) {
-				case 0:		// +jbOZlg-
+				case 0:		// 足首
 					break;
-				case 1:		// +YkuZlg-
+				case 1:		// 手首
 					break;
-				case 2:		// +gZ0-
+				case 2:		// 膝
 					break;
-				case 3:		// +gKk-
+				case 3:		// 肩
 					sd->def2 -= (sd->def2 * 50)/100;
 					break;
-				case 4:		// +gXA-
+				case 4:		// 腰
 					sd->def2     -= (sd->def2 * 25)/100;
 					sd->base_atk -= (sd->base_atk * 25)/100;
 					break;
-				case 5:		// +mZY-
+				case 5:		// 首
 					sd->critical_def -= (sd->critical_def * 50)/100;
 					break;
 			}
 		}
-		if(sd->sc.data[SC_APPLEIDUN].timer != -1) {	// +MKQwyTClMPMwbmeXao4-
-			sd->status.max_hp +-= ((5+-sd->sc.data[SC_APPLEIDUN].val1*2+-sd->sc.data[SC_APPLEIDUN].val2
-						+-sd->sc.data[SC_APPLEIDUN].val3/10) * sd->status.max_hp)/100;
+		if(sd->sc.data[SC_APPLEIDUN].timer != -1) {	// イドゥンの林檎
+			sd->status.max_hp += ((5+sd->sc.data[SC_APPLEIDUN].val1*2+sd->sc.data[SC_APPLEIDUN].val2
+						+sd->sc.data[SC_APPLEIDUN].val3/10) * sd->status.max_hp)/100;
 
-		} else if(sd->sc.data[SC_APPLEIDUN_].timer != -1) {	// +MKQwyTClMPMwbmeXao4-
-			sd->status.max_hp +-= ((5+-sd->sc.data[SC_APPLEIDUN_].val1*2+-sd->sc.data[SC_APPLEIDUN_].val2
-						+-sd->sc.data[SC_APPLEIDUN_].val3/10) * sd->status.max_hp)/100;
+		} else if(sd->sc.data[SC_APPLEIDUN_].timer != -1) {	// イドゥンの林檎
+			sd->status.max_hp += ((5+sd->sc.data[SC_APPLEIDUN_].val1*2+sd->sc.data[SC_APPLEIDUN_].val2
+						+sd->sc.data[SC_APPLEIDUN_].val3/10) * sd->status.max_hp)/100;
 		}
 
 		if(sd->sc.data[SC_DELUGE].timer != -1
 #ifdef PRE_RENEWAL
 			&& sd->def_ele == ELE_WATER
 #endif
-		) {	// +MMcw6jDlMPwwuA-
-			sd->status.max_hp +-= sd->status.max_hp*sd->sc.data[SC_DELUGE].val3/100;
+		) {	// デリュージ
+			sd->status.max_hp += sd->status.max_hp*sd->sc.data[SC_DELUGE].val3/100;
 		}
-		if(sd->sc.data[SC_SERVICE4U].timer != -1) {	// +MLUw/DDTMLkw1TCpMPww5jD8-
-			sd->status.max_sp +-= sd->status.max_sp*(15+-sd->sc.data[SC_SERVICE4U].val1+-sd->sc.data[SC_SERVICE4U].val2
-						+-sd->sc.data[SC_SERVICE4U].val3)/100;
-			sd->dsprate -= 20+-sd->sc.data[SC_SERVICE4U].val1*3+-sd->sc.data[SC_SERVICE4U].val2+-sd->sc.data[SC_SERVICE4U].val3;
+		if(sd->sc.data[SC_SERVICE4U].timer != -1) {	// サービスフォーユー
+			sd->status.max_sp += sd->status.max_sp*(15+sd->sc.data[SC_SERVICE4U].val1+sd->sc.data[SC_SERVICE4U].val2
+						+sd->sc.data[SC_SERVICE4U].val3)/100;
+			sd->dsprate -= 20+sd->sc.data[SC_SERVICE4U].val1*3+sd->sc.data[SC_SERVICE4U].val2+sd->sc.data[SC_SERVICE4U].val3;
 			if(sd->dsprate < 0)
 				sd->dsprate = 0;
-		} else if(sd->sc.data[SC_SERVICE4U_].timer != -1) {	// +MLUw/DDTMLkw1TCpMPww5jD8-
-			sd->status.max_sp +-= sd->status.max_sp*(15+-sd->sc.data[SC_SERVICE4U_].val1+-sd->sc.data[SC_SERVICE4U_].val2
-						+-sd->sc.data[SC_SERVICE4U_].val3)/100;
-			sd->dsprate -= 20+-sd->sc.data[SC_SERVICE4U_].val1*3+-sd->sc.data[SC_SERVICE4U_].val2+-sd->sc.data[SC_SERVICE4U_].val3;
+		} else if(sd->sc.data[SC_SERVICE4U_].timer != -1) {	// サービスフォーユー
+			sd->status.max_sp += sd->status.max_sp*(15+sd->sc.data[SC_SERVICE4U_].val1+sd->sc.data[SC_SERVICE4U_].val2
+						+sd->sc.data[SC_SERVICE4U_].val3)/100;
+			sd->dsprate -= 20+sd->sc.data[SC_SERVICE4U_].val1*3+sd->sc.data[SC_SERVICE4U_].val2+sd->sc.data[SC_SERVICE4U_].val3;
 			if(sd->dsprate < 0)
 				sd->dsprate = 0;
 		}
 
-		if(sd->sc.data[SC_FORTUNE].timer != -1) {	// +XniQSzBuMK0wuQ-
-			sd->critical +-= (10+-sd->sc.data[SC_FORTUNE].val1+-sd->sc.data[SC_FORTUNE].val2+-sd->sc.data[SC_FORTUNE].val3)*10;
-		} else if(sd->sc.data[SC_FORTUNE_].timer != -1) {	// +XniQSzBuMK0wuQ-
-			sd->critical +-= (10+-sd->sc.data[SC_FORTUNE_].val1+-sd->sc.data[SC_FORTUNE_].val2+-sd->sc.data[SC_FORTUNE_].val3)*10;
+		if(sd->sc.data[SC_FORTUNE].timer != -1) {	// 幸運のキス
+			sd->critical += (10+sd->sc.data[SC_FORTUNE].val1+sd->sc.data[SC_FORTUNE].val2+sd->sc.data[SC_FORTUNE].val3)*10;
+		} else if(sd->sc.data[SC_FORTUNE_].timer != -1) {	// 幸運のキス
+			sd->critical += (10+sd->sc.data[SC_FORTUNE_].val1+sd->sc.data[SC_FORTUNE_].val2+sd->sc.data[SC_FORTUNE_].val3)*10;
 		}
 
-		if(sd->sc.data[SC_EXPLOSIONSPIRITS].timer != -1) {	// +cgaIwmziUtU-
+		if(sd->sc.data[SC_EXPLOSIONSPIRITS].timer != -1) {	// 爆裂波動
 			if(sd->s_class.job == PC_JOB_SNV || sd->s_class.job == PC_JOB_ESNV)
-				sd->critical +-= sd->sc.data[SC_EXPLOSIONSPIRITS].val1*100;
+				sd->critical += sd->sc.data[SC_EXPLOSIONSPIRITS].val1*100;
 			else
-				sd->critical +-= sd->sc.data[SC_EXPLOSIONSPIRITS].val2;
+				sd->critical += sd->sc.data[SC_EXPLOSIONSPIRITS].val2;
 		}
 
 #ifdef PRE_RENEWAL
-		if(sd->sc.data[SC_STEELBODY].timer != -1) {	// +kdFSWw-
+		if(sd->sc.data[SC_STEELBODY].timer != -1) {	// 金剛
 			sd->def = 90;
 			sd->mdef = 90;
 		}
 #endif
 		if(sd->sc.data[SC_ENCPOISON].timer != -1)
-			sd->addeff[4] +-= sd->sc.data[SC_ENCPOISON].val2;
-		if(sd->sc.data[SC_TRUESIGHT].timer != -1)	// +MMgwpTDrMPwwtTCkMMg-
-			sd->critical +-= 10*(sd->sc.data[SC_TRUESIGHT].val1);
+			sd->addeff[4] += sd->sc.data[SC_ENCPOISON].val2;
+		if(sd->sc.data[SC_TRUESIGHT].timer != -1)	// トゥルーサイト
+			sd->critical += 10*(sd->sc.data[SC_TRUESIGHT].val1);
 #ifndef PRE_RENEWAL
-		if(sd->sc.data[SC_SPEARQUICKEN].timer != -1)   // +MLkw1DCiMK8wpDDDMLEw8w-
-			sd->critical +-= 30*(sd->sc.data[SC_SPEARQUICKEN].val1);
+		if(sd->sc.data[SC_SPEARQUICKEN].timer != -1)   // スピアクイッケン
+			sd->critical += 30*(sd->sc.data[SC_SPEARQUICKEN].val1);
 #endif
 
 		/*
-		if(sd->sc.data[SC_VOLCANO].timer != -1)	// +MKgw8zDBMOMw8zDIMN0wpDC6MPM-(+XF5gJzBv-battle.c+MGc-)
-			sd->addeff[2] +-= sd->sc.data[SC_VOLCANO].val2;	// % of granting
-		if(sd->sc.data[SC_DELUGE].timer != -1)	// +MKgw8zDBMOMw8zDIMN0wpDC6MPM-(+XF5gJzBv-battle.c+MGc-)
-			sd->addeff[0] +-= sd->sc.data[SC_DELUGE].val2;	// % of granting
+		if(sd->sc.data[SC_VOLCANO].timer != -1)	// エンチャントポイズン(属性はbattle.cで)
+			sd->addeff[2] += sd->sc.data[SC_VOLCANO].val2;	// % of granting
+		if(sd->sc.data[SC_DELUGE].timer != -1)	// エンチャントポイズン(属性はbattle.cで)
+			sd->addeff[0] += sd->sc.data[SC_DELUGE].val2;	// % of granting
 		*/
 
-		// +MNUwoTCkMMYwozDzMLAwuTDUMOowwzDI-
+		// ファイティングスピリット
 		if(sd->sc.data[SC_FIGHTINGSPIRIT].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->base_atk +-= sd->sc.data[SC_FIGHTINGSPIRIT].val2;
+			sd->base_atk += sd->sc.data[SC_FIGHTINGSPIRIT].val2;
 #else
-			sd->plus_atk +-= sd->sc.data[SC_FIGHTINGSPIRIT].val2;
+			sd->plus_atk += sd->sc.data[SC_FIGHTINGSPIRIT].val2;
 #endif
 		}
-		// +YFBgFg-
+		// 恐怖
 		if(sd->sc.data[SC_FEAR].timer != -1) {
 			sd->hit  = sd->hit * 80/100;
 			sd->flee = sd->flee * 80/100;
 		}
-		// +MKQw8zDTMLgw0zDqMMYwow-
+		// インビジビリティ
 		if(sd->sc.data[SC__INVISIBILITY].timer != -1) {
-			sd->critical +-= sd->critical * (sd->sc.data[SC__INVISIBILITY].val1 * 20) / 100;
+			sd->critical += sd->critical * (sd->sc.data[SC__INVISIBILITY].val1 * 20) / 100;
 		}
-		// +MN4wuTCrMOww/DDJ/xowqDDKMNkw/DC3MOcw8w-
+		// マスカレード：エナベーション
 		if(sd->sc.data[SC__ENERVATION].timer != -1) {
-			sd->base_atk -= sd->base_atk * (20 +- sd->sc.data[SC__ENERVATION].val1 * 10) / 100;
-			sd->watk -= sd->watk * (20 +- sd->sc.data[SC__ENERVATION].val1 * 10) / 100;
+			sd->base_atk -= sd->base_atk * (20 + sd->sc.data[SC__ENERVATION].val1 * 10) / 100;
+			sd->watk -= sd->watk * (20 + sd->sc.data[SC__ENERVATION].val1 * 10) / 100;
 		}
-		// +MN4wuTCrMOww/DDJ/xowsDDrMPww3zD8-
+		// マスカレード：グルーミー
 		if(sd->sc.data[SC__GROOMY].timer != -1) {
 			sd->hit -= sd->hit * (sd->sc.data[SC__GROOMY].val1 * 20) / 100;
 		}
-		// +MN4wuTCrMOww/DDJ/xow7DCkMLgwzTC5-
+		// マスカレード：レイジネス
 		if(sd->sc.data[SC__LAZINESS].timer != -1) {
 			sd->flee -= sd->flee*10/100;
 		}
-		// +MN4wuTCrMOww/DDJ/xowojDzMOkwwzCtMPw-
+		// マスカレード：アンラッキー
 		if(sd->sc.data[SC__UNLUCKY].timer != -1) {
 			sd->critical -= sd->critical * (sd->sc.data[SC__UNLUCKY].val1 * 10) / 100;
 			sd->flee2 -= sd->sc.data[SC__UNLUCKY].val1 * 10;
 		}
-		// +MLcw/DDrMMkwuTDaMOs-(DEF)
+		// シールドスペル(DEF)
 		if(sd->sc.data[SC_SHIELDSPELL_DEF].timer != -1 && sd->sc.data[SC_SHIELDSPELL_DEF].val2 == 2) {
 #ifdef PRE_RENEWAL
-			sd->base_atk +-= sd->sc.data[SC_SHIELDSPELL_DEF].val3;
+			sd->base_atk += sd->sc.data[SC_SHIELDSPELL_DEF].val3;
 #else
-			sd->plus_atk +-= sd->sc.data[SC_SHIELDSPELL_DEF].val3;
+			sd->plus_atk += sd->sc.data[SC_SHIELDSPELL_DEF].val3;
 #endif
 		}
-		// +MLcw/DDrMMkwuTDaMOs-(+fL6TLA-)
+		// シールドスペル(精錬)
 		if(sd->sc.data[SC_SHIELDSPELL_REF].timer != -1 && sd->sc.data[SC_SHIELDSPELL_REF].val2 == 2) {
 #ifdef PRE_RENEWAL
-			sd->def2 +-= sd->sc.data[SC_SHIELDSPELL_REF].val3;
+			sd->def2 += sd->sc.data[SC_SHIELDSPELL_REF].val3;
 #else
-			sd->def +-= sd->sc.data[SC_SHIELDSPELL_REF].val3;
+			sd->def += sd->sc.data[SC_SHIELDSPELL_REF].val3;
 #endif
 		}
-		// +MNUwqTD8MLkwqjDWMNAw8zCsMPwwyQ-
+		// フォースオブバンガード
 		if(sd->sc.data[SC_FORCEOFVANGUARD].timer != -1) {
-			sd->status.max_hp +-= (sd->status.max_hp * sd->sc.data[SC_FORCEOFVANGUARD].val1 * 3) / 100;
+			sd->status.max_hp += (sd->status.max_hp * sd->sc.data[SC_FORCEOFVANGUARD].val1 * 3) / 100;
 		}
-		// +MNcw7DC5MMYwozD8MLg-
+		// プレスティージ
 		if(sd->sc.data[SC_PRESTIGE].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->def2 +-= sd->sc.data[SC_PRESTIGE].val2;
+			sd->def2 += sd->sc.data[SC_PRESTIGE].val2;
 #else
-			sd->def +-= sd->sc.data[SC_PRESTIGE].val2;
+			sd->def += sd->sc.data[SC_PRESTIGE].val2;
 #endif
 		}
-		// +MNAw8zDHMKMw8zCw-
+		// バンディング
 		if(sd->sc.data[SC_BANDING].timer != -1 && sd->sc.data[SC_BANDING].val2 > 1) {
 #ifdef PRE_RENEWAL
-			sd->base_atk +-= (10 +- sd->sc.data[SC_BANDING].val1 * 10) * sd->sc.data[SC_BANDING].val2;
-			sd->def2 +-= (5 +- sd->sc.data[SC_BANDING].val1) * sd->sc.data[SC_BANDING].val2;
+			sd->base_atk += (10 + sd->sc.data[SC_BANDING].val1 * 10) * sd->sc.data[SC_BANDING].val2;
+			sd->def2 += (5 + sd->sc.data[SC_BANDING].val1) * sd->sc.data[SC_BANDING].val2;
 #else
-			sd->plus_atk +-= (10 +- sd->sc.data[SC_BANDING].val1 * 10) * sd->sc.data[SC_BANDING].val2;
-			sd->def +-= (5 +- sd->sc.data[SC_BANDING].val1) * sd->sc.data[SC_BANDING].val2;
+			sd->plus_atk += (10 + sd->sc.data[SC_BANDING].val1 * 10) * sd->sc.data[SC_BANDING].val2;
+			sd->def += (5 + sd->sc.data[SC_BANDING].val1) * sd->sc.data[SC_BANDING].val2;
 #endif
 		}
-		// +MKIw/DC5MMkw6TCkMNY-
+		// アースドライブ
 		if(sd->sc.data[SC_EARTHDRIVE].timer != -1) {
 			sd->def -= sd->def * 25 / 100;
 		}
-		// +MKQw8zC5MNQw7DD8MLcw5zDz-
+		// インスピレーション
 		if(sd->sc.data[SC_INSPIRATION].timer != -1) {
-			sd->status.max_hp +-= (600 +- sd->status.max_hp / 20) * sd->sc.data[SC_INSPIRATION].val1;
+			sd->status.max_hp += (600 + sd->status.max_hp / 20) * sd->sc.data[SC_INSPIRATION].val1;
 #ifdef PRE_RENEWAL
-			sd->base_atk +-= sd->sc.data[SC_INSPIRATION].val1 * 40 +- sd->status.job_level * 3;
+			sd->base_atk += sd->sc.data[SC_INSPIRATION].val1 * 40 + sd->status.job_level * 3;
 #else
-			sd->plus_atk +-= sd->sc.data[SC_INSPIRATION].val1 * 40 +- sd->status.job_level * 3;
+			sd->plus_atk += sd->sc.data[SC_INSPIRATION].val1 * 40 + sd->status.job_level * 3;
 #endif
-			sd->hit +-= 25 +- sd->sc.data[SC_INSPIRATION].val1 * 5;
+			sd->hit += 25 + sd->sc.data[SC_INSPIRATION].val1 * 5;
 		}
-		// +b1x63GYHWSk-
+		// 潜竜昇天
 		if(sd->sc.data[SC_RAISINGDRAGON].timer != -1) {
-			sd->status.max_hp +-= sd->status.max_hp * sd->sc.data[SC_RAISINGDRAGON].val3 / 100;
-			sd->status.max_sp +-= sd->status.max_sp * sd->sc.data[SC_RAISINGDRAGON].val3 / 100;
+			sd->status.max_hp += sd->status.max_hp * sd->sc.data[SC_RAISINGDRAGON].val3 / 100;
+			sd->status.max_sp += sd->status.max_sp * sd->sc.data[SC_RAISINGDRAGON].val3 / 100;
 		}
-		// +cLl6dA- -+U80--
+		// 点穴 -反-
 		if(sd->sc.data[SC_GENTLETOUCH_CHANGE].timer != -1) {
 			sd->status.max_hp -= sd->status.max_hp * (sd->sc.data[SC_GENTLETOUCH_CHANGE].val1 * 2) / 100;
 		}
-		// +cLl6dA- -+bTs--
+		// 点穴 -活-
 		if(sd->sc.data[SC_GENTLETOUCH_REVITALIZE].timer != -1) {
-			sd->status.max_hp +-= sd->status.max_hp * (sd->sc.data[SC_GENTLETOUCH_REVITALIZE].val1 * 3) / 100;
+			sd->status.max_hp += sd->status.max_hp * (sd->sc.data[SC_GENTLETOUCH_REVITALIZE].val1 * 3) / 100;
 		}
-		// +MNUw6jDDMLAwbmtM-
+		// フリッグの歌
 		if(sd->sc.data[SC_FRIGG_SONG].timer != -1) {
-			sd->status.max_hp +-= sd->sc.data[SC_FRIGG_SONG].val3 * sd->status.max_hp / 100;
+			sd->status.max_hp += sd->sc.data[SC_FRIGG_SONG].val3 * sd->status.max_hp / 100;
 		}
-		// +MOEw6TDzMLMw6jD8-
+		// メランコリー
 		if(sd->sc.data[SC_GLOOMYDAY].timer != -1) {
-			sd->flee -= sd->sc.data[SC_GLOOMYDAY].val1 * 5 +- 20;
+			sd->flee -= sd->sc.data[SC_GLOOMYDAY].val1 * 5 + 20;
 		}
-		// +MOww/DDpMLowbpcy-
+		// レーラズの露
 		if(sd->sc.data[SC_LERADS_DEW].timer != -1) {
-			sd->status.max_hp +-= sd->sc.data[SC_LERADS_DEW].val1 * 200 +- sd->sc.data[SC_LERADS_DEW].val4 * 300;
+			sd->status.max_hp += sd->sc.data[SC_LERADS_DEW].val1 * 200 + sd->sc.data[SC_LERADS_DEW].val4 * 300;
 		}
-		// +MNMw6DDzMMkwqjDWMKYwqTD8MK8w6TCk-
+		// ビヨンドオブウォークライ
 		if(sd->sc.data[SC_BEYOND_OF_WARCRY].timer != -1) {
 			sd->status.max_hp -= sd->sc.data[SC_BEYOND_OF_WARCRY].val3 * sd->status.max_hp / 100;
-			sd->critical +-= sd->sc.data[SC_BEYOND_OF_WARCRY].val4 * 10;
+			sd->critical += sd->sc.data[SC_BEYOND_OF_WARCRY].val4 * 10;
 		}
-		// +MNUw6TCkMMcw/DDKMKQwyDDVMKMw/DDQMPw-
+		// フライデーナイトフィーバー
 		if(sd->sc.data[SC_SATURDAY_NIGHT_FEVER].timer != -1) {
-			sd->watk +-= 100 * sd->sc.data[SC_SATURDAY_NIGHT_FEVER].val1;
-			sd->def -= sd->def * (10 +- 10 * sd->sc.data[SC_SATURDAY_NIGHT_FEVER].val1) / 100;
-			sd->flee -= sd->flee * (40 +- 10 * sd->sc.data[SC_SATURDAY_NIGHT_FEVER].val1) / 100;
+			sd->watk += 100 * sd->sc.data[SC_SATURDAY_NIGHT_FEVER].val1;
+			sd->def -= sd->def * (10 + 10 * sd->sc.data[SC_SATURDAY_NIGHT_FEVER].val1) / 100;
+			sd->flee -= sd->flee * (40 + 10 * sd->sc.data[SC_SATURDAY_NIGHT_FEVER].val1) / 100;
 		}
-		// +MLkwyDDpMKQwrTDzMLA-
+		// ストライキング
 		if(sd->sc.data[SC_STRIKING].timer != -1) {
-			sd->critical +-= 10 * sd->sc.data[SC_STRIKING].val1;
+			sd->critical += 10 * sd->sc.data[SC_STRIKING].val1;
 		}
-		// +MKow/DDHMKMw8zBuUps-
+		// オーディンの力
 		if(sd->sc.data[SC_ODINS_POWER].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->watk +-= 60 +- 10 * sd->sc.data[SC_ODINS_POWER].val1;
-			sd->matk1 +-= 60 +- 10 * sd->sc.data[SC_ODINS_POWER].val1;
-			sd->matk2 +-= 60 +- 10 * sd->sc.data[SC_ODINS_POWER].val1;
+			sd->watk += 60 + 10 * sd->sc.data[SC_ODINS_POWER].val1;
+			sd->matk1 += 60 + 10 * sd->sc.data[SC_ODINS_POWER].val1;
+			sd->matk2 += 60 + 10 * sd->sc.data[SC_ODINS_POWER].val1;
 #else
-			sd->plus_atk +-= 60 +- 10 * sd->sc.data[SC_ODINS_POWER].val1;
-			sd->plus_matk +-= 60 +- 10 * sd->sc.data[SC_ODINS_POWER].val1;
+			sd->plus_atk += 60 + 10 * sd->sc.data[SC_ODINS_POWER].val1;
+			sd->plus_matk += 60 + 10 * sd->sc.data[SC_ODINS_POWER].val1;
 #endif
-			sd->def -= 10 +- 10 * sd->sc.data[SC_ODINS_POWER].val1;
-			sd->mdef -= 10 +- 10 * sd->sc.data[SC_ODINS_POWER].val1;
+			sd->def -= 10 + 10 * sd->sc.data[SC_ODINS_POWER].val1;
+			sd->mdef -= 10 + 10 * sd->sc.data[SC_ODINS_POWER].val1;
 		}
-		// +MNUwoTCkMKIw/DCoMK8wuTDRMPMwtzDnMPM-(+cVleVQ-)
+		// ファイアーエクスパンション(煙幕)
 		if(sd->sc.data[SC_FIRE_EXPANSION_SMOKE_POWDER].timer != -1) {
-			sd->flee +-= sd->flee * sd->sc.data[SC_FIRE_EXPANSION_SMOKE_POWDER].val3 / 100;
+			sd->flee += sd->flee * sd->sc.data[SC_FIRE_EXPANSION_SMOKE_POWDER].val3 / 100;
 		}
-		// +MNUwoTCkMKIw/DCoMK8wuTDRMPMwtzDnMPM-(+UKxtmQ-)
+		// ファイアーエクスパンション(催涙)
 		if(sd->sc.data[SC_FIRE_EXPANSION_TEAR_GAS].timer != -1) {
 			sd->hit -= sd->hit * sd->sc.data[SC_FIRE_EXPANSION_TEAR_GAS].val2 / 100;
 			sd->flee -= sd->flee * sd->sc.data[SC_FIRE_EXPANSION_TEAR_GAS].val2 / 100;
 		}
-		// HP+WJdSoDDdMPwwtzDnMPM-
+		// HP増加ポーション
 		if(sd->sc.data[SC_PROMOTE_HEALTH_RESERCH].timer != -1) {
-			sd->status.max_hp +-= 500 +- sd->sc.data[SC_PROMOTE_HEALTH_RESERCH].val1 * 1000 +- 4 / 3 * sd->status.base_level;
+			sd->status.max_hp += 500 + sd->sc.data[SC_PROMOTE_HEALTH_RESERCH].val1 * 1000 + 4 / 3 * sd->status.base_level;
 		}
-		// SP+WJdSoDDdMPwwtzDnMPM-
+		// SP増加ポーション
 		if(sd->sc.data[SC_ENERGY_DRINK_RESERCH].timer != -1) {
-			sd->status.max_sp +-= sd->status.max_sp * ((sd->sc.data[SC_ENERGY_DRINK_RESERCH].val1 * 5) - 5 +- sd->status.base_level / 10) / 100;
+			sd->status.max_sp += sd->status.max_sp * ((sd->sc.data[SC_ENERGY_DRINK_RESERCH].val1 * 5) - 5 + sd->status.base_level / 10) / 100;
 		}
-		// +MNMwvzC/-500
+		// ビタタ500
 		if(sd->sc.data[SC_VITATA_500].timer != -1) {
-			sd->status.max_sp +-= sd->status.max_sp * sd->sc.data[SC_VITATA_500].val2 / 100;
+			sd->status.max_sp += sd->status.max_sp * sd->sc.data[SC_VITATA_500].val2 / 100;
 		}
-		// +MNUwoTCkMKIw/DCvMO0w/DCv-
+		// ファイアークローク
 		if(sd->sc.data[SC_FIRE_CLOAK].timer != -1) {
-			sd->subele[ELE_FIRE] +-= sd->sc.data[SC_FIRE_CLOAK].val2;
+			sd->subele[ELE_FIRE] += sd->sc.data[SC_FIRE_CLOAK].val2;
 			sd->subele[ELE_WATER] -= sd->sc.data[SC_FIRE_CLOAK].val3;
 		}
-		// +MKYwqTD8ML8w/DDJMO0wwzDX-
+		// ウォータードロップ
 		if(sd->sc.data[SC_WATER_DROP].timer != -1) {
-			sd->subele[ELE_WATER] +-= sd->sc.data[SC_WATER_DROP].val2;
+			sd->subele[ELE_WATER] += sd->sc.data[SC_WATER_DROP].val2;
 			sd->subele[ELE_WIND] -= sd->sc.data[SC_WATER_DROP].val3;
 		}
-		// +MKYwozDzMMkwuTDGMMMw1w-
+		// ウィンドステップ
 		if(sd->sc.data[SC_WIND_STEP].timer != -1) {
-			sd->flee +-= sd->sc.data[SC_WIND_STEP].val2;
+			sd->flee += sd->sc.data[SC_WIND_STEP].val2;
 		}
-		// +MKYwozDzMMkwqzD8MMYw8w-
+		// ウィンドカーテン
 		if(sd->sc.data[SC_WIND_CURTAIN].timer != -1) {
-			sd->subele[ELE_WIND] +-= sd->sc.data[SC_WIND_CURTAIN].val2;
+			sd->subele[ELE_WIND] += sd->sc.data[SC_WIND_CURTAIN].val2;
 			sd->subele[ELE_EARTH] -= sd->sc.data[SC_WIND_CURTAIN].val3;
 		}
-		// +ML0w6jDDMMkwuTCtMPM-
+		// ソリッドスキン
 		if(sd->sc.data[SC_SOLID_SKIN].timer != -1) {
-			sd->def +-= sd->def * sd->sc.data[SC_SOLID_SKIN].val2 / 100;
-			sd->status.max_hp +-= sd->status.max_hp * sd->sc.data[SC_SOLID_SKIN].val3 / 100;
+			sd->def += sd->def * sd->sc.data[SC_SOLID_SKIN].val2 / 100;
+			sd->status.max_hp += sd->status.max_hp * sd->sc.data[SC_SOLID_SKIN].val3 / 100;
 		}
-		// +MLkwyDD8MPMwtzD8MOswyQ-
+		// ストーンシールド
 		if(sd->sc.data[SC_STONE_SHIELD].timer != -1) {
-			sd->subele[ELE_EARTH] +-= sd->sc.data[SC_STONE_SHIELD].val2;
+			sd->subele[ELE_EARTH] += sd->sc.data[SC_STONE_SHIELD].val2;
 			sd->subele[ELE_FIRE] -= sd->sc.data[SC_STONE_SHIELD].val3;
 		}
-		// +MNEwpDDtMMYwrzDLMMMwrw-
+		// パイロテクニック
 		if(sd->sc.data[SC_PYROTECHNIC].timer != -1) {
-			sd->watk +-= sd->sc.data[SC_PYROTECHNIC].val2;
+			sd->watk += sd->sc.data[SC_PYROTECHNIC].val2;
 		}
-		// +MNIw/DC/MPw-
+		// ヒーター
 		if(sd->sc.data[SC_HEATER].timer != -1) {
-			sd->watk +-= sd->sc.data[SC_HEATER].val2;
+			sd->watk += sd->sc.data[SC_HEATER].val2;
 		}
-		// +MMgw7TDUMMMwrw-
+		// トロピック
 		if(sd->sc.data[SC_TROPIC].timer != -1) {
-			sd->watk +-= sd->sc.data[SC_TROPIC].val2;
+			sd->watk += sd->sc.data[SC_TROPIC].val2;
 		}
-		// +MKIwrzCiMNcw7DCk-
+		// アクアプレイ
 		if(sd->sc.data[SC_AQUAPLAY].timer != -1) {
-			sd->matk1 +-= sd->sc.data[SC_AQUAPLAY].val2;
-			sd->matk2 +-= sd->sc.data[SC_AQUAPLAY].val2;
+			sd->matk1 += sd->sc.data[SC_AQUAPLAY].val2;
+			sd->matk2 += sd->sc.data[SC_AQUAPLAY].val2;
 		}
-		// +MK8w/DDpMPw-
+		// クーラー
 		if(sd->sc.data[SC_COOLER].timer != -1) {
-			sd->matk1 +-= sd->sc.data[SC_COOLER].val2;
-			sd->matk2 +-= sd->sc.data[SC_COOLER].val2;
+			sd->matk1 += sd->sc.data[SC_COOLER].val2;
+			sd->matk2 += sd->sc.data[SC_COOLER].val2;
 		}
-		// +MK8w/DDrMKgwojD8-
+		// クールエアー
 		if(sd->sc.data[SC_CHILLY_AIR].timer != -1) {
-			sd->matk1 +-= sd->sc.data[SC_CHILLY_AIR].val2;
-			sd->matk2 +-= sd->sc.data[SC_CHILLY_AIR].val2;
+			sd->matk1 += sd->sc.data[SC_CHILLY_AIR].val2;
+			sd->matk2 += sd->sc.data[SC_CHILLY_AIR].val2;
 		}
-		// +MNowyDDtMLgw/A-
+		// ペトロジー
 		if(sd->sc.data[SC_PETROLOGY].timer != -1) {
-			sd->status.max_hp +-= sd->status.max_hp * sd->sc.data[SC_PETROLOGY].val2 / 100;
+			sd->status.max_hp += sd->status.max_hp * sd->sc.data[SC_PETROLOGY].val2 / 100;
 		}
-		// +MKsw/DC5MMkwvTCkMOs-
+		// カースドソイル
 		if(sd->sc.data[SC_CURSED_SOIL].timer != -1) {
-			sd->status.max_hp +-= sd->status.max_hp * sd->sc.data[SC_CURSED_SOIL].val2 / 100;
+			sd->status.max_hp += sd->status.max_hp * sd->sc.data[SC_CURSED_SOIL].val2 / 100;
 		}
-		// +MKIwwzDXMNgwpDDQMOs-
+		// アップヘイバル
 		if(sd->sc.data[SC_UPHEAVAL].timer != -1) {
-			sd->status.max_hp +-= sd->status.max_hp * sd->sc.data[SC_UPHEAVAL].val2 / 100;
+			sd->status.max_hp += sd->status.max_hp * sd->sc.data[SC_UPHEAVAL].val2 / 100;
 		}
-		// +U0FRbVkc-
+		// 十六夜
 		if(sd->sc.data[SC_IZAYOI].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->matk1 +-= sd->sc.data[SC_IZAYOI].val2;
-			sd->matk2 +-= sd->sc.data[SC_IZAYOI].val2;
+			sd->matk1 += sd->sc.data[SC_IZAYOI].val2;
+			sd->matk2 += sd->sc.data[SC_IZAYOI].val2;
 #else
-			sd->plus_matk +-= sd->sc.data[SC_IZAYOI].val2;
+			sd->plus_matk += sd->sc.data[SC_IZAYOI].val2;
 #endif
 		}
-		// +XnuIUw- -+UgaOqw--
+		// 幻術 -分身-
 		if(sd->sc.data[SC_KAGEMUSYA].timer != -1) {
 			sd->skill_dmgup.id[sd->skill_dmgup.count] = KO_BAKURETSU;
 			sd->skill_dmgup.rate[sd->skill_dmgup.count] = sd->sc.data[SC_KAGEMUSYA].val2;
-			sd->skill_dmgup.count+-+-;
+			sd->skill_dmgup.count++;
 			sd->skill_dmgup.id[sd->skill_dmgup.count] = KO_HAPPOKUNAI;
 			sd->skill_dmgup.rate[sd->skill_dmgup.count] = sd->sc.data[SC_KAGEMUSYA].val2;
-			sd->skill_dmgup.count+-+-;
+			sd->skill_dmgup.count++;
 			sd->skill_dmgup.id[sd->skill_dmgup.count] = KO_JYUMONJIKIRI;
 			sd->skill_dmgup.rate[sd->skill_dmgup.count] = sd->sc.data[SC_KAGEMUSYA].val2;
-			sd->skill_dmgup.count+-+-;
+			sd->skill_dmgup.count++;
 			sd->skill_dmgup.id[sd->skill_dmgup.count] = KO_HUUMARANKA;
 			sd->skill_dmgup.rate[sd->skill_dmgup.count] = sd->sc.data[SC_KAGEMUSYA].val2;
-			sd->skill_dmgup.count+-+-;
+			sd->skill_dmgup.count++;
 		}
-		// +XnuIUw- -+a4tnCA--
+		// 幻術 -残月-
 		if(sd->sc.data[SC_ZANGETSU].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->base_atk +-= sd->sc.data[SC_ZANGETSU].val2;
-			sd->matk1 +-= sd->sc.data[SC_ZANGETSU].val3;
-			sd->matk2 +-= sd->sc.data[SC_ZANGETSU].val3;
+			sd->base_atk += sd->sc.data[SC_ZANGETSU].val2;
+			sd->matk1 += sd->sc.data[SC_ZANGETSU].val3;
+			sd->matk2 += sd->sc.data[SC_ZANGETSU].val3;
 #else
-			sd->plus_atk +-= sd->sc.data[SC_ZANGETSU].val2;
-			sd->plus_matk +-= sd->sc.data[SC_ZANGETSU].val3;
+			sd->plus_atk += sd->sc.data[SC_ZANGETSU].val2;
+			sd->plus_matk += sd->sc.data[SC_ZANGETSU].val3;
 #endif
 		}
-		// +MKIw8zDqMN8wwzDI-
+		// アンリミット
 		if(sd->sc.data[SC_UNLIMIT].timer != -1) {
 			sd->def = sd->def2 = sd->mdef = sd->mdef2 = 1;
 		}
-		// +MKQw6jDlMPwwuDDnMPMwyTD8MNQw8zCw-
+		// イリュージョンドーピング
 		if(sd->sc.data[SC_ILLUSIONDOPING].timer != -1) {
 			sd->hit -= 50;
 		}
-		// +MMsw4zDzMLAw6TC5-
+		// ニャングラス
 		if(sd->sc.data[SC_NYANGGRASS].timer != -1) {
 			sd->def = sd->mdef = 0;
 		}
-		// +i2ZiEg-
+		// 警戒
 		if(sd->sc.data[SC_HISS].timer != -1 && sd->sc.data[SC_HISS].val1 > 0) {
-			sd->flee2 +-= sd->sc.data[SC_HISS].val2;
+			sd->flee2 += sd->sc.data[SC_HISS].val2;
 		}
-		// +MKQwzDDPMMMwqzC3MOMw7zD8-
+		// イヌハッカシャワー
 		if(sd->sc.data[SC_CATNIPPOWDER].timer != -1) {
 			sd->watk -= sd->watk * sd->sc.data[SC_CATNIPPOWDER].val2 / 100;
 			sd->matk1 -= sd->matk1 * sd->sc.data[SC_CATNIPPOWDER].val2 / 100;
-			sd->nhealhp +-= sd->nhealhp * sd->sc.data[SC_CATNIPPOWDER].val3 / 100;
+			sd->nhealhp += sd->nhealhp * sd->sc.data[SC_CATNIPPOWDER].val3 / 100;
 			if(sd->nhealhp > 0x7fff)
 				sd->nhealhp = 0x7fff;
-			sd->nhealsp +-= sd->nhealsp * sd->sc.data[SC_CATNIPPOWDER].val3 / 100;
+			sd->nhealsp += sd->nhealsp * sd->sc.data[SC_CATNIPPOWDER].val3 / 100;
 			if(sd->nhealsp > 0x7fff)
 				sd->nhealsp = 0x7fff;
 		}
-		// +X3EwbptC-
+		// 影の魂
 		if(sd->sc.data[SC_SOULSHADOW].timer != -1) {
-			sd->critical +-= sd->sc.data[SC_SOULSHADOW].val2;
+			sd->critical += sd->sc.data[SC_SOULSHADOW].val2;
 		}
-		// +WZZ8vjBum0I-
+		// 妖精の魂
 		if(sd->sc.data[SC_SOULFAIRY].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->matk1 +-= sd->sc.data[SC_SOULFAIRY].val2;
-			sd->matk2 +-= sd->sc.data[SC_SOULFAIRY].val2;
+			sd->matk1 += sd->sc.data[SC_SOULFAIRY].val2;
+			sd->matk2 += sd->sc.data[SC_SOULFAIRY].val2;
 #else
-			sd->plus_matk +-= sd->sc.data[SC_SOULFAIRY].val2;
+			sd->plus_matk += sd->sc.data[SC_SOULFAIRY].val2;
 #endif
 		}
-		// +nfkwbptC-
+		// 鷹の魂
 		if(sd->sc.data[SC_SOULFALCON].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->watk +-= sd->sc.data[SC_SOULFALCON].val2;
+			sd->watk += sd->sc.data[SC_SOULFALCON].val2;
 #else
-			sd->plus_atk +-= sd->sc.data[SC_SOULFALCON].val2;
+			sd->plus_atk += sd->sc.data[SC_SOULFALCON].val2;
 #endif
-			sd->hit +-= sd->sc.data[SC_SOULFALCON].val3;
+			sd->hit += sd->sc.data[SC_SOULFALCON].val3;
 		}
-		// +MLQw/DDsMOAwbptC-
+		// ゴーレムの魂
 		if(sd->sc.data[SC_SOULGOLEM].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->def2 +-= sd->sc.data[SC_SOULGOLEM].val2;
-			sd->mdef2 +-= sd->sc.data[SC_SOULGOLEM].val3;
+			sd->def2 += sd->sc.data[SC_SOULGOLEM].val2;
+			sd->mdef2 += sd->sc.data[SC_SOULGOLEM].val3;
 #else
-			sd->def +-= sd->sc.data[SC_SOULGOLEM].val2;
-			sd->mdef +-= sd->sc.data[SC_SOULGOLEM].val3;
+			sd->def += sd->sc.data[SC_SOULGOLEM].val2;
+			sd->mdef += sd->sc.data[SC_SOULGOLEM].val3;
 #endif
 		}
-		// +MKow/DDQMPwwyTDWMPwwuTDI-
+		// オーバードブースト
 		if(sd->sc.data[SC_OVERED_BOOST].timer != -1) {
 			sd->flee = sd->sc.data[SC_OVERED_BOOST].val3;
 			sd->aspd = sd->sc.data[SC_OVERED_BOOST].val4;
@@ -3003,308 +2982,308 @@ L_RECALC:
 			sd->watk -= sd->watk * sd->sc.data[SC_EQC].val4 / 100;
 			sd->def2 -= sd->def2 * sd->sc.data[SC_EQC].val4 / 100;
 		}
-		// +MNEwpDDtMK8w6TC5MMYwozDDMK8-
+		// パイロクラスティック
 		if(sd->sc.data[SC_PYROCLASTIC].timer != -1) {
-			sd->watk +-= sd->sc.data[SC_PYROCLASTIC].val2;
+			sd->watk += sd->sc.data[SC_PYROCLASTIC].val2;
 		}
-		// +MMcwwzDJMOow/DDXMO0wuDCnMK8wtzDnMPM-
+		// デッドリープロジェクション
 		if(sd->sc.data[SC_DEADLY_DEFEASANCE].timer != -1) {
 			sd->special_state.no_magic_damage = 0;
 		}
-		// +XzeXbTBqT+Ff9Q-
+		// 強靭な信念
 		if(sd->sc.data[SC_POWERFUL_FAITH].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->watk +-= sd->sc.data[SC_POWERFUL_FAITH].val2;
+			sd->watk += sd->sc.data[SC_POWERFUL_FAITH].val2;
 #else
-			sd->plus_atk +-= sd->sc.data[SC_POWERFUL_FAITH].val2;
+			sd->plus_atk += sd->sc.data[SC_POWERFUL_FAITH].val2;
 #endif
-			sd->patk +-= sd->sc.data[SC_POWERFUL_FAITH].val3;
+			sd->patk += sd->sc.data[SC_POWERFUL_FAITH].val3;
 		}
-		// +WAVW+jBqT+Ff9Q-
+		// 堅固な信念
 		if(sd->sc.data[SC_FIRM_FAITH].timer != -1) {
-			sd->status.max_hp +-= sd->status.max_hp * sd->sc.data[SC_FIRM_FAITH].val2 / 100;
-			sd->res +-= sd->sc.data[SC_FIRM_FAITH].val3;
+			sd->status.max_hp += sd->status.max_hp * sd->sc.data[SC_FIRM_FAITH].val2 / 100;
+			sd->res += sd->sc.data[SC_FIRM_FAITH].val3;
 		}
-		// +X+BbnzBqT+Ff9Q-
+		// 忠実な信念
 		if(sd->sc.data[SC_SINCERE_FAITH].timer != -1) {
-			sd->perfect_hit +-= sd->sc.data[SC_SINCERE_FAITH].val3;
+			sd->perfect_hit += sd->sc.data[SC_SINCERE_FAITH].val3;
 		}
-		// +MKww/DDJMLkwvzDzMLk-
+		// ガードスタンス
 		if(sd->sc.data[SC_GUARD_STANCE].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->def2 +-= sd->sc.data[SC_GUARD_STANCE].val2;
+			sd->def2 += sd->sc.data[SC_GUARD_STANCE].val2;
 			sd->watk -= sd->sc.data[SC_GUARD_STANCE].val3;
 #else
-			sd->def +-= sd->sc.data[SC_GUARD_STANCE].val2;
+			sd->def += sd->sc.data[SC_GUARD_STANCE].val2;
 			sd->plus_atk -= sd->sc.data[SC_GUARD_STANCE].val3;
 #endif
 		}
-		// +MKIwvzDDMK8wuTC/MPMwuQ-
+		// アタックスタンス
 		if(sd->sc.data[SC_ATTACK_STANCE].timer != -1) {
-			sd->patk +-= sd->sc.data[SC_ATTACK_STANCE].val2;
-			sd->smatk +-= sd->sc.data[SC_ATTACK_STANCE].val2;
+			sd->patk += sd->sc.data[SC_ATTACK_STANCE].val2;
+			sd->smatk += sd->sc.data[SC_ATTACK_STANCE].val2;
 #ifdef PRE_RENEWAL
 			sd->def2 -= sd->sc.data[SC_ATTACK_STANCE].val3;
 #else
 			sd->def -= sd->sc.data[SC_ATTACK_STANCE].val3;
 #endif
 		}
-		// +MNsw/DDqMPwwtzD8MOswyQ-
+		// ホーリーシールド
 		if(sd->sc.data[SC_HOLY_S].timer != -1) {
-			sd->skill_elemagic_dmgup[ELE_HOLY] +-= sd->sc.data[SC_HOLY_S].val2;
-			sd->subele[ELE_DARK] +-= sd->sc.data[SC_HOLY_S].val3;
-			sd->subele[ELE_UNDEAD] +-= sd->sc.data[SC_HOLY_S].val3;
+			sd->skill_elemagic_dmgup[ELE_HOLY] += sd->sc.data[SC_HOLY_S].val2;
+			sd->subele[ELE_DARK] += sd->sc.data[SC_HOLY_S].val3;
+			sd->subele[ELE_UNDEAD] += sd->sc.data[SC_HOLY_S].val3;
 		}
-		// +MNcw7DC7MPMwuTCiMK0wqDD8MLk-
+		// プレセンスアキエース
 		if(sd->sc.data[SC_PRE_ACIES].timer != -1) {
-			sd->crate +-= sd->sc.data[SC_PRE_ACIES].val2;
+			sd->crate += sd->sc.data[SC_PRE_ACIES].val2;
 		}
-		// +MLMw8zDaMMYw8zDGMKMwog-
+		// コンペテンティア
 		if(sd->sc.data[SC_COMPETENTIA].timer != -1) {
-			sd->patk +-= sd->sc.data[SC_COMPETENTIA].val2;
-			sd->smatk +-= sd->sc.data[SC_COMPETENTIA].val3;
+			sd->patk += sd->sc.data[SC_COMPETENTIA].val2;
+			sd->smatk += sd->sc.data[SC_COMPETENTIA].val3;
 		}
-		// +MOkwwzC3MOU-
+		// ラッシュ
 		if(sd->sc.data[SC_RUSH_QUAKE2].timer != -1) {
-			sd->short_weapon_damege_rate +-= sd->sc.data[SC_RUSH_QUAKE2].val2;
-			sd->long_weapon_damege_rate +-= sd->sc.data[SC_RUSH_QUAKE2].val2;
+			sd->short_weapon_damege_rate += sd->sc.data[SC_RUSH_QUAKE2].val2;
+			sd->long_weapon_damege_rate += sd->sc.data[SC_RUSH_QUAKE2].val2;
 		}
-		// +ljJfoYjFf25nCVK5UxY-
+		// 防御装置有効化
 		if(sd->sc.data[SC_D_MACHINE].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->def2 +-= sd->sc.data[SC_D_MACHINE].val2;
+			sd->def2 += sd->sc.data[SC_D_MACHINE].val2;
 #else
-			sd->def +-= sd->sc.data[SC_D_MACHINE].val2;
+			sd->def += sd->sc.data[SC_D_MACHINE].val2;
 #endif
-			sd->res +-= sd->sc.data[SC_D_MACHINE].val3;
+			sd->res += sd->sc.data[SC_D_MACHINE].val3;
 		}
-		// +MKIw0zC5MLkw7DCkMOQw/A-
+		// アビススレイヤー
 		if(sd->sc.data[SC_ABYSS_SLAYER].timer != -1) {
-			sd->patk +-= sd->sc.data[SC_ABYSS_SLAYER].val2;
-			sd->smatk +-= sd->sc.data[SC_ABYSS_SLAYER].val2;
-			sd->hit +-= sd->sc.data[SC_ABYSS_SLAYER].val3;
+			sd->patk += sd->sc.data[SC_ABYSS_SLAYER].val2;
+			sd->smatk += sd->sc.data[SC_ABYSS_SLAYER].val2;
+			sd->hit += sd->sc.data[SC_ABYSS_SLAYER].val3;
 		}
-		// +MNgw6zDAMLkwxjCj-
+		// ヘルダスティ
 		if(sd->sc.data[SC_BO_HELL_DUSTY].timer != -1) {
-			sd->addrace[RCT_FORMLESS] +-= sd->sc.data[SC_BO_HELL_DUSTY].val2;
-			sd->addrace[RCT_PLANT] +-= sd->sc.data[SC_BO_HELL_DUSTY].val2;
-			sd->long_weapon_damege_rate +-= sd->sc.data[SC_BO_HELL_DUSTY].val3;
+			sd->addrace[RCT_FORMLESS] += sd->sc.data[SC_BO_HELL_DUSTY].val2;
+			sd->addrace[RCT_PLANT] += sd->sc.data[SC_BO_HELL_DUSTY].val2;
+			sd->long_weapon_damege_rate += sd->sc.data[SC_BO_HELL_DUSTY].val3;
 		}
-		// +MN8wuTDGMKMwwzCvMLcw8zDVMKkwyzD8-
+		// ミスティックシンフォニー
 		if(sd->sc.data[SC_MYSTIC_SYMPHONY].timer != -1) {
 			sd->skill_dmgup.id[sd->skill_dmgup.count] = TR_SOUNDBLEND;
 			sd->skill_dmgup.rate[sd->skill_dmgup.count] = sd->sc.data[SC_MYSTIC_SYMPHONY].val2;
-			sd->skill_dmgup.count+-+-;
+			sd->skill_dmgup.count++;
 			sd->skill_dmgup.id[sd->skill_dmgup.count] = TR_RHYTHMSHOOTING;
 			sd->skill_dmgup.rate[sd->skill_dmgup.count] = sd->sc.data[SC_MYSTIC_SYMPHONY].val2;
-			sd->skill_dmgup.count+-+-;
+			sd->skill_dmgup.count++;
 			sd->skill_dmgup.id[sd->skill_dmgup.count] = TR_ROSEBLOSSOM;
 			sd->skill_dmgup.rate[sd->skill_dmgup.count] = sd->sc.data[SC_MYSTIC_SYMPHONY].val2;
-			sd->skill_dmgup.count+-+-;
+			sd->skill_dmgup.count++;
 			sd->skill_dmgup.id[sd->skill_dmgup.count] = TR_ROSEBLOSSOM_ATK;
 			sd->skill_dmgup.rate[sd->skill_dmgup.count] = sd->sc.data[SC_MYSTIC_SYMPHONY].val2;
-			sd->skill_dmgup.count+-+-;
+			sd->skill_dmgup.count++;
 		}
-		// +MLIw1TCnMMswojDOMK8wvzD8MPM-
+		// ゲフェニアノクターン
 		if(sd->sc.data[SC_GEF_NOCTURN].timer != -1) {
 			sd->mres -= sd->sc.data[SC_GEF_NOCTURN].val3;
 		}
-		// +knFU4TBuMOkw1zC9MMcwow-
+		// 鉱員のラプソディ
 		if(sd->sc.data[SC_AIN_RHAPSODY].timer != -1) {
 			sd->res -= sd->sc.data[SC_AIN_RHAPSODY].val3;
 		}
-		// +MN8w5TD8MLgwqzDrMKQw8zC/MPww6zD8MMk-
+		// ミュージカルインタールード
 		if(sd->sc.data[SC_MUSICAL_INTERLUDE].timer != -1) {
-			sd->res +-= sd->sc.data[SC_MUSICAL_INTERLUDE].val3;
+			sd->res += sd->sc.data[SC_MUSICAL_INTERLUDE].val3;
 		}
-		// +WRVxPDBRMG4wuzDsMMow/DDH-
+		// 夕焼けのセレナーデ
 		if(sd->sc.data[SC_JAWAII_SERENADE].timer != -1) {
-			sd->smatk +-= sd->sc.data[SC_JAWAII_SERENADE].val3;
+			sd->smatk += sd->sc.data[SC_JAWAII_SERENADE].val3;
 		}
-		// +MNcw7TDzMMYw6TDeMPwwwQ-
+		// プロンテラマーチ
 		if(sd->sc.data[SC_PRON_MARCH].timer != -1) {
-			sd->patk +-= sd->sc.data[SC_PRON_MARCH].val3;
+			sd->patk += sd->sc.data[SC_PRON_MARCH].val3;
 		}
-		// +MLkw2jDrMKgw8zDBMOMw8zDGMKMw8zCw-
+		// スペルエンチャンティング
 		if(sd->sc.data[SC_SPELL_ENCHANTING].timer != -1) {
-			sd->smatk +-= sd->sc.data[SC_SPELL_ENCHANTING].val2;
+			sd->smatk += sd->sc.data[SC_SPELL_ENCHANTING].val2;
 		}
-		// +MLUw4jDzMKIw6zDJMPww6w-
+		// サモンアルドール
 		if(sd->sc.data[SC_SUMMON_ELEMENTAL_ARDOR].timer != -1) {
-			sd->skill_elemagic_dmgup[ELE_FIRE] +-= sd->sc.data[SC_SUMMON_ELEMENTAL_ARDOR].val2;
+			sd->skill_elemagic_dmgup[ELE_FIRE] += sd->sc.data[SC_SUMMON_ELEMENTAL_ARDOR].val2;
 		}
-		// +MLUw4jDzMMcwozDrMNMwqg-
+		// サモンディルビオ
 		if(sd->sc.data[SC_SUMMON_ELEMENTAL_DILUVIO].timer != -1) {
-			sd->skill_elemagic_dmgup[ELE_WATER] +-= sd->sc.data[SC_SUMMON_ELEMENTAL_DILUVIO].val2;
+			sd->skill_elemagic_dmgup[ELE_WATER] += sd->sc.data[SC_SUMMON_ELEMENTAL_DILUVIO].val2;
 		}
-		// +MLUw4jDzMNcw7TC7MOk-
+		// サモンプロセラ
 		if(sd->sc.data[SC_SUMMON_ELEMENTAL_PROCELLA].timer != -1) {
-			sd->skill_elemagic_dmgup[ELE_WIND] +-= sd->sc.data[SC_SUMMON_ELEMENTAL_PROCELLA].val2;
+			sd->skill_elemagic_dmgup[ELE_WIND] += sd->sc.data[SC_SUMMON_ELEMENTAL_PROCELLA].val2;
 		}
-		// +MLUw4jDzMMYw7DDiMMgwpTC5-
+		// サモンテレモトゥス
 		if(sd->sc.data[SC_SUMMON_ELEMENTAL_TERREMOTUS].timer != -1) {
-			sd->skill_elemagic_dmgup[ELE_EARTH] +-= sd->sc.data[SC_SUMMON_ELEMENTAL_TERREMOTUS].val2;
+			sd->skill_elemagic_dmgup[ELE_EARTH] += sd->sc.data[SC_SUMMON_ELEMENTAL_TERREMOTUS].val2;
 		}
-		// +MLUw4jDzMLUw/DDaMPMwuQ-
+		// サモンサーペンス
 		if(sd->sc.data[SC_SUMMON_ELEMENTAL_SERPENS].timer != -1) {
-			sd->skill_elemagic_dmgup[ELE_POISON] +-= sd->sc.data[SC_SUMMON_ELEMENTAL_SERPENS].val2;
+			sd->skill_elemagic_dmgup[ELE_POISON] += sd->sc.data[SC_SUMMON_ELEMENTAL_SERPENS].val2;
 		}
-		// +MNUw7DCkMOAwxjCvMMswwzCv-
+		// フレイムテクニック
 		if(sd->sc.data[SC_FLAMETECHNIC].timer != -1) {
 			sd->skill_dmgup.id[sd->skill_dmgup.count] = MG_FIREBOLT;
 			sd->skill_dmgup.rate[sd->skill_dmgup.count] = sd->sc.data[SC_FLAMETECHNIC].val2;
-			sd->skill_dmgup.count+-+-;
+			sd->skill_dmgup.count++;
 		}
-		// +MLMw/DDrMMkw1TCpMPwwuQ-
+		// コールドフォース
 		if(sd->sc.data[SC_COLD_FORCE].timer != -1) {
 			sd->skill_dmgup.id[sd->skill_dmgup.count] = MG_COLDBOLT;
 			sd->skill_dmgup.rate[sd->skill_dmgup.count] = sd->sc.data[SC_COLD_FORCE].val2;
-			sd->skill_dmgup.count+-+-;
+			sd->skill_dmgup.count++;
 		}
-		// +MLAw7DCkMLkw1jDqMPwwug-
+		// グレイスブリーズ
 		if(sd->sc.data[SC_GRACE_BREEZE].timer != -1) {
 			sd->skill_dmgup.id[sd->skill_dmgup.count] = MG_LIGHTNINGBOLT;
 			sd->skill_dmgup.rate[sd->skill_dmgup.count] = sd->sc.data[SC_GRACE_BREEZE].val2;
-			sd->skill_dmgup.count+-+-;
+			sd->skill_dmgup.count++;
 		}
-		// +MKIw/DC5MLEwog-
+		// アースケア
 		if(sd->sc.data[SC_EARTH_CARE].timer != -1) {
 			sd->skill_dmgup.id[sd->skill_dmgup.count] = WZ_EARTHSPIKE;
 			sd->skill_dmgup.rate[sd->skill_dmgup.count] = sd->sc.data[SC_EARTH_CARE].val2;
-			sd->skill_dmgup.count+-+-;
+			sd->skill_dmgup.count++;
 		}
-		// +MMcwozD8MNcw3TCkMLowyzDzMLA-
+		// ディープポイズニング
 		if(sd->sc.data[SC_DEEP_POISONING].timer != -1) {
 			sd->skill_dmgup.id[sd->skill_dmgup.count] = SO_CLOUD_KILL;
 			sd->skill_dmgup.rate[sd->skill_dmgup.count] = sd->sc.data[SC_DEEP_POISONING].val2;
-			sd->skill_dmgup.count+-+-;
+			sd->skill_dmgup.count++;
 		}
-		// +MNUw7DCkMOAwojD8MN4w/A-
+		// フレイムアーマー
 		if(sd->sc.data[SC_FLAMEARMOR].timer != -1) {
-			sd->subele[ELE_FIRE] +-= sd->sc.data[SC_FLAMEARMOR].val2;
+			sd->subele[ELE_FIRE] += sd->sc.data[SC_FLAMEARMOR].val2;
 		}
-		// +MK8w6jC5ML8w6zCiMPww3jD8-
+		// クリスタルアーマー
 		if(sd->sc.data[SC_CRYSTAL_ARMOR].timer != -1) {
-			sd->subele[ELE_WATER] +-= sd->sc.data[SC_CRYSTAL_ARMOR].val2;
+			sd->subele[ELE_WATER] += sd->sc.data[SC_CRYSTAL_ARMOR].val2;
 		}
-		// +MKIwpDC6MKow1jC5MMgw/DDg-
+		// アイズオブストーム
 		if(sd->sc.data[SC_EYES_OF_STORM].timer != -1) {
-			sd->subele[ELE_WIND] +-= sd->sc.data[SC_EYES_OF_STORM].val2;
+			sd->subele[ELE_WIND] += sd->sc.data[SC_EYES_OF_STORM].val2;
 		}
-		// +MLkwyDDtMPMwsDDXMO0wxjCvMLcw5zDz-
+		// ストロングプロテクション
 		if(sd->sc.data[SC_STRONG_PROTECTION].timer != -1) {
-			sd->subele[ELE_EARTH] +-= sd->sc.data[SC_STRONG_PROTECTION].val2;
+			sd->subele[ELE_EARTH] += sd->sc.data[SC_STRONG_PROTECTION].val2;
 		}
-		// +MN0wpDC6MPMwtzD8MOswyQ-
+		// ポイズンシールド
 		if(sd->sc.data[SC_POISON_SHIELD].timer != -1) {
-			sd->subele[ELE_POISON] +-= sd->sc.data[SC_POISON_SHIELD].val2;
+			sd->subele[ELE_POISON] += sd->sc.data[SC_POISON_SHIELD].val2;
 		}
-		// +MKQw8zDGMPMwtzDWMKgwpDDg-
+		// インテンシブエイム
 		if(sd->sc.data[SC_INTENSIVE_AIM].timer != -1) {
 #ifdef PRE_RENEWAL
-			sd->watk +-= sd->sc.data[SC_INTENSIVE_AIM].val2;
+			sd->watk += sd->sc.data[SC_INTENSIVE_AIM].val2;
 #else
-			sd->plus_atk +-= sd->sc.data[SC_INTENSIVE_AIM].val2;
+			sd->plus_atk += sd->sc.data[SC_INTENSIVE_AIM].val2;
 #endif
-			sd->hit +-= sd->sc.data[SC_INTENSIVE_AIM].val3;
-			sd->critical +-= sd->sc.data[SC_INTENSIVE_AIM].val4 * 10;
+			sd->hit += sd->sc.data[SC_INTENSIVE_AIM].val3;
+			sd->critical += sd->sc.data[SC_INTENSIVE_AIM].val4 * 10;
 		}
-		// +MNIwyTClMPMwqzD8MMk-
+		// ヒドゥンカード
 		if(sd->sc.data[SC_HIDDEN_CARD].timer != -1) {
-			sd->patk +-= sd->sc.data[SC_HIDDEN_CARD].val2;
-			sd->long_weapon_damege_rate +-= sd->sc.data[SC_HIDDEN_CARD].val3;
+			sd->patk += sd->sc.data[SC_HIDDEN_CARD].val2;
+			sd->long_weapon_damege_rate += sd->sc.data[SC_HIDDEN_CARD].val3;
 		}
-		// +a2ZY63sm-
+		// 武士符
 		if(sd->sc.data[SC_TALISMAN_OF_WARRIOR].timer != -1) {
-			sd->patk +-= sd->sc.data[SC_TALISMAN_OF_WARRIOR].val2;
+			sd->patk += sd->sc.data[SC_TALISMAN_OF_WARRIOR].val2;
 		}
-		// +bNVeK3sm-
+		// 法師符
 		if(sd->sc.data[SC_TALISMAN_OF_MAGICIAN].timer != -1) {
-			sd->smatk +-= sd->sc.data[SC_TALISMAN_OF_MAGICIAN].val2;
+			sd->smatk += sd->sc.data[SC_TALISMAN_OF_MAGICIAN].val2;
 		}
-		// +TpSITHsm-
+		// 五行符
 		if(sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].timer != -1) {
-			sd->addele[ELE_FIRE]  +-= sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
-			sd->addele[ELE_WATER] +-= sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
-			sd->addele[ELE_WIND]  +-= sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
-			sd->addele[ELE_EARTH] +-= sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
-			sd->magic_addele[ELE_FIRE]  +-= sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
-			sd->magic_addele[ELE_WATER] +-= sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
-			sd->magic_addele[ELE_WIND]  +-= sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
-			sd->magic_addele[ELE_EARTH] +-= sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
+			sd->addele[ELE_FIRE]  += sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
+			sd->addele[ELE_WATER] += sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
+			sd->addele[ELE_WIND]  += sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
+			sd->addele[ELE_EARTH] += sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
+			sd->magic_addele[ELE_FIRE]  += sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
+			sd->magic_addele[ELE_WATER] += sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
+			sd->magic_addele[ELE_WIND]  += sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
+			sd->magic_addele[ELE_EARTH] += sd->sc.data[SC_TALISMAN_OF_FIVE_ELEMENTS].val2;
 		}
-		// +VttluU6UiEyWYw-
+		// 四方五行陣
 		if(sd->sc.data[SC_T_FIVETH_GOD].timer != -1) {
-			sd->smatk +-= sd->sc.data[SC_T_FIVETH_GOD].val2;
+			sd->smatk += sd->sc.data[SC_T_FIVETH_GOD].val2;
 		}
-		// +WSlXMHlelwo-
+		// 天地神霊
 		if(sd->sc.data[SC_HEAVEN_AND_EARTH].timer != -1) {
-			sd->short_weapon_damege_rate +-= sd->sc.data[SC_HEAVEN_AND_EARTH].val2;
-			sd->long_weapon_damege_rate +-= sd->sc.data[SC_HEAVEN_AND_EARTH].val2;
-			for(i = 0; i < ELE_MAX; i+-+-) {
-				sd->magic_addele[i] +-= sd->sc.data[SC_HEAVEN_AND_EARTH].val2;
+			sd->short_weapon_damege_rate += sd->sc.data[SC_HEAVEN_AND_EARTH].val2;
+			sd->long_weapon_damege_rate += sd->sc.data[SC_HEAVEN_AND_EARTH].val2;
+			for(i = 0; i < ELE_MAX; i++) {
+				sd->magic_addele[i] += sd->sc.data[SC_HEAVEN_AND_EARTH].val2;
 			}
 		}
-		// +TgmXCk4AT1M-
+		// 三霊一体
 		if(sd->sc.data[SC_TEMPORARY_COMMUNION].timer != -1) {
-			sd->patk +-= sd->sc.data[SC_TEMPORARY_COMMUNION].val2;
-			sd->smatk +-= sd->sc.data[SC_TEMPORARY_COMMUNION].val3;
-			sd->hplus +-= sd->sc.data[SC_TEMPORARY_COMMUNION].val4;
+			sd->patk += sd->sc.data[SC_TEMPORARY_COMMUNION].val2;
+			sd->smatk += sd->sc.data[SC_TEMPORARY_COMMUNION].val3;
+			sd->hplus += sd->sc.data[SC_TEMPORARY_COMMUNION].val4;
 		}
-		// +MGswgzCTMNYw7DDDMLcw8zCw-
+		// にゃんブレッシング
 		if(sd->sc.data[SC_BLESSING_OF_M_CREATURES].timer != -1) {
-			sd->patk +-= sd->sc.data[SC_BLESSING_OF_M_CREATURES].val2;
-			sd->smatk +-= sd->sc.data[SC_BLESSING_OF_M_CREATURES].val3;
+			sd->patk += sd->sc.data[SC_BLESSING_OF_M_CREATURES].val2;
+			sd->smatk += sd->sc.data[SC_BLESSING_OF_M_CREATURES].val3;
 		}
-		// +bwae0g-
+		// 漆黒
 		if(sd->sc.data[SC_HANDICAPSTATE_DEEPBLIND].timer != -1) {
 			sd->flee = 0;
 			sd->flee2 = 0;
 		}
-		// +cSFsF1Kb-
+		// 無気力
 		if(sd->sc.data[SC_HANDICAPSTATE_LASSITUDE].timer != -1) {
 			sd->critical = 0;
 		}
-		// +YCVRtw-
+		// 急冷
 		if(sd->sc.data[SC_HANDICAPSTATE_FROSTBITE].timer != -1) {
 			sd->def -= sd->def * sd->sc.data[SC_HANDICAPSTATE_FROSTBITE].val2 / 100;
 			sd->def2 -= sd->def2 * sd->sc.data[SC_HANDICAPSTATE_FROSTBITE].val2 / 100;
 			sd->mdef -= sd->mdef * sd->sc.data[SC_HANDICAPSTATE_FROSTBITE].val2 / 100;
 			sd->mdef2 -= sd->mdef2 * sd->sc.data[SC_HANDICAPSTATE_FROSTBITE].val2 / 100;
 		}
-		// +fVBmdlMW-
+		// 結晶化
 		if(sd->sc.data[SC_HANDICAPSTATE_CRYSTALLIZATION].timer != -1) {
 			sd->mdef = 0;
 			sd->mdef2 = 0;
 		}
-		// +Tg1eeA-
+		// 不幸
 		if(sd->sc.data[SC_HANDICAPSTATE_MISFORTUNE].timer != -1) {
 			sd->hit = 0;
 		}
-		// +Xzdr0g-
+		// 強毒
 		if(sd->sc.data[SC_HANDICAPSTATE_DEADLYPOISON].timer != -1) {
 			sd->def = 0;
 			sd->def2 = 0;
 		}
 	}
 
-	// +X3Fy/DD7ZycwbnQDT1M-
+	// 影狼・朧の球体
 	if(sd->elementball.num >= MAX_ELEMENTBALL) {
-		if(sd->elementball.ele == ELE_FIRE) {			/* +cGt7Jv8acI5ZKQ- */
-			sd->addele[ELE_EARTH] +-= 30;
+		if(sd->elementball.ele == ELE_FIRE) {			/* 火符：炎天 */
+			sd->addele[ELE_EARTH] += 30;
 		}
-		else if(sd->elementball.ele == ELE_WATER) {		/* +bDd7Jv8aVDmW6g- */
-			sd->addele[ELE_FIRE] +-= 30;
+		else if(sd->elementball.ele == ELE_WATER) {		/* 氷符：吹雪 */
+			sd->addele[ELE_FIRE] += 30;
 		}
-		else if(sd->elementball.ele == ELE_WIND) {		/* +mKh7Jv8al1JdUA- */
-			sd->addele[ELE_WATER] +-= 30;
+		else if(sd->elementball.ele == ELE_WIND) {		/* 風符：青嵐 */
+			sd->addele[ELE_WATER] += 30;
 		}
-		else if(sd->elementball.ele == ELE_EARTH) {		/* +Vx97Jv8aUltYSg- */
-			sd->addele[ELE_WIND] +-= 30;
+		else if(sd->elementball.ele == ELE_EARTH) {		/* 土符：剛塊 */
+			sd->addele[ELE_WIND] += 30;
 		}
 	}
 
-	// +MMYwszDzMOkw8zCrMPww3DD8MMowuQ-
+	// テコンランカーボーナス
 	if(sd->status.class_ == PC_CLASS_TK && sd->status.base_level >= 90 && ranking_get_pc_rank(sd,RK_TAEKWON) > 0)
 	{
 		sd->status.max_hp *= 3;
@@ -3312,28 +3291,28 @@ L_RECALC:
 	}
 
 #ifdef PRE_RENEWAL
-	// +Vx97Jv8aUltYSg-
+	// 土符：剛塊
 	if(sd->elementball.num && sd->elementball.ele == ELE_EARTH) {
-		sd->watk +-= sd->watk * sd->elementball.num * 10 / 100;
+		sd->watk += sd->watk * sd->elementball.num * 10 / 100;
 	}
 #endif
-	// +ML0wpjDrMKgwyjC4MPw-
+	// ソウルエナジー
 	if(sd->soulenergy.num > 0) {
 #ifdef PRE_RENEWAL
-		sd->matk1 +-= sd->soulenergy.num * 3;
-		sd->matk2 +-= sd->soulenergy.num * 3;
+		sd->matk1 += sd->soulenergy.num * 3;
+		sd->matk2 += sd->soulenergy.num * 3;
 #else
-		sd->plus_matk +-= sd->soulenergy.num * 3;
+		sd->plus_matk += sd->soulenergy.num * 3;
 #endif
 	}
 
-	// MATK+Tld7l1HmdAY-(+Z1aI3Gtj-)
+	// MATK乗算処理(杖補正)
 	if(sd->matk2_rate != 100) {
 		sd->matk1 = sd->matk1 * sd->matk2_rate / 100;
 		sd->matk2 = sd->matk2 * sd->matk2_rate / 100;
 	}
 
-	// +MLkwxjD8ML8wuVb6W5o-
+	// ステータス固定
 	if(sd->fix_status.max_hp > 0) {
 		sd->status.max_hp = sd->fix_status.max_hp;
 	}
@@ -3346,11 +3325,11 @@ L_RECALC:
 	}
 	if(sd->fix_status.matk > 0) {
 		sd->matk1 = sd->matk2 = sd->fix_status.matk;
-		// MATK+Tld7l1HmdAY-(+VvpbmlAk-*(+Z1aI3GtjACtnVojca2NO5VkW-))
+		// MATK乗算処理(固定値*(杖補正+杖補正以外))
 #ifdef PRE_RENEWAL
 		if(sd->matk_rate != 100 || sd->matk2_rate != 100) {
-			sd->matk1 = sd->matk1 * (sd->matk_rate +- sd->matk2_rate - 100) / 100;
-			sd->matk2 = sd->matk2 * (sd->matk_rate +- sd->matk2_rate - 100) / 100;
+			sd->matk1 = sd->matk1 * (sd->matk_rate + sd->matk2_rate - 100) / 100;
+			sd->matk2 = sd->matk2 * (sd->matk_rate + sd->matk2_rate - 100) / 100;
 		}
 #else
 		if(sd->matk2_rate != 100) {
@@ -3427,7 +3406,7 @@ L_RECALC:
 	if(sd->dmotion < 400)
 		sd->dmotion = 400;
 
-	// MATK+ZwBPTlAkT92WnA-
+	// MATK最低値保障
 #ifdef PRE_RENEWAL
 	if(sd->matk1 < 1)
 	 	sd->matk1 = 1;
@@ -3457,28 +3436,28 @@ L_RECALC:
 	if(sd->status.ap > sd->status.max_ap)
 		sd->status.ap = sd->status.max_ap;
 
-	// bTigereye+MEwwajBPMGowYzBmMEQwXzCJMNEwsTDDMMiQATBjMGZRQzBrYjswWQ-
+	// bTigereyeがなくなっていたらパケット送って元に戻す
 	if(b_tigereye == 1 && sd->special_state.infinite_tigereye == 0 && sd->sc.data[SC_TIGEREYE].timer == -1)
 		clif_status_load_id(sd,SI_TIGEREYE,0);
 
-	// bInfiniteEndure+MEwwajBPMGowYzBmMEQwXzCJMNEwsTDDMMgwkpABMGMwZlFDMGtiOzBZ-
+	// bInfiniteEndureがなくなっていたらパケットを送って元に戻す
 	if(b_endure == 1 && sd->special_state.infinite_endure == 0)
 		clif_status_load_id(sd,SI_ENDURE,0);
-	// bSpeedRate+MEwwajBPMGowYzBmMEQwXzCJMNEwsTDDMMgwkpABMGMwZlFDMGtiOzBZ-
+	// bSpeedRateがなくなっていたらパケットを送って元に戻す
 	if(b_speedrate != 0 && sd->speed_rate == 0)
 		clif_status_load_id(sd,SI_MOVHASTE_INFINITY,0);
 	else if(b_speedrate < sd->speed_rate)
 		clif_status_load_id(sd,SI_MOVHASTE_INFINITY,1);
 
-	// +igh7l1HmdAYwUzBTMH4wZw-
+	// 計算処理ここまで
 	if( sd->status_calc_pc_process > 1 ) {
-		// +MFMwbpWiZXAwTFGNXjB2hDBrVHwwcDCMMF8wbjBnMAFRjYoIe5cwWTCL-
+		// この関数が再帰的に呼ばれたので、再計算する
 		if( --calclimit ) {
 			sd->status_calc_pc_process = 1;
 			goto L_RECALC;
 		} else {
-			// +cSGWUDDrMPww1zBrMGowYzBfMG4wZ4oIe5diUzBhUgcwig-
-			printf("status_calc_pc: infinity loop!+AFw-n");
+			// 無限ループになったので計算打ち切り
+			printf("status_calc_pc: infinity loop!\n");
 		}
 	}
 	sd->status_calc_pc_process = 0;
@@ -3510,15 +3489,15 @@ L_RECALC:
 
 	if( memcmp(b_skill,sd->status.skill,sizeof(sd->status.skill)) || b_attackrange != sd->range.attackrange ) {
 		int type;
-		for(i=0; i<MAX_PCSKILL; i+-+-) {
-			// +MKsw/DDJMLkwrTDrMJIw7TC5MMgwVzBfMGgwTVNzZkJ2elLVV4swajCJcrZhS3VwXjgwkonjlmQ-
+		for(i=0; i<MAX_PCSKILL; i++) {
+			// カードスキルをロストしたとき即時発動型なら状態異常を解除
 			if(b_skill[i].flag == 1 && b_skill[i].lv > 0 && sd->status.skill[i].lv <= 0 && skill_get_inf(i) & INF_SELF) {
 				type = GetSkillStatusChangeTable(i);
 				if(type >= 0 && sd->sc.data[type].timer != -1)
 					status_change_end(&sd->bl, type, -1);
 			}
 		}
-		clif_skillinfoblock(sd);	// +MLkwrTDrkAFP4Q-
+		clif_skillinfoblock(sd);	// スキル送信
 	}
 
 	if(b_speed != sd->speed) {
@@ -3532,12 +3511,12 @@ L_RECALC:
 		pc_checkweighticon(sd);
 	}
 
-	for(i=0; i<12; i+-+-) {
-		if(b_paramb[i] +- b_paramc[i] != sd->paramb[i] +- sd->paramc[i]) {
+	for(i=0; i<12; i++) {
+		if(b_paramb[i] + b_paramc[i] != sd->paramb[i] + sd->paramc[i]) {
 			if(i < 6)
-				clif_updatestatus(sd,SP_STR+-i);
+				clif_updatestatus(sd,SP_STR+i);
 			else
-				clif_updatestatus(sd,SP_POW+-i-6);
+				clif_updatestatus(sd,SP_POW+i-6);
 		}
 	}
 
@@ -3625,7 +3604,7 @@ L_RECALC:
 	    (sd->sc.data[SC_PROVOKE].timer == -1 || sd->sc.data[SC_PROVOKE].val2 == 0) &&
 	    !unit_isdead(&sd->bl) )
 	{
-		// +MKow/DDIMNAw/DC1MPwwr3Z6UtU-
+		// オートバーサーク発動
 		status_change_start(&sd->bl,SC_PROVOKE,10,1,0,0,0,0);
 	}
 
@@ -3633,8 +3612,8 @@ L_RECALC:
 }
 
 /*==========================================
- * PC+MG4-amotion+MJKKCHuXMFcwZo/UMFk-
- * +YjswijBvZXRlcDBn-1+TuVOCg-
+ * PCのamotionを計算して返す
+ * 戻りは整数で1以上
  *------------------------------------------
  */
 static int status_calc_amotion_pc(struct map_session_data *sd)
@@ -3658,108 +3637,108 @@ static int status_calc_amotion_pc(struct map_session_data *sd)
 
 	nullpo_retr(0, sd);
 
-	/* ASPD+VvpbmjDcMPwwyjC5- */
+	/* ASPD固定ボーナス */
 	if(sd->fix_status.aspd) {
 		int fix_aspd = 2000 - sd->fix_status.aspd*10;
 		return (fix_aspd < 100)? 100:fix_aspd;
 	}
 
 #ifdef PRE_RENEWAL
-	/* +V/pnLA-ASPD+MG6KCHuX- */
-	if(sd->status.weapon < WT_MAX)	// +ckdiSzBuWDRUCDBvUCQwkjBdMG4wfjB+U9Zflw-
+	/* 基本ASPDの計算 */
+	if(sd->status.weapon < WT_MAX)	// 片手の場合は値をそのまま取得
 		base_amotion = job_db[sd->s_class.job].aspd_base[sd->status.weapon];
-	else	// 2+UgAwblg0VAgwbw-2+UgB1KDBuigh7lzCSiEwwRg-
-		base_amotion = (job_db[sd->s_class.job].aspd_base[sd->weapontype1] +- job_db[sd->s_class.job].aspd_base[sd->weapontype2]) * 140 / 200;
+	else	// 2刀の場合は2刀用の計算を行う
+		base_amotion = (job_db[sd->s_class.job].aspd_base[sd->weapontype1] + job_db[sd->s_class.job].aspd_base[sd->weapontype2]) * 140 / 200;
 
-	/* +V/pnLA-ASPD+MGtUBDDRMOkw4TD8ML8wbjDcMPwwyjC5MJKQaXUo- */
-	if(pc_isriding(sd))	// +mg5RdU/uffQ-
-		base_amotion = base_amotion - 1000 * (50+-10*pc_checkskill(sd,KN_CAVALIERMASTERY)) / 100 - (base_amotion * sd->paramc[4] / 1000) - (base_amotion * sd->paramc[1] / 250) +- 1000;
-	else if(pc_isdragon(sd))	// +MMkw6TC0MPMwyDDsMPwwyzDzMLA-
-		base_amotion = base_amotion - 1000 * (75+-5*pc_checkskill(sd,RK_DRAGONTRAINING)) / 100 - (base_amotion * sd->paramc[4] / 1000) - (base_amotion * sd->paramc[1] / 250) +- 1000;
-	else	// +mg5OVzBXMGYwRDBqMEQ-
+	/* 基本ASPDに各パラメータのボーナスを適用 */
+	if(pc_isriding(sd))	// 騎兵修練
+		base_amotion = base_amotion - 1000 * (50+10*pc_checkskill(sd,KN_CAVALIERMASTERY)) / 100 - (base_amotion * sd->paramc[4] / 1000) - (base_amotion * sd->paramc[1] / 250) + 1000;
+	else if(pc_isdragon(sd))	// ドラゴントレーニング
+		base_amotion = base_amotion - 1000 * (75+5*pc_checkskill(sd,RK_DRAGONTRAINING)) / 100 - (base_amotion * sd->paramc[4] / 1000) - (base_amotion * sd->paramc[1] / 250) + 1000;
+	else	// 騎乗していない
 		base_amotion = base_amotion - (base_amotion * sd->paramc[4] / 1000) - (base_amotion * sd->paramc[1] / 250);
 #else
-	/* +V/pnLA-ASPD+MG6KCHuX- */
-	if(sd->status.weapon < WT_MAX) {	// +ckdiSzBuWDRUCDBvUCQwkjBdMG4wfjB+U9Zflw-
+	/* 基本ASPDの計算 */
+	if(sd->status.weapon < WT_MAX) {	// 片手の場合は値をそのまま取得
 		base_amotion = (2000 - job_db[sd->s_class.job].aspd_base[sd->status.weapon]) / 10;
 		if(base_amotion > 144)
 			base_penalty = (100-(base_amotion-144)*2);
 		else
 			base_penalty = 100;
-	} else {	// 2+UgAwblg0VAgwbw-2+UgB1KDBuigh7lzCSiEwwRg-
+	} else {	// 2刀の場合は2刀用の計算を行う
 		base_amotion = (2000 - job_db[sd->s_class.job].aspd_base[sd->weapontype1]) / 10;
-		base_amotion = base_amotion +- (((2000 - job_db[sd->s_class.job].aspd_base[sd->weapontype2]) / 10) - 194) / 4;
+		base_amotion = base_amotion + (((2000 - job_db[sd->s_class.job].aspd_base[sd->weapontype2]) / 10) - 194) / 4;
 	}
 
-	/* +V/pnLA-ASPD+MGtUBDDRMOkw4TD8ML8wbjDcMPwwyjC5MJKQaXUo- */
+	/* 基本ASPDに各パラメータのボーナスを適用 */
 	if(sd->status.weapon < WT_MAX){
 		if( sd->status.weapon == WT_BOW ||
 		    sd->status.weapon == WT_MUSICAL ||
 		    sd->status.weapon == WT_WHIP ||
 		    (sd->status.weapon >= WT_HANDGUN && sd->status.weapon <= WT_GRENADE) )
-			base_amotion = (int)(200-(200-(base_amotion +- sqrt(sd->paramc[1]*(10-1/(float)400) +- sd->paramc[4]*9/(float)49) * base_penalty/100)));
+			base_amotion = (int)(200-(200-(base_amotion + sqrt(sd->paramc[1]*(10-1/(float)400) + sd->paramc[4]*9/(float)49) * base_penalty/100)));
 		else
-			base_amotion = (int)(200-(200-(base_amotion +- sqrt(sd->paramc[1]*(10+-10/(float)111) +- sd->paramc[4]*9/(float)49) * base_penalty/100)));
+			base_amotion = (int)(200-(200-(base_amotion + sqrt(sd->paramc[1]*(10+10/(float)111) + sd->paramc[4]*9/(float)49) * base_penalty/100)));
 	} else {
-		base_amotion = (int)(200-(200-(base_amotion +- sqrt(sd->paramc[1]*(10-1/(float)400) +- sd->paramc[4]*9/(float)49)*1.05)));
+		base_amotion = (int)(200-(200-(base_amotion + sqrt(sd->paramc[1]*(10-1/(float)400) + sd->paramc[4]*9/(float)49)*1.05)));
 	}
 	base_amotion = (2000-base_amotion*10);
 #endif
 
-	/* +dv4w2jDKMOswxjCjMG5SoHuX- */
+	/* 盾ペナルティの加算 */
 	if(sd->equip_index[EQUIP_INDEX_LARM] >= 0 && sd->inventory_data[sd->equip_index[EQUIP_INDEX_LARM]] && itemdb_isarmor(sd->inventory_data[sd->equip_index[EQUIP_INDEX_LARM]]->nameid) && job_db[sd->s_class.job].aspd_base[WT_MAX] != 0)
-		base_amotion +-= job_db[sd->s_class.job].aspd_base[WT_MAX];
+		base_amotion += job_db[sd->s_class.job].aspd_base[WT_MAX];
 
 	if(sd->sc.count > 0) {
-		// +MNIw/DDIMNAw7DDr-
+		// ヒートバレル
 		if(sd->sc.data[SC_HEAT_BARREL].timer != -1)
 			heatbarrel -= sd->sc.data[SC_HEAT_BARREL].val1 * 10;
 	}
 
 #ifdef PRE_RENEWAL
-	/* +MNww/DDKMLk-ADD_ASPD+MG6KCHuX- */
-	amotion = base_amotion +- sd->aspd_add +- heatbarrel;
+	/* ボーナスADD_ASPDの計算 */
+	amotion = base_amotion + sd->aspd_add + heatbarrel;
 #else
 	amotion = base_amotion;
 #endif
 
-	/* amotion+MExZCVMWMFkwi3K2YUt1cF44MG6KCHuX- */
+	/* amotionが変化する状態異常の計算 */
 	if(sd->sc.count > 0) {
-		/* amotion+MExYl1KgMFkwizC5MMYw/DC/MLkwbooIe5c- */
+		/* amotionが増加するステータスの計算 */
 
-		// +ecEwkl/YMIwwajBEMGc-
+		// 私を忘れないで
 		if(sd->sc.data[SC_DONTFORGETME].timer != -1) {
 			slow_val = sd->sc.data[SC_DONTFORGETME].val1;
 		}
 
-		// +kdFSWw-
+		// 金剛
 		if(sd->sc.data[SC_STEELBODY].timer != -1) {
 			if(slow_val < 25)
 				slow_val = 25;
 		}
 
-		// +MLgw5zCkMPMwyDDTMPwwyA-
+		// ジョイントビート
 		if(sd->sc.data[SC_JOINTBEAT].timer != -1) {
 			switch (sd->sc.data[SC_JOINTBEAT].val4) {
-				case 1:		// +YkuZlg-
+				case 1:		// 手首
 					if(slow_val < 25)
 						slow_val = 25;
 					break;
-				case 2:		// +gZ0-
+				case 2:		// 膝
 					if(slow_val < 10)
 						slow_val = 10;
 					break;
 			}
 		}
 
-		// +MLAw6TDTMMYw/DC3MOcw8zDVMKMw/DDrMMk-
+		// グラビテーションフィールド
 		if(sd->sc.data[SC_GRAVITATION].timer != -1) {
 			int penalty = sd->sc.data[SC_GRAVITATION].val1*5;
 			if(slow_val < penalty)
 				slow_val = penalty;
 		}
 
-		// +ecEwkn4bMIkwajBEMGc-
+		// 私を縛らないで
 		if(sd->sc.data[SC_DANCING].timer != -1 && sd->sc.data[SC_BARDDANCER].timer == -1) {
 			if(sd->sc.data[SC_LONGINGFREEDOM].timer != -1) {
 				if(sd->sc.data[SC_LONGINGFREEDOM].val1 < 5) {
@@ -3770,100 +3749,100 @@ static int status_calc_amotion_pc(struct map_session_data *sd)
 			}
 		}
 
-		// +MM8w6zC3MM0w/DC3MOcw8zCmMKkw/DCv-(+MNowyjDrMMYwow-)
+		// ハルシネーションウォーク(ペナルティ)
 		if(sd->sc.data[SC_HALLUCINATIONWALK_POSTDELAY].timer != -1) {
 			if(slow_val < 50)
 				slow_val = 50;
 		}
 
-		// +MNEw6TDpMKQwug-
+		// パラライズ
 		if(sd->sc.data[SC_PARALIZE].timer != -1) {
 			if(slow_val < 10)
 				slow_val = 10;
 		}
 
-		// +MNUw7TC5MMgw3zC5MMYwow-
+		// フロストミスティ
 		if(sd->sc.data[SC_FROSTMISTY].timer != -1) {
 			if(slow_val < 15)
 				slow_val = 15;
 		}
 
-		// +MNwwxzCjMNowpDDzMMYwozDzMLA-
+		// ボディペインティング
 		if(sd->sc.data[SC__BODYPAINT].timer != -1) {
 			if(slow_val < 25)
 				slow_val = 25;
 		}
 
-		// +MKQw8zDTMLgw0zDqMMYwow-
+		// インビジビリティ
 		if(sd->sc.data[SC__INVISIBILITY].timer != -1) {
 			int penalty = 50 - 10 * sd->sc.data[SC__INVISIBILITY].val1;
 			if(slow_val < penalty)
 				slow_val = penalty;
 		}
 
-		// +MN4wuTCrMOww/DDJ/xowsDDrMPww3zD8-
+		// マスカレード：グルーミー
 		if(sd->sc.data[SC__GROOMY].timer != -1) {
-			int penalty = 20 +- 10 * sd->sc.data[SC__GROOMY].val1;
+			int penalty = 20 + 10 * sd->sc.data[SC__GROOMY].val1;
 			if(slow_val < penalty)
 				slow_val = penalty;
 		}
 
-		// +MKIw/DC5MMkw6TCkMNY-
+		// アースドライブ
 		if(sd->sc.data[SC_EARTHDRIVE].timer != -1) {
 			if(slow_val < 25)
 				slow_val = 25;
 		}
 
-		// +MOEw6TDzMLMw6jD8-
+		// メランコリー
 		if(sd->sc.data[SC_GLOOMYDAY].timer != -1) {
-			int penalty = 15 +- 5 * sd->sc.data[SC_GLOOMYDAY].val1;
+			int penalty = 15 + 5 * sd->sc.data[SC_GLOOMYDAY].val1;
 			if(slow_val < penalty)
 				slow_val = penalty;
 		}
 
-		// +MOEw7TDzcgZfPg-
+		// メロン爆弾
 		if(sd->sc.data[SC_MELON_BOMB].timer != -1) {
 			int penalty = sd->sc.data[SC_MELON_BOMB].val1;
 			if(slow_val < penalty)
 				slow_val = penalty;
 		}
 
-		// +MNowpDDzMK0w6TD8-
+		// ペインキラー
 		if(sd->sc.data[SC_PAIN_KILLER].timer != -1) {
 			int penalty = sd->sc.data[SC_PAIN_KILLER].val1 * 10;
 			if(slow_val < penalty)
 				slow_val = penalty;
 		}
 
-		/* amotion+MExuG1wRMFkwizC5MMYw/DC/MLkwbooIe5c-1 */
+		/* amotionが減少するステータスの計算1 */
 
-		// +WJeQHzDdMPwwtzDnMPM-
+		// 増速ポーション
 		if(sd->sc.data[tmp = SC_SPEEDPOTION2].timer != -1 || sd->sc.data[tmp = SC_SPEEDPOTION1].timer != -1 || sd->sc.data[tmp = SC_SPEEDPOTION0].timer != -1)
 			haste_val1 = sd->sc.data[tmp].val2;
 
-		// +b8N+LjC1MOkw3jCkMPMwuDDlMPwwuQ-
+		// 濃縮サラマインジュース
 		if(sd->sc.data[SC_EXTRACT_SALAMINE_JUICE].timer != -1)
-			haste_val1 +-= sd->sc.data[SC_EXTRACT_SALAMINE_JUICE].val1;
+			haste_val1 += sd->sc.data[SC_EXTRACT_SALAMINE_JUICE].val1;
 
-		/* amotion+MExuG1wRMFkwizC5MMYw/DC/MLkwbooIe5c-2 */
+		/* amotionが減少するステータスの計算2 */
 
-		// +MMQw/DDPMPMwyTCvMKMwwzCxMPM-
+		// ツーハンドクィッケン
 		if(sd->sc.data[SC_TWOHANDQUICKEN].timer != -1)
 			haste_val2 = sd->sc.data[SC_TWOHANDQUICKEN].val2;
 
-		// +MLkw1DCiMK8wozDDMLEw8w-
+		// スピアクィッケン
 		if(sd->sc.data[SC_SPEARQUICKEN].timer != -1) {
 			if(haste_val2 < sd->sc.data[SC_SPEARQUICKEN].val2)
 				haste_val2 = sd->sc.data[SC_SPEARQUICKEN].val2;
 		}
 
-		// +MO8w8zDPMPMwyTCvMKMwwzCxMPM-
+		// ワンハンドクィッケン
 		if(sd->sc.data[SC_ONEHAND].timer != -1) {
 			if(haste_val2 < 30)
 				haste_val2 = 30;
 		}
 
-		// +MKIwyTDsMMow6jDzMOkwwzC3MOU-
+		// アドレナリンラッシュ
 		if(sd->sc.data[SC_ADRENALINE].timer != -1) {
 			int bonus;
 			if(sd->sc.data[SC_ADRENALINE].val2 || !battle_config.party_skill_penalty)
@@ -3874,7 +3853,7 @@ static int status_calc_amotion_pc(struct map_session_data *sd)
 				haste_val2 = bonus;
 		}
 
-		// +MKIwyTDsMMow6jDzMOkwwzC3MOU-2
+		// アドレナリンラッシュ2
 		if(sd->sc.data[SC_ADRENALINE2].timer != -1) {
 			int bonus;
 			if(sd->sc.data[SC_ADRENALINE2].val2 || !battle_config.party_skill_penalty)
@@ -3885,7 +3864,7 @@ static int status_calc_amotion_pc(struct map_session_data *sd)
 				haste_val2 = bonus;
 		}
 
-		// +WRWWfTBuMKIwtTC3MPMwrzDtMLk-
+		// 夕陽のアサシンクロス
 		if(sd->sc.data[SC_ASSNCROS].timer != -1) {
 			int bonus = sd->sc.data[SC_ASSNCROS].val2;
 			if(haste_val2 < bonus)
@@ -3897,14 +3876,14 @@ static int status_calc_amotion_pc(struct map_session_data *sd)
 				haste_val2 = bonus;
 		}
 
-		// +Zh8wbluJaX0-
+		// 星の安楽
 		if(sd->sc.data[SC_STAR_COMFORT].timer != -1) {
-			comfort_bonus = (sd->status.base_level +- sd->status.dex +- sd->status.luk)/10;
+			comfort_bonus = (sd->status.base_level + sd->status.dex + sd->status.luk)/10;
 			if(haste_val2 < comfort_bonus)
 				haste_val2 = comfort_bonus;
 		}
 
-		// +MKwwyDDqMPMwsDDVMKMw/DDQMPw-
+		// ガトリングフィーバー
 		if(sd->sc.data[SC_GATLINGFEVER].timer != -1) {
 #ifdef PRE_RENEWAL
 			ferver_bonus = sd->sc.data[SC_GATLINGFEVER].val1*2;
@@ -3915,40 +3894,40 @@ static int status_calc_amotion_pc(struct map_session_data *sd)
 				haste_val2 = ferver_bonus;
 		}
 
-		// +MN4wwzDJMM0wuTCtMOMw8zC7MOkw/A-
+		// マッドネスキャンセラー
 		if(sd->sc.data[SC_MADNESSCANCEL].timer != -1) {
-			int bonus = 20+-ferver_bonus;
+			int bonus = 20+ferver_bonus;
 			if(haste_val2 < bonus)
 				haste_val2 = bonus;
 		}
 
-		// +cLl6dA- -+U80--
+		// 点穴 -反-
 		if(sd->sc.data[SC_GENTLETOUCH_CHANGE].timer != -1) {
 			int bonus = sd->sc.data[SC_GENTLETOUCH_CHANGE].val4;
 			if(haste_val2 < bonus)
 				haste_val2 = bonus;
 		}
 
-		// +MLkwpDDzMLAwwDDzMLk-
+		// スイングダンス
 		if(sd->sc.data[SC_SWING].timer != -1) {
 			int bonus = sd->sc.data[SC_SWING].val4;
 			if(haste_val2 < bonus)
 				haste_val2 = bonus;
 		}
 
-		// +MMAw8zC5MKYwozC6MKYwqTD8MLA-
+		// ダンスウィズウォーグ
 		if(sd->sc.data[SC_DANCE_WITH_WUG].timer != -1) {
-			int bonus = 2 +- sd->sc.data[SC_DANCE_WITH_WUG].val4;
+			int bonus = 2 + sd->sc.data[SC_DANCE_WITH_WUG].val4;
 			if(haste_val2 < bonus)
 				haste_val2 = bonus;
 		}
-		// +Zh8wbmnLMEg-
+		// 星の構え
 		if(sd->sc.data[SC_STARSTANCE].timer != -1)
-			haste_val1 +-= sd->sc.data[SC_STARSTANCE].val2;
+			haste_val1 += sd->sc.data[SC_STARSTANCE].val2;
 
-		/* +MF0wbk7W- */
+		/* その他 */
 
-		// +MNAw/DC1MPwwrw-
+		// バーサーク
 #ifdef PRE_RENEWAL
 		if(sd->sc.data[SC_BERSERK].timer != -1)
 			berserk_flag = 1;
@@ -3957,110 +3936,110 @@ static int status_calc_amotion_pc(struct map_session_data *sd)
 			berserk_flag = 1;
 #endif
 
-		// +MMcwozDVMKcw8zDAMPw-
+		// ディフェンダー
 		if(sd->sc.data[SC_DEFENDER].timer != -1)
-			bonus_add +-= sd->sc.data[SC_DEFENDER].val3;
+			bonus_add += sd->sc.data[SC_DEFENDER].val3;
 
-		// +MNUwoTCkMMYwozDzMLAwuTDUMOowwzDI-
+		// ファイティングスピリット
 		if(sd->sc.data[SC_FIGHTINGSPIRIT].timer != -1)
 			bonus_add -= sd->sc.data[SC_FIGHTINGSPIRIT].val3;
 
-		// +MKwwuTDI-
+		// ガスト
 		if(sd->sc.data[SC_GUST].timer != -1)
 			bonus_add -= sd->sc.data[SC_GUST].val2;
 
-		// +MNYw6TC5MMg-
+		// ブラスト
 		if(sd->sc.data[SC_BLAST].timer != -1)
 			bonus_add -= sd->sc.data[SC_BLAST].val2;
 
-		// +MO8wpDDrMMkwuTDIMPww4A-
+		// ワイルドストーム
 		if(sd->sc.data[SC_WILD_STORM].timer != -1)
 			bonus_add -= sd->sc.data[SC_WILD_STORM].val2;
 
-		// +MOIw8zC5ML8w/FkJjqswxzDTMOswwQ-
+		// モンスター変身デビルチ
 		if(sd->sc.data[SC_MONSTER_TRANSFORM].timer != -1 && sd->sc.data[SC_MONSTER_TRANSFORM].val1 == 1109)
 			bonus_add -= -10;
 
-		// +X3EwbptC-
+		// 影の魂
 		if(sd->sc.data[SC_SOULSHADOW].timer != -1)
 			bonus_add -= sd->sc.data[SC_SOULSHADOW].val3;
 
-		// +X+BbnzBqT+Ff9Q-
+		// 忠実な信念
 		if(sd->sc.data[SC_SINCERE_FAITH].timer != -1)
 			bonus_add -= sd->sc.data[SC_SINCERE_FAITH].val2;
 
-		// +l1lbwg-
+		// 静寂
 		if(sd->sc.data[SC_HANDICAPSTATE_DEEPSILENCE].timer != -1)
-			bonus_add +-= sd->sc.data[SC_HANDICAPSTATE_DEEPSILENCE].val2;
+			bonus_add += sd->sc.data[SC_HANDICAPSTATE_DEEPSILENCE].val2;
 	}
 
-	/* +WSqWfTBoZwgwaGYfMG5gqptU- */
+	/* 太陽と月と星の悪魔 */
 	if((skilllv = pc_checkskill(sd,SG_DEVIL)) > 0 && sd->status.job_level >= 50) {
-		int bonus = skilllv*3 +- comfort_bonus;
+		int bonus = skilllv*3 + comfort_bonus;
 		if(haste_val2 < bonus)
 			haste_val2 = bonus;
 	}
 
-	/* slow_val+MGg-haste_val1+MGg-haste_val2+MJJSoHuXMFkwiw- */
+	/* slow_valとhaste_val1とhaste_val2を加算する */
 	bonus_rate = slow_val - haste_val1 - haste_val2;
 
 #ifdef PRE_RENEWAL
-	/* bonus_rate+MGswojCkMMYw4DBuMNww/DDKMLkwklKge5cwWTCL- */
+	/* bonus_rateにアイテムのボーナスを加算する */
 	if(sd->aspd_add_rate != 0 || sd->aspd_rate != 0) {
-		sd->aspd_rate +-= sd->aspd_add_rate;
+		sd->aspd_rate += sd->aspd_add_rate;
 		bonus_rate -= sd->aspd_rate;
 	}
 #endif
 
-	/* +MNAw/DC1MPwwrw- */
+	/* バーサーク */
 	if(berserk_flag)
 		bonus_rate -= 30;
 
-	/* +MNUw6jD8MK0w4zC5MMg- */
+	/* フリーキャスト */
 	if(sd->ud.skilltimer != -1 && (skilllv = pc_checkskill(sd,SA_FREECAST)) > 0)
-		bonus_rate +-= 5 * (10 - skilllv);
+		bonus_rate += 5 * (10 - skilllv);
 
-	/* bonus_rate+MG6KCHuX- */
+	/* bonus_rateの計算 */
 	if(bonus_rate != 0)
-		amotion = amotion * (bonus_rate+-100) / 100;
+		amotion = amotion * (bonus_rate+100) / 100;
 
-	/* +MKIwyTDQMPMwuTDJMNYwwzCv- */
+	/* アドバンスドブック */
 	if(sd->weapontype1 == WT_BOOK && (skilllv = pc_checkskill(sd,SA_ADVANCEDBOOK)) > 0)
-		amotion -= amotion * (skilllv+-1) / 2 / 100;
+		amotion -= amotion * (skilllv+1) / 2 / 100;
 
-	/* +MLcw8zCwMOswojCvMLcw5zDz- */
+	/* シングルアクション */
 	if(sd->status.weapon >= WT_HANDGUN && sd->status.weapon <= WT_GRENADE && (skilllv = pc_checkskill(sd,GS_SINGLEACTION)) > 0)
-		amotion -= amotion * (skilllv+-1) / 2 / 100;
+		amotion -= amotion * (skilllv+1) / 2 / 100;
 
-	/* bonus_add+MG5SoHuX- */
+	/* bonus_addの加算 */
 	if(bonus_add != 0)
-		amotion +-= bonus_add;
+		amotion += bonus_add;
 
 #ifndef PRE_RENEWAL
-	if(pc_isriding(sd))	// +mg5RdU/uffQ-
+	if(pc_isriding(sd))	// 騎兵修練
 		amotion = amotion * (150-10*pc_checkskill(sd,KN_CAVALIERMASTERY)) / 100;
-	else if(pc_isdragon(sd))	// +MMkw6TC0MPMwyDDsMPwwyzDzMLA-
+	else if(pc_isdragon(sd))	// ドラゴントレーニング
 		amotion = amotion * (125-5*pc_checkskill(sd,RK_DRAGONTRAINING)) / 100;
 
-	/* +MKIwpDDGMOAwbjDcMPwwyjC5MJJSoHuXMFkwiw- */
+	/* アイテムのボーナスを加算する */
 	if(sd->aspd_add_rate != 0 || sd->aspd_rate != 0) {
-		sd->aspd_rate +-= sd->aspd_add_rate;
+		sd->aspd_rate += sd->aspd_add_rate;
 		amotion = amotion * (100-sd->aspd_rate) / 100;
 	}
 
-	/* +MNww/DDKMLk-ADD_ASPD+MG6KCHuX- */
-	amotion +-= sd->aspd_add +- heatbarrel;
+	/* ボーナスADD_ASPDの計算 */
+	amotion += sd->aspd_add + heatbarrel;
 #endif
 
-	/* +XA9lcFIHMIpOCjBS- */
+	/* 小数切り上げ */
 	amotion = ceil(amotion);
 
 	return (amotion < 1)? 1:(int)amotion;
 }
 
 /*==========================================
- * PC+MG4-speed+MJKKCHuXMFcwZo/UMFk-
- * +YjswijBvZXRlcDBn-1+TuVOCg-
+ * PCのspeedを計算して返す
+ * 戻りは整数で1以上
  *------------------------------------------
  */
 static int status_calc_speed_pc(struct map_session_data *sd, int speed)
@@ -4076,51 +4055,51 @@ static int status_calc_speed_pc(struct map_session_data *sd, int speed)
 
 	nullpo_retr(0, sd);
 
-	if(sd->fix_status.speed > MIN_WALK_SPEED && sd->fix_status.speed <= MAX_WALK_SPEED)	// SPEED+Vvpbmg-
+	if(sd->fix_status.speed > MIN_WALK_SPEED && sd->fix_status.speed <= MAX_WALK_SPEED)	// SPEED固定
 		return sd->fix_status.speed;
-	if(sd->ud.skilltimer != -1 && pc_checkskill(sd,SA_FREECAST) > 0)	// +MNUw6jD8MK0w4zC5MMhytmFLMGowiXn7UtWQH16mVvpbmg-
+	if(sd->ud.skilltimer != -1 && pc_checkskill(sd,SA_FREECAST) > 0)	// フリーキャスト状態なら移動速度固定
 		return sd->speed * (175 - 5 * pc_checkskill(sd,SA_FREECAST)) / 100;
-	if(sd->sc.data[SC_STEELBODY].timer != -1)	// +kdFSWzBveftS1ZAfXqZW+lua-
+	if(sd->sc.data[SC_STEELBODY].timer != -1)	// 金剛は移動速度固定
 		return 200;
-	if(sd->ud.skilltimer != -1 && sd->ud.skillid == LG_EXEEDBREAK)		// +MKQwrzC3MPwwyTDWMOwwpDCvMG6KYFUxTi0-
+	if(sd->ud.skilltimer != -1 && sd->ud.skillid == LG_EXEEDBREAK)		// イクシードブレイクの詠唱中
 		return (150 - 10 * sd->ud.skilllv);
-	if(sd->sc.data[SC_FULL_THROTTLE].timer != -1)		// +MNUw6zC5MO0wwzDIMOtOLQ-
+	if(sd->sc.data[SC_FULL_THROTTLE].timer != -1)		// フルスロットル中
 		return 50;
 
-	/* speed+MExZCVMWMFkwizC5MMYw/DC/MLkwbooIe5c- */
+	/* speedが変化するステータスの計算 */
 	if(sd->sc.count > 0) {
-		/* speed+MExYl1KgMFkwizC5MMYw/DC/MLkwbooIe5c- */
+		/* speedが増加するステータスの計算 */
 
-		// +MMgw8zDNMOswyTDpMKQw1g-
+		// トンネルドライブ
 		if(sd->sc.data[SC_HIDING].timer != -1 && pc_checkskill(sd,RG_TUNNELDRIVE) > 0) {
 			slow_val = 120 - 6 * pc_checkskill(sd,RG_TUNNELDRIVE);
-		// +MMEwpzCkMLkwpjCpMPwwrw-(+m0JytmFL-)
+		// チェイスウォーク(魂状態)
 		} else if(sd->sc.data[SC_CHASEWALK].timer != -1 && sd->sc.data[SC_ROGUE].timer != -1) {
 			slow_val = -40;
 		} else {
-			// +kB9epm4bXBE-
+			// 速度減少
 			if(sd->sc.data[SC_DECREASEAGI].timer != -1)
 				slow_val = 25;
 
-			// +ecEwkn4bMIkwajBEMGc-
+			// 私を縛らないで
 			if(sd->sc.data[SC_LONGINGFREEDOM].timer != -1) {
 				int penalty = 50 - 10 * sd->sc.data[SC_LONGINGFREEDOM].val1;
 				if(slow_val < penalty)
 					slow_val = penalty;
-			// +jgowig-/+bxRZTw-
+			// 踊り/演奏
 			} else if(sd->sc.data[SC_DANCING].timer != -1) {
-				int penalty = 500 - (40 +- 10 * (sd->sc.data[SC_BARDDANCER].timer != -1)) * pc_checkskill(sd,((sd->sex == SEX_MALE)? BA_MUSICALLESSON: DC_DANCINGLESSON));
+				int penalty = 500 - (40 + 10 * (sd->sc.data[SC_BARDDANCER].timer != -1)) * pc_checkskill(sd,((sd->sex == SEX_MALE)? BA_MUSICALLESSON: DC_DANCINGLESSON));
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MK8woTCwMN4wpDCi-
+			// クァグマイア
 			if(sd->sc.data[SC_QUAGMIRE].timer != -1) {
 				if(slow_val < 50)
 					slow_val = 50;
 			}
 
-			// +ecEwkl/YMIwwajBEMGc-
+			// 私を忘れないで
 			if(sd->sc.data[SC_DONTFORGETME].timer != -1) {
 				if(slow_val < sd->sc.data[SC_DONTFORGETME].val2)
 					slow_val = sd->sc.data[SC_DONTFORGETME].val2;
@@ -4130,65 +4109,65 @@ static int status_calc_speed_pc(struct map_session_data *sd, int speed)
 					slow_val = sd->sc.data[SC_DONTFORGETME_].val2;
 			}
 
-			// +VGowRA-
+			// 呪い
 			if(sd->sc.data[SC_CURSE].timer != -1) {
 				if(slow_val < 300)
 					slow_val = 300;
 			}
 
-			// +MMEwpzCkMLkwpjCpMPwwrw-(+kBpeOA-)
+			// チェイスウォーク(通常)
 			if(sd->sc.data[SC_CHASEWALK].timer != -1 && sd->sc.data[SC_ROGUE].timer == -1) {
 				int penalty = 35 - 5 * sd->sc.data[SC_CHASEWALK].val1;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MN4w/DC3MOUwqjDWMKIw0zC5-
+			// マーシュオブアビス
 			if(sd->sc.data[SC_MARSHOFABYSS].timer != -1) {
 				if(slow_val < sd->sc.data[SC_MARSHOFABYSS].val2)
 					slow_val = sd->sc.data[SC_MARSHOFABYSS].val2;
 			}
 
-			// +MM8w6zC3MM0w/DC3MOcw8zCmMKkw/DCv-(+MNowyjDrMMYwow-)
+			// ハルシネーションウォーク(ペナルティ)
 			if(sd->sc.data[SC_HALLUCINATIONWALK_POSTDELAY].timer != -1) {
 				if(slow_val < 100)
 					slow_val = 100;
 			}
 
-			// +MKsw4jDVMOkw/DC4MOU-
+			// カモフラージュ
 			if(sd->sc.data[SC_CAMOUFLAGE].timer != -1 && sd->sc.data[SC_CAMOUFLAGE].val1 > 2) {
 				int penalty = 25 * (5 - sd->sc.data[SC_CAMOUFLAGE].val1);
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MLkwxjDrMLkw1TCjMPww6zDJ-(+T391KIAF-)
+			// ステルスフィールド(使用者)
 			if(sd->sc.data[SC_STEALTHFIELD_MASTER].timer != -1) {
 				if(slow_val < 20)
 					slow_val = 20;
 			}
 
-			// +MLAw6TDTMMYw/DC3MOcw8zDVMKMw/DDrMMk-
+			// グラビテーションフィールド
 			if(battle_config.player_gravitation_type && sd->sc.data[SC_GRAVITATION].timer != -1) {
 				int penalty = sd->sc.data[SC_GRAVITATION].val1 * 5;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +fVBaWohjiMU-
+			// 結婚衣装
 			if(sd->sc.data[SC_WEDDING].timer != -1) {
 				if(slow_val < 100)
 					slow_val = 100;
 			}
 
-			// +MLgw5zCkMPMwyDDTMPwwyA-
+			// ジョイントビート
 			if(sd->sc.data[SC_JOINTBEAT].timer != -1) {
 				int penalty = 0;
 				switch (sd->sc.data[SC_JOINTBEAT].val4) {
-				case 0:	// +jbOZlg-
+				case 0:	// 足首
 					penalty = 50;
 					break;
-				case 2:	// +gZ0-
+				case 2:	// 膝
 					penalty = 30;
 					break;
 				}
@@ -4196,12 +4175,12 @@ static int status_calc_speed_pc(struct map_session_data *sd, int speed)
 					slow_val = penalty;
 			}
 
-			// +MK8w7TD8MK0w8zCw-(+XnNXMHn7UtU-)
+			// クローキング(平地移動)
 			if(sd->sc.data[SC_CLOAKING].timer != -1) {
 				int i;
 				int check = 1;
-				for(i=0; i<8; i+-+-) {
-					if(map_getcell(sd->bl.m,sd->bl.x+-dirx[i],sd->bl.y+-diry[i],CELL_CHKNOPASS)) {
+				for(i=0; i<8; i++) {
+					if(map_getcell(sd->bl.m,sd->bl.x+dirx[i],sd->bl.y+diry[i],CELL_CHKNOPASS)) {
 						check = 0;
 						break;
 					}
@@ -4213,19 +4192,19 @@ static int status_calc_speed_pc(struct map_session_data *sd, int speed)
 				}
 			}
 
-			// +eftS1ZAfXqZPTk4L-(+MKIwpDDGMOA-)
+			// 移動速度低下(アイテム)
 			if(sd->sc.data[SC_SLOWPOTION].timer != -1) {
 				if(slow_val < 100)
 					slow_val = 100;
 			}
 
-			// +MKwwyDDqMPMwsDDVMKMw/DDQMPw-
+			// ガトリングフィーバー
 			if(sd->sc.data[SC_GATLINGFEVER].timer != -1) {
 				if(slow_val < 100)
 					slow_val = 100;
 			}
 
-			// +bDSQQQ-
+			// 水遁
 			if(sd->sc.data[SC_SUITON].timer != -1) {
 				if(sd->sc.data[SC_SUITON].val4) {
 					if(slow_val < 50)
@@ -4233,59 +4212,59 @@ static int status_calc_speed_pc(struct map_session_data *sd, int speed)
 				}
 			}
 
-			// +MNUw7TC5MMgw3zC5MMYwow-
+			// フロストミスティ
 			if(sd->sc.data[SC_FROSTMISTY].timer != -1) {
 				if(slow_val < 50)
 					slow_val = 50;
 			}
 
-			// +MN4wuTCrMOww/DDJ/xow7DCkMLgwzTC5-
+			// マスカレード：レイジネス
 			if(sd->sc.data[SC__LAZINESS].timer != -1) {
 				if(slow_val < 10)
 					slow_val = 10;
 			}
 
-			// +MN4wuTCrMOww/DDJ/xowsDDrMPww3zD8-
+			// マスカレード：グルーミー
 			if(sd->sc.data[SC__GROOMY].timer != -1) {
-				int penalty = 5 +- 5 * sd->sc.data[SC__GROOMY].val1;
+				int penalty = 5 + 5 * sd->sc.data[SC__GROOMY].val1;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MOEw7TDzcgZfPg-
+			// メロン爆弾
 			if(sd->sc.data[SC_MELON_BOMB].timer != -1) {
 				int penalty = sd->sc.data[SC_MELON_BOMB].val1;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MNAwpDDzMMkwyDDpMMMw1w-
+			// バインドトラップ
 			if(sd->sc.data[SC_B_TRAP].timer != -1) {
 				int penalty = sd->sc.data[SC_B_TRAP].val3;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
-			// +kc1Sm4q/e8A-
+			// 重力調節
 			if(sd->sc.data[SC_CREATINGSTAR].timer != -1){
 				if( slow_val < 10 ){
 					slow_val = 10;
 				}
 			}
 
-			// +MOow0DCmMPMwyQ-
+			// リバウンド
 			if(sd->sc.data[SC_REBOUND].timer != -1) {
 				if(slow_val < 25)
 					slow_val = 25;
 			}
 
-			// +MLcw/DDrMMkwwTCnMPww8zDpMMMwtzDl-
+			// シールドチェーンラッシュ
 			if(sd->sc.data[SC_SHIELDCHAINRUSH].timer != -1) {
 				int penalty = sd->sc.data[SC_SHIELDCHAINRUSH].val3;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MLAw6TCmMPMwyTCwMOkw0zDGMPwwtzDnMPM-
+			// グラウンドグラビテーション
 			if(sd->sc.data[SC_GROUNDGRAVITY].timer != -1) {
 				int penalty = sd->sc.data[SC_GROUNDGRAVITY].val3;
 				if(slow_val < penalty)
@@ -4293,43 +4272,43 @@ static int status_calc_speed_pc(struct map_session_data *sd, int speed)
 			}
 		}
 
-		/* speed+MExuG1wRMFkwizC5MMYw/DC/MLmKCHuX-1 */
+		/* speedが減少するステータス計算1 */
 
-		// +MLkw1DD8MMkw3TD8MLcw5zDz-
+		// スピードポーション
 		if(sd->sc.data[SC_SPEEDUP1].timer != -1)
 			haste_val1 = 50;
 
-		// +kB9epliXUqA-
+		// 速度増加
 		if(sd->sc.data[SC_INCREASEAGI].timer != -1) {
 			if(haste_val1 < 25)
 				haste_val1 = 25;
 		}
 
-		// +MLUw3TD8MMibVGzV-(+eftS1ZAfXqZYl1Kg-)
+		// サポート魔法(移動速度増加)
 		if(sd->sc.data[SC_SUPPORT_SPEED].timer != -1) {
 			if(haste_val1 < 25)
 				haste_val1 = 25;
 		}
 
-		// +MKYwpDDzMMkwpjCpMPwwrw-
+		// ウインドウォーク
 		if(sd->sc.data[SC_WINDWALK].timer != -1) {
 			int bonus = 2 * sd->sc.data[SC_WINDWALK].val1;
 			if(haste_val1 < bonus)
 				haste_val1 = bonus;
 		}
 
-		// +MKsw/DDIMNYw/DC5MMg-
+		// カートブースト
 		if(sd->sc.data[SC_CARTBOOST].timer != -1) {
 			if(haste_val1 < 20)
 				haste_val1 = 20;
 		}
 
-		// +MK8w7TD8MK0w8zCw-(+WMFsvzBEeftS1Q-)
+		// クローキング(壁沿い移動)
 		if(sd->sc.data[SC_CLOAKING].timer != -1) {
 			int i;
 			int check = 1;
-			for(i=0; i<8; i+-+-) {
-				if(map_getcell(sd->bl.m,sd->bl.x+-dirx[i],sd->bl.y+-diry[i],CELL_CHKNOPASS)) {
+			for(i=0; i<8; i++) {
+				if(map_getcell(sd->bl.m,sd->bl.x+dirx[i],sd->bl.y+diry[i],CELL_CHKNOPASS)) {
 					check = 0;
 					break;
 				}
@@ -4341,119 +4320,119 @@ static int status_calc_speed_pc(struct map_session_data *sd, int speed)
 			}
 		}
 
-		// +MK8w7TD8MK0w8zCwMKgwrzC3MPwwyQ-
+		// クローキングエクシード
 		if(sd->sc.data[SC_CLOAKINGEXCEED].timer != -1) {
 			int bonus = sd->sc.data[SC_CLOAKINGEXCEED].val1 * 10;
 			if(haste_val1 < bonus)
 				haste_val1 = bonus;
 		}
 
-		// +MNAw/DC1MPwwrw-
+		// バーサーク
 		if(sd->sc.data[SC_BERSERK].timer != -1) {
 			if(haste_val1 < 25)
 				haste_val1 = 25;
 		}
 
-		// +ML8wpDDqMK4-
+		// タイリギ
 		if(sd->sc.data[SC_RUN].timer != -1) {
 			if(haste_val1 < 55)
 				haste_val1 = 55;
 		}
 
-		// +fcpgJVbekH8-
+		// 緊急回避
 		if(sd->sc.data[SC_AVOID].timer != -1) {
 			int bonus = 10 * sd->sc.data[SC_AVOID].val1;
 			if(haste_val1 < bonus)
 				haste_val1 = bonus;
 		}
 
-		// +MKYw6zDVMMAwwzC3MOU-
+		// ウルフダッシュ
 		if(sd->sc.data[SC_WUGDASH].timer != -1) {
 			if(haste_val2 < 50)
 				haste_val2 = 50;
 		}
 
-		// +MKIwrzC7MOkw7DD8MLcw5zDz-
+		// アクセラレーション
 		if(sd->sc.data[SC_ACCELERATION].timer != -1) {
 			if(haste_val2 < 25)
 				haste_val2 = 25;
 		}
 
-		// +MLkwpDDzMLAwwDDzMLk-
+		// スイングダンス
 		if(sd->sc.data[SC_SWING].timer != -1) {
 			if(haste_val1 < 25)
 				haste_val1 = 25;
 		}
 
-		// +MKsw/DDIMNYw/DC5MMg-
+		// カートブースト
 		if(sd->sc.data[SC_GN_CARTBOOST].timer != -1) {
-			int bonus = 25 +- ((sd->sc.data[SC_GN_CARTBOOST].val1 +- 1) / 2) * 25;
+			int bonus = 25 + ((sd->sc.data[SC_GN_CARTBOOST].val1 + 1) / 2) * 25;
 			if(haste_val1 < bonus)
 				haste_val1 = bonus;
 		}
 
-		// +eftS1ZAfXqZYl1Kg-(+MKIwpDDGMOA-)
+		// 移動速度増加(アイテム)
 		if(sd->sc.data[SC_SPEEDUP0].timer != -1) {
 			if(haste_val1 < 25)
 				haste_val1 = 25;
 		}
 
-		// +MKYwozDzMMkwuTDGMMMw1w-
+		// ウィンドステップ
 		if(sd->sc.data[SC_WIND_STEP].timer != -1) {
 			int bonus = sd->sc.data[SC_WIND_STEP].val3;
 			if(haste_val1 < bonus)
 				haste_val1 = bonus;
 		}
 
-		// +MMEw4zC/MOow8zCw-
+		// チャタリング
 		if(sd->sc.data[SC_CHATTERING].timer != -1) {
 			int bonus = sd->sc.data[SC_CHATTERING].val3;
 			if(haste_val1 < bonus)
 				haste_val1 = bonus;
 		}
 
-		// +MKIwrzDpMKYwuTDAMMMwtzDl-
+		// アクラウスダッシュ
 		if(sd->sc.data[SC_ARCLOUSEDASH].timer != -1) {
 			if(haste_val1 < 25)
 				haste_val1 = 25;
 		}
 
-		// +i2ZiEg-
+		// 警戒
 		if(sd->sc.data[SC_HISS].timer != -1 && sd->sc.data[SC_HISS].val4 > 0) {
 			if(haste_val1 < sd->sc.data[SC_HISS].val3)
 				haste_val1 = sd->sc.data[SC_HISS].val3;
 		}
 
-		// +WRVxPDBRMG4wuzDsMMow/DDH-
+		// 夕焼けのセレナーデ
 		if(sd->sc.data[SC_JAWAII_SERENADE].timer != -1) {
 			int bonus = sd->sc.data[SC_JAWAII_SERENADE].val4;
 			if(haste_val1 < bonus)
 				haste_val1 = bonus;
 		}
 
-		// +MNcw7TDzMMYw6TDeMPwwwQ-
+		// プロンテラマーチ
 		if(sd->sc.data[SC_PRON_MARCH].timer != -1) {
 			int bonus = sd->sc.data[SC_PRON_MARCH].val3;
 			if(haste_val1 < bonus)
 				haste_val1 = bonus;
 		}
 
-		// +X3GWoDCM-
+		// 影隠れ
 		if(sd->sc.data[SC_SHADOW_CLOCK].timer != -1) {
 			int bonus = sd->sc.data[SC_SHADOW_CLOCK].val3;
 			if(haste_val1 < bonus)
 				haste_val1 = bonus;
 		}
 
-		/* speed+MExuG1wRMFkwizC5MMYw/DC/MLmKCHuX-2 */
+		/* speedが減少するステータス計算2 */
 
-		// +h41UCA-
+		// 融合
 		if(sd->sc.data[SC_FUSION].timer != -1)
 			haste_val2 = 25;
 
-		/* +MF0wbk7W- */
+		/* その他 */
 
-		// +MMcwozDVMKcw8zDAMPw-
+		// ディフェンダー
 		if(sd->sc.data[SC_DEFENDER].timer != -1)
 			defender_flag = 1;
 
@@ -4462,64 +4441,64 @@ static int status_calc_speed_pc(struct map_session_data *sd, int speed)
 			walkspeed_flag = 1;
 	}
 
-	// +Vt6Qf3OHWJdSoA-
+	// 回避率増加
 	if((sd->s_class.job == PC_JOB_AS || sd->s_class.job == PC_JOB_GC) && (skilllv = pc_checkskill(sd,TF_MISS)) > 0) {
 		if(haste_val1 < skilllv)
 			haste_val1 = skilllv;
 	}
 
-	// +MKIwpDDGMOAw3DD8MMowuQ-
-	speed_rate = sd->speed_rate +- sd->speed_add_rate;
+	// アイテムボーナス
+	speed_rate = sd->speed_rate + sd->speed_add_rate;
 	if(speed_rate != 0) {
 		if(haste_val1 < speed_rate)
 			haste_val1 = speed_rate;
 	}
 
-	/* +mg5OVw- */
+	/* 騎乗 */
 
-	// +MNowsw-
+	// ペコ
 	if(pc_isriding(sd)) {
 		if(haste_val2 < 25)
 			haste_val2 = 25;
 	}
 
-	// +MMkw6TC0MPM-
+	// ドラゴン
 	if(pc_isdragon(sd)) {
 		if(haste_val2 < 25)
 			haste_val2 = 25;
 	}
 
-	// +MKYw6zDV-
+	// ウルフ
 	if(pc_iswolfmount(sd)) {
-		int bonus = 15 +- 5 * pc_checkskill(sd,RA_WUGRIDER);
+		int bonus = 15 + 5 * pc_checkskill(sd,RA_WUGRIDER);
 		if(haste_val2 < bonus)
 			haste_val2 = bonus;
 	}
 
-	// +mg5OVzC3MLkwxjDg-
+	// 騎乗システム
 	if(sd->sc.data[SC_ALL_RIDING].timer != -1) {
 		if(haste_val2 < 25)
 			haste_val2 = 25;
 	}
 
-	/* bonus_rate+MG5nAE9OUCQwkootW5o- */
+	/* bonus_rateの最低値を設定 */
 	bonus_rate = slow_val - haste_val1 - haste_val2;
 	if(bonus_rate < -60)
 		bonus_rate = -60;
 
-	/* speed+MG5nAH1Cigh7lw- */
-	if(pc_iscarton(sd))	// +MKsw/DDI-
-		speed +-= speed * (50 - 5 * pc_checkskill(sd,MC_PUSHCART)) / 100;
-	if(pc_isgear(sd))	// +m1RcDjCuMKJkLU5X-
-		speed +-= speed * (5 - pc_checkskill(sd,NC_MADOLICENCE)) / 10;
+	/* speedの最終計算 */
+	if(pc_iscarton(sd))	// カート
+		speed += speed * (50 - 5 * pc_checkskill(sd,MC_PUSHCART)) / 100;
+	if(pc_isgear(sd))	// 魔導ギア搭乗
+		speed += speed * (5 - pc_checkskill(sd,NC_MADOLICENCE)) / 10;
 	if(bonus_rate != 0)	// bonus_rate
-		speed = speed * (bonus_rate+-100) / 100;
-	if(defender_flag && speed < 200)	// +MMcwozDVMKcw8zDAMPw-
+		speed = speed * (bonus_rate+100) / 100;
+	if(defender_flag && speed < 200)	// ディフェンダー
 		speed = 200;
-	if(walkspeed_flag)	// +MLkwrzDqMNcwyHUoMLkwxjD8ML8wuQ-
+	if(walkspeed_flag)	// スクリプト用ステータス
 		speed = speed * 100 / sd->sc.data[SC_WALKSPEED].val1;
 
-	/* +ZwBPTlAkMAFnAFknUCQwkootW5owWTCL- */
+	/* 最低値、最大値を設定する */
 	if(speed < MIN_WALK_SPEED)
 		speed = MIN_WALK_SPEED;
 	if(speed > MAX_WALK_SPEED)
@@ -4529,8 +4508,8 @@ static int status_calc_speed_pc(struct map_session_data *sd, int speed)
 }
 
 /*==========================================
- * +W/6MYTBu-group+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のgroupを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_group(struct block_list *bl)
@@ -4539,14 +4518,14 @@ int status_get_group(struct block_list *bl)
 
 	if(bl->type == BL_MOB && (struct mob_data *)bl)
 		return mobdb_search(((struct mob_data *)bl)->class_)->group_id;
-	// PC PET+MG8-0+/whnKootW5o-)
+	// PC PETは0（未設定)
 
 	return 0;
 }
 
 /*==========================================
- * +W/6MYTBu-Class+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のClassを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_class(struct block_list *bl)
@@ -4570,8 +4549,8 @@ int status_get_class(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuZblUETCSj9QwWQ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象の方向を返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_dir(struct block_list *bl)
@@ -4595,8 +4574,8 @@ int status_get_dir(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuMOww2TDrMJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のレベルを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_lv(struct block_list *bl)
@@ -4620,8 +4599,8 @@ int status_get_lv(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBugHdpbTDsMNkw6zCSj9QwWQ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象の職業レベルを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_jlv(struct block_list *bl)
@@ -4645,8 +4624,8 @@ int status_get_jlv(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuXAR6CzCSj9QwWQ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象の射程を返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_range(struct block_list *bl)
@@ -4670,8 +4649,8 @@ int status_get_range(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-HP+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のHPを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_hp(struct block_list *bl)
@@ -4693,8 +4672,8 @@ int status_get_hp(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-SP+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のSPを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_sp(struct block_list *bl)
@@ -4714,8 +4693,8 @@ int status_get_sp(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-AP+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のAPを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_ap(struct block_list *bl)
@@ -4729,8 +4708,8 @@ int status_get_ap(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-MHP+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のMHPを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_max_hp(struct block_list *bl)
@@ -4762,7 +4741,7 @@ int status_get_max_hp(struct block_list *bl)
 					hp = hp * battle_config.monster_hp_rate / 100;
 			}
 			if(gc && ((struct mob_data*)bl)->guild_id == gc->guild_id) {
-				hp +-= gc->defense * 1000;
+				hp += gc->defense * 1000;
 			}
 			max_hp = (hp > 0x7FFFFFFF ? 0x7FFFFFFF : (int)hp);
 		} else if(bl->type == BL_PET && ((struct pet_data*)bl)) {
@@ -4780,13 +4759,13 @@ int status_get_max_hp(struct block_list *bl)
 		if(sc) {
 #ifndef PRE_RENEWAL
 			if(sc->data[SC_DELUGE].timer != -1)
-				max_hp +-= sc->data[SC_DELUGE].val3 * max_hp / 100;
+				max_hp += sc->data[SC_DELUGE].val3 * max_hp / 100;
 #endif
 			if(sc->data[SC_APPLEIDUN].timer != -1)
-				max_hp +-= ((5+-sc->data[SC_APPLEIDUN].val1*2+-((sc->data[SC_APPLEIDUN].val2+-1)>>1)
-						+-sc->data[SC_APPLEIDUN].val3/10) * max_hp)/100;
+				max_hp += ((5+sc->data[SC_APPLEIDUN].val1*2+((sc->data[SC_APPLEIDUN].val2+1)>>1)
+						+sc->data[SC_APPLEIDUN].val3/10) * max_hp)/100;
 			if(sc->data[SC_FRIGG_SONG].timer != -1)
-				max_hp +-= sc->data[SC_FRIGG_SONG].val3 * max_hp / 100;
+				max_hp += sc->data[SC_FRIGG_SONG].val3 * max_hp / 100;
 			if(sc->data[SC_EQC].timer != -1)
 				max_hp -= sc->data[SC_EQC].val3 * max_hp / 100;
 		}
@@ -4797,8 +4776,8 @@ int status_get_max_hp(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-MSP+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のMSPを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_max_sp(struct block_list *bl)
@@ -4821,8 +4800,8 @@ int status_get_max_sp(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-MaxAP+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のMaxAPを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_max_ap(struct block_list *bl)
@@ -4836,8 +4815,8 @@ int status_get_max_ap(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Str+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のStrを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_str(struct block_list *bl)
@@ -4863,19 +4842,19 @@ int status_get_str(struct block_list *bl)
 
 	if(sc && bl->type != BL_HOM) {
 		if(sc->data[SC_LOUD].timer != -1 && sc->data[SC_QUAGMIRE].timer == -1 && bl->type != BL_PC)
-			str +-= 4;
-		if( sc->data[SC_BLESSING].timer != -1 && bl->type != BL_PC) {	// +MNYw7DDDMLcw8zCw-
+			str += 4;
+		if( sc->data[SC_BLESSING].timer != -1 && bl->type != BL_PC) {	// ブレッシング
 			int race = status_get_race(bl);
 			if(battle_check_undead(race,status_get_elem_type(bl)) || race == RCT_DEMON)
-				str >>= 1;				// +YKqbVA-/+Tg1rew-
+				str >>= 1;				// 悪魔/不死
 			else
-				str +-= sc->data[SC_BLESSING].val1;	// +MF0wbk7W-
+				str += sc->data[SC_BLESSING].val1;	// その他
 		}
-		if(sc->data[SC_TRUESIGHT].timer != -1 && bl->type != BL_PC)	// +MMgwpTDrMPwwtTCkMMg-
-			str +-= 5;
+		if(sc->data[SC_TRUESIGHT].timer != -1 && bl->type != BL_PC)	// トゥルーサイト
+			str += 5;
 		if(sc->data[SC_CHASEWALK_STR].timer != -1)
-			str +-= sc->data[SC_CHASEWALK_STR].val1;
-		if(sc->data[SC_ALL_STAT_DOWN].timer != -1 && bl->type != BL_PC)	// +MKow/DDrMLkwxjD8ML8wuTDAMKYw8w-
+			str += sc->data[SC_CHASEWALK_STR].val1;
+		if(sc->data[SC_ALL_STAT_DOWN].timer != -1 && bl->type != BL_PC)	// オールステータスダウン
 			str -= sc->data[SC_ALL_STAT_DOWN].val2;
 	}
 	if(str < 0) str = 0;
@@ -4883,8 +4862,8 @@ int status_get_str(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Agi+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のAgiを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_agi(struct block_list *bl)
@@ -4909,27 +4888,27 @@ int status_get_agi(struct block_list *bl)
 		agi = ((struct elem_data *)bl)->agi;
 
 	if(sc && bl->type != BL_HOM) {
-		if(sc->data[SC_SPEEDUP1].timer != -1 && bl->type != BL_PC)	// +kB9epl83UxY-
+		if(sc->data[SC_SPEEDUP1].timer != -1 && bl->type != BL_PC)	// 速度強化
 			agi *= 3;
-		if(sc->data[SC_INCREASEAGI].timer != -1 && sc->data[SC_QUAGMIRE].timer == -1 && sc->data[SC_DONTFORGETME].timer == -1 && bl->type != BL_PC)	// +kB9epliXUqA-(PC+MG8-pc.c+MGc-)
-			agi +-= 2+-sc->data[SC_INCREASEAGI].val1;
-		if(sc->data[SC_SUITON].timer != -1 && sc->data[SC_SUITON].val3 != 0 && bl->type != BL_PC)	// +bDSQQQ-
-			agi +-= sc->data[SC_SUITON].val3;
+		if(sc->data[SC_INCREASEAGI].timer != -1 && sc->data[SC_QUAGMIRE].timer == -1 && sc->data[SC_DONTFORGETME].timer == -1 && bl->type != BL_PC)	// 速度増加(PCはpc.cで)
+			agi += 2+sc->data[SC_INCREASEAGI].val1;
+		if(sc->data[SC_SUITON].timer != -1 && sc->data[SC_SUITON].val3 != 0 && bl->type != BL_PC)	// 水遁
+			agi += sc->data[SC_SUITON].val3;
 		if(sc->data[SC_CONCENTRATE].timer != -1 && sc->data[SC_QUAGMIRE].timer == -1 && bl->type != BL_PC)
-			agi +-= agi*(2+-sc->data[SC_CONCENTRATE].val1)/100;
-		if(sc->data[SC_DECREASEAGI].timer != -1)	// +kB9epm4bXBH/CDCqMPww0DD8MLkwrTDrTtVp2DBv-AGI-50+/wk-
-			agi -= (sc->data[SC_DECREASEAGI].val2)? 50: 2+-sc->data[SC_DECREASEAGI].val1;
-		if(sc->data[SC_QUAGMIRE].timer != -1)	// +MK8woTCwMN4wpDCi-
+			agi += agi*(2+sc->data[SC_CONCENTRATE].val1)/100;
+		if(sc->data[SC_DECREASEAGI].timer != -1)	// 速度減少（オーバースキル仕様はAGI-50）
+			agi -= (sc->data[SC_DECREASEAGI].val2)? 50: 2+sc->data[SC_DECREASEAGI].val1;
+		if(sc->data[SC_QUAGMIRE].timer != -1)	// クァグマイア
 #ifdef PRE_RENEWAL
 			agi -= agi * sc->data[SC_QUAGMIRE].val1*10 / 100;
 #else
 			agi -= (agi/2 < sc->data[SC_QUAGMIRE].val1*10) ? agi/2 : sc->data[SC_QUAGMIRE].val1*10;
 #endif
-		if(sc->data[SC_MARSHOFABYSS].timer != -1)	// +MN4w/DC3MOUwqjDWMKIw0zC5-
+		if(sc->data[SC_MARSHOFABYSS].timer != -1)	// マーシュオブアビス
 			agi -= agi * sc->data[SC_MARSHOFABYSS].val3 / 100;
-		if(sc->data[SC_TRUESIGHT].timer != -1 && bl->type != BL_PC)	// +MMgwpTDrMPwwtTCkMMg-
-			agi +-= 5;
-		if(sc->data[SC_ALL_STAT_DOWN].timer != -1 && bl->type != BL_PC)	// +MKow/DDrMLkwxjD8ML8wuTDAMKYw8w-
+		if(sc->data[SC_TRUESIGHT].timer != -1 && bl->type != BL_PC)	// トゥルーサイト
+			agi += 5;
+		if(sc->data[SC_ALL_STAT_DOWN].timer != -1 && bl->type != BL_PC)	// オールステータスダウン
 			agi -= sc->data[SC_ALL_STAT_DOWN].val2;
 	}
 	if(agi < 0) agi = 0;
@@ -4937,8 +4916,8 @@ int status_get_agi(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Vit+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のVitを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_vit(struct block_list *bl)
@@ -4965,9 +4944,9 @@ int status_get_vit(struct block_list *bl)
 	if(sc && bl->type != BL_HOM) {
 		if(sc->data[SC_STRIPARMOR].timer != -1 && bl->type != BL_PC)
 			vit = vit*60/100;
-		if(sc->data[SC_TRUESIGHT].timer != -1 && bl->type != BL_PC)	// +MMgwpTDrMPwwtTCkMMg-
-			vit +-= 5;
-		if(sc->data[SC_ALL_STAT_DOWN].timer != -1 && bl->type != BL_PC)	// +MKow/DDrMLkwxjD8ML8wuTDAMKYw8w-
+		if(sc->data[SC_TRUESIGHT].timer != -1 && bl->type != BL_PC)	// トゥルーサイト
+			vit += 5;
+		if(sc->data[SC_ALL_STAT_DOWN].timer != -1 && bl->type != BL_PC)	// オールステータスダウン
 			vit -= sc->data[SC_ALL_STAT_DOWN].val2;
 	}
 
@@ -4976,8 +4955,8 @@ int status_get_vit(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Int+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のIntを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_int(struct block_list *bl)
@@ -5002,20 +4981,20 @@ int status_get_int(struct block_list *bl)
 		int_ = ((struct elem_data *)bl)->int_;
 
 	if(sc && bl->type != BL_HOM) {
-		if(sc->data[SC_BLESSING].timer != -1 && bl->type != BL_PC) {	// +MNYw7DDDMLcw8zCw-
+		if(sc->data[SC_BLESSING].timer != -1 && bl->type != BL_PC) {	// ブレッシング
 			int race = status_get_race(bl);
 			if(battle_check_undead(race,status_get_elem_type(bl)) || race == RCT_DEMON)
-				int_ >>= 1;	// +YKqbVA-/+Tg1rew-
+				int_ >>= 1;	// 悪魔/不死
 			else
-				int_ +-= sc->data[SC_BLESSING].val1;	// +MF0wbk7W-
+				int_ += sc->data[SC_BLESSING].val1;	// その他
 		}
 		if(sc->data[SC_STRIPHELM].timer != -1 && bl->type != BL_PC)
 			int_ = int_*60/100;
-		if(sc->data[SC_TRUESIGHT].timer != -1 && bl->type != BL_PC)	// +MMgwpTDrMPwwtTCkMMg-
-			int_ +-= 5;
-		if(sc->data[SC__STRIPACCESSARY].timer != -1 && bl->type != BL_PC)	// +MLkwyDDqMMMw1zCiMK8wuzC1MOow/A-
+		if(sc->data[SC_TRUESIGHT].timer != -1 && bl->type != BL_PC)	// トゥルーサイト
+			int_ += 5;
+		if(sc->data[SC__STRIPACCESSARY].timer != -1 && bl->type != BL_PC)	// ストリップアクセサリー
 			int_ = int_ * 80 / 100;
-		if(sc->data[SC_ALL_STAT_DOWN].timer != -1 && bl->type != BL_PC)	// +MKow/DDrMLkwxjD8ML8wuTDAMKYw8w-
+		if(sc->data[SC_ALL_STAT_DOWN].timer != -1 && bl->type != BL_PC)	// オールステータスダウン
 			int_ -= sc->data[SC_ALL_STAT_DOWN].val2;
 	}
 	if(int_ < 0) int_ = 0;
@@ -5023,8 +5002,8 @@ int status_get_int(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Dex+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のDexを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_dex(struct block_list *bl)
@@ -5051,31 +5030,31 @@ int status_get_dex(struct block_list *bl)
 	if(sc && bl->type != BL_HOM) {
 #ifdef PRE_RENEWAL
 		if(sc->data[SC_EXPLOSIONSPIRITS].timer != -1 && bl->type != BL_PC)
-			dex *= 3;	// NPC+cgaIwmziUtU-
+			dex *= 3;	// NPC爆裂波動
 #endif
 		if(sc->data[SC_CONCENTRATE].timer != -1 && sc->data[SC_QUAGMIRE].timer == -1 && bl->type != BL_PC)
-			dex +-= dex*(2+-sc->data[SC_CONCENTRATE].val1)/100;
+			dex += dex*(2+sc->data[SC_CONCENTRATE].val1)/100;
 
-		if(sc->data[SC_BLESSING].timer != -1 && bl->type != BL_PC) {	// +MNYw7DDDMLcw8zCw-
+		if(sc->data[SC_BLESSING].timer != -1 && bl->type != BL_PC) {	// ブレッシング
 			int race = status_get_race(bl);
 			if(battle_check_undead(race,status_get_elem_type(bl)) || race == RCT_DEMON)
-				dex >>= 1;	// +YKqbVA-/+Tg1rew-
+				dex >>= 1;	// 悪魔/不死
 			else
-				dex +-= sc->data[SC_BLESSING].val1;	// +MF0wbk7W-
+				dex += sc->data[SC_BLESSING].val1;	// その他
 		}
-		if(sc->data[SC_QUAGMIRE].timer != -1)	// +MK8woTCwMN4wpDCi-
+		if(sc->data[SC_QUAGMIRE].timer != -1)	// クァグマイア
 #ifdef PRE_RENEWAL
 			dex -= dex * sc->data[SC_QUAGMIRE].val1*10 / 100;
 #else
 			dex -= (dex/2 < sc->data[SC_QUAGMIRE].val1*10) ? dex/2 : sc->data[SC_QUAGMIRE].val1*10;
 #endif
-		if(sc->data[SC_MARSHOFABYSS].timer != -1)	// +MN4w/DC3MOUwqjDWMKIw0zC5-
+		if(sc->data[SC_MARSHOFABYSS].timer != -1)	// マーシュオブアビス
 			dex -= dex * sc->data[SC_MARSHOFABYSS].val3 / 100;
-		if(sc->data[SC_TRUESIGHT].timer != -1 && bl->type != BL_PC)	// +MMgwpTDrMPwwtTCkMMg-
-			dex +-= 5;
-		if(sc->data[SC__STRIPACCESSARY].timer != -1 && bl->type != BL_PC)	// +MLkwyDDqMMMw1zCiMK8wuzC1MOow/A-
+		if(sc->data[SC_TRUESIGHT].timer != -1 && bl->type != BL_PC)	// トゥルーサイト
+			dex += 5;
+		if(sc->data[SC__STRIPACCESSARY].timer != -1 && bl->type != BL_PC)	// ストリップアクセサリー
 			dex = dex * 80 / 100;
-		if(sc->data[SC_ALL_STAT_DOWN].timer != -1 && bl->type != BL_PC)	// +MKow/DDrMLkwxjD8ML8wuTDAMKYw8w-
+		if(sc->data[SC_ALL_STAT_DOWN].timer != -1 && bl->type != BL_PC)	// オールステータスダウン
 			dex -= sc->data[SC_ALL_STAT_DOWN].val2;
 	}
 	if(dex < 0) dex = 0;
@@ -5083,8 +5062,8 @@ int status_get_dex(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Luk+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のLukを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_luk(struct block_list *bl)
@@ -5109,17 +5088,17 @@ int status_get_luk(struct block_list *bl)
 		luk = ((struct elem_data *)bl)->luk;
 
 	if(sc && bl->type != BL_HOM) {
-		if(sc->data[SC_GLORIA].timer != -1 && bl->type != BL_PC)	// +MLAw7TDqMKI-(PC+MG8-pc.c+MGc-)
-			luk +-= 30;
-		if(sc->data[SC_CURSE].timer != -1 )		// +VGowRA-
+		if(sc->data[SC_GLORIA].timer != -1 && bl->type != BL_PC)	// グロリア(PCはpc.cで)
+			luk += 30;
+		if(sc->data[SC_CURSE].timer != -1 )		// 呪い
 			luk = 0;
-		if(sc->data[SC_TRUESIGHT].timer != -1 && bl->type != BL_PC)	// +MMgwpTDrMPwwtTCkMMg-
-			luk +-= 5;
-		if(sc->data[SC__STRIPACCESSARY].timer != -1 && bl->type != BL_PC)	// +MLkwyDDqMMMw1zCiMK8wuzC1MOow/A-
+		if(sc->data[SC_TRUESIGHT].timer != -1 && bl->type != BL_PC)	// トゥルーサイト
+			luk += 5;
+		if(sc->data[SC__STRIPACCESSARY].timer != -1 && bl->type != BL_PC)	// ストリップアクセサリー
 			luk = luk * 80 / 100;
-		if(sc->data[SC_BANANA_BOMB].timer != -1 && bl->type != BL_PC)	// +MNAwyjDKcgZfPg-
+		if(sc->data[SC_BANANA_BOMB].timer != -1 && bl->type != BL_PC)	// バナナ爆弾
 			luk -= luk * sc->data[SC_BANANA_BOMB].val1 / 100;
-		if(sc->data[SC_ALL_STAT_DOWN].timer != -1 && bl->type != BL_PC)	// +MKow/DDrMLkwxjD8ML8wuTDAMKYw8w-
+		if(sc->data[SC_ALL_STAT_DOWN].timer != -1 && bl->type != BL_PC)	// オールステータスダウン
 			luk -= sc->data[SC_ALL_STAT_DOWN].val2;
 	}
 	if(luk < 0) luk = 0;
@@ -5127,8 +5106,8 @@ int status_get_luk(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Pow+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のPowを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_pow(struct block_list *bl)
@@ -5145,8 +5124,8 @@ int status_get_pow(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Sta+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のStaを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_sta(struct block_list *bl)
@@ -5163,8 +5142,8 @@ int status_get_sta(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Wis+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のWisを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_wis(struct block_list *bl)
@@ -5181,8 +5160,8 @@ int status_get_wis(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Spl+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のSplを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_spl(struct block_list *bl)
@@ -5199,8 +5178,8 @@ int status_get_spl(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Con+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のConを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_con(struct block_list *bl)
@@ -5217,8 +5196,8 @@ int status_get_con(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Crt+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のCrtを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_crt(struct block_list *bl)
@@ -5235,8 +5214,8 @@ int status_get_crt(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Flee+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-1+TuVOCg-
+ * 対象のFleeを返す
+ * 戻りは整数で1以上
  *------------------------------------------
  */
 int status_get_flee(struct block_list *bl)
@@ -5258,83 +5237,83 @@ int status_get_flee(struct block_list *bl)
 	else if(bl->type == BL_MOB && ((struct mob_data *)bl))
 		flee = ((struct mob_data *)bl)->st.flee;
 	else
-		flee = status_get_agi(bl) +- status_get_lv(bl);
+		flee = status_get_agi(bl) + status_get_lv(bl);
 
 #ifndef PRE_RENEWAL
 	if(bl->type != BL_PC && bl->type != BL_HOM)
-		flee +-= 100;
+		flee += 100;
 #endif
 
-	/* +Y1Vzcg- */
+	/* 捕獲 */
 	if(sc && (sc->data[SC_TINDER_BREAKER].timer != -1 || sc->data[SC_CBC].timer != -1))
 		return 0;
 
 	if(sc && bl->type != BL_HOM) {
 		if(sc->data[SC_WHISTLE].timer != -1 && bl->type != BL_PC)
-			flee +-= sc->data[SC_WHISTLE].val1 +- sc->data[SC_WHISTLE].val2 +- sc->data[SC_WHISTLE].val3;
+			flee += sc->data[SC_WHISTLE].val1 + sc->data[SC_WHISTLE].val2 + sc->data[SC_WHISTLE].val3;
 		if(sc->data[SC_BLIND].timer != -1 && bl->type != BL_PC)
 			flee -= flee*25/100;
-		if(sc->data[SC_WINDWALK].timer != -1 && bl->type != BL_PC)		// +MKYwozDzMMkwpjCpMPwwrw-
-			flee +-= sc->data[SC_WINDWALK].val2;
-		if(sc->data[SC_SPIDERWEB].timer != -1 && bl->type != BL_PC)	// +MLkw0TCkMMAw/DCmMKcw1g-
+		if(sc->data[SC_WINDWALK].timer != -1 && bl->type != BL_PC)		// ウィンドウォーク
+			flee += sc->data[SC_WINDWALK].val2;
+		if(sc->data[SC_SPIDERWEB].timer != -1 && bl->type != BL_PC)	// スパイダーウェブ
 			flee -= 50;
 		if(sc->data[SC_THE_SUN].timer != -1 && bl->type != BL_PC)	// THE SUN
 			flee = flee*80/100;
-		if(sc->data[SC_GATLINGFEVER].timer != -1 && bl->type != BL_PC)	// +MKwwyDDqMPMwsDDVMKMw/DDQMPw-
+		if(sc->data[SC_GATLINGFEVER].timer != -1 && bl->type != BL_PC)	// ガトリングフィーバー
 			flee -= sc->data[SC_GATLINGFEVER].val1*5;
-		if(sc->data[SC_ADJUSTMENT].timer != -1 && bl->type != BL_PC)	// +MKIwuDDjMLkwyDDhMPMwyA-
-			flee +-= 30;
-		if(sc->data[SC_FEAR].timer != -1 && bl->type != BL_PC)		// +YFBgFg-
+		if(sc->data[SC_ADJUSTMENT].timer != -1 && bl->type != BL_PC)	// アジャストメント
+			flee += 30;
+		if(sc->data[SC_FEAR].timer != -1 && bl->type != BL_PC)		// 恐怖
 			flee -= flee*20/100;
-		if(sc->data[SC_HALLUCINATIONWALK].timer != -1 && bl->type != BL_PC)		// +MM8w6zC3MM0w/DC3MOcw8zCmMKkw/DCv-
-			flee +-= sc->data[SC_HALLUCINATIONWALK].val1 * 50;
-		if(sc->data[SC_INFRAREDSCAN].timer != -1 && bl->type != BL_PC)	// +MKQw8zDVMOkw7DDDMMkwuTCtMOMw8w-
+		if(sc->data[SC_HALLUCINATIONWALK].timer != -1 && bl->type != BL_PC)		// ハルシネーションウォーク
+			flee += sc->data[SC_HALLUCINATIONWALK].val1 * 50;
+		if(sc->data[SC_INFRAREDSCAN].timer != -1 && bl->type != BL_PC)	// インフラレッドスキャン
 			flee  -= flee*30/100;
-		if(sc->data[SC__LAZINESS].timer != -1 && bl->type != BL_PC)		// +MN4wuTCrMOww/DDJ/xow7DCkMLgwzTC5-
+		if(sc->data[SC__LAZINESS].timer != -1 && bl->type != BL_PC)		// マスカレード：レイジネス
 			flee  -= flee*10/100;
-		if(sc->data[SC_GLOOMYDAY].timer != -1 && bl->type != BL_PC)		// +MOEw6TDzMLMw6jD8-
-			flee -= sc->data[SC_GLOOMYDAY].val1 * 5 +- 20;
-		if(sc->data[SC_SATURDAY_NIGHT_FEVER].timer != -1 && bl->type != BL_PC)		// +MNUw6TCkMMcw/DDKMKQwyDDVMKMw/DDQMPw-
-			flee -= flee * (40 +- sc->data[SC_SATURDAY_NIGHT_FEVER].val1 * 10) / 100;
-		if(sc->data[SC_FIRE_EXPANSION_SMOKE_POWDER].timer != -1 && bl->type != BL_PC)	// +MNUwoTCkMKIw/DCoMK8wuTDRMPMwtzDnMPM-(+cVleVQ-)
-			flee +-= flee * sc->data[SC_FIRE_EXPANSION_SMOKE_POWDER].val2 / 100;
-		if(sc->data[SC_FIRE_EXPANSION_TEAR_GAS].timer != -1 && bl->type != BL_PC)	// +MNUwoTCkMKIw/DCoMK8wuTDRMPMwtzDnMPM-(+UKxtmQ-)
+		if(sc->data[SC_GLOOMYDAY].timer != -1 && bl->type != BL_PC)		// メランコリー
+			flee -= sc->data[SC_GLOOMYDAY].val1 * 5 + 20;
+		if(sc->data[SC_SATURDAY_NIGHT_FEVER].timer != -1 && bl->type != BL_PC)		// フライデーナイトフィーバー
+			flee -= flee * (40 + sc->data[SC_SATURDAY_NIGHT_FEVER].val1 * 10) / 100;
+		if(sc->data[SC_FIRE_EXPANSION_SMOKE_POWDER].timer != -1 && bl->type != BL_PC)	// ファイアーエクスパンション(煙幕)
+			flee += flee * sc->data[SC_FIRE_EXPANSION_SMOKE_POWDER].val2 / 100;
+		if(sc->data[SC_FIRE_EXPANSION_TEAR_GAS].timer != -1 && bl->type != BL_PC)	// ファイアーエクスパンション(催涙)
 			flee -= flee * sc->data[SC_FIRE_EXPANSION_TEAR_GAS].val2 / 100;
 #ifndef PRE_RENEWAL
-		if(sc->data[SC_SPEARQUICKEN].timer != -1 && bl->type != BL_PC)      // +MLkw1DCiMK8wpDDDMLEw8w-
-			flee +-= sc->data[SC_SPEARQUICKEN].val1 * 2;
+		if(sc->data[SC_SPEARQUICKEN].timer != -1 && bl->type != BL_PC)      // スピアクイッケン
+			flee += sc->data[SC_SPEARQUICKEN].val1 * 2;
 #endif
-		if(sc->data[SC_GROOMING].timer != -1 && bl->type != BL_PC)	// +MLAw6zD8MN8w8zCw-
-			flee +-= sc->data[SC_GROOMING].val2;
-		if(sc->data[SC_C_MARKER].timer != -1 && bl->type != BL_PC)  // +MK8w6jDgML4w8zDeMPwwqzD8-
+		if(sc->data[SC_GROOMING].timer != -1 && bl->type != BL_PC)	// グルーミング
+			flee += sc->data[SC_GROOMING].val2;
+		if(sc->data[SC_C_MARKER].timer != -1 && bl->type != BL_PC)  // クリムゾンマーカー
 			flee -= sc->data[SC_C_MARKER].val1 * 10;
-		if(sc->data[SC_VOLCANIC_ASH].timer != -1 && sc->data[SC_VOLCANIC_ASH].val4 > 0) 	// +cGtccXBw-
+		if(sc->data[SC_VOLCANIC_ASH].timer != -1 && sc->data[SC_VOLCANIC_ASH].val4 > 0) 	// 火山灰
 			flee -= flee * sc->data[SC_VOLCANIC_ASH].val4 / 100;
-		if(sc->data[SC_HANDICAPSTATE_DEEPBLIND].timer != -1 && bl->type != BL_PC)	// +bwae0g-
+		if(sc->data[SC_HANDICAPSTATE_DEEPBLIND].timer != -1 && bl->type != BL_PC)	// 漆黒
 			flee = 0;
 	}
 
-	// +Vt6Qf3OHiNxrYw-
+	// 回避率補正
 	if(bl->type != BL_HOM)
 		target_count = unit_counttargeted(bl,battle_config.agi_penalty_count_lv);
 
 	if(battle_config.agi_penalty_type > 0 && target_count >= battle_config.agi_penalty_count) {
-		// +MNowyjDrMMYwo4otW5owiDCKW/6MYTBMWRowRA-
+		// ペナルティ設定より対象が多い
 		if(battle_config.agi_penalty_type == 1) {
-			// +Vt6Qf3OHMEw-agi_penalty_num%+MFowZG4bXBE-
+			// 回避率がagi_penalty_num%ずつ減少
 			int flee_rate = (target_count-(battle_config.agi_penalty_count-1)) * battle_config.agi_penalty_num;
 			flee = flee * (100 - flee_rate) / 100;
 		} else if(battle_config.agi_penalty_type == 2) {
-			// +Vt6Qf3OHMEw-agi_penalty_num+UgZuG1wR-
+			// 回避率がagi_penalty_num分減少
 			flee -= (target_count - (battle_config.agi_penalty_count - 1))*battle_config.agi_penalty_num;
 		}
 	}
-	// +W/5Oug-MAP+MGcwbm4bXBFSuWec-
+	// 対人MAPでの減少効果
 	if(battle_config.gvg_flee_penalty & 1 && map[bl->m].flag.gvg) {
-		flee = flee*(200 - battle_config.gvg_flee_rate)/100;	// +W5+WmzBr-GvG+MGc-Flee+MJJuG1wR-
+		flee = flee*(200 - battle_config.gvg_flee_rate)/100;	// 実際にGvGでFleeを減少
 	}
 	if(battle_config.gvg_flee_penalty & 2 && map[bl->m].flag.pvp) {
-		flee = flee*(200 - battle_config.gvg_flee_rate)/100;	// +W5+WmzBr-PvP+MGc-Flee+MJJuG1wR-
+		flee = flee*(200 - battle_config.gvg_flee_rate)/100;	// 実際にPvPでFleeを減少
 	}
 	if(flee < 1) flee = 1;
 
@@ -5342,8 +5321,8 @@ int status_get_flee(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Hit+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-1+TuVOCg-
+ * 対象のHitを返す
+ * 戻りは整数で1以上
  *------------------------------------------
  */
 int status_get_hit(struct block_list *bl)
@@ -5359,49 +5338,49 @@ int status_get_hit(struct block_list *bl)
 	if(bl->type == BL_PC) {
 		hit = ((struct map_session_data *)bl)->hit;
 	} else if(bl->type == BL_HOM && ((struct homun_data *)bl)) {
-		hit +-= ((struct homun_data *)bl)->hit;
+		hit += ((struct homun_data *)bl)->hit;
 	} else if(bl->type == BL_MERC && ((struct merc_data *)bl)) {
-		hit +-= ((struct merc_data *)bl)->hit;
+		hit += ((struct merc_data *)bl)->hit;
 	} else if(bl->type == BL_ELEM && ((struct elem_data *)bl)) {
-		hit +-= ((struct elem_data *)bl)->hit;
+		hit += ((struct elem_data *)bl)->hit;
 	} else if(bl->type == BL_MOB && ((struct mob_data *)bl)) {
-		hit +-= ((struct mob_data *)bl)->st.hit;
+		hit += ((struct mob_data *)bl)->st.hit;
 	} else {
 		struct status_change *sc = status_get_sc(bl);
 
-		hit +-= status_get_dex(bl) +- status_get_lv(bl);
+		hit += status_get_dex(bl) + status_get_lv(bl);
 		if(sc) {
 #ifndef PRE_RENEWAL
-			if(sc->data[SC_EXPLOSIONSPIRITS].timer != -1 && bl->type != BL_PC)	// NPC+cgaIwmziUtU-
+			if(sc->data[SC_EXPLOSIONSPIRITS].timer != -1 && bl->type != BL_PC)	// NPC爆裂波動
 				hit *= 2;
 #endif
 			if(sc->data[SC_HUMMING].timer != -1)
-				hit +-= hit*(sc->data[SC_HUMMING].val1*2+-sc->data[SC_HUMMING].val2 +- sc->data[SC_HUMMING].val3)/100;
-			if(sc->data[SC_TRUESIGHT].timer != -1)		// +MMgwpTDrMPwwtTCkMMg-
-				hit +-= 3*(sc->data[SC_TRUESIGHT].val1);
-			if(sc->data[SC_CONCENTRATION].timer != -1)	// +MLMw8zC7MPMwyDDsMPwwtzDnMPM-
-				hit +-= 10*(sc->data[SC_CONCENTRATION].val1);
+				hit += hit*(sc->data[SC_HUMMING].val1*2+sc->data[SC_HUMMING].val2 + sc->data[SC_HUMMING].val3)/100;
+			if(sc->data[SC_TRUESIGHT].timer != -1)		// トゥルーサイト
+				hit += 3*(sc->data[SC_TRUESIGHT].val1);
+			if(sc->data[SC_CONCENTRATION].timer != -1)	// コンセントレーション
+				hit += 10*(sc->data[SC_CONCENTRATION].val1);
 			if(sc->data[SC_THE_SUN].timer != -1 && bl->type != BL_PC)
 				hit = hit*80/100;
-			if(sc->data[SC_ADJUSTMENT].timer != -1 && bl->type != BL_PC) // +MKIwuDDjMLkwyDDhMPMwyA-
+			if(sc->data[SC_ADJUSTMENT].timer != -1 && bl->type != BL_PC) // アジャストメント
 				hit -= 30;
-			if(sc->data[SC_INCREASING].timer != -1 && bl->type != BL_PC) // +MKQw8zCvMOow/DC4MPMwsDCiMK0w5TDpMLcw/A-
-				hit +-= 20;
-			if(sc->data[SC_INCHIT].timer!=-1 && bl->type != BL_PC)	// +MKwwpDDHMMMwyTCiML8wwzCv-
-				hit +-= sc->data[SC_INCHIT].val1;
-			if(sc->data[SC_FEAR].timer != -1 && bl->type != BL_PC)	// +YFBgFg-
+			if(sc->data[SC_INCREASING].timer != -1 && bl->type != BL_PC) // インクリージングアキュラシー
+				hit += 20;
+			if(sc->data[SC_INCHIT].timer!=-1 && bl->type != BL_PC)	// ガイデッドアタック
+				hit += sc->data[SC_INCHIT].val1;
+			if(sc->data[SC_FEAR].timer != -1 && bl->type != BL_PC)	// 恐怖
 				hit -= hit*20/100;
-			if(sc->data[SC__GROOMY].timer != -1 && bl->type != BL_PC)	// +MN4wuTCrMOww/DDJ/xowsDDrMPww3zD8-
+			if(sc->data[SC__GROOMY].timer != -1 && bl->type != BL_PC)	// マスカレード：グルーミー
 				hit -= hit*(20*sc->data[SC__GROOMY].val1)/100;
-			if(sc->data[SC_FIRE_EXPANSION_TEAR_GAS].timer != -1 && bl->type != BL_PC)	// +MNUwoTCkMKIw/DCoMK8wuTDRMPMwtzDnMPM-(+UKxtmQ-)
+			if(sc->data[SC_FIRE_EXPANSION_TEAR_GAS].timer != -1 && bl->type != BL_PC)	// ファイアーエクスパンション(催涙)
 				hit -= hit*(sc->data[SC_FIRE_EXPANSION_TEAR_GAS].val2)/100;
-			if(sc->data[SC_ILLUSIONDOPING].timer != -1 && bl->type != BL_PC)	// +MKQw6jDlMPwwuDDnMPMwyTD8MNQw8zCw-
+			if(sc->data[SC_ILLUSIONDOPING].timer != -1 && bl->type != BL_PC)	// イリュージョンドーピング
 				hit -= 50;
-			if(sc->data[SC_HEAT_BARREL].timer != -1 && bl->type != BL_PC)  // +MNIw/DDIMNAw7DDr-
+			if(sc->data[SC_HEAT_BARREL].timer != -1 && bl->type != BL_PC)  // ヒートバレル
 				hit -= sc->data[SC_HEAT_BARREL].val4;
-			if(sc->data[SC_VOLCANIC_ASH].timer != -1 && sc->data[SC_VOLCANIC_ASH].val2 > 0) 	// +cGtccXBw-
+			if(sc->data[SC_VOLCANIC_ASH].timer != -1 && sc->data[SC_VOLCANIC_ASH].val2 > 0) 	// 火山灰
 				hit -= hit * sc->data[SC_VOLCANIC_ASH].val2 / 100;
-			if(sc->data[SC_HANDICAPSTATE_MISFORTUNE].timer != -1 && bl->type != BL_PC)	// +Tg1eeA-
+			if(sc->data[SC_HANDICAPSTATE_MISFORTUNE].timer != -1 && bl->type != BL_PC)	// 不幸
 				hit = 0;
 		}
 	}
@@ -5411,8 +5390,8 @@ int status_get_hit(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuW4xRaFbekH8wko/UMFk-
- * +YjswijBvZXRlcDBn-1+TuVOCg-
+ * 対象の完全回避を返す
+ * 戻りは整数で1以上
  *------------------------------------------
  */
 int status_get_flee2(struct block_list *bl)
@@ -5424,16 +5403,16 @@ int status_get_flee2(struct block_list *bl)
 
 	sc = status_get_sc(bl);
 	if(bl->type == BL_PC && (struct map_session_data *)bl) {
-		flee2 = status_get_luk(bl) +- 10;
-		flee2 +-= ((struct map_session_data *)bl)->flee2 - (((struct map_session_data *)bl)->paramc[5] +- 10);
+		flee2 = status_get_luk(bl) + 10;
+		flee2 += ((struct map_session_data *)bl)->flee2 - (((struct map_session_data *)bl)->paramc[5] + 10);
 	} else {
-		flee2 = status_get_luk(bl)+-1;
+		flee2 = status_get_luk(bl)+1;
 	}
 
 	if(sc) {
-		if(sc->data[SC__UNLUCKY].timer != -1 && bl->type != BL_PC)	// +MN4wuTCrMOww/DDJ/xowojDzMOkwwzCtMPw-
+		if(sc->data[SC__UNLUCKY].timer != -1 && bl->type != BL_PC)	// マスカレード：アンラッキー
 			flee2 -= sc->data[SC__UNLUCKY].val1 * 10;
-		if(sc->data[SC_HANDICAPSTATE_DEEPBLIND].timer != -1 && bl->type != BL_PC)	// +bwae0g-
+		if(sc->data[SC_HANDICAPSTATE_DEEPBLIND].timer != -1 && bl->type != BL_PC)	// 漆黒
 			flee2 = 0;
 	}
 
@@ -5442,8 +5421,8 @@ int status_get_flee2(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuMK8w6jDGMKMwqzDrMJKP1DBZ-
- * +YjswijBvZXRlcDBn-1+TuVOCg-
+ * 対象のクリティカルを返す
+ * 戻りは整数で1以上
  *------------------------------------------
  */
 int status_get_critical(struct block_list *bl)
@@ -5456,11 +5435,11 @@ int status_get_critical(struct block_list *bl)
 	sc = status_get_sc(bl);
 	if(bl->type == BL_PC && (struct map_session_data *)bl) {
 #ifdef PRE_RENEWAL
-		critical = status_get_luk(bl)*3 +- 10;
-		critical +-= ((struct map_session_data *)bl)->critical - ((((struct map_session_data *)bl)->paramc[5]*3) +- 10);
+		critical = status_get_luk(bl)*3 + 10;
+		critical += ((struct map_session_data *)bl)->critical - ((((struct map_session_data *)bl)->paramc[5]*3) + 10);
 #else
-		critical = status_get_luk(bl)*33/10 +- 10;
-		critical +-= ((struct map_session_data *)bl)->critical - ((((struct map_session_data *)bl)->paramc[5]*33/10) +- 10);
+		critical = status_get_luk(bl)*33/10 + 10;
+		critical += ((struct map_session_data *)bl)->critical - ((((struct map_session_data *)bl)->paramc[5]*33/10) + 10);
 #endif
 	} else if(bl->type == BL_HOM && ((struct homun_data *)bl)) {
 		critical = ((struct homun_data *)bl)->critical;
@@ -5469,27 +5448,27 @@ int status_get_critical(struct block_list *bl)
 	} else if(bl->type == BL_ELEM && ((struct elem_data *)bl)) {
 		critical = ((struct elem_data *)bl)->critical;
 	} else {
-		critical = status_get_luk(bl)*3 +- 1;
+		critical = status_get_luk(bl)*3 + 1;
 	}
 
 	if(sc) {
 		if(sc->data[SC_FORTUNE].timer != -1 && bl->type != BL_PC)
-			critical +-= (10+-sc->data[SC_FORTUNE].val1+-sc->data[SC_FORTUNE].val2+-sc->data[SC_FORTUNE].val3)*10;
+			critical += (10+sc->data[SC_FORTUNE].val1+sc->data[SC_FORTUNE].val2+sc->data[SC_FORTUNE].val3)*10;
 		if(sc->data[SC_EXPLOSIONSPIRITS].timer != -1 && bl->type != BL_PC)
-			critical +-= sc->data[SC_EXPLOSIONSPIRITS].val2;
-		if(sc->data[SC_TRUESIGHT].timer != -1 && bl->type != BL_PC)	// +MMgwpTDrMPwwtTCkMMg-
-			critical +-= 10*sc->data[SC_TRUESIGHT].val1;
-		if(sc->data[SC__INVISIBILITY].timer != -1 && bl->type != BL_PC)	// +MKQw8zDTMLgw0zDqMMYwow-
-			critical +-= critical * (sc->data[SC__INVISIBILITY].val1 * 20) / 100;
-		if(sc->data[SC__UNLUCKY].timer != -1 && bl->type != BL_PC)	// +MN4wuTCrMOww/DDJ/xowojDzMOkwwzCtMPw-
+			critical += sc->data[SC_EXPLOSIONSPIRITS].val2;
+		if(sc->data[SC_TRUESIGHT].timer != -1 && bl->type != BL_PC)	// トゥルーサイト
+			critical += 10*sc->data[SC_TRUESIGHT].val1;
+		if(sc->data[SC__INVISIBILITY].timer != -1 && bl->type != BL_PC)	// インビジビリティ
+			critical += critical * (sc->data[SC__INVISIBILITY].val1 * 20) / 100;
+		if(sc->data[SC__UNLUCKY].timer != -1 && bl->type != BL_PC)	// マスカレード：アンラッキー
 			critical -= critical * (sc->data[SC__UNLUCKY].val1 * 10) / 100;
-		if(sc->data[SC_STRIKING].timer != -1 && bl->type != BL_PC)	// +MLkwyDDpMKQwrTDzMLA-
-			critical +-= 10 * sc->data[SC_STRIKING].val1;
+		if(sc->data[SC_STRIKING].timer != -1 && bl->type != BL_PC)	// ストライキング
+			critical += 10 * sc->data[SC_STRIKING].val1;
 #ifndef PRE_RENEWAL
-		if(sc->data[SC_SPEARQUICKEN].timer != -1 && bl->type != BL_PC)   // +MLkw1DCiMK8wpDDDMLEw8w-
-			critical +-= 30*sc->data[SC_SPEARQUICKEN].val1;
+		if(sc->data[SC_SPEARQUICKEN].timer != -1 && bl->type != BL_PC)   // スピアクイッケン
+			critical += 30*sc->data[SC_SPEARQUICKEN].val1;
 #endif
-		if(sc->data[SC_HANDICAPSTATE_LASSITUDE].timer != -1 && bl->type != BL_PC)	// +cSFsF1Kb-
+		if(sc->data[SC_HANDICAPSTATE_LASSITUDE].timer != -1 && bl->type != BL_PC)	// 無気力
 			critical = 0;
 	}
 	if(critical < 1) critical = 1;
@@ -5497,8 +5476,8 @@ int status_get_critical(struct block_list *bl)
 }
 
 /*==========================================
- * base_atk+MG5T1l+X-
- * +YjswijBvZXRlcDBn-1+TuVOCg-
+ * base_atkの取得
+ * 戻りは整数で1以上
  *------------------------------------------
  */
 int status_get_baseatk(struct block_list *bl)
@@ -5513,10 +5492,10 @@ int status_get_baseatk(struct block_list *bl)
 	if(bl->type == BL_PC) {
 		struct map_session_data *sd = (struct map_session_data *)bl;
 		if(sd) {
-			batk = sd->base_atk;	// +ii1bmjBVMIwwZjBEMIs-base_atk
+			batk = sd->base_atk;	// 設定されているbase_atk
 #ifdef PRE_RENEWAL
 			if(sd->status.weapon < WT_MAX) {
-				batk +-= sd->weapon_atk[sd->status.weapon];
+				batk += sd->weapon_atk[sd->status.weapon];
 			}
 #endif
 		}
@@ -5524,63 +5503,63 @@ int status_get_baseatk(struct block_list *bl)
 #ifdef PRE_RENEWAL
 		batk = 1;
 #else
-		batk = status_get_str(bl) +- status_get_lv(bl) * 2;
+		batk = status_get_str(bl) + status_get_lv(bl) * 2;
 #endif
 	} else if(bl->type == BL_MERC && ((struct merc_data *)bl)) {
 		batk = 1;
 	} else if(bl->type == BL_ELEM && ((struct elem_data *)bl)) {
 		batk = 1;
-	} else {	// +MF0wjE7lWRYwajCJ-
+	} else {	// それ以外なら
 #ifdef PRE_RENEWAL
 		int str, dstr;
 		str  = status_get_str(bl);	// STR
 		dstr = str/10;
-		batk = dstr*dstr +- str;	// base_atk+MJKKCHuXMFkwiw-
+		batk = dstr*dstr + str;	// base_atkを計算する
 #else
-		batk = status_get_str(bl) +- status_get_lv(bl);	// base_atk+MJKKCHuXMFkwiw-
+		batk = status_get_str(bl) + status_get_lv(bl);	// base_atkを計算する
 #endif
 	}
-	if(sc) {	// +crZhS3VwXjgwQjCK-
+	if(sc) {	// 状態異常あり
 #ifdef PRE_RENEWAL
-		if(sc->data[SC__BLOODYLUST].timer != -1 && bl->type != BL_PC)	// +MNYw6TDDMMcwozDpMLkwyA-
-			batk = batk*(100+-32)/100;	// base_atk+WJdSoA-
-		else if(sc->data[SC_PROVOKE].timer != -1 && bl->type != BL_PC)	// PC+MGcw1zDtMNwwwzCv-(SM_PROVOKE)+crZhSw-
-			batk = batk*(100+-2+-3*sc->data[SC_PROVOKE].val1)/100;	// base_atk+WJdSoA-
-		if(sc->data[SC_CURSE].timer != -1)	// +VGowjzCMMGYwRDBfMIk-
-			batk -= batk*25/100;	// base_atk+MEw-25%+bhtcEQ-
-		if(sc->data[SC_CONCENTRATION].timer != -1 && bl->type != BL_PC)	// +MLMw8zC7MPMwyDDsMPwwtzDnMPM-
-			batk +-= batk*(5*sc->data[SC_CONCENTRATION].val1)/100;
+		if(sc->data[SC__BLOODYLUST].timer != -1 && bl->type != BL_PC)	// ブラッディラスト
+			batk = batk*(100+32)/100;	// base_atk増加
+		else if(sc->data[SC_PROVOKE].timer != -1 && bl->type != BL_PC)	// PCでプロボック(SM_PROVOKE)状態
+			batk = batk*(100+2+3*sc->data[SC_PROVOKE].val1)/100;	// base_atk増加
+		if(sc->data[SC_CURSE].timer != -1)	// 呪われていたら
+			batk -= batk*25/100;	// base_atkが25%減少
+		if(sc->data[SC_CONCENTRATION].timer != -1 && bl->type != BL_PC)	// コンセントレーション
+			batk += batk*(5*sc->data[SC_CONCENTRATION].val1)/100;
 #endif
-		if(sc->data[SC_JOINTBEAT].timer != -1 && sc->data[SC_JOINTBEAT].val4 == 4)	// +MLgw5zCkMPMwyDDTMPwwyDBngXA-
+		if(sc->data[SC_JOINTBEAT].timer != -1 && sc->data[SC_JOINTBEAT].val4 == 4)	// ジョイントビートで腰
 			batk -= batk*25/100;
-		if(sc->data[SC_MADNESSCANCEL].timer != -1 && bl->type != BL_PC)	// +MN4wwzDJMM0wuTCtMOMw8zC7MOkw/A-
-			batk +-= 100;
+		if(sc->data[SC_MADNESSCANCEL].timer != -1 && bl->type != BL_PC)	// マッドネスキャンセラー
+			batk += 100;
 		if(sc->data[SC_THE_MAGICIAN].timer != -1)
 			batk = batk*50/100;
 		if(sc->data[SC_THE_DEVIL].timer != -1)
 			batk = batk*50/100;
 		if(sc->data[SC_THE_SUN].timer != -1)
 			batk = batk*80/100;
-		if(sc->data[SC_SKE].timer != -1 && bl->type == BL_MOB)	// +MKgwuTCv-
+		if(sc->data[SC_SKE].timer != -1 && bl->type == BL_MOB)	// エスク
 			batk *= 4;
-		if(sc->data[SC__ENERVATION].timer != -1 && bl->type == BL_MOB)	// +MN4wuTCrMOww/DDJ/xowqDDKMNkw/DC3MOcw8w-
-			batk -= batk * (20 +- sc->data[SC__ENERVATION].val1 * 10) / 100;
-		if(sc->data[SC_SHIELDSPELL_DEF].timer != -1 && sc->data[SC_SHIELDSPELL_DEF].val2 == 2 && bl->type == BL_MOB)	// +MLcw/DDrMMkwuTDaMOs-(DEF)
-			batk +-= sc->data[SC_SHIELDSPELL_DEF].val3;
-		if(sc->data[SC_SATURDAY_NIGHT_FEVER].timer != -1 && bl->type == BL_MOB)	// +MNUw6TCkMMcw/DDKMKQwyDDVMKMw/DDQMPw-
-			batk +-= 100 * sc->data[SC_SATURDAY_NIGHT_FEVER].val1;
-		if(sc->data[SC_ODINS_POWER].timer != -1 && bl->type == BL_MOB)	// +MKow/DDHMKMw8zBuUps-
-			batk +-= 60 +- 10 * sc->data[SC_ODINS_POWER].val1;
-		if(sc->data[SC_CHATTERING].timer != -1 && bl->type == BL_MOB)	// +MMEw4zC/MOow8zCw-
-			batk +-= sc->data[SC_CHATTERING].val2;
+		if(sc->data[SC__ENERVATION].timer != -1 && bl->type == BL_MOB)	// マスカレード：エナベーション
+			batk -= batk * (20 + sc->data[SC__ENERVATION].val1 * 10) / 100;
+		if(sc->data[SC_SHIELDSPELL_DEF].timer != -1 && sc->data[SC_SHIELDSPELL_DEF].val2 == 2 && bl->type == BL_MOB)	// シールドスペル(DEF)
+			batk += sc->data[SC_SHIELDSPELL_DEF].val3;
+		if(sc->data[SC_SATURDAY_NIGHT_FEVER].timer != -1 && bl->type == BL_MOB)	// フライデーナイトフィーバー
+			batk += 100 * sc->data[SC_SATURDAY_NIGHT_FEVER].val1;
+		if(sc->data[SC_ODINS_POWER].timer != -1 && bl->type == BL_MOB)	// オーディンの力
+			batk += 60 + 10 * sc->data[SC_ODINS_POWER].val1;
+		if(sc->data[SC_CHATTERING].timer != -1 && bl->type == BL_MOB)	// チャタリング
+			batk += sc->data[SC_CHATTERING].val2;
 	}
-	if(batk < 1) batk = 1;	// base_atk+MG9nAE9OMGcwgg-1
+	if(batk < 1) batk = 1;	// base_atkは最低でも1
 	return batk;
 }
 
 /*==========================================
- * +W/6MYTBu-Atk+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のAtkを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_atk(struct block_list *bl)
@@ -5610,7 +5589,7 @@ int status_get_atk(struct block_list *bl)
 #endif
 				atk = md->st.atk;
 			if(guardup_lv > 0)
-				atk +-= 1000*guardup_lv;
+				atk += 1000*guardup_lv;
 		}
 	} else if(bl->type == BL_PET && (struct pet_data *)bl) {
 		atk = mobdb_search(((struct pet_data*)bl)->class_)->atk1;
@@ -5620,47 +5599,47 @@ int status_get_atk(struct block_list *bl)
 		int rate = 100;
 #ifdef PRE_RENEWAL
 		if(sc->data[SC__BLOODYLUST].timer != -1 && bl->type != BL_PC)
-			atk = atk*(100+-32)/100;
+			atk = atk*(100+32)/100;
 		else if(sc->data[SC_PROVOKE].timer != -1 && bl->type != BL_PC)
-			atk = atk*(100+-2+-3*sc->data[SC_PROVOKE].val1)/100;
+			atk = atk*(100+2+3*sc->data[SC_PROVOKE].val1)/100;
 		if(sc->data[SC_CURSE].timer != -1)
 			atk -= atk*25/100;
-		if(sc->data[SC_CONCENTRATION].timer != -1 && bl->type != BL_PC)	// +MLMw8zC7MPMwyDDsMPwwtzDnMPM-
-			atk +-= atk*(5*sc->data[SC_CONCENTRATION].val1)/100;
-		if(sc->data[SC_EXPLOSIONSPIRITS].timer != -1 && bl->type != BL_PC)	// NPC+cgaIwmziUtU-
-			rate +-= 200;
-		if(sc->data[SC_SKE].timer != -1 && bl->type == BL_MOB)		// +MKgwuTCv-
-			rate +-= 300;
+		if(sc->data[SC_CONCENTRATION].timer != -1 && bl->type != BL_PC)	// コンセントレーション
+			atk += atk*(5*sc->data[SC_CONCENTRATION].val1)/100;
+		if(sc->data[SC_EXPLOSIONSPIRITS].timer != -1 && bl->type != BL_PC)	// NPC爆裂波動
+			rate += 200;
+		if(sc->data[SC_SKE].timer != -1 && bl->type == BL_MOB)		// エスク
+			rate += 300;
 #endif
 		if(sc->data[SC_STRIPWEAPON].timer != -1 && bl->type != BL_PC)
 			atk -= atk*25/100;
-		if(sc->data[SC_MADNESSCANCEL].timer != -1 && bl->type != BL_PC)	// +MN4wwzDJMM0wuTCtMOMw8zC7MOkw/A-
-			atk +-= 100;
+		if(sc->data[SC_MADNESSCANCEL].timer != -1 && bl->type != BL_PC)	// マッドネスキャンセラー
+			atk += 100;
 		if(sc->data[SC_THE_MAGICIAN].timer != -1 && bl->type != BL_PC)
 			atk = atk*50/100;
 		if(sc->data[SC_THE_DEVIL].timer != -1 && bl->type != BL_PC)
 			atk = atk*50/100;
 		if(sc->data[SC_THE_SUN].timer != -1 && bl->type != BL_PC)
 			atk = atk*80/100;
-		if(sc->data[SC_SKE].timer != -1 && bl->type == BL_MOB)		// +MKgwuTCv-
-			rate +-= 300;
-		if(sc->data[SC__ENERVATION].timer != -1 && bl->type == BL_MOB)	// +MN4wuTCrMOww/DDJ/xowqDDKMNkw/DC3MOcw8w-
-			atk -= atk * (20 +- sc->data[SC__ENERVATION].val1 * 10) / 100;
-		if(sc->data[SC_SHIELDSPELL_DEF].timer != -1 && sc->data[SC_SHIELDSPELL_DEF].val2 == 2 && bl->type == BL_MOB)	// +MLcw/DDrMMkwuTDaMOs-(DEF)
-			atk +-= sc->data[SC_SHIELDSPELL_DEF].val3;
-		if(sc->data[SC_SATURDAY_NIGHT_FEVER].timer != -1 && bl->type == BL_MOB)	// +MNUw6TCkMMcw/DDKMKQwyDDVMKMw/DDQMPw-
-			atk +-= 100 * sc->data[SC_SATURDAY_NIGHT_FEVER].val1;
-		if(sc->data[SC_ODINS_POWER].timer != -1 && bl->type == BL_MOB)	// +MKow/DDHMKMw8zBuUps-
-			atk +-= 60 +- 10 * sc->data[SC_ODINS_POWER].val1;
-		if(sc->data[SC_CATNIPPOWDER].timer != -1 && bl->type != BL_PC)		// +MKQwzDDPMMMwqzC3MOMw7zD8-
+		if(sc->data[SC_SKE].timer != -1 && bl->type == BL_MOB)		// エスク
+			rate += 300;
+		if(sc->data[SC__ENERVATION].timer != -1 && bl->type == BL_MOB)	// マスカレード：エナベーション
+			atk -= atk * (20 + sc->data[SC__ENERVATION].val1 * 10) / 100;
+		if(sc->data[SC_SHIELDSPELL_DEF].timer != -1 && sc->data[SC_SHIELDSPELL_DEF].val2 == 2 && bl->type == BL_MOB)	// シールドスペル(DEF)
+			atk += sc->data[SC_SHIELDSPELL_DEF].val3;
+		if(sc->data[SC_SATURDAY_NIGHT_FEVER].timer != -1 && bl->type == BL_MOB)	// フライデーナイトフィーバー
+			atk += 100 * sc->data[SC_SATURDAY_NIGHT_FEVER].val1;
+		if(sc->data[SC_ODINS_POWER].timer != -1 && bl->type == BL_MOB)	// オーディンの力
+			atk += 60 + 10 * sc->data[SC_ODINS_POWER].val1;
+		if(sc->data[SC_CATNIPPOWDER].timer != -1 && bl->type != BL_PC)		// イヌハッカシャワー
 			atk -= atk * sc->data[SC_CATNIPPOWDER].val2 / 100;
-		if(sc->data[SC_SHRIMP].timer != -1)		// +MKgw004JZic-
-			atk +-= atk * sc->data[SC_SHRIMP].val3 / 100;
+		if(sc->data[SC_SHRIMP].timer != -1)		// エビ三昧
+			atk += atk * sc->data[SC_SHRIMP].val3 / 100;
 		if(sc->data[SC_EQC].timer != -1 && bl->type == BL_MOB)		// E.Q.C
 			atk -= atk * sc->data[SC_EQC].val4 / 100;
-		if(sc->data[SC_VOLCANIC_ASH].timer != -1 && sc->data[SC_VOLCANIC_ASH].val4 > 0) 	// +cGtccXBw-
+		if(sc->data[SC_VOLCANIC_ASH].timer != -1 && sc->data[SC_VOLCANIC_ASH].val4 > 0) 	// 火山灰
 			atk -= atk * sc->data[SC_VOLCANIC_ASH].val4 / 100;
-		if(rate != 100)	// NPC+cgaIwmziUtUwaDCoMLkwrzCSUA1zh1Kge5cwVTBbMIs-
+		if(rate != 100)	// NPC爆裂波動とエスクを倍率加算させる
 			atk = atk * rate / 100;
 	}
 	if(atk < 0) atk = 0;
@@ -5668,8 +5647,8 @@ int status_get_atk(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuXeZiSw-Atk+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象の左手Atkを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_atk_(struct block_list *bl)
@@ -5685,16 +5664,16 @@ int status_get_atk_(struct block_list *bl)
 		if(sd->sc.data[SC_CURSE].timer != -1)
 			atk -= atk*25/100;
 #endif
-		if(sd->sc.data[SC_SHRIMP].timer != -1)		// +MKgw004JZic-
-			atk +-= atk * sd->sc.data[SC_SHRIMP].val3 / 100;
+		if(sd->sc.data[SC_SHRIMP].timer != -1)		// エビ三昧
+			atk += atk * sd->sc.data[SC_SHRIMP].val3 / 100;
 		return atk;
 	}
 	return 0;
 }
 
 /*==========================================
- * +W/6MYTBu-Atk2+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のAtk2を返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_atk2(struct block_list *bl)
@@ -5725,7 +5704,7 @@ int status_get_atk2(struct block_list *bl)
 #endif
 					atk2 = md->st.matk;
 				if(guardup_lv > 0)
-					atk2 +-= 1000*guardup_lv;
+					atk2 += 1000*guardup_lv;
 			}
 		} else if(bl->type == BL_PET && (struct pet_data *)bl) {
 			atk2 = mobdb_search(((struct pet_data*)bl)->class_)->atk2;
@@ -5734,47 +5713,47 @@ int status_get_atk2(struct block_list *bl)
 			int rate = 100;
 #ifdef PRE_RENEWAL
 			if(sc->data[SC_IMPOSITIO].timer != -1)
-				atk2 +-= sc->data[SC_IMPOSITIO].val1*5;
+				atk2 += sc->data[SC_IMPOSITIO].val1*5;
 			if(sc->data[SC__BLOODYLUST].timer != -1)
-				atk2 = atk2*(100+-32)/100;
+				atk2 = atk2*(100+32)/100;
 			else if(sc->data[SC_PROVOKE].timer != -1)
-				atk2 = atk2*(100+-2+-3*sc->data[SC_PROVOKE].val1)/100;
+				atk2 = atk2*(100+2+3*sc->data[SC_PROVOKE].val1)/100;
 			if(sc->data[SC_CURSE].timer != -1)
 				atk2 -= atk2*25/100;
 			if(sc->data[SC_DRUMBATTLE].timer != -1)
-				atk2 +-= sc->data[SC_DRUMBATTLE].val2;
+				atk2 += sc->data[SC_DRUMBATTLE].val2;
 			if(sc->data[SC_NIBELUNGEN].timer != -1 && (status_get_element(bl)/10) >= 8 )
-				atk2 +-= sc->data[SC_NIBELUNGEN].val2;
+				atk2 += sc->data[SC_NIBELUNGEN].val2;
 #endif
 			if(sc->data[SC_STRIPWEAPON].timer != -1)
 				atk2 -= atk2*25/100;
 #ifdef PRE_RENEWAL
-			if(sc->data[SC_CONCENTRATION].timer != -1)	// +MLMw8zC7MPMwyDDsMPwwtzDnMPM-
-				atk2 +-= atk2*(5*sc->data[SC_CONCENTRATION].val1)/100;
-			if(sc->data[SC_EXPLOSIONSPIRITS].timer != -1 && bl->type != BL_PC)	// NPC+cgaIwmziUtU-
-				rate +-= 200;
-			if(sc->data[SC_SKE].timer != -1 && bl->type == BL_MOB)		// +MKgwuTCv-
-				rate +-= 300;
+			if(sc->data[SC_CONCENTRATION].timer != -1)	// コンセントレーション
+				atk2 += atk2*(5*sc->data[SC_CONCENTRATION].val1)/100;
+			if(sc->data[SC_EXPLOSIONSPIRITS].timer != -1 && bl->type != BL_PC)	// NPC爆裂波動
+				rate += 200;
+			if(sc->data[SC_SKE].timer != -1 && bl->type == BL_MOB)		// エスク
+				rate += 300;
 #endif
-			if(sc->data[SC_MADNESSCANCEL].timer != -1 && bl->type != BL_PC)	// +MN4wwzDJMM0wuTCtMOMw8zC7MOkw/A-
-				atk2 +-= 100;
+			if(sc->data[SC_MADNESSCANCEL].timer != -1 && bl->type != BL_PC)	// マッドネスキャンセラー
+				atk2 += 100;
 			if(sc->data[SC_THE_MAGICIAN].timer != -1 && bl->type != BL_PC)
 				atk2 = atk2*50/100;
 			if(sc->data[SC_THE_DEVIL].timer != -1 && bl->type != BL_PC)
 				atk2 = atk2*50/100;
 			if(sc->data[SC_THE_SUN].timer != -1 && bl->type != BL_PC)
 				atk2 = atk2*80/100;
-			if(sc->data[SC__ENERVATION].timer != -1 && bl->type == BL_MOB)	// +MN4wuTCrMOww/DDJ/xowqDDKMNkw/DC3MOcw8w-
-				atk2 -= atk2 * (20 +- sc->data[SC__ENERVATION].val1 * 10) / 100;
-			if(sc->data[SC_SHIELDSPELL_DEF].timer != -1 && sc->data[SC_SHIELDSPELL_DEF].val2 == 2 && bl->type == BL_MOB)	// +MLcw/DDrMMkwuTDaMOs-(DEF)
-				atk2 +-= sc->data[SC_SHIELDSPELL_DEF].val3;
-			if(sc->data[SC_SATURDAY_NIGHT_FEVER].timer != -1 && bl->type == BL_MOB)	// +MNUw6TCkMMcw/DDKMKQwyDDVMKMw/DDQMPw-
-				atk2 +-= 100 * sc->data[SC_SATURDAY_NIGHT_FEVER].val1;
-			if(sc->data[SC_ODINS_POWER].timer != -1 && bl->type == BL_MOB)	// +MKow/DDHMKMw8zBuUps-
-				atk2 +-= 60 +- 10 * sc->data[SC_ODINS_POWER].val1;
-			if(sc->data[SC_CATNIPPOWDER].timer != -1 && bl->type != BL_PC)		// +MKQwzDDPMMMwqzC3MOMw7zD8-
+			if(sc->data[SC__ENERVATION].timer != -1 && bl->type == BL_MOB)	// マスカレード：エナベーション
+				atk2 -= atk2 * (20 + sc->data[SC__ENERVATION].val1 * 10) / 100;
+			if(sc->data[SC_SHIELDSPELL_DEF].timer != -1 && sc->data[SC_SHIELDSPELL_DEF].val2 == 2 && bl->type == BL_MOB)	// シールドスペル(DEF)
+				atk2 += sc->data[SC_SHIELDSPELL_DEF].val3;
+			if(sc->data[SC_SATURDAY_NIGHT_FEVER].timer != -1 && bl->type == BL_MOB)	// フライデーナイトフィーバー
+				atk2 += 100 * sc->data[SC_SATURDAY_NIGHT_FEVER].val1;
+			if(sc->data[SC_ODINS_POWER].timer != -1 && bl->type == BL_MOB)	// オーディンの力
+				atk2 += 60 + 10 * sc->data[SC_ODINS_POWER].val1;
+			if(sc->data[SC_CATNIPPOWDER].timer != -1 && bl->type != BL_PC)		// イヌハッカシャワー
 				atk2 -= atk2 * sc->data[SC_CATNIPPOWDER].val2 / 100;
-			if(rate != 100)	// NPC+cgaIwmziUtUwaDCoMLkwrzCSUA1zh1Kge5cwVTBbMIs-
+			if(rate != 100)	// NPC爆裂波動とエスクを倍率加算させる
 				atk2 = atk2 * rate / 100;
 		}
 		if(atk2 < 0) atk2 = 0;
@@ -5783,8 +5762,8 @@ int status_get_atk2(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuXeZiSw-Atk2+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象の左手Atk2を返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_atk_2(struct block_list *bl)
@@ -5798,8 +5777,8 @@ int status_get_atk_2(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-MAtk1+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のMAtk1を返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_matk1(struct block_list *bl)
@@ -5828,16 +5807,16 @@ int status_get_matk1(struct block_list *bl)
 
 #ifndef PRE_RENEWAL
 		if(battle_config.monster_atk2_to_matk && bl->type == BL_MOB)
-			matk1 = ((struct mob_data *)bl)->st.matk * 13 / 10 +- int_ +- status_get_lv(bl);
+			matk1 = ((struct mob_data *)bl)->st.matk * 13 / 10 + int_ + status_get_lv(bl);
 		else
 #endif
-			matk1 = int_+-(int_/5)*(int_/5);
+			matk1 = int_+(int_/5)*(int_/5);
 
-		// MOB+MG4-max_sp+UCQwkg-MATK+iNxrY1AkMGdOVzBjU9Ywi2ZC-
+		// MOBのmax_sp値をMATK補正値で乗っ取る時
 		if(battle_config.mob_take_over_sp == 1) {
 			if(bl->type == BL_MOB) {
-				int b_class = status_get_class(bl);		// +dvRjpQ-maxsp+U9Zfl3EhdAYwbnC6MOAw6jDkMOo-
-				if(mobdb_search(b_class)->max_sp > 0) {		// 1+TuVOCjBuZkIwbjB/-
+				int b_class = status_get_class(bl);		// 直接maxsp取得無理の為ムリヤリ
+				if(mobdb_search(b_class)->max_sp > 0) {		// 1以上の時のみ
 					matk1 = matk1 * (mobdb_search(b_class)->max_sp/100);
 				}
 			}
@@ -5846,7 +5825,7 @@ int status_get_matk1(struct block_list *bl)
 		if(sc) {
 #ifdef PRE_RENEWAL
 			if(sc->data[SC_MINDBREAKER].timer != -1)
-				matk1 +-= (matk1*20*sc->data[SC_MINDBREAKER].val1)/100;
+				matk1 += (matk1*20*sc->data[SC_MINDBREAKER].val1)/100;
 #endif
 			if(sc->data[SC_STRENGTH].timer != -1)
 				matk1 = matk1*50/100;
@@ -5854,15 +5833,15 @@ int status_get_matk1(struct block_list *bl)
 				matk1 = matk1*50/100;
 			if(sc->data[SC_THE_SUN].timer != -1)
 				matk1 = matk1*80/100;
-			if(sc->data[SC_ODINS_POWER].timer != -1)	// +MKow/DDHMKMw8zBuUps-
-				matk1 +-= 60 +- 10 * sc->data[SC_ODINS_POWER].val1;
+			if(sc->data[SC_ODINS_POWER].timer != -1)	// オーディンの力
+				matk1 += 60 + 10 * sc->data[SC_ODINS_POWER].val1;
 #ifdef PRE_RENEWAL
-			if(sc->data[SC_CHATTERING].timer != -1)	// +MMEw4zC/MOow8zCw-
-				matk1 +-= sc->data[SC_CHATTERING].val2;
+			if(sc->data[SC_CHATTERING].timer != -1)	// チャタリング
+				matk1 += sc->data[SC_CHATTERING].val2;
 #endif
-			if(sc->data[SC_SHRIMP].timer != -1)		// +MKgw004JZic-
-				matk1 +-= matk1 * sc->data[SC_SHRIMP].val3 / 100;
-			if(sc->data[SC_CATNIPPOWDER].timer != -1)		// +MKQwzDDPMMMwqzC3MOMw7zD8-
+			if(sc->data[SC_SHRIMP].timer != -1)		// エビ三昧
+				matk1 += matk1 * sc->data[SC_SHRIMP].val3 / 100;
+			if(sc->data[SC_CATNIPPOWDER].timer != -1)		// イヌハッカシャワー
 				matk1 -= matk1 * sc->data[SC_CATNIPPOWDER].val2 / 100;
 		}
 	}
@@ -5870,8 +5849,8 @@ int status_get_matk1(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-MAtk2+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のMAtk2を返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_matk2(struct block_list *bl)
@@ -5900,16 +5879,16 @@ int status_get_matk2(struct block_list *bl)
 
 #ifndef PRE_RENEWAL
 		if(battle_config.monster_atk2_to_matk && bl->type == BL_MOB)
-			matk2 = ((struct mob_data *)bl)->st.matk * 7 / 10 +- int_ +- status_get_lv(bl);
+			matk2 = ((struct mob_data *)bl)->st.matk * 7 / 10 + int_ + status_get_lv(bl);
 		else
 #endif
-			matk2 = int_+-(int_/7)*(int_/7);
+			matk2 = int_+(int_/7)*(int_/7);
 
-		// MOB+MG4-max_sp+UCQwkg-MATK+iNxrY1AkMGdOVzBjU9Ywi2ZC-
+		// MOBのmax_sp値をMATK補正値で乗っ取る時
 		if(battle_config.mob_take_over_sp == 1) {
 			if(bl->type == BL_MOB) {
-				int b_class = status_get_class(bl);		// +dvRjpQ-maxsp+U9Zfl3EhdAYwbnC6MOAw6jDkMOo-
-				if(mobdb_search(b_class)->max_sp > 0) {		// 1+TuVOCjBuZkIwbjB/-
+				int b_class = status_get_class(bl);		// 直接maxsp取得無理の為ムリヤリ
+				if(mobdb_search(b_class)->max_sp > 0) {		// 1以上の時のみ
 					matk2 = matk2 * (mobdb_search(b_class)->max_sp/100);
 				}
 			}
@@ -5918,7 +5897,7 @@ int status_get_matk2(struct block_list *bl)
 		if(sc) {
 #ifdef PRE_RENEWAL
 			if(sc->data[SC_MINDBREAKER].timer != -1)
-				matk2 +-= (matk2*20*sc->data[SC_MINDBREAKER].val1)/100;
+				matk2 += (matk2*20*sc->data[SC_MINDBREAKER].val1)/100;
 #endif
 			if(sc->data[SC_STRENGTH].timer != -1)
 				matk2 = matk2*50/100;
@@ -5926,11 +5905,11 @@ int status_get_matk2(struct block_list *bl)
 				matk2 = matk2*50/100;
 			if(sc->data[SC_THE_SUN].timer != -1)
 				matk2 = matk2*80/100;
-			if(sc->data[SC_ODINS_POWER].timer != -1)	// +MKow/DDHMKMw8zBuUps-
-				matk2 +-= 60 +- 10 * sc->data[SC_ODINS_POWER].val1;
-			if(sc->data[SC_CHATTERING].timer != -1)	// +MMEw4zC/MOow8zCw-
-				matk2 +-= sc->data[SC_CHATTERING].val2;
-			if(sc->data[SC_CATNIPPOWDER].timer != -1)		// +MKQwzDDPMMMwqzC3MOMw7zD8-
+			if(sc->data[SC_ODINS_POWER].timer != -1)	// オーディンの力
+				matk2 += 60 + 10 * sc->data[SC_ODINS_POWER].val1;
+			if(sc->data[SC_CHATTERING].timer != -1)	// チャタリング
+				matk2 += sc->data[SC_CHATTERING].val2;
+			if(sc->data[SC_CATNIPPOWDER].timer != -1)		// イヌハッカシャワー
 				matk2 -= matk2 * sc->data[SC_CATNIPPOWDER].val2 / 100;
 		}
 	}
@@ -5938,8 +5917,8 @@ int status_get_matk2(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Def+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のDefを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_def(struct block_list *bl)
@@ -5969,90 +5948,90 @@ int status_get_def(struct block_list *bl)
 
 	if(def < 1000000) {
 		if(sc) {
-			// +MK0w/DDUMPMwsGZCMG8-DEF100
+			// キーピング時はDEF100
 			if(sc->data[SC_KEEPING].timer != -1)
 				def *= 2;
-			// +MNcw7TDcMMMwr2ZCMG9uG3uX-
+			// プロボック時は減算
 			if(sc->data[SC__BLOODYLUST].timer != -1 && bl->type != BL_PC)
 				def = def * (100 - 55) / 100;
 			else if(sc->data[SC_PROVOKE].timer != -1 && bl->type != BL_PC)
 				def = def * (100 - 5 - 5 * sc->data[SC_PROVOKE].val1) / 100;
-			// +YiZZKp8TMG6X/zBNZkIwb1Kge5c-
+			// 戦太鼓の響き時は加算
 			if(sc->data[SC_DRUMBATTLE].timer != -1 && bl->type != BL_PC)
-				def +-= sc->data[SC_DRUMBATTLE].val3;
-			// +a9IwazBLMEswYzBmMEQwi2ZCMG9uG3uX-
+				def += sc->data[SC_DRUMBATTLE].val3;
+			// 毒にかかっている時は減算
 			if(sc->data[SC_POISON].timer != -1 && bl->type != BL_PC)
 				def = def*75/100;
-			// +MLkwyDDqMMMw1zC3MPww6zDJZkIwb24be5c-
+			// ストリップシールド時は減算
 			if(sc->data[SC_STRIPSHIELD].timer != -1 && bl->type != BL_PC)
 				def = def*85/100;
-			// +MLcwsDDKMOAwrzDrMLcwuWZCMG9uG3uX-
+			// シグナムクルシス時は減算
 			if(sc->data[SC_SIGNUMCRUCIS].timer != -1 && bl->type != BL_PC)
 				def = def * (100 - sc->data[SC_SIGNUMCRUCIS].val2)/100;
-			// +bDiQYDBubfdsjGZCMG8-PC+TuVZFg-DEF+MEw-0+MGswajCL-
+			// 永遠の混沌時はPC以外DEFが0になる
 			if(sc->data[SC_ETERNALCHAOS].timer != -1 && bl->type != BL_PC)
 				def = 0;
-			// +Uc19UDABd/NTFmZCMG9T8zC3MNUwyA-
+			// 凍結、石化時は右シフト
 			if(sc->data[SC_FREEZE].timer != -1 || (sc->data[SC_STONE].timer != -1 && sc->data[SC_STONE].val2 == 0))
 				def >>= 1;
-			// +MLMw8zC7MPMwyDDsMPwwtzDnMPNmQjBvbht7lw-
+			// コンセントレーション時は減算
 			if( sc->data[SC_CONCENTRATION].timer != -1 && bl->type != BL_PC)
 				def = def * (100 - 5*sc->data[SC_CONCENTRATION].val1) / 100;
-			// NPC+MMcwozDVMKcw8zDAMPw-
+			// NPCディフェンダー
 			if(sc->data[SC_NPC_DEFENDER].timer != -1 && bl->type != BL_PC)
-				def +-= 100;
+				def += 100;
 			// THE SUN
 			if(sc->data[SC_THE_SUN].timer != -1 && bl->type != BL_PC)
 				def = def*80/100;
-			// +MNUw6TCkMPMwsA-
+			// フライング
 			if(sc->data[SC_FLING].timer != -1 && bl->type != BL_PC)
 				def = def * (100 - 5*sc->data[SC_FLING].val2)/100;
-			// +MKgwuTCv-
+			// エスク
 			if(sc->data[SC_SKE].timer != -1 && bl->type == BL_MOB)
 				def = def/2;
 #ifdef PRE_RENEWAL
-			// +MLkwyDD8MPMwuTCtMPM-
+			// ストーンスキン
 			if(sc->data[SC_STONESKIN].timer != -1 && bl->type != BL_PC)
-				def = def * (100 +- 20 * sc->data[SC_STONESKIN].val1) / 100;
-			// +MKIw8zDBMN4wuDDDMK8-
+				def = def * (100 + 20 * sc->data[SC_STONESKIN].val1) / 100;
+			// アンチマジック
 			if(sc->data[SC_ANTIMAGIC].timer != -1 && bl->type != BL_PC)
 				def = def * (100 - 20 * sc->data[SC_ANTIMAGIC].val1) / 100;
 #endif
-			// +MNUw7TC5MMgw3zC5MMYwow-
+			// フロストミスティ
 			if(sc->data[SC_FROSTMISTY].timer != -1 && bl->type != BL_PC)
 				def = def * 90 / 100;
-			// +MKIwyjDpMKQwug-
+			// アナライズ
 			if(sc->data[SC_ANALYZE].timer != -1 && bl->type != BL_PC)
 				def = def * (100 - 14 * sc->data[SC_ANALYZE].val1) / 100;
-			// +MMsw5TD8MMgw6TDrMNAw6jCiMPw-
+			// ニュートラルバリアー
 			if(sc->data[SC_NEUTRALBARRIER].timer != -1 && bl->type != BL_PC)
-				def = def * (110 +- 5 * sc->data[SC_NEUTRALBARRIER].val1) / 100;
-			// +MKIw/DC5MMkw6TCkMNY-
+				def = def * (110 + 5 * sc->data[SC_NEUTRALBARRIER].val1) / 100;
+			// アースドライブ
 			if(sc->data[SC_EARTHDRIVE].timer != -1 && bl->type != BL_PC)
 				def = def * 85 / 100;
-			// +MNUw6TCkMMcw/DDKMKQwyDDVMKMw/DDQMPw-
+			// フライデーナイトフィーバー
 			if(sc->data[SC_SATURDAY_NIGHT_FEVER].timer != -1 && bl->type != BL_PC)
 				def = def * (90 - 10 * sc->data[SC_SATURDAY_NIGHT_FEVER].val1) / 100;
-			// +MKow/DDHMKMw8zBuUps-
+			// オーディンの力
 			if(sc->data[SC_ODINS_POWER].timer != -1 && bl->type != BL_PC)
-				def -= 10 +- 10 * sc->data[SC_ODINS_POWER].val1;
-			// +MMsw4zDzMLAw6TC5-
+				def -= 10 + 10 * sc->data[SC_ODINS_POWER].val1;
+			// ニャングラス
 			if(sc->data[SC_NYANGGRASS].timer != -1 && bl->type != BL_PC)
 				def >>= 1;
-			// +cGtccXBw-
+			// 火山灰
 			if(sc->data[SC_VOLCANIC_ASH].timer != -1 && sc->data[SC_VOLCANIC_ASH].val3 > 0)
 				def -= def * sc->data[SC_VOLCANIC_ASH].val3 / 100;
-			// +YCVRtw-
+			// 急冷
 			if(sc->data[SC_HANDICAPSTATE_FROSTBITE].timer != -1 && bl->type != BL_PC)
 				def -= def * sc->data[SC_HANDICAPSTATE_FROSTBITE].val2 / 100;
-			// +MKIw8zDqMN8wwzDI-
+			// アンリミット
 			if(sc->data[SC_UNLIMIT].timer != -1)
 				def = 1;
-			// +Xzdr0g-
+			// 強毒
 			if(sc->data[SC_HANDICAPSTATE_DEADLYPOISON].timer != -1 && bl->type != BL_PC)
 				def = 0;
 		}
-		// +imBVMU4tMG+KYFUxZkJuG3uXc4cwa1f6MGUwRDBmbht7lw-
+		// 詠唱中は詠唱時減算率に基づいて減算
 		if(ud && ud->skilltimer != -1) {
 			int def_rate = skill_get_castdef(ud->skillid);
 			if(def_rate != 0)
@@ -6064,8 +6043,8 @@ int status_get_def(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-MDef+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のMDefを返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_mdef(struct block_list *bl)
@@ -6091,42 +6070,42 @@ int status_get_mdef(struct block_list *bl)
 
 	if(mdef < 1000000) {
 		if(sc) {
-			// +MNAw6jCiMPxytmFLZkIwbw-MDEF100
+			// バリアー状態時はMDEF100
 			if(sc->data[SC_BARRIER].timer != -1)
-				mdef +-= 100;
-			// +Uc19UDABd/NTFmZCMG8-1.25+UA0-
+				mdef += 100;
+			// 凍結、石化時は1.25倍
 			if(sc->data[SC_FREEZE].timer != -1 || (sc->data[SC_STONE].timer != -1 && sc->data[SC_STONE].val2 == 0))
 				mdef = mdef*125/100;
 #ifdef PRE_RENEWAL
-			// +MLkwyDD8MPMwuTCtMPM-
+			// ストーンスキン
 			if(sc->data[SC_STONESKIN].timer != -1 && bl->type != BL_PC)
 				mdef = mdef * (100 - 20 * sc->data[SC_STONESKIN].val1) / 100;
-			// +MKIw8zDBMN4wuDDDMK8-
+			// アンチマジック
 			if(sc->data[SC_ANTIMAGIC].timer != -1 && bl->type != BL_PC)
-				mdef = mdef * (100 +- 20 * sc->data[SC_ANTIMAGIC].val1) / 100;
+				mdef = mdef * (100 + 20 * sc->data[SC_ANTIMAGIC].val1) / 100;
 #endif
-			// +MKIwyjDpMKQwug-
+			// アナライズ
 			if(sc->data[SC_ANALYZE].timer != -1 && bl->type != BL_PC)
 				mdef = mdef * (100 - 14 * sc->data[SC_ANALYZE].val1) / 100;
-			// +MMsw5TD8MMgw6TDrMNAw6jCiMPw-
+			// ニュートラルバリアー
 			if(sc->data[SC_NEUTRALBARRIER].timer != -1 && bl->type != BL_PC)
-				mdef = mdef * (110 +- 5 * sc->data[SC_NEUTRALBARRIER].val1) / 100;
-			// +MKow/DDHMKMw8zBuUps-
+				mdef = mdef * (110 + 5 * sc->data[SC_NEUTRALBARRIER].val1) / 100;
+			// オーディンの力
 			if(sc->data[SC_ODINS_POWER].timer != -1 && bl->type != BL_PC)
-				mdef -= 10 +- 10 * sc->data[SC_ODINS_POWER].val1;
-			// +cLl6dA- -+U80--
+				mdef -= 10 + 10 * sc->data[SC_ODINS_POWER].val1;
+			// 点穴 -反-
 			if(sc->data[SC_GENTLETOUCH_CHANGE].timer != -1)
 				mdef -= sc->data[SC_GENTLETOUCH_CHANGE].val3;
-			// +MMsw4zDzMLAw6TC5-
+			// ニャングラス
 			if(sc->data[SC_NYANGGRASS].timer != -1 && bl->type != BL_PC)
 				mdef >>= 1;
-			// +YCVRtw-
+			// 急冷
 			if(sc->data[SC_HANDICAPSTATE_FROSTBITE].timer != -1 && bl->type != BL_PC)
 				mdef -= mdef * sc->data[SC_HANDICAPSTATE_FROSTBITE].val2 / 100;
-			// +MKIw8zDqMN8wwzDI-
+			// アンリミット
 			if(sc->data[SC_UNLIMIT].timer != -1)
 				mdef = 1;
-			// +fVBmdlMW-
+			// 結晶化
 			if(sc->data[SC_HANDICAPSTATE_CRYSTALLIZATION].timer != -1 && bl->type != BL_PC)
 				mdef = 0;
 		}
@@ -6136,8 +6115,8 @@ int status_get_mdef(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Def2+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-1+TuVOCg-
+ * 対象のDef2を返す
+ * 戻りは整数で1以上
  *------------------------------------------
  */
 int status_get_def2(struct block_list *bl)
@@ -6154,7 +6133,7 @@ int status_get_def2(struct block_list *bl)
 #ifdef PRE_RENEWAL
 		def2 = mobdb_search(((struct mob_data *)bl)->class_)->vit;
 #else
-		def2 = (int)(mobdb_search(((struct mob_data *)bl)->class_)->vit/(float)2 +- mobdb_search(((struct mob_data *)bl)->class_)->lv/(float)2);
+		def2 = (int)(mobdb_search(((struct mob_data *)bl)->class_)->vit/(float)2 + mobdb_search(((struct mob_data *)bl)->class_)->lv/(float)2);
 #endif
 	else if(bl->type == BL_PET && (struct pet_data *)bl)
 		def2 = mobdb_search(((struct pet_data *)bl)->class_)->vit;
@@ -6168,9 +6147,9 @@ int status_get_def2(struct block_list *bl)
 	if(sc) {
 		if(sc->data[SC_ANGELUS].timer != -1 && bl->type != BL_PC) {
 #ifdef PRE_RENEWAL
-			def2 = def2*(110+-5*sc->data[SC_ANGELUS].val1)/100;
+			def2 = def2*(110+5*sc->data[SC_ANGELUS].val1)/100;
 #else
-			def2 = def2*(100+-5*sc->data[SC_ANGELUS].val1)/100;
+			def2 = def2*(100+5*sc->data[SC_ANGELUS].val1)/100;
 #endif
 		}
 		if(sc->data[SC__BLOODYLUST].timer != -1 && bl->type != BL_PC)
@@ -6179,44 +6158,44 @@ int status_get_def2(struct block_list *bl)
 			def2 = def2 * (100 - 5 - 5 * sc->data[SC_PROVOKE].val1) / 100;
 		if(sc->data[SC_POISON].timer != -1 && bl->type != BL_PC)
 			def2 = def2*75/100;
-		// +MLMw8zC7MPMwyDDsMPwwtzDnMPNmQjBvbht7lw-
+		// コンセントレーション時は減算
 		if( sc->data[SC_CONCENTRATION].timer != -1 && bl->type != BL_PC)
 			def2 = def2*(100 - 5*sc->data[SC_CONCENTRATION].val1)/100;
-		// +MLgw5zCkMPMwyDDTMPwwyGZCMGowiW4be5c-
+		// ジョイントビート時なら減算
 		if(sc->data[SC_JOINTBEAT].timer != -1) {
-			if(sc->data[SC_JOINTBEAT].val4 == 3)	// +gKk-
+			if(sc->data[SC_JOINTBEAT].val4 == 3)	// 肩
 				def2 -= def2*50/100;
-			if(sc->data[SC_JOINTBEAT].val4 == 4)	// +gXA-
+			if(sc->data[SC_JOINTBEAT].val4 == 4)	// 腰
 				def2 -= def2*25/100;
 		}
-		// +bDiQYDBubfdsjGZCMG8-DEF2+MEw-0+MGswajCL-
+		// 永遠の混沌時はDEF2が0になる
 		if(sc->data[SC_ETERNALCHAOS].timer != -1)
 			def2 = 0;
 		// THE SUN
 		if(sc->data[SC_THE_SUN].timer != -1 && bl->type != BL_PC)
 			def2 = def2*80/100;
-		// +MNUw6TCkMPMwsA-
+		// フライング
 		if(sc->data[SC_FLING].timer != -1 && bl->type != BL_PC)
 			def2 = def2 * (100 - 5*sc->data[SC_FLING].val2)/100;
-		// +MKgwuTCr-
+		// エスカ
 		if(sc->data[SC_SKA].timer != -1 && bl->type == BL_MOB)
-			def2 +-= 90;
-		// +MLcw/DDrMMkwuTDaMOs-
+			def2 += 90;
+		// シールドスペル
 		if(sc->data[SC_SHIELDSPELL_REF].timer != -1 && sc->data[SC_SHIELDSPELL_REF].val2 == 2 && bl->type == BL_MOB)
-			def2 +-= sc->data[SC_SHIELDSPELL_REF].val2;
-		// +MNcw7DC5MMYwozD8MLg-
+			def2 += sc->data[SC_SHIELDSPELL_REF].val2;
+		// プレスティージ
 		if(sc->data[SC_PRESTIGE].timer != -1 && bl->type == BL_MOB)
-			def2 +-= sc->data[SC_PRESTIGE].val2;
-		// +YCVRtw-
+			def2 += sc->data[SC_PRESTIGE].val2;
+		// 急冷
 		if(sc->data[SC_HANDICAPSTATE_FROSTBITE].timer != -1 && bl->type != BL_PC)
 			def2 -= def2 * sc->data[SC_HANDICAPSTATE_FROSTBITE].val2 / 100;
-		// +MKIw8zDqMN8wwzDI-
+		// アンリミット
 		if(sc->data[SC_UNLIMIT].timer != -1)
 			def2 = 1;
 		// E.Q.C
 		if(sc->data[SC_EQC].timer != -1 && bl->type == BL_MOB)
 			def2 -= def2 * sc->data[SC_EQC].val4 / 100;
-		// +Xzdr0g-
+		// 強毒
 		if(sc->data[SC_HANDICAPSTATE_DEADLYPOISON].timer != -1 && bl->type != BL_PC)
 			def2 = 0;
 	}
@@ -6225,8 +6204,8 @@ int status_get_def2(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-MDef2+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-0+TuVOCg-
+ * 対象のMDef2を返す
+ * 戻りは整数で0以上
  *------------------------------------------
  */
 int status_get_mdef2(struct block_list *bl)
@@ -6240,39 +6219,39 @@ int status_get_mdef2(struct block_list *bl)
 
 	if(bl->type == BL_MOB && (struct mob_data *)bl)
 #ifdef PRE_RENEWAL
-		mdef2 = mobdb_search(((struct mob_data *)bl)->class_)->int_ +- (mobdb_search(((struct mob_data *)bl)->class_)->vit>>1);
+		mdef2 = mobdb_search(((struct mob_data *)bl)->class_)->int_ + (mobdb_search(((struct mob_data *)bl)->class_)->vit>>1);
 #else
-		mdef2 = (int)(mobdb_search(((struct mob_data *)bl)->class_)->int_/(float)4 +- mobdb_search(((struct mob_data *)bl)->class_)->lv/(float)4);
+		mdef2 = (int)(mobdb_search(((struct mob_data *)bl)->class_)->int_/(float)4 + mobdb_search(((struct mob_data *)bl)->class_)->lv/(float)4);
 #endif
 	else if(bl->type == BL_PC && (struct map_session_data *)bl)
 #ifdef PRE_RENEWAL
-		mdef2 = ((struct map_session_data *)bl)->mdef2 +- (((struct map_session_data *)bl)->paramc[2]>>1);
+		mdef2 = ((struct map_session_data *)bl)->mdef2 + (((struct map_session_data *)bl)->paramc[2]>>1);
 #else
 		mdef2 = ((struct map_session_data *)bl)->mdef2;
 #endif
 	else if(bl->type == BL_PET && (struct pet_data *)bl)
-		mdef2 = mobdb_search(((struct pet_data *)bl)->class_)->int_ +- (mobdb_search(((struct pet_data *)bl)->class_)->vit>>1);
+		mdef2 = mobdb_search(((struct pet_data *)bl)->class_)->int_ + (mobdb_search(((struct pet_data *)bl)->class_)->vit>>1);
 	else if (bl->type == BL_HOM && (struct homun_data *)bl)
 		mdef2 = ((struct homun_data *)bl)->mdef;
 	else if (bl->type == BL_MERC && (struct merc_data *)bl)
-		mdef2 = ((struct merc_data *)bl)->int_ +- (((struct merc_data *)bl)->vit>>1);
+		mdef2 = ((struct merc_data *)bl)->int_ + (((struct merc_data *)bl)->vit>>1);
 	else if (bl->type == BL_ELEM && (struct elem_data *)bl)
-		mdef2 = ((struct elem_data *)bl)->int_ +- (((struct elem_data *)bl)->vit>>1);
+		mdef2 = ((struct elem_data *)bl)->int_ + (((struct elem_data *)bl)->vit>>1);
 
 	if(sc) {
-		// +MKgwuTCr-
+		// エスカ
 		if(sc->data[SC_SKA].timer != -1 && bl->type == BL_MOB)
 			mdef2 = 90;
-		// +MN4wpDDzMMkw1jDsMKQwqzD8-
+		// マインドブレイカー
 		if(sc->data[SC_MINDBREAKER].timer != -1 && bl->type != BL_PC)
 			mdef2 -= (mdef2*12*sc->data[SC_MINDBREAKER].val1)/100;
-		// +YCVRtw-
+		// 急冷
 		if(sc->data[SC_HANDICAPSTATE_FROSTBITE].timer != -1 && bl->type != BL_PC)
 			mdef2 -= mdef2 * sc->data[SC_HANDICAPSTATE_FROSTBITE].val2 / 100;
-		// +MKIw8zDqMN8wwzDI-
+		// アンリミット
 		if(sc->data[SC_UNLIMIT].timer != -1)
 			mdef2 = 1;
-		// +fVBmdlMW-
+		// 結晶化
 		if(sc->data[SC_HANDICAPSTATE_CRYSTALLIZATION].timer != -1 && bl->type != BL_PC)
 			mdef2 = 0;
 	}
@@ -6280,9 +6259,9 @@ int status_get_mdef2(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Speed(+eftS1ZAfXqY-)+MJKP1DBZ-
- * +YjswijBvZXRlcDBn-1+TuVOCg-
- * Speed+MG9cDzBVMEQwezBGMEx5+1LVkB9epjBMkB8wRA-
+ * 対象のSpeed(移動速度)を返す
+ * 戻りは整数で1以上
+ * Speedは小さいほうが移動速度が速い
  *------------------------------------------
  */
 int status_get_speed(struct block_list *bl)
@@ -6320,56 +6299,56 @@ int status_get_speed(struct block_list *bl)
 		else if(bl->type == BL_PET && (struct pet_data *)bl)
 			speed = ((struct pet_data *)bl)->speed;
 
-		/* speed+MExZCVMWMFkwizC5MMYw/DC/MLkwbooIe5c- */
+		/* speedが変化するステータスの計算 */
 		if(sc) {
-			/* speed+MExYl1KgMFkwizC5MMYw/DC/MLkwbooIe5c- */
+			/* speedが増加するステータスの計算 */
 
-			// +kdFSWzBveftS1ZAfXqZW+lua-
+			// 金剛は移動速度固定
 			if(sc->data[SC_STEELBODY].timer != -1)
 				return 200;
 
-			// +kB9epm4bXBE-
+			// 速度減少
 			if(sc->data[SC_DECREASEAGI].timer != -1)
 				slow_val = 25;
 
-			// +MK8woTCwMN4wpDCi-
+			// クァグマイア
 			if(sc->data[SC_QUAGMIRE].timer != -1) {
 				if(slow_val < 50)
 					slow_val = 50;
 			}
 
-			// +ecEwkl/YMIwwajBEMGc-
+			// 私を忘れないで
 			if(sc->data[SC_DONTFORGETME].timer != -1) {
 				if(slow_val < sc->data[SC_DONTFORGETME].val2)
 					slow_val = sc->data[SC_DONTFORGETME].val2;
 			}
 
-			// +VGowRA-
+			// 呪い
 			if(sc->data[SC_CURSE].timer != -1) {
 				if(slow_val < 300)
 					slow_val = 300;
 			}
 
-			// +MN4w/DC3MOUwqjDWMKIw0zC5-
+			// マーシュオブアビス
 			if(sc->data[SC_MARSHOFABYSS].timer != -1) {
 				if(slow_val < sc->data[SC_MARSHOFABYSS].val2)
 					slow_val = sc->data[SC_MARSHOFABYSS].val2;
 			}
 
-			// +MM8w6zC3MM0w/DC3MOcw8zCmMKkw/DCv-(+MNowyjDrMMYwow-)
+			// ハルシネーションウォーク(ペナルティ)
 			if(sc->data[SC_HALLUCINATIONWALK_POSTDELAY].timer != -1) {
 				if(slow_val < 100)
 					slow_val = 100;
 			}
 
-			// +MLgw5zCkMPMwyDDTMPwwyA-
+			// ジョイントビート
 			if(sc->data[SC_JOINTBEAT].timer != -1) {
 				int penalty = 0;
 				switch (sc->data[SC_JOINTBEAT].val4) {
-				case 0:	// +jbOZlg-
+				case 0:	// 足首
 					penalty = 50;
 					break;
-				case 2:	// +gZ0-
+				case 2:	// 膝
 					penalty = 30;
 					break;
 				}
@@ -6377,110 +6356,110 @@ int status_get_speed(struct block_list *bl)
 					slow_val = penalty;
 			}
 
-			// +MKwwyDDqMPMwsDDVMKMw/DDQMPw-
+			// ガトリングフィーバー
 			if(sc->data[SC_GATLINGFEVER].timer != -1) {
 				if(slow_val < 100)
 					slow_val = 100;
 			}
 
-			// +MKgwuTCm-
+			// エスウ
 			if(sc->data[SC_SWOO].timer != -1) {
 				if(slow_val < 300)
 					slow_val = 300;
 			}
 
-			// +MNEw6TDpMKQwug-
+			// パラライズ
 			if(sc->data[SC_PARALIZE].timer != -1) {
 				if(slow_val < 100)
 					slow_val = 100;
 			}
 
-			// +MNUw7TC5MMgw3zC5MMYwow-
+			// フロストミスティ
 			if(sc->data[SC_FROSTMISTY].timer != -1) {
 				if(slow_val < 50)
 					slow_val = 50;
 			}
 
-			// +MN4wuTCrMOww/DDJ/xow7DCkMLgwzTC5-
+			// マスカレード：レイジネス
 			if(sc->data[SC__LAZINESS].timer != -1) {
 				if(slow_val < 10)
 					slow_val = 10;
 			}
 
-			// +MN4wuTCrMOww/DDJ/xowsDDrMPww3zD8-
+			// マスカレード：グルーミー
 			if(sc->data[SC__GROOMY].timer != -1) {
-				int penalty = 5 +- 5 * sc->data[SC__GROOMY].val1;
+				int penalty = 5 + 5 * sc->data[SC__GROOMY].val1;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MOEw7TDzcgZfPg-
+			// メロン爆弾
 			if(sc->data[SC_MELON_BOMB].timer != -1) {
 				int penalty = sc->data[SC_MELON_BOMB].val1;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MLAw6TDTMMYw/DC3MOcw8zDVMKMw/DDrMMk-
+			// グラビテーションフィールド
 			if(battle_config.enemy_gravitation_type && sc->data[SC_GRAVITATION].timer != -1) {
 				int penalty = sc->data[SC_GRAVITATION].val1 * 5;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MNAwpDDzMMkwyDDpMMMw1w-
+			// バインドトラップ
 			if(sc->data[SC_B_TRAP].timer != -1) {
 				int penalty = sc->data[SC_B_TRAP].val3;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MKgwuTDP-
+			// エスハ
 			if(sc->data[SC_SHA].timer != -1) {
 				if(slow_val < sc->data[SC_SHA].val2)
 					slow_val = sc->data[SC_SHA].val2;
 			}
 
-			// +MLcw/DDrMMkwwTCnMPww8zDpMMMwtzDl-
+			// シールドチェーンラッシュ
 			if(sc->data[SC_SHIELDCHAINRUSH].timer != -1) {
 				if(slow_val < sc->data[SC_SHIELDCHAINRUSH].val3)
 					slow_val = sc->data[SC_SHIELDCHAINRUSH].val3;
 			}
 
-			// +MLAw6TCmMPMwyTCwMOkw0zDGMPwwtzDnMPM-
+			// グラウンドグラビテーション
 			if(sc->data[SC_GROUNDGRAVITY].timer != -1) {
 				if(slow_val < sc->data[SC_GROUNDGRAVITY].val3)
 					slow_val = sc->data[SC_GROUNDGRAVITY].val3;
 			}
 
-			/* speed+MExuG1wRMFkwizC5MMYw/DC/MLmKCHuX- */
+			/* speedが減少するステータス計算 */
 
-			// +kB9epl83UxY-
+			// 速度強化
 			if(sc->data[SC_SPEEDUP1].timer != -1)
 				haste_val = 50;
 
-			// +kB9epliXUqA-
+			// 速度増加
 			if(sc->data[SC_INCREASEAGI].timer != -1) {
 				if(haste_val < 25)
 					haste_val = 25;
 			}
 
-			// +MKYwpDDzMMkwpjCpMPwwrw-
+			// ウインドウォーク
 			if(sc->data[SC_WINDWALK].timer != -1) {
 				int bonus = 2 * sc->data[SC_WINDWALK].val1;
 				if(haste_val < bonus)
 					haste_val = bonus;
 			}
 
-			// +MKQw8zDTMPMwtzDWMOs-
+			// インビンシブル
 			if(sc->data[SC_INVINCIBLE].timer != -1 && sc->data[SC_INVINCIBLEOFF].timer == -1) {
 				if(haste_val < 75)
 					haste_val = 75;
 			}
 
-			/* +MF0wbk7W- */
+			/* その他 */
 
-			// +MMcwozDVMKcw8zDAMPw-
+			// ディフェンダー
 			if(sc->data[SC_DEFENDER].timer != -1)
 				defender_flag = 1;
 
@@ -6489,20 +6468,20 @@ int status_get_speed(struct block_list *bl)
 				walkspeed_flag = 1;
 		}
 
-		/* bonus_rate+MG5nAE9OUCQwkootW5o- */
+		/* bonus_rateの最低値を設定 */
 		bonus_rate = slow_val - haste_val;
 		if(bonus_rate < -60)
 			bonus_rate = -60;
 
-		/* speed+MG5nAH1Cigh7lw- */
+		/* speedの最終計算 */
 		if(bonus_rate != 0)	// bonus_rate
-			speed = speed * (bonus_rate+-100) / 100;
-		if(defender_flag && speed < 200)	// +MMcwozDVMKcw8zDAMPw-
+			speed = speed * (bonus_rate+100) / 100;
+		if(defender_flag && speed < 200)	// ディフェンダー
 			speed = 200;
-		if(walkspeed_flag)	// +MLkwrzDqMNcwyHUoMLkwxjD8ML8wuQ-
+		if(walkspeed_flag)	// スクリプト用ステータス
 			speed = speed * 100 / sc->data[SC_WALKSPEED].val1;
 
-		/* +ZwBPTlAkMAFnAFknUCQwkootW5owWTCL- */
+		/* 最低値、最大値を設定する */
 		if(speed < MIN_WALK_SPEED)
 			speed = MIN_WALK_SPEED;
 		if(speed > MAX_WALK_SPEED)
@@ -6513,8 +6492,8 @@ int status_get_speed(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-aDelay(+ZTtkg2ZCMMcwozDsMKQ-)+MJKP1DBZ-
- * aDelay+MG9cDzBVMEQwezBGMExlO2SDkB9epjBMkB8wRA-
+ * 対象のaDelay(攻撃時ディレイ)を返す
+ * aDelayは小さいほうが攻撃速度が速い
  *------------------------------------------
  */
 int status_get_adelay(struct block_list *bl)
@@ -6544,7 +6523,7 @@ int status_get_adelay(struct block_list *bl)
 				calc_adelay = mobdb_search(((struct mob_data *)bl)->class_)->adelay;
 
 			if(guardup_lv > 0)
-				bonus_rate -= 5 +- 5*guardup_lv;
+				bonus_rate -= 5 + 5*guardup_lv;
 		} else if(bl->type == BL_PET && (struct pet_data *)bl) {
 			if(mobdb_search(((struct pet_data *)bl)->class_)->adelay < mobdb_search(((struct pet_data *)bl)->class_)->amotion)
 				calc_adelay = mobdb_search(((struct pet_data *)bl)->class_)->amotion;
@@ -6558,114 +6537,114 @@ int status_get_adelay(struct block_list *bl)
 			calc_adelay = ((struct elem_data *)bl)->adelay;
 		}
 
-		/* amotion+MExZCVMWMFkwi3K2YUt1cF44MG6KCHuX- */
+		/* amotionが変化する状態異常の計算 */
 		if(sc) {
 
-			/* amotion+MExYl1KgMFkwizC5MMYw/DC/MLkwbooIe5c- */
+			/* amotionが増加するステータスの計算 */
 
-			// +ecEwkl/YMIwwajBEMGc-
+			// 私を忘れないで
 			if(sc->data[SC_DONTFORGETME].timer != -1) {
 				slow_val = sc->data[SC_DONTFORGETME].val1;
 			}
 
-			// +kdFSWw-
+			// 金剛
 			if(sc->data[SC_STEELBODY].timer != -1) {
 				if(slow_val < 25)
 					slow_val = 25;
 			}
 
-			// +MLgw5zCkMPMwyDDTMPwwyA-
+			// ジョイントビート
 			if(sc->data[SC_JOINTBEAT].timer != -1) {
 				switch (sc->data[SC_JOINTBEAT].val4) {
-					case 1:		// +YkuZlg-
+					case 1:		// 手首
 						if(slow_val < 25)
 							slow_val = 25;
 						break;
-					case 2:		// +gZ0-
+					case 2:		// 膝
 						if(slow_val < 10)
 							slow_val = 10;
 						break;
 				}
 			}
 
-			// +MLAw6TDTMMYw/DC3MOcw8zDVMKMw/DDrMMk-
+			// グラビテーションフィールド
 			if(sc->data[SC_GRAVITATION].timer != -1) {
 				int penalty = sc->data[SC_GRAVITATION].val1*5;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MNUw7TC5MMgw3zC5MMYwow-
+			// フロストミスティ
 			if(sc->data[SC_FROSTMISTY].timer != -1) {
 				if(slow_val < 15)
 					slow_val = 15;
 			}
 
-			// +MNwwxzCjMNowpDDzMMYwozDzMLA-
+			// ボディペインティング
 			if(sc->data[SC__BODYPAINT].timer != -1) {
 				if(slow_val < 25)
 					slow_val = 25;
 			}
 
-			// +MKQw8zDTMLgw0zDqMMYwow-
+			// インビジビリティ
 			if(sc->data[SC__INVISIBILITY].timer != -1) {
 				int penalty = 50 - 10 * sc->data[SC__INVISIBILITY].val1;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MN4wuTCrMOww/DDJ/xowsDDrMPww3zD8-
+			// マスカレード：グルーミー
 			if(sc->data[SC__GROOMY].timer != -1) {
-				int penalty = 20 +- 10 * sc->data[SC__GROOMY].val1;
+				int penalty = 20 + 10 * sc->data[SC__GROOMY].val1;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MKIw/DC5MMkw6TCkMNY-
+			// アースドライブ
 			if(sc->data[SC_EARTHDRIVE].timer != -1) {
 				if(slow_val < 25)
 					slow_val = 25;
 			}
 
-			// +MOEw6TDzMLMw6jD8-
+			// メランコリー
 			if(sc->data[SC_GLOOMYDAY].timer != -1) {
-				int penalty = 15 +- 5 * sc->data[SC_GLOOMYDAY].val1;
+				int penalty = 15 + 5 * sc->data[SC_GLOOMYDAY].val1;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MOEw7TDzcgZfPg-
+			// メロン爆弾
 			if(sc->data[SC_MELON_BOMB].timer != -1) {
 				int penalty = sc->data[SC_MELON_BOMB].val1;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			/* amotion+MExuG1wRMFkwizC5MMYw/DC/MLkwbooIe5c-1 */
+			/* amotionが減少するステータスの計算1 */
 
-			// +WJeQHzDdMPwwtzDnMPM-
+			// 増速ポーション
 			if(sc->data[tmp = SC_SPEEDPOTION2].timer != -1 || sc->data[tmp = SC_SPEEDPOTION1].timer != -1 || sc->data[tmp = SC_SPEEDPOTION0].timer != -1)
 				haste_val1 = sc->data[tmp].val2;
 
-			/* amotion+MExuG1wRMFkwizC5MMYw/DC/MLkwbooIe5c-2 */
+			/* amotionが減少するステータスの計算2 */
 
-			// +MMQw/DDPMPMwyTCvMKMwwzCxMPM-
+			// ツーハンドクィッケン
 			if(sc->data[SC_TWOHANDQUICKEN].timer != -1)
 				haste_val2 = sc->data[SC_TWOHANDQUICKEN].val2;
 
-			// +MLkw1DCiMK8wozDDMLEw8w-
+			// スピアクィッケン
 			if(sc->data[SC_SPEARQUICKEN].timer != -1) {
 				if(haste_val2 < sc->data[SC_SPEARQUICKEN].val2)
 					haste_val2 = sc->data[SC_SPEARQUICKEN].val2;
 			}
 
-			// +MO8w8zDPMPMwyTCvMKMwwzCxMPM-
+			// ワンハンドクィッケン
 			if(sc->data[SC_ONEHAND].timer != -1) {
 				if(haste_val2 < 30)
 					haste_val2 = 30;
 			}
 
-			// +MKIwyTDsMMow6jDzMOkwwzC3MOU-
+			// アドレナリンラッシュ
 			if(sc->data[SC_ADRENALINE].timer != -1) {
 				int bonus;
 				if(sc->data[SC_ADRENALINE].val2 || !battle_config.party_skill_penalty)
@@ -6676,7 +6655,7 @@ int status_get_adelay(struct block_list *bl)
 					haste_val2 = bonus;
 			}
 
-			// +MKIwyTDsMMow6jDzMOkwwzC3MOU-2
+			// アドレナリンラッシュ2
 			if(sc->data[SC_ADRENALINE2].timer != -1) {
 				int bonus;
 				if(sc->data[SC_ADRENALINE2].val2 || !battle_config.party_skill_penalty)
@@ -6687,64 +6666,64 @@ int status_get_adelay(struct block_list *bl)
 					haste_val2 = bonus;
 			}
 
-			// +WRWWfTBuMKIwtTC3MPMwrzDtMLk-
+			// 夕陽のアサシンクロス
 			if(sc->data[SC_ASSNCROS].timer != -1) {
 				int bonus = sc->data[SC_ASSNCROS].val2;
 				if(haste_val2 < bonus)
 					haste_val2 = bonus;
 			}
 
-			// +MKwwyDDqMPMwsDDVMKMw/DDQMPw-
+			// ガトリングフィーバー
 			if(sc->data[SC_GATLINGFEVER].timer != -1) {
 				ferver_bonus = sc->data[SC_GATLINGFEVER].val1*2;
 				if(haste_val2 < ferver_bonus)
 					haste_val2 = ferver_bonus;
 			}
 
-			// +MN4wwzDJMM0wuTCtMOMw8zC7MOkw/A-
+			// マッドネスキャンセラー
 			if(sc->data[SC_MADNESSCANCEL].timer != -1) {
-				int bonus = 20+-ferver_bonus;
+				int bonus = 20+ferver_bonus;
 				if(haste_val2 < bonus)
 					haste_val2 = bonus;
 			}
 
-			// +cLl6dA- -+U80--
+			// 点穴 -反-
 			if(sc->data[SC_GENTLETOUCH_CHANGE].timer != -1) {
 				int bonus = sc->data[SC_GENTLETOUCH_CHANGE].val4;
 				if(haste_val2 < bonus)
 					haste_val2 = bonus;
 			}
 
-			/* +MF0wbk7W- */
+			/* その他 */
 
-			// +MMcwozDVMKcw8zDAMPw-
+			// ディフェンダー
 			if(sc->data[SC_DEFENDER].timer != -1)
-				add_val +-= sc->data[SC_DEFENDER].val3;
+				add_val += sc->data[SC_DEFENDER].val3;
 
-			// +MNIw/DDIMNAw7DDr-
+			// ヒートバレル
 			if(sc->data[SC_HEAT_BARREL].timer != -1)
 				add_val -= sc->data[SC_HEAT_BARREL].val1 * 10;
 
-			// +l1lbwg-
+			// 静寂
 			if(sc->data[SC_HANDICAPSTATE_DEEPSILENCE].timer != -1)
-				add_val +-= sc->data[SC_HANDICAPSTATE_DEEPSILENCE].val2;
+				add_val += sc->data[SC_HANDICAPSTATE_DEEPSILENCE].val2;
 		}
 
-		/* slow_val+MGg-haste_val1+MGg-haste_val2+MJJSoHuXMFkwiw- */
+		/* slow_valとhaste_val1とhaste_val2を加算する */
 		bonus_rate = slow_val - haste_val1 - haste_val2;
 
-		/* bonus_rate+MG6KCHuX- */
+		/* bonus_rateの計算 */
 		if(bonus_rate != 0)
-			calc_adelay = calc_adelay * (bonus_rate+-100) / 100;
+			calc_adelay = calc_adelay * (bonus_rate+100) / 100;
 
-		/* add_val+MG5SoHuX- */
+		/* add_valの加算 */
 		if(add_val != 0)
-			calc_adelay +-= add_val;
+			calc_adelay += add_val;
 
-		/* +XA9lcFIHMIpOCjBS- */
+		/* 小数切り上げ */
 		adelay = (int)ceil(calc_adelay);
 
-		/* +ZwBPTlAkMG6KLVua- */
+		/* 最低値の設定 */
 		switch(bl->type)
 		{
 			case BL_MOB:
@@ -6775,7 +6754,7 @@ int status_get_adelay(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-amotion+MJKP1DBZ-
+ * 対象のamotionを返す
  *------------------------------------------
  */
 int status_get_amotion(struct block_list *bl)
@@ -6802,7 +6781,7 @@ int status_get_amotion(struct block_list *bl)
 			int guardup_lv = ((struct mob_data*)bl)->guardup_lv;
 			calc_amotion = mobdb_search(((struct mob_data *)bl)->class_)->amotion;
 			if(guardup_lv > 0)
-				bonus_rate -= 5 +- 5*guardup_lv;
+				bonus_rate -= 5 + 5*guardup_lv;
 		} else if(bl->type == BL_PET && (struct pet_data *)bl) {
 			calc_amotion = mobdb_search(((struct pet_data *)bl)->class_)->amotion;
 		} else if(bl->type == BL_HOM && (struct homun_data *)bl && ((struct homun_data *)bl)->msd) {
@@ -6813,114 +6792,114 @@ int status_get_amotion(struct block_list *bl)
 			calc_amotion = ((struct elem_data *)bl)->amotion;
 		}
 
-		/* amotion+MExZCVMWMFkwi3K2YUt1cF44MG6KCHuX- */
+		/* amotionが変化する状態異常の計算 */
 		if(sc) {
 
-			/* amotion+MExYl1KgMFkwizC5MMYw/DC/MLkwbooIe5c- */
+			/* amotionが増加するステータスの計算 */
 
-			// +ecEwkl/YMIwwajBEMGc-
+			// 私を忘れないで
 			if(sc->data[SC_DONTFORGETME].timer != -1) {
 				slow_val = sc->data[SC_DONTFORGETME].val1;
 			}
 
-			// +kdFSWw-
+			// 金剛
 			if(sc->data[SC_STEELBODY].timer != -1) {
 				if(slow_val < 25)
 					slow_val = 25;
 			}
 
-			// +MLgw5zCkMPMwyDDTMPwwyA-
+			// ジョイントビート
 			if(sc->data[SC_JOINTBEAT].timer != -1) {
 				switch (sc->data[SC_JOINTBEAT].val4) {
-					case 1:		// +YkuZlg-
+					case 1:		// 手首
 						if(slow_val < 25)
 							slow_val = 25;
 						break;
-					case 2:		// +gZ0-
+					case 2:		// 膝
 						if(slow_val < 10)
 							slow_val = 10;
 						break;
 				}
 			}
 
-			// +MLAw6TDTMMYw/DC3MOcw8zDVMKMw/DDrMMk-
+			// グラビテーションフィールド
 			if(sc->data[SC_GRAVITATION].timer != -1) {
 				int penalty = sc->data[SC_GRAVITATION].val1*5;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MNUw7TC5MMgw3zC5MMYwow-
+			// フロストミスティ
 			if(sc->data[SC_FROSTMISTY].timer != -1) {
 				if(slow_val < 15)
 					slow_val = 15;
 			}
 
-			// +MNwwxzCjMNowpDDzMMYwozDzMLA-
+			// ボディペインティング
 			if(sc->data[SC__BODYPAINT].timer != -1) {
 				if(slow_val < 25)
 					slow_val = 25;
 			}
 
-			// +MKQw8zDTMLgw0zDqMMYwow-
+			// インビジビリティ
 			if(sc->data[SC__INVISIBILITY].timer != -1) {
 				int penalty = 50 - 10 * sc->data[SC__INVISIBILITY].val1;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MN4wuTCrMOww/DDJ/xowsDDrMPww3zD8-
+			// マスカレード：グルーミー
 			if(sc->data[SC__GROOMY].timer != -1) {
-				int penalty = 20 +- 10 * sc->data[SC__GROOMY].val1;
+				int penalty = 20 + 10 * sc->data[SC__GROOMY].val1;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MKIw/DC5MMkw6TCkMNY-
+			// アースドライブ
 			if(sc->data[SC_EARTHDRIVE].timer != -1) {
 				if(slow_val < 25)
 					slow_val = 25;
 			}
 
-			// +MOEw6TDzMLMw6jD8-
+			// メランコリー
 			if(sc->data[SC_GLOOMYDAY].timer != -1) {
-				int penalty = 15 +- 5 * sc->data[SC_GLOOMYDAY].val1;
+				int penalty = 15 + 5 * sc->data[SC_GLOOMYDAY].val1;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			// +MOEw7TDzcgZfPg-
+			// メロン爆弾
 			if(sc->data[SC_MELON_BOMB].timer != -1) {
 				int penalty = sc->data[SC_MELON_BOMB].val1;
 				if(slow_val < penalty)
 					slow_val = penalty;
 			}
 
-			/* amotion+MExuG1wRMFkwizC5MMYw/DC/MLkwbooIe5c-1 */
+			/* amotionが減少するステータスの計算1 */
 
-			// +WJeQHzDdMPwwtzDnMPM-
+			// 増速ポーション
 			if(sc->data[tmp = SC_SPEEDPOTION2].timer != -1 || sc->data[tmp = SC_SPEEDPOTION1].timer != -1 || sc->data[tmp = SC_SPEEDPOTION0].timer != -1)
 				haste_val1 = sc->data[tmp].val2;
 
-			/* amotion+MExuG1wRMFkwizC5MMYw/DC/MLkwbooIe5c-2 */
+			/* amotionが減少するステータスの計算2 */
 
-			// +MMQw/DDPMPMwyTCvMKMwwzCxMPM-
+			// ツーハンドクィッケン
 			if(sc->data[SC_TWOHANDQUICKEN].timer != -1)
 				haste_val2 = sc->data[SC_TWOHANDQUICKEN].val2;
 
-			// +MLkw1DCiMK8wozDDMLEw8w-
+			// スピアクィッケン
 			if(sc->data[SC_SPEARQUICKEN].timer != -1) {
 				if(haste_val2 < sc->data[SC_SPEARQUICKEN].val2)
 					haste_val2 = sc->data[SC_SPEARQUICKEN].val2;
 			}
 
-			// +MO8w8zDPMPMwyTCvMKMwwzCxMPM-
+			// ワンハンドクィッケン
 			if(sc->data[SC_ONEHAND].timer != -1) {
 				if(haste_val2 < 30)
 					haste_val2 = 30;
 			}
 
-			// +MKIwyTDsMMow6jDzMOkwwzC3MOU-
+			// アドレナリンラッシュ
 			if(sc->data[SC_ADRENALINE].timer != -1) {
 				int bonus;
 				if(sc->data[SC_ADRENALINE].val2 || !battle_config.party_skill_penalty)
@@ -6931,7 +6910,7 @@ int status_get_amotion(struct block_list *bl)
 					haste_val2 = bonus;
 			}
 
-			// +MKIwyTDsMMow6jDzMOkwwzC3MOU-2
+			// アドレナリンラッシュ2
 			if(sc->data[SC_ADRENALINE2].timer != -1) {
 				int bonus;
 				if(sc->data[SC_ADRENALINE2].val2 || !battle_config.party_skill_penalty)
@@ -6942,64 +6921,64 @@ int status_get_amotion(struct block_list *bl)
 					haste_val2 = bonus;
 			}
 
-			// +WRWWfTBuMKIwtTC3MPMwrzDtMLk-
+			// 夕陽のアサシンクロス
 			if(sc->data[SC_ASSNCROS].timer != -1) {
 				int bonus = sc->data[SC_ASSNCROS].val2;
 				if(haste_val2 < bonus)
 					haste_val2 = bonus;
 			}
 
-			// +MKwwyDDqMPMwsDDVMKMw/DDQMPw-
+			// ガトリングフィーバー
 			if(sc->data[SC_GATLINGFEVER].timer != -1) {
 				ferver_bonus = sc->data[SC_GATLINGFEVER].val1*2;
 				if(haste_val2 < ferver_bonus)
 					haste_val2 = ferver_bonus;
 			}
 
-			// +MN4wwzDJMM0wuTCtMOMw8zC7MOkw/A-
+			// マッドネスキャンセラー
 			if(sc->data[SC_MADNESSCANCEL].timer != -1) {
-				int bonus = 20+-ferver_bonus;
+				int bonus = 20+ferver_bonus;
 				if(haste_val2 < bonus)
 					haste_val2 = bonus;
 			}
 
-			// +cLl6dA- -+U80--
+			// 点穴 -反-
 			if(sc->data[SC_GENTLETOUCH_CHANGE].timer != -1) {
 				int bonus = sc->data[SC_GENTLETOUCH_CHANGE].val4;
 				if(haste_val2 < bonus)
 					haste_val2 = bonus;
 			}
 
-			/* +MF0wbk7W- */
+			/* その他 */
 
-			// +MMcwozDVMKcw8zDAMPw-
+			// ディフェンダー
 			if(sc->data[SC_DEFENDER].timer != -1)
 				defender_flag = 1;
 
-			// +MNIw/DDIMNAw7DDr-
+			// ヒートバレル
 			if(sc->data[SC_HEAT_BARREL].timer != -1)
 				heatbarrel_flag = 1;
 		}
 
-		/* slow_val+MGg-haste_val1+MGg-haste_val2+MJJSoHuXMFkwiw- */
+		/* slow_valとhaste_val1とhaste_val2を加算する */
 		bonus_rate = slow_val - haste_val1 - haste_val2;
 
-		/* bonus_rate+MG6KCHuX- */
+		/* bonus_rateの計算 */
 		if(bonus_rate != 0)
-			calc_amotion = calc_amotion * (bonus_rate+-100) / 100;
+			calc_amotion = calc_amotion * (bonus_rate+100) / 100;
 
-		/* +MMcwozDVMKcw8zDAMPw- */
+		/* ディフェンダー */
 		if(defender_flag)
-			calc_amotion +-= sc->data[SC_DEFENDER].val3;
+			calc_amotion += sc->data[SC_DEFENDER].val3;
 
-		/* +MNIw/DDIMNAw7DDr- */
+		/* ヒートバレル */
 		if(heatbarrel_flag)
 			calc_amotion -= sc->data[SC_HEAT_BARREL].val1 * 10;
 
-		/* +XA9lcFIHMIpOCjBS- */
+		/* 小数切り上げ */
 		amotion = (int)ceil(calc_amotion);
 
-		/* +ZwBPTlAkMG6KLVua- */
+		/* 最低値の設定 */
 		switch(bl->type)
 		{
 			case BL_MOB:
@@ -7026,7 +7005,7 @@ int status_get_amotion(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-dmotion+MJKP1DBZ-
+ * 対象のdmotionを返す
  *------------------------------------------
  */
 int status_get_dmotion(struct block_list *bl)
@@ -7071,7 +7050,7 @@ int status_get_dmotion(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-P.Atk+MJKP1DBZ-
+ * 対象のP.Atkを返す
  *------------------------------------------
  */
 int status_get_patk(struct block_list *bl)
@@ -7088,7 +7067,7 @@ int status_get_patk(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-S.Matk+MJKP1DBZ-
+ * 対象のS.Matkを返す
  *------------------------------------------
  */
 int status_get_smatk(struct block_list *bl)
@@ -7105,7 +7084,7 @@ int status_get_smatk(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Res+MJKP1DBZ-
+ * 対象のResを返す
  *------------------------------------------
  */
 int status_get_res(struct block_list *bl)
@@ -7123,9 +7102,9 @@ int status_get_res(struct block_list *bl)
 			res = ((struct mob_data *)bl)->st.res;
 		}
 		if(sc) {
-			if(sc->data[SC_SHADOW_STRIP].timer != -1) 	// +MLkwyDDqMMMw1zC3MOMwyTCm-
+			if(sc->data[SC_SHADOW_STRIP].timer != -1) 	// ストリップシャドウ
 				res -= sc->data[SC_SHADOW_STRIP].val2;
-			if(sc->data[SC_AIN_RHAPSODY].timer != -1) 	// +knFU4TBuMOkw1zC9MMcwow-
+			if(sc->data[SC_AIN_RHAPSODY].timer != -1) 	// 鉱員のラプソディ
 				res -= sc->data[SC_AIN_RHAPSODY].val3;
 		}
 	}
@@ -7135,7 +7114,7 @@ int status_get_res(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-Mres+MJKP1DBZ-
+ * 対象のMresを返す
  *------------------------------------------
  */
 int status_get_mres(struct block_list *bl)
@@ -7153,9 +7132,9 @@ int status_get_mres(struct block_list *bl)
 			mres = ((struct mob_data *)bl)->st.mres;
 		}
 		if(sc) {
-			if(sc->data[SC_SHADOW_STRIP].timer != -1) 	// +MLkwyDDqMMMw1zC3MOMwyTCm-
+			if(sc->data[SC_SHADOW_STRIP].timer != -1) 	// ストリップシャドウ
 				mres -= sc->data[SC_SHADOW_STRIP].val2;
-			if(sc->data[SC_GEF_NOCTURN].timer != -1) 	// +MLIw1TCnMMswojDOMK8wvzD8MPM-
+			if(sc->data[SC_GEF_NOCTURN].timer != -1) 	// ゲフェニアノクターン
 				mres -= sc->data[SC_GEF_NOCTURN].val3;
 		}
 	}
@@ -7165,7 +7144,7 @@ int status_get_mres(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-H.Plus+MJKP1DBZ-
+ * 対象のH.Plusを返す
  *------------------------------------------
  */
 int status_get_hplus(struct block_list *bl)
@@ -7182,7 +7161,7 @@ int status_get_hplus(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBu-C.Rate+MJKP1DBZ-
+ * 対象のC.Rateを返す
  *------------------------------------------
  */
 int status_get_crate(struct block_list *bl)
@@ -7199,7 +7178,7 @@ int status_get_crate(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuXF5gJzCSj9QwWQ-
+ * 対象の属性を返す
  *------------------------------------------
  */
 int status_get_element(struct block_list *bl)
@@ -7211,62 +7190,62 @@ int status_get_element(struct block_list *bl)
 
 	sc = status_get_sc(bl);
 	if(sc) {
-		if(sc->data[SC_BENEDICTIO].timer != -1)		// +gFZPU5ZNeY8-
-			ret = 20 +- ELE_HOLY;
-		if(sc->data[SC_ELEMENTWATER].timer != -1)	// +bDQ-
-			ret = 20*sc->data[SC_ELEMENTWATER].val1 +- ELE_WATER;
-		if(sc->data[SC_ELEMENTGROUND].timer != -1)	// +Vx8-
-			ret = 20*sc->data[SC_ELEMENTGROUND].val1 +- ELE_EARTH;
-		if(sc->data[SC_ELEMENTFIRE].timer != -1)		// +cGs-
-			ret = 20*sc->data[SC_ELEMENTFIRE].val1 +- ELE_FIRE;
-		if(sc->data[SC_ELEMENTWIND].timer != -1)		// +mKg-
-			ret = 20*sc->data[SC_ELEMENTWIND].val1 +- ELE_WIND;
-		if(sc->data[SC_ELEMENTPOISON].timer != -1)	// +a9I-
-			ret = 20*sc->data[SC_ELEMENTPOISON].val1 +- ELE_POISON;
-		if(sc->data[SC_ELEMENTHOLY].timer != -1)		// +gFY-
-			ret = 20*sc->data[SC_ELEMENTHOLY].val1 +- ELE_HOLY;
-		if(sc->data[SC_ELEMENTDARK].timer != -1)		// +lcc-
-			ret = 20*sc->data[SC_ELEMENTDARK].val1 +- ELE_DARK;
-		if(sc->data[SC_ELEMENTELEKINESIS].timer != -1)	// +X/U-
-			ret = 20*sc->data[SC_ELEMENTELEKINESIS].val1 +- ELE_GHOST;
-		if(sc->data[SC_ELEMENTUNDEAD].timer != -1)	// +Tg1rew-
-			ret = 20*sc->data[SC_ELEMENTUNDEAD].val1 +- ELE_UNDEAD;
-		if(sc->data[SC_FLAMEARMOR].timer != -1)	// +MNUw7DCkMOAwojD8MN4w/A-
-			ret = 20 +- ELE_FIRE;
-		if(sc->data[SC_CRYSTAL_ARMOR].timer != -1)	// +MK8w6jC5ML8w6zCiMPww3jD8-
-			ret = 20 +- ELE_WATER;
-		if(sc->data[SC_EYES_OF_STORM].timer != -1)	// +MKIwpDC6MKow1jC5MMgw/DDg-
-			ret = 20 +- ELE_WIND;
-		if(sc->data[SC_STRONG_PROTECTION].timer != -1)	// +MLkwyDDtMPMwsDDXMO0wxjCvMLcw5zDz-
-			ret = 20 +- ELE_EARTH;
-		if(sc->data[SC_POISON_SHIELD].timer != -1)	// +MN0wpDC6MPMwtzD8MOswyQ-
-			ret = 20 +- ELE_POISON;
-		if(sc->data[SC_FREEZE].timer != -1)		// +Uc19UA-
-			ret = 20 +- ELE_WATER;
+		if(sc->data[SC_BENEDICTIO].timer != -1)		// 聖体降福
+			ret = 20 + ELE_HOLY;
+		if(sc->data[SC_ELEMENTWATER].timer != -1)	// 水
+			ret = 20*sc->data[SC_ELEMENTWATER].val1 + ELE_WATER;
+		if(sc->data[SC_ELEMENTGROUND].timer != -1)	// 土
+			ret = 20*sc->data[SC_ELEMENTGROUND].val1 + ELE_EARTH;
+		if(sc->data[SC_ELEMENTFIRE].timer != -1)		// 火
+			ret = 20*sc->data[SC_ELEMENTFIRE].val1 + ELE_FIRE;
+		if(sc->data[SC_ELEMENTWIND].timer != -1)		// 風
+			ret = 20*sc->data[SC_ELEMENTWIND].val1 + ELE_WIND;
+		if(sc->data[SC_ELEMENTPOISON].timer != -1)	// 毒
+			ret = 20*sc->data[SC_ELEMENTPOISON].val1 + ELE_POISON;
+		if(sc->data[SC_ELEMENTHOLY].timer != -1)		// 聖
+			ret = 20*sc->data[SC_ELEMENTHOLY].val1 + ELE_HOLY;
+		if(sc->data[SC_ELEMENTDARK].timer != -1)		// 闇
+			ret = 20*sc->data[SC_ELEMENTDARK].val1 + ELE_DARK;
+		if(sc->data[SC_ELEMENTELEKINESIS].timer != -1)	// 念
+			ret = 20*sc->data[SC_ELEMENTELEKINESIS].val1 + ELE_GHOST;
+		if(sc->data[SC_ELEMENTUNDEAD].timer != -1)	// 不死
+			ret = 20*sc->data[SC_ELEMENTUNDEAD].val1 + ELE_UNDEAD;
+		if(sc->data[SC_FLAMEARMOR].timer != -1)	// フレイムアーマー
+			ret = 20 + ELE_FIRE;
+		if(sc->data[SC_CRYSTAL_ARMOR].timer != -1)	// クリスタルアーマー
+			ret = 20 + ELE_WATER;
+		if(sc->data[SC_EYES_OF_STORM].timer != -1)	// アイズオブストーム
+			ret = 20 + ELE_WIND;
+		if(sc->data[SC_STRONG_PROTECTION].timer != -1)	// ストロングプロテクション
+			ret = 20 + ELE_EARTH;
+		if(sc->data[SC_POISON_SHIELD].timer != -1)	// ポイズンシールド
+			ret = 20 + ELE_POISON;
+		if(sc->data[SC_FREEZE].timer != -1)		// 凍結
+			ret = 20 + ELE_WATER;
 		if(sc->data[SC_STONE].timer != -1 && sc->data[SC_STONE].val2 == 0)
-			ret = 20 +- ELE_EARTH;
-		if(sc->data[SC_SHAPESHIFT].timer != -1)		// +MLcwpzCkMNcwtzDVMMg-
-			ret = 20 +- sc->data[SC_SHAPESHIFT].val2;
-		if(sc->data[SC_HANDICAPSTATE_FROSTBITE].timer != -1)		// +YCVRtw-
-			ret = 20 +- ELE_WATER;
-		if(sc->data[SC_HANDICAPSTATE_LIGHTNINGSTRIKE].timer != -1)	// +b8BtQQ-
-			ret = 20 +- ELE_WIND;
-		if(sc->data[SC_HANDICAPSTATE_CRYSTALLIZATION].timer != -1)	// +fVBmdlMW-
-			ret = 20 +- ELE_EARTH;
-		if(sc->data[SC_HANDICAPSTATE_CONFLAGRATION].timer != -1)	// +cGtwfQ-
-			ret = 20 +- ELE_FIRE;
+			ret = 20 + ELE_EARTH;
+		if(sc->data[SC_SHAPESHIFT].timer != -1)		// シェイプシフト
+			ret = 20 + sc->data[SC_SHAPESHIFT].val2;
+		if(sc->data[SC_HANDICAPSTATE_FROSTBITE].timer != -1)		// 急冷
+			ret = 20 + ELE_WATER;
+		if(sc->data[SC_HANDICAPSTATE_LIGHTNINGSTRIKE].timer != -1)	// 激流
+			ret = 20 + ELE_WIND;
+		if(sc->data[SC_HANDICAPSTATE_CRYSTALLIZATION].timer != -1)	// 結晶化
+			ret = 20 + ELE_EARTH;
+		if(sc->data[SC_HANDICAPSTATE_CONFLAGRATION].timer != -1)	// 火災
+			ret = 20 + ELE_FIRE;
 
 		if(ret != 20)
 			return ret;
 	}
 
 	if(bl->type == BL_MOB && (struct mob_data *)bl) {
-		// 10+MG5PTf8d-Lv*2+MAH/ETBuT03/HVxeYCc-
+		// 10の位＝Lv*2、１の位＝属性
 		ret = ((struct mob_data *)bl)->def_ele;
 	}
 	else if(bl->type == BL_PC && (struct map_session_data *)bl) {
-		// +ljJfoVxeYCc-Lv1
-		ret = 20+-((struct map_session_data *)bl)->def_ele;
+		// 防御属性Lv1
+		ret = 20+((struct map_session_data *)bl)->def_ele;
 	}
 	else if(bl->type == BL_PET && (struct pet_data *)bl) {
 		ret = mobdb_search(((struct pet_data *)bl)->class_)->element;
@@ -7289,7 +7268,7 @@ int status_get_element(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuZTtkg1xeYCcwko/UMFk-
+ * 対象の攻撃属性を返す
  *------------------------------------------
  */
 int status_get_attack_element(struct block_list *bl)
@@ -7308,41 +7287,41 @@ int status_get_attack_element(struct block_list *bl)
 	else if(bl->type == BL_PET && (struct pet_data *)bl)
 		ret = ELE_NEUTRAL;
 	else if(bl->type == BL_HOM && (struct homun_data *)bl)
-		ret = ELE_NONE;	// +cSFcXmAn-
+		ret = ELE_NONE;	// 無属性
 	else if(bl->type == BL_MERC && (struct merc_data *)bl)
-		ret = ELE_NONE;	// +cSFcXmAn-
+		ret = ELE_NONE;	// 無属性
 	else if(bl->type == BL_ELEM && (struct elem_data *)bl)
-		ret = ELE_NONE;	// +cSFcXmAn-
+		ret = ELE_NONE;	// 無属性
 
 	if(sc) {
-		if(sc->data[SC_FROSTWEAPON].timer != -1)		// +MNUw7TC5MMgwpjCnMN0w8w-
+		if(sc->data[SC_FROSTWEAPON].timer != -1)		// フロストウェポン
 			ret = ELE_WATER;
-		if(sc->data[SC_SEISMICWEAPON].timer != -1)	// +MLUwpDC6MN8wwzCvMKYwpzDdMPM-
+		if(sc->data[SC_SEISMICWEAPON].timer != -1)	// サイズミックウェポン
 			ret = ELE_EARTH;
-		if(sc->data[SC_FLAMELAUNCHER].timer != -1)	// +MNUw7DD8MOAw6TDzMMEw4zD8-
+		if(sc->data[SC_FLAMELAUNCHER].timer != -1)	// フレームランチャー
 			ret = ELE_FIRE;
-		if(sc->data[SC_LIGHTNINGLOADER].timer != -1)	// +MOkwpDDIMMsw8zCwMO0w/DDAMPw-
+		if(sc->data[SC_LIGHTNINGLOADER].timer != -1)	// ライトニングローダー
 			ret = ELE_WIND;
-		if(sc->data[SC_ENCPOISON].timer != -1)		// +MKgw8zDBMOMw8zDIMN0wpDC6MPM-
+		if(sc->data[SC_ENCPOISON].timer != -1)		// エンチャントポイズン
 			ret = ELE_POISON;
-		if(sc->data[SC_ASPERSIO].timer != -1)		// +MKIwuTDaMOswtzCq-
+		if(sc->data[SC_ASPERSIO].timer != -1)		// アスペルシオ
 			ret = ELE_HOLY;
-		if(sc->data[SC_DARKELEMENT].timer != -1)		// +lcdcXmAn-
+		if(sc->data[SC_DARKELEMENT].timer != -1)		// 闇属性
 			ret = ELE_DARK;
-		if(sc->data[SC_ATTENELEMENT].timer != -1)	// +X/VcXmAn-
+		if(sc->data[SC_ATTENELEMENT].timer != -1)	// 念属性
 			ret = ELE_GHOST;
-		if(sc->data[SC_UNDEADELEMENT].timer != -1)	// +Tg1re1xeYCc-
+		if(sc->data[SC_UNDEADELEMENT].timer != -1)	// 不死属性
 			ret = ELE_UNDEAD;
-		if(sc->data[SC_SEVENWIND].timer != -1)		// +ZpYwSzBEmKg-
+		if(sc->data[SC_SEVENWIND].timer != -1)		// 暖かい風
 			ret = sc->data[SC_SEVENWIND].val3;
-		if(sc->data[SC_TIDAL_WEAPON].timer != -1 || sc->data[SC_TIDAL_WEAPON_OPTION].timer != -1)	// +ML8wpDDAMOswpjCnMN0w8w-
+		if(sc->data[SC_TIDAL_WEAPON].timer != -1 || sc->data[SC_TIDAL_WEAPON_OPTION].timer != -1)	// タイダルウェポン
 			ret = ELE_WATER;
 	}
 	return ret;
 }
 
 /*==========================================
- * +W/6MYTBuZTtkg1xeYCf/CF3mYkv/CTCSj9QwWQ-
+ * 対象の攻撃属性（左手）を返す
  *------------------------------------------
  */
 int status_get_attack_element2(struct block_list *bl)
@@ -7355,25 +7334,25 @@ int status_get_attack_element2(struct block_list *bl)
 		ret = ((struct map_session_data *)bl)->atk_ele_;
 
 		if(sc) {
-			if(sc->data[SC_FROSTWEAPON].timer != -1)		// +MNUw7TC5MMgwpjCnMN0w8w-
+			if(sc->data[SC_FROSTWEAPON].timer != -1)		// フロストウェポン
 				ret = ELE_WATER;
-			if(sc->data[SC_SEISMICWEAPON].timer != -1)	// +MLUwpDC6MN8wwzCvMKYwpzDdMPM-
+			if(sc->data[SC_SEISMICWEAPON].timer != -1)	// サイズミックウェポン
 				ret = ELE_EARTH;
-			if(sc->data[SC_FLAMELAUNCHER].timer != -1)	// +MNUw7DD8MOAw6TDzMMEw4zD8-
+			if(sc->data[SC_FLAMELAUNCHER].timer != -1)	// フレームランチャー
 				ret = ELE_FIRE;
-			if(sc->data[SC_LIGHTNINGLOADER].timer != -1)	// +MOkwpDDIMMsw8zCwMO0w/DDAMPw-
+			if(sc->data[SC_LIGHTNINGLOADER].timer != -1)	// ライトニングローダー
 				ret = ELE_WIND;
-			if(sc->data[SC_ENCPOISON].timer != -1)		// +MKgw8zDBMOMw8zDIMN0wpDC6MPM-
+			if(sc->data[SC_ENCPOISON].timer != -1)		// エンチャントポイズン
 				ret = ELE_POISON;
-			if(sc->data[SC_ASPERSIO].timer != -1)		// +MKIwuTDaMOswtzCq-
+			if(sc->data[SC_ASPERSIO].timer != -1)		// アスペルシオ
 				ret = ELE_HOLY;
-			if(sc->data[SC_DARKELEMENT].timer != -1)		// +lcdcXmAn-
+			if(sc->data[SC_DARKELEMENT].timer != -1)		// 闇属性
 				ret = ELE_DARK;
-			if(sc->data[SC_ATTENELEMENT].timer != -1)	// +X/VcXmAn-
+			if(sc->data[SC_ATTENELEMENT].timer != -1)	// 念属性
 				ret = ELE_GHOST;
-			if(sc->data[SC_UNDEADELEMENT].timer != -1)	// +Tg1re1xeYCc-
+			if(sc->data[SC_UNDEADELEMENT].timer != -1)	// 不死属性
 				ret = ELE_UNDEAD;
-			if(sc->data[SC_SEVENWIND].timer != -1)		// +ZpYwSzBEmKg-
+			if(sc->data[SC_SEVENWIND].timer != -1)		// 暖かい風
 				ret = sc->data[SC_SEVENWIND].val3;
 		}
 		return ret;
@@ -7382,7 +7361,7 @@ int status_get_attack_element2(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBua2ZWaFxeYCcwkpZkMEQwX2U7ZINcXmAnMJKP1DBZ-
+ * 対象の武器属性を除いた攻撃属性を返す
  *------------------------------------------
  */
 int status_get_attack_element_nw(struct block_list *bl)
@@ -7395,43 +7374,43 @@ int status_get_attack_element_nw(struct block_list *bl)
 	sc = status_get_sc(bl);
 
 	if(bl->type == BL_HOM && (struct homun_data *)bl)
-		ret = ELE_NONE;	// +cSFcXmAn-
+		ret = ELE_NONE;	// 無属性
 	else if(bl->type == BL_MERC && (struct merc_data *)bl)
-		ret = ELE_NONE;	// +cSFcXmAn-
+		ret = ELE_NONE;	// 無属性
 	else if(bl->type == BL_ELEM && (struct elem_data *)bl)
-		ret = ELE_NONE;	// +cSFcXmAn-
+		ret = ELE_NONE;	// 無属性
 
 	if(sc) {
-		if(sc->data[SC_FROSTWEAPON].timer != -1)		// +MNUw7TC5MMgwpjCnMN0w8w-
+		if(sc->data[SC_FROSTWEAPON].timer != -1)		// フロストウェポン
 			ret = ELE_WATER;
-		if(sc->data[SC_SEISMICWEAPON].timer != -1)	// +MLUwpDC6MN8wwzCvMKYwpzDdMPM-
+		if(sc->data[SC_SEISMICWEAPON].timer != -1)	// サイズミックウェポン
 			ret = ELE_EARTH;
-		if(sc->data[SC_FLAMELAUNCHER].timer != -1)	// +MNUw7DD8MOAw6TDzMMEw4zD8-
+		if(sc->data[SC_FLAMELAUNCHER].timer != -1)	// フレームランチャー
 			ret = ELE_FIRE;
-		if(sc->data[SC_LIGHTNINGLOADER].timer != -1)	// +MOkwpDDIMMsw8zCwMO0w/DDAMPw-
+		if(sc->data[SC_LIGHTNINGLOADER].timer != -1)	// ライトニングローダー
 			ret = ELE_WIND;
-		if(sc->data[SC_ENCPOISON].timer != -1)		// +MKgw8zDBMOMw8zDIMN0wpDC6MPM-
+		if(sc->data[SC_ENCPOISON].timer != -1)		// エンチャントポイズン
 			ret = ELE_POISON;
-		if(sc->data[SC_ASPERSIO].timer != -1)		// +MKIwuTDaMOswtzCq-
+		if(sc->data[SC_ASPERSIO].timer != -1)		// アスペルシオ
 			ret = ELE_HOLY;
-		if(sc->data[SC_DARKELEMENT].timer != -1)		// +lcdcXmAn-
+		if(sc->data[SC_DARKELEMENT].timer != -1)		// 闇属性
 			ret = ELE_DARK;
-		if(sc->data[SC_ATTENELEMENT].timer != -1)	// +X/VcXmAn-
+		if(sc->data[SC_ATTENELEMENT].timer != -1)	// 念属性
 			ret = ELE_GHOST;
-		if(sc->data[SC_UNDEADELEMENT].timer != -1)	// +Tg1re1xeYCc-
+		if(sc->data[SC_UNDEADELEMENT].timer != -1)	// 不死属性
 			ret = ELE_UNDEAD;
-		if(sc->data[SC_SEVENWIND].timer != -1)		// +ZpYwSzBEmKg-
+		if(sc->data[SC_SEVENWIND].timer != -1)		// 暖かい風
 			ret = sc->data[SC_SEVENWIND].val3;
-		if(sc->data[SC__INVISIBILITY].timer != -1)	// +MKQw8zDTMLgw0zDqMMYwow-
+		if(sc->data[SC__INVISIBILITY].timer != -1)	// インビジビリティ
 			ret = ELE_GHOST;
-		if(sc->data[SC_PYROCLASTIC].timer != -1)	// +MNEwpDDtMK8w6TC5MMYwozDDMK8-
+		if(sc->data[SC_PYROCLASTIC].timer != -1)	// パイロクラスティック
 			ret = ELE_FIRE;
 	}
 	return ret;
 }
 
 /*==========================================
- * +W/6MYTBuMNEw/DDGMKM-ID+MJKP1DBZ-
+ * 対象のパーティIDを返す
  *------------------------------------------
  */
 int status_get_party_id(struct block_list *bl)
@@ -7468,7 +7447,7 @@ int status_get_party_id(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuMK4w6zDJ-ID+MJKP1DBZ-
+ * 対象のギルドIDを返す
  *------------------------------------------
  */
 int status_get_guild_id(struct block_list *bl)
@@ -7499,7 +7478,7 @@ int status_get_guild_id(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuei5lzzCSj9QwWQ-
+ * 対象の種族を返す
  *------------------------------------------
  */
 int status_get_race(struct block_list *bl)
@@ -7538,25 +7517,25 @@ int status_get_race(struct block_list *bl)
 	sc = status_get_sc(bl);
 
 	if(sc) {
-		if(sc->data[SC_RACEUNKNOWN].timer != -1)	// +cSFfYg-
+		if(sc->data[SC_RACEUNKNOWN].timer != -1)	// 無形
 			race = RCT_FORMLESS;
-		if(sc->data[SC_RACEUNDEAD].timer != -1)	// +Tg1rew-
+		if(sc->data[SC_RACEUNDEAD].timer != -1)	// 不死
 			race = RCT_UNDEAD;
-		if(sc->data[SC_RACEBEAST].timer != -1)	// +UtVyaQ-
+		if(sc->data[SC_RACEBEAST].timer != -1)	// 動物
 			race = RCT_BRUTE;
-		if(sc->data[SC_RACEPLANT].timer != -1)	// +aQ1yaQ-
+		if(sc->data[SC_RACEPLANT].timer != -1)	// 植物
 			race = RCT_PLANT;
-		if(sc->data[SC_RACEINSECT].timer != -1)	// +ZgaGaw-
+		if(sc->data[SC_RACEINSECT].timer != -1)	// 昆虫
 			race = RCT_INSECT;
-		if(sc->data[SC_RACEFISH].timer != -1)	// +m1qMnQ-
+		if(sc->data[SC_RACEFISH].timer != -1)	// 魚貝
 			race = RCT_FISH;
-		if(sc->data[SC_RACEDEVIL].timer != -1)	// +YKqbVA-
+		if(sc->data[SC_RACEDEVIL].timer != -1)	// 悪魔
 			race = RCT_DEMON;
-		if(sc->data[SC_RACEHUMAN].timer != -1)	// +TrqVkw-
+		if(sc->data[SC_RACEHUMAN].timer != -1)	// 人間
 			race = RCT_DEMIHUMAN;
-		if(sc->data[SC_RACEANGEL].timer != -1)	// +WSlPfw-
+		if(sc->data[SC_RACEANGEL].timer != -1)	// 天使
 			race = RCT_ANGEL;
-		if(sc->data[SC_RACEDRAGON].timer != -1)	// +etw-
+		if(sc->data[SC_RACEDRAGON].timer != -1)	// 竜
 			race = RCT_DRAGON;
 	}
 
@@ -7564,7 +7543,7 @@ int status_get_race(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuMLUwpDC6MJKP1DBZ-
+ * 対象のサイズを返す
  *------------------------------------------
  */
 int status_get_size(struct block_list *bl)
@@ -7596,7 +7575,7 @@ int status_get_size(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuMOIw/DDJMJKP1DBZ-
+ * 対象のモードを返す
  *------------------------------------------
  */
 int status_get_mode(struct block_list *bl)
@@ -7611,11 +7590,11 @@ int status_get_mode(struct block_list *bl)
 		return mobdb_search(((struct pet_data *)bl)->class_)->mode;
 	}
 
-	return MD_CANMOVE;	// +MGgwijBCMEgwWlLVME8waDBEMEYwUzBoMGc-1
+	return MD_CANMOVE;	// とりあえず動くということで1
 }
 
 /*==========================================
- * +W/6MYTBu-MVPExp+MJKP1DBZ-
+ * 対象のMVPExpを返す
  *------------------------------------------
  */
 int status_get_mexp(struct block_list *bl)
@@ -7631,7 +7610,7 @@ int status_get_mexp(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuZXUwvzCkMNcwko/UMFk-
+ * 対象の敵タイプを返す
  *------------------------------------------
  */
 int status_get_enemy_type(struct block_list *bl)
@@ -7651,7 +7630,7 @@ int status_get_enemy_type(struct block_list *bl)
 }
 
 /*==========================================
- * +W/6MYTBuZw2CcjCSj9QwWQ-
+ * 対象の服色を返す
  *------------------------------------------
  */
 short status_get_clothes_color(struct block_list *bl)
@@ -7674,7 +7653,7 @@ short status_get_clothes_color(struct block_list *bl)
 }
 
 /*==========================================
- * StatusChange+MG5T1l+X-
+ * StatusChangeの取得
  *------------------------------------------
  */
 struct status_change *status_get_sc(struct block_list *bl)
@@ -7696,7 +7675,7 @@ struct status_change *status_get_sc(struct block_list *bl)
 }
 
 /*==========================================
- * +m1Rs1XEhUrkwSzBpMEYwSw-
+ * 魔法無効かどうか
  *------------------------------------------
  */
 int status_check_no_magic_damage(struct block_list *bl)
@@ -7712,7 +7691,7 @@ int status_check_no_magic_damage(struct block_list *bl)
 }
 
 /*==========================================
- * +crZhS3VwXjgwboAQYCeKCHuX-
+ * 状態異常の耐性計算
  *------------------------------------------
  */
 int status_change_rate(struct block_list *bl,int type,int rate,int src_level)
@@ -7724,75 +7703,75 @@ int status_change_rate(struct block_list *bl,int type,int rate,int src_level)
 
 	nullpo_retr(0, bl);
 
-	if(type < 0)	// type+MEw-0+ZypugDBuWDRUCFkxZVc-
+	if(type < 0)	// typeが0未満の場合失敗
 		return 0;
 
-	if(rate <= 0)	// +eLpzhzBM-0+TuVOCzBuMIIwbjBvWTFlVw-
+	if(rate <= 0)	// 確率が0以下のものは失敗
 		return 0;
 
 #ifndef PRE_RENEWAL
 	cap = src_level - status_get_lv(bl);
-	if(cap <= 0)	// +W/6MYTBuMHswRjBMMOww2TDrMEya2DBEWDRUCDBv-0
+	if(cap <= 0)	// 対象のほうがレベルが高い場合は0
 		cap = 0;
 	else
 		cap = cap * cap / 5;
 #endif
 
-	switch(type) {	// +crZhS3VwXjiAEGAnMLkwxjD8ML8wuQ- rate+MG9OB1IGc4c-
+	switch(type) {	// 状態異常耐性ステータス rateは万分率
 #ifdef PRE_RENEWAL
-		case SC_STONE:	// +d/NTFg-
-		case SC_FREEZE:	// +Uc19UA-
-			rate +-= src_level*10 - rate * status_get_mdef(bl)*10 / 1000 - status_get_luk(bl)*10 - status_get_lv(bl)*10;
+		case SC_STONE:	// 石化
+		case SC_FREEZE:	// 凍結
+			rate += src_level*10 - rate * status_get_mdef(bl)*10 / 1000 - status_get_luk(bl)*10 - status_get_lv(bl)*10;
 			sc_flag = 1;
 			break;
-		case SC_STUN:	// +MLkwvzDz-
-		case SC_SILENCE:	// +bIie2Q-
-		case SC_POISON:	// +a9I-
-		case SC_DPOISON:	// +cxtr0g-
-		case SC_BLEED:	// +UfqIQA-
-			rate +-= src_level*10 - rate * status_get_vit(bl)*10 / 1000 - status_get_luk(bl)*10 - status_get_lv(bl)*10;
+		case SC_STUN:	// スタン
+		case SC_SILENCE:	// 沈黙
+		case SC_POISON:	// 毒
+		case SC_DPOISON:	// 猛毒
+		case SC_BLEED:	// 出血
+			rate += src_level*10 - rate * status_get_vit(bl)*10 / 1000 - status_get_luk(bl)*10 - status_get_lv(bl)*10;
 			sc_flag = 1;
 			break;
-		case SC_SLEEP:	// +d2F3IA-
-			rate +-= src_level*10 - rate * status_get_int(bl)*10 / 1000 - status_get_luk(bl)*10 - status_get_lv(bl)*10;
+		case SC_SLEEP:	// 睡眠
+			rate += src_level*10 - rate * status_get_int(bl)*10 / 1000 - status_get_luk(bl)*10 - status_get_lv(bl)*10;
 			sc_flag = 1;
 			break;
-		case SC_BLIND:	// +Zpee0g-
-			rate +-= src_level*10 - rate * (status_get_vit(bl)*10 +- status_get_int(bl)*10) / 2000 - status_get_luk(bl)*10 - status_get_lv(bl)*10;
+		case SC_BLIND:	// 暗黒
+			rate += src_level*10 - rate * (status_get_vit(bl)*10 + status_get_int(bl)*10) / 2000 - status_get_luk(bl)*10 - status_get_lv(bl)*10;
 			sc_flag = 1;
 			break;
-		case SC_CURSE:	// +VGowRA-
-			rate +-= src_level*10 - rate * status_get_luk(bl)*10 / 1000 - status_get_luk(bl)*10;
+		case SC_CURSE:	// 呪い
+			rate += src_level*10 - rate * status_get_luk(bl)*10 / 1000 - status_get_luk(bl)*10;
 			sc_flag = 1;
 			break;
-		case SC_CONFUSION:	// +bfdOcQ-
-			rate +-= status_get_luk(bl)*10 +- -(rate * (status_get_str(bl)*10 +- status_get_int(bl)*10) / 2000) - src_level*10 +- status_get_lv(bl)*10;
+		case SC_CONFUSION:	// 混乱
+			rate += status_get_luk(bl)*10 + -(rate * (status_get_str(bl)*10 + status_get_int(bl)*10) / 2000) - src_level*10 + status_get_lv(bl)*10;
 			sc_flag = 1;
 			break;
 #else
-		case SC_STONE:	// +d/NTFg-
-		case SC_FREEZE:	// +Uc19UA-
+		case SC_STONE:	// 石化
+		case SC_FREEZE:	// 凍結
 			rate = rate * (100 - (status_get_mdef(bl) - cap)) / 100;
 			sc_flag = 1;
 			break;
-		case SC_STUN:	// +MLkwvzDz-
-		case SC_POISON:	// +a9I-
-		case SC_DPOISON:	// +cxtr0g-
+		case SC_STUN:	// スタン
+		case SC_POISON:	// 毒
+		case SC_DPOISON:	// 猛毒
 			rate = rate * (100 - (status_get_vit(bl) - cap)) / 100;
 			sc_flag = 1;
 			break;
-		case SC_SLEEP:	// +d2F3IA-
-		case SC_BLEED:	// +UfqIQA-
+		case SC_SLEEP:	// 睡眠
+		case SC_BLEED:	// 出血
 			rate = rate * (100 - (status_get_agi(bl) - cap)) / 100;
 			sc_flag = 1;
 			break;
-		case SC_BLIND:	// +Zpee0g-
-		case SC_SILENCE:	// +bIie2Q-
+		case SC_BLIND:	// 暗黒
+		case SC_SILENCE:	// 沈黙
 			rate = rate * (100 - (status_get_int(bl) - cap)) / 100;
 			sc_flag = 1;
 			break;
-		case SC_CONFUSION:	// +bfdOcQ-
-		case SC_CURSE:	// +VGowRA-
+		case SC_CONFUSION:	// 混乱
+		case SC_CURSE:	// 呪い
 			rate = rate * (100 - (status_get_luk(bl) - cap)) / 100;
 			sc_flag = 1;
 			break;
@@ -7809,20 +7788,20 @@ int status_change_rate(struct block_list *bl,int type,int rate,int src_level)
 				rate -= rate * pc_checkskill((struct map_session_data *)bl,GC_RESEARCHNEWPOISON) * 5 / 100;
 			break;
 		case SC_PARALYZE:
-			rate = rate * (100 - (status_get_vit(bl)/5 +- status_get_luk(bl)/10)) / 100;
+			rate = rate * (100 - (status_get_vit(bl)/5 + status_get_luk(bl)/10)) / 100;
 			break;
-		case SC_HANDICAPSTATE_DEEPBLIND:		// +bwae0g-
-		case SC_HANDICAPSTATE_DEEPSILENCE:		// +l1lbwg-
-		case SC_HANDICAPSTATE_LASSITUDE:		// +cSFsF1Kb-
-		case SC_HANDICAPSTATE_FROSTBITE:		// +YCVRtw-
-		case SC_HANDICAPSTATE_SWOONING:			// +WTF5Xg-
-		case SC_HANDICAPSTATE_LIGHTNINGSTRIKE:	// +b8BtQQ-
-		case SC_HANDICAPSTATE_CRYSTALLIZATION:	// +fVBmdlMW-
-		case SC_HANDICAPSTATE_CONFLAGRATION:	// +cGtwfQ-
-		case SC_HANDICAPSTATE_MISFORTUNE:		// +Tg1eeA-
-		case SC_HANDICAPSTATE_DEADLYPOISON:		// +Xzdr0g-
-		case SC_HANDICAPSTATE_DEPRESSION:		// +YYKbMQ-
-		case SC_HANDICAPSTATE_HOLYFLAME:		// +gFZwaw-
+		case SC_HANDICAPSTATE_DEEPBLIND:		// 漆黒
+		case SC_HANDICAPSTATE_DEEPSILENCE:		// 静寂
+		case SC_HANDICAPSTATE_LASSITUDE:		// 無気力
+		case SC_HANDICAPSTATE_FROSTBITE:		// 急冷
+		case SC_HANDICAPSTATE_SWOONING:			// 失神
+		case SC_HANDICAPSTATE_LIGHTNINGSTRIKE:	// 激流
+		case SC_HANDICAPSTATE_CRYSTALLIZATION:	// 結晶化
+		case SC_HANDICAPSTATE_CONFLAGRATION:	// 火災
+		case SC_HANDICAPSTATE_MISFORTUNE:		// 不幸
+		case SC_HANDICAPSTATE_DEADLYPOISON:		// 強毒
+		case SC_HANDICAPSTATE_DEPRESSION:		// 憂鬱
+		case SC_HANDICAPSTATE_HOLYFLAME:		// 聖火
 			rate = rate * (100 - (status_get_lv(bl) - src_level)) / 100;
 			break;
 		default:
@@ -7832,13 +7811,13 @@ int status_change_rate(struct block_list *bl,int type,int rate,int src_level)
 		struct status_change *sc = status_get_sc(bl);
 		if(sc) {
 			if(sc->data[SC_STATUS_UNCHANGE].timer != -1 && status_is_disable(type,0x10)) {
-				rate = 0;	// +MLQwuTDaMOswblFocrZhS3VwXjiAEGAnTi0wajCJcSFSuQ-
+				rate = 0;	// ゴスペルの全状態異常耐性中なら無効
 			}
 			if(sc->data[SC_REFRESH].timer != -1 && status_is_disable(type,0x10)) {
-				rate = 0;	// +MOow1TDsMMMwtzDlUrlnnE4tMG9xIVK5-
+				rate = 0;	// リフレッシュ効果中は無効
 			}
 			if(sc->data[SC_INSPIRATION].timer != -1 && status_is_disable(type,0x10)) {
-				rate = 0;	// +MKQw8zC5MNQw7DD8MLcw5zDzUrlnnE4tMGowiXEhUrk-
+				rate = 0;	// インスピレーション効果中なら無効
 			}
 		}
 	}
@@ -7847,7 +7826,7 @@ int status_change_rate(struct block_list *bl,int type,int rate,int src_level)
 }
 
 /*==========================================
- * +crZhS3VwXjgwbokHUZn/CDDHMMMwyTDqMPwwpDDzMNUwpzCvMMj/CQ-
+ * 状態異常の複写（デッドリーインフェクト）
  *------------------------------------------
  */
 int status_change_copy(struct block_list *src,struct block_list *bl)
@@ -7869,7 +7848,7 @@ int status_change_copy(struct block_list *src,struct block_list *bl)
 	tick = gettick();
 	status_calc_pc_stop_begin(bl);
 
-	for(type = 0; type < MAX_STATUSCHANGE; type+-+-) {
+	for(type = 0; type < MAX_STATUSCHANGE; type++) {
 		if(scdata_db[type].copyable) {
 			if(sc->data[type].timer != -1)
 			{
@@ -7886,7 +7865,7 @@ int status_change_copy(struct block_list *src,struct block_list *bl)
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjgwxzD8ML8wblLVdoR4uk/d-
+ * ステータス異常データの動的確保
  *------------------------------------------
  */
 #ifdef DYNAMIC_SC_DATA
@@ -7897,7 +7876,7 @@ int status_calloc_sc_data(struct status_change *sc)
 	{
 		int i;
 		sc->data = (struct status_change_data *)aCalloc(MAX_STATUSCHANGE, sizeof(struct status_change_data));
-		for(i=0; i<MAX_STATUSCHANGE; i+-+-) {
+		for(i=0; i<MAX_STATUSCHANGE; i++) {
 			sc->data[i].timer = -1;
 			sc->data[i].val1  = 0;
 			sc->data[i].val2  = 0;
@@ -7926,7 +7905,7 @@ int status_free_sc_data(struct status_change *sc)
 #endif
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjiVi1nL-
+ * ステータス異常開始
  *------------------------------------------
  */
 int status_change_start(struct block_list *bl,int type,int val1,int val2,int val3,int val4,int tick,int flag)
@@ -7969,7 +7948,7 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 	if(type == SC_AETERNA && (sc->data[SC_STONE].timer != -1 || sc->data[SC_FREEZE].timer != -1))
 		return 0;
 
-	// +cnlrinz7-
+	// 特殊系
 	if(type >= MAX_STATUSCHANGE) {
 		switch(type) {
 			case SC_SOUL:
@@ -7977,7 +7956,7 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				break;
 			default:
 				if(battle_config.error_log)
-					printf("UnknownStatusChange [%d]+AFw-n", type);
+					printf("UnknownStatusChange [%d]\n", type);
 				break;
 		}
 		return 0;
@@ -7999,7 +7978,7 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		case SC__INVISIBILITY:
 		case SC_REFLECTDAMAGE:
 		case SC_FORCEOFVANGUARD:
-		case SC_SOULCOLLECT:		/* +m0IwboTEek0- */
+		case SC_SOULCOLLECT:		/* 魂の蓄積 */
 			if(sc->data[type].timer != -1) {
 				status_change_end(bl,type,-1);
 				return 0;
@@ -8033,7 +8012,7 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				const int se_stance_list[] = { SC_LUNARSTANCE, SC_UNIVERSESTANCE, SC_SUNSTANCE, SC_STARSTANCE };
 				const int se_light_list[] = { SC_LIGHTOFMOON, -1, SC_LIGHTOFSUN, SC_LIGHTOFSTAR };
 
-				for( i = 0; i < sizeof(se_stance_list)/sizeof(se_stance_list[0]); i+-+- ){
+				for( i = 0; i < sizeof(se_stance_list)/sizeof(se_stance_list[0]); i++ ){
 					int sc_checking = se_stance_list[i];
 					if(sc->data[sc_checking].timer != -1){
 						status_change_end(bl,sc_checking,-1);
@@ -8051,7 +8030,7 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				}
 			}
 			break;
-		// 3+ayFlsGvSMLkwrTDr-
+		// 3次新毒スキル
 		case SC_TOXIN:
 		case SC_PARALIZE:
 		case SC_VENOMBLEED:
@@ -8069,11 +8048,11 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			   sc->data[SC_OBLIVIONCURSE].timer != -1 ||
 			   sc->data[SC_LEECHEND].timer != -1
 			) {
-				// +ZbBr0jBvkc2JBzBVMFswajBE-
+				// 新毒は重複させない
 				return 0;
 			}
 			break;
-		// 3+ayFrTDC5MK0w6w- +cuxZTw-
+		// 3次歌スキル 独奏
 		case SC_SWING:
 		case SC_SYMPHONY_LOVE:
 		case SC_MOONLIT_SERENADE:
@@ -8096,7 +8075,7 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			if(sc->data[SC_FRIGG_SONG].timer != -1)
 				status_change_end(bl,SC_FRIGG_SONG,-1);
 			break;
-		// 3+ayFrTDC5MK0w6w- +VAhZTw-
+		// 3次歌スキル 合奏
 		case SC_SIREN:
 		case SC_SIRCLEOFNATURE:
 		case SC_SONG_OF_MANA:
@@ -8106,8 +8085,8 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		case SC_MELODYOFSINK:
 		case SC_BEYOND_OF_WARCRY:
 		case SC_UNLIMITED_HUMMING_VOICE:
-			if(battle_config.third_song_overlap) {	// +YiaV2IotW5owZ2tMMLkwrTDrkc2JB1PvgP0wblg0VAg-
-				// +MOEw7TDHMKMw/DCqMNYwtzDzMK8waDDTMOgw8zDJMKow1jCmMKkw/DCvMOkwpDBvkc2JBzBVMFswajBE-
+			if(battle_config.third_song_overlap) {	// 戦闘設定で歌スキル重複可能の場合
+				// メロディーオブシンクとビヨンドオブウォークライは重複させない
 				if(type == SC_MELODYOFSINK && sc->data[SC_BEYOND_OF_WARCRY].timer != -1)
 					status_change_end(bl,SC_BEYOND_OF_WARCRY,-1);
 				if(type == SC_BEYOND_OF_WARCRY && sc->data[SC_MELODYOFSINK].timer != -1)
@@ -8173,7 +8152,7 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			if(sc->data[SC_GUARD_STANCE].timer != -1)
 				status_change_end(bl,SC_GUARD_STANCE,-1);
 			break;
-		case SC_INTENSIVE_AIM:		/* +MKQw8zDGMPMwtzDWMKgwpDDg- */
+		case SC_INTENSIVE_AIM:		/* インテンシブエイム */
 			if(sc->data[SC_INTENSIVE_AIM].timer != -1) {
 				status_change_end(bl,SC_INTENSIVE_AIM,-1);
 				return 0;
@@ -8190,22 +8169,22 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 	if( sd ) {
 		int weapon = sd->status.weapon;
 		if(weapon >= WT_MAX)
-			weapon -= WT_DOUBLE_DD +- WT_MAX;
+			weapon -= WT_DOUBLE_DD + WT_MAX;
 
-		// +MKIwyTDsMMow6jDzMOkwwzC3MOUwbmtmVmhSJFua-
+		// アドレナリンラッシュの武器判定
 		if( type == SC_ADRENALINE && !(skill_get_weapontype(BS_ADRENALINE)&(1<<weapon)) )
 			return 0;
-		// +MNUw6zCiMMkw7DDKMOow8zDpMMMwtzDlMG5rZlZoUiRbmg-
+		// フルアドレナリンラッシュの武器判定
 		if( type == SC_ADRENALINE2 && !(skill_get_weapontype(BS_ADRENALINE2)&(1<<weapon)) )
 			return 0;
-		if( !(flag&8) && SC_STONE <= type && type <= SC_BLEED ) {	/* +MKsw/DDJMGswiDCLgBBgJw- */
+		if( !(flag&8) && SC_STONE <= type && type <= SC_BLEED ) {	/* カードによる耐性 */
 			int scdef = sd->reseff[type-SC_STONE];
-			if(sc->data[SC_SIEGFRIED].timer != -1) {	// +MLgw/DCvMNUw6jD8MMkwbnK2YUt1cF44gBBgJw-
-				scdef +-= 5000;
+			if(sc->data[SC_SIEGFRIED].timer != -1) {	// ジークフリードの状態異常耐性
+				scdef += 5000;
 			}
 			if(scdef > 0 && atn_rand()%10000 < scdef) {
 				if(battle_config.battle_log)
-					printf("PC %d skill_sc_start: card+MGswiDCLdXBeOIAQYCd2elLVAFw-n", sd->bl.id);
+					printf("PC %d skill_sc_start: cardによる異常耐性発動\n", sd->bl.id);
 				return 0;
 			}
 #ifndef PRE_RENEWAL
@@ -8216,27 +8195,27 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		}
 	}
 
-	// +MKIw8zDHMMMwyTBvUc19UDD7d/NTFjD7UfqIQHEhUrk-
+	// アンデッドは凍結・石化・出血無効
 	if((race == RCT_UNDEAD || elem == ELE_UNDEAD) && !(flag&1) && (type == SC_STONE || type == SC_FREEZE || type == SC_BLEED))
 		return 0;
 
-	// +MKYwqTD8MLAw0DCkMMhytmFLTi0wbzDPMKQwxzCjMPMwsDABMK8w7TD8MK0w8zCwcSFSuQ-
+	// ウォーグバイト状態中はハイディング、クローキング無効
 	if(sc->data[SC_WUGBITE].timer != -1 && (type == SC_HIDING || type == SC_CLOAKING || type == SC_CLOAKINGEXCEED || type == SC_NEWMOON))
 		return 0;
 
-	// +MKYwqTD8MN4w/HK2YUtOLTBvUc19UDABbDd9UDABUbdRzXEhUrk-
+	// ウォーマー状態中は凍結、氷結、冷凍無効
 	if(sc->data[SC_WARMER].timer != -1 && (type == SC_FREEZE || type == SC_FROSTMISTY || type == SC_DIAMONDDUST))
 		return 0;
 
-	// +bDhORZcccrZhS04tMG9zRHCOVGpxIVK5-
+	// 永久霜状態中は獄炎呪無効
 	if(sc->data[SC_CHILL].timer != -1 && type == SC_BURNT)
 		return 0;
 
-	// +iExS1U4NgP1ytmFLdXBeODBuUSpRSJgGT00-
+	// 行動不能状態異常の優先順位
 	if(type >= SC_STONE && type < SC_SLEEP) {
 		int i;
-		for(i = type; i < SC_SLEEP; i+-+-) {
-			if(sc->data[i+-1].timer != -1)
+		for(i = type; i < SC_SLEEP; i++) {
+			if(sc->data[i+1].timer != -1)
 				return 0;
 		}
 	}
@@ -8245,30 +8224,30 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		sc->data[type].timer != -1 && sc->data[type].val2 && !val2)
 		return 0;
 
-	// +MNwwuVxeYCcwazBvcSFSuQ-(+MF8wYDBXMKsw/DDJMGswiDCLUrlnnDBvkGl1KDBVMIwwiw-)
+	// ボス属性には無効(ただしカードによる効果は適用される)
 	if( (mode&MD_BOSS || mode&MD_STATUSCHANGEIMMUNITY) && !(flag&1) && status_is_disable(type,0x01) ) {
 		if(type == SC_BLESSING && !battle_check_undead(race,elem) && race != RCT_DEMON) {
-			// +MNYw7DC5MG9ODWt7-/+YKqbVDBnMGowRDBqMIlSuTBP-
+			// ブレスは不死/悪魔でないなら効く
 			;
 		} else {
 			return 0;
 		}
 	}
 
-	// +MK8woTCwMN4wpDCiTi0wb3EhUrk-
+	// クァグマイア中は無効
 	if(sc->data[SC_QUAGMIRE].timer != -1 && status_is_disable(type,0x02))
 		return 0;
-	// +ecEwkl/YMIwwajBEMGdOLTBvcSFSuQ-
+	// 私を忘れないで中は無効
 	if(sc->data[SC_DONTFORGETME].timer != -1 && status_is_disable(type,0x04))
 		return 0;
-	// +kB9epm4bXBFOLTBvcSFSuQ-
+	// 速度減少中は無効
 	if(sc->data[SC_DECREASEAGI].timer != -1 && status_is_disable(type,0x08))
 		return 0;
 
 	if(type == SC_STUN || type == SC_SLEEP)
 		unit_stop_walking(bl,1);
 
-	// +MNYw7DDDMLcw8zCwMGswiDCLVGowRDABd/NTFjBuieOWZA-
+	// ブレッシングによる呪い、石化の解除
 	if(type == SC_BLESSING && (sd || (!battle_check_undead(race,elem) && race != RCT_DEMON))) {
 		bool f = false;
 		if(sc->data[SC_CURSE].timer != -1) {
@@ -8280,12 +8259,12 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			f = true;
 		}
 
-		// +VGowRDABd/NTFonjlmRmQjBvMNYw7DDDMLcw8zCwcrZhSzBrMGowiTBqMEQwbjBnfUIwjzCL-
+		// 呪い、石化解除時はブレッシング状態にならないので終わる
 		if(f)
 			return 0;
 	}
 
-	/* +MK0w8zCwMLkwsDDsMKQwuXK2YUswZzBvcnlbmnVwXjgwazBLMEswiTBqMEQ- */
+	/* キングスグレイス状態では特定異常にかからない */
 	if(sc->data[SC_KINGS_GRACE].timer != -1) {
 		if(type >= SC_STONE && type <= SC_BLEED)
 			return 0;
@@ -8295,11 +8274,11 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				return 0;
 		}
 	}
-	/* +cnlbmg-MAP+MGcwbzC/MO0wpjBuULdytmFLMGswajCJMGowRA- */
+	/* 特定MAPではタロウの傷状態にならない */
 	if(type == SC_BITESCAR && !map[bl->m].flag.pvp && !map[bl->m].flag.gvg && !map[bl->m].flag.turbo)
 		return 0;
 
-	if(sc->data[type].timer != -1) {	/* +MFkwZzBrVAwwWHVwXjgwazBqMGMwZjBEMItYNFQIML8wpDDeieOWZA- */
+	if(sc->data[type].timer != -1) {	/* すでに同じ異常になっている場合タイマ解除 */
 		if(type == SC_ALL_RIDING || type == SC_HAT_EFFECT) {
 			status_change_end(bl,type,-1);
 			return 0;
@@ -8313,9 +8292,9 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		if((type >= SC_STUN && type <= SC_BLIND) ||
 			type == SC_DPOISON || type == SC_FOGWALLPENALTY || type == SC_FORCEWALKING || type == SC_ORATIO ||
 			type == SC_FRESHSHRIMP || type == SC_HEAT_BARREL || type == SC_OVERED_BOOST)
-			return 0;	/* +fZkwTo2zMFcwTDBnME0wajBEcrZhS3VwXjgwZzBCMItmQjBvcrZhS3VwXjgwkohMMI8wajBE- */
+			return 0;	/* 継ぎ足しができない状態異常である時は状態異常を行わない */
 		if(type == SC_GRAFFITI || type == SC_SEVENWIND || type == SC_SHAPESHIFT || type == SC__AUTOSHADOWSPELL || type == SC_PROPERTYWALK || type == SC_PYROCLASTIC) {
-			// +dXBeOE4tMGswgjBGTgBepnK2YUt1cF44MGswajBjMF9mQjBrieOWZDBXMGYwSzCJUY1epjBLMEswiw-
+			// 異常中にもう一度状態異常になった時に解除してから再度かかる
 			status_change_end(bl,type,-1);
 		} else {
 			sc->count--;
@@ -8328,13 +8307,13 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		}
 	}
 
-	switch(type) {	/* +dXBeODBuei6YXjBUMGgwblHmdAY- */
-		case SC_DOUBLE:				/* +MMAw1jDrMLkwyDDsMKQw1TCjMPMwsA- */
-		case SC_SUFFRAGIUM:			/* +MLUw1TDpMK4w4A- */
-		case SC_MAGNIFICAT:			/* +MN4wsDDLMNUwozCrMPwwyA- */
-		case SC_AETERNA:			/* +MKgw/DDGMOswyg- */
-		case SC_BASILICA:			/* +MNAwuDDqMKs- */
-		case SC_TRICKDEAD:			/* +a3swkzBgMHUwig- */
+	switch(type) {	/* 異常の種類ごとの処理 */
+		case SC_DOUBLE:				/* ダブルストレイフィング */
+		case SC_SUFFRAGIUM:			/* サフラギム */
+		case SC_MAGNIFICAT:			/* マグニフィカート */
+		case SC_AETERNA:			/* エーテルナ */
+		case SC_BASILICA:			/* バジリカ */
+		case SC_TRICKDEAD:			/* 死んだふり */
 		case SC_STRIPWEAPON:
 		case SC_STRIPSHIELD:
 		case SC_STRIPARMOR:
@@ -8343,202 +8322,202 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		case SC_CP_SHIELD:
 		case SC_CP_ARMOR:
 		case SC_CP_HELM:
-		case SC_DEVOTION:			/* +MMcwozDcMPwwtzDnMPM- */
+		case SC_DEVOTION:			/* ディボーション */
 		case SC_COMBO:
-		case SC_EXTREMITYFIST:			/* +lj9P7n+FiYdR8GLz- */
+		case SC_EXTREMITYFIST:			/* 阿修羅覇凰拳 */
 		case SC_RICHMANKIM:
-		case SC_ROKISWEIL:			/* +MO0wrTBuU+swcw- */
-		case SC_INTOABYSS:			/* +bfFt9TBuTi0waw- */
-		case SC_POEMBRAGI:			/* +MNYw6TCuMG6KaQ- */
-		case SC_ANKLE:				/* +MKIw8zCvMOs- */
-		case SC_MAGNUM:				/* +MN4wsDDKMOAw1jDsMKQwrw- */
-		case SC_TIGERFIST:			/* +Tw+GTmLz- */
-		case SC_ENERGYCOAT:			/* +MKgwyjC4MPwwszD8MMg- */
-		case SC_POEMBRAGI_:			/* +MNYw6TCuMG6KaQ- */
+		case SC_ROKISWEIL:			/* ロキの叫び */
+		case SC_INTOABYSS:			/* 深淵の中に */
+		case SC_POEMBRAGI:			/* ブラギの詩 */
+		case SC_ANKLE:				/* アンクル */
+		case SC_MAGNUM:				/* マグナムブレイク */
+		case SC_TIGERFIST:			/* 伏虎拳 */
+		case SC_ENERGYCOAT:			/* エナジーコート */
+		case SC_POEMBRAGI_:			/* ブラギの詩 */
 		case SC_FOGWALLPENALTY:
 		case SC_FOGWALL:
 		case SC_REVERSEORCISH:
 		case SC_GRAVITATION_USER:
-		case SC_BLADESTOP_WAIT:			/* +dn1SA1PWMIo-(+X4UwYQ-) */
-		case SC_SAFETYWALL:			/* +MLsw/DDVMMYwozCmMKkw/DDr- */
-		case SC_PNEUMA:				/* +MMsw5TD8MN4- */
+		case SC_BLADESTOP_WAIT:			/* 白刃取り(待ち) */
+		case SC_SAFETYWALL:			/* セーフティウォール */
+		case SC_PNEUMA:				/* ニューマ */
 		case SC_KEEPING:
 		case SC_BARRIER:
-		case SC_AURABLADE:			/* +MKow/DDpMNYw7DD8MMk- */
-		case SC_HEADCRUSH:			/* +MNgwwzDJMK8w6TDDMLcw5Q- */
-		case SC_MELTDOWN:			/* +MOEw6zDIMMAwpjDz- */
-		case SC_SPLASHER:			/* +MNkwyjDgMLkw1zDpMMMwtzDjMPw- */
-		case SC_GOSPEL:				/* +MLQwuTDaMOs- */
-		case SC_STATUS_UNCHANGE:		/* +UWhytmFLdXBeOIAQYCc- */
-		case SC_INCDAMAGE:			/* +iKswwDDhMPwwuA-%+TgpmBw- */
-		case SC_PRESERVE:			/* +MNcw6jC2MPww1g- */
-		case SC_REGENERATION:			/* +b8BSsQ- */
+		case SC_AURABLADE:			/* オーラブレード */
+		case SC_HEADCRUSH:			/* ヘッドクラッシュ */
+		case SC_MELTDOWN:			/* メルトダウン */
+		case SC_SPLASHER:			/* ベナムスプラッシャー */
+		case SC_GOSPEL:				/* ゴスペル */
+		case SC_STATUS_UNCHANGE:		/* 全状態異常耐性 */
+		case SC_INCDAMAGE:			/* 被ダメージ%上昇 */
+		case SC_PRESERVE:			/* プリザーブ */
+		case SC_REGENERATION:			/* 激励 */
 		case SC_BATTLEORDER_DELAY:
 		case SC_REGENERATION_DELAY:
 		case SC_RESTORE_DELAY:
 		case SC_EMERGENCYCALL_DELAY:
 		case SC_MEAL_INCEXP:
 		case SC_MEAL_INCJOB:
-		case SC_COMBATHAN:			/* +YiaV2GVZe8Q- */
-		case SC_LIFEINSURANCE:			/* +dR9UfU/dlnqKPA- */
-		case SC_JOB_COMBATHAN:		/* JOB+ZVl7xA- */
+		case SC_COMBATHAN:			/* 戦闘教範 */
+		case SC_LIFEINSURANCE:			/* 生命保険証 */
+		case SC_JOB_COMBATHAN:		/* JOB教範 */
 		case SC_FORCEWALKING:
-		case SC_TKCOMBO:			/* +MMYwszDzMLMw8zDc- */
+		case SC_TKCOMBO:			/* テコンコンボ */
 		case SC_TRIPLEATTACK_RATE_UP:
 		case SC_COUNTER_RATE_UP:
-		case SC_WARM:				/* +bikwgjCK- */
-		case SC_KAIZEL:				/* +MKswpDC8MOs- */
-		case SC_KAAHI:				/* +MKswojDS- */
-		case SC_SMA:				/* +MKgwuTDe- */
-		case SC_MIRACLE:			/* +WSqWfTBoZwgwaGYfMG5ZR43h- */
-		case SC_ANGEL:				/* +WSqWfTBoZwgwaGYfMG5ZKU9/- */
-		case SC_BABY:				/* +MNEw0TABMN4w3jABWSdZfTBN- */
+		case SC_WARM:				/* 温もり */
+		case SC_KAIZEL:				/* カイゼル */
+		case SC_KAAHI:				/* カアヒ */
+		case SC_SMA:				/* エスマ */
+		case SC_MIRACLE:			/* 太陽と月と星の奇跡 */
+		case SC_ANGEL:				/* 太陽と月と星の天使 */
+		case SC_BABY:				/* パパ、ママ、大好き */
 		case SC_DODGE:
 		case SC_DODGE_DELAY:
-		case SC_DOUBLECASTING:			/* +MMAw1jDrMK0w4zC5MMYwozDzMLA- */
-		case SC_SHRINK:				/* +MLcw5TDqMPMwrw- */
+		case SC_DOUBLECASTING:			/* ダブルキャスティング */
+		case SC_SHRINK:				/* シュリンク */
 		case SC_TIGEREYE:
 		case SC_PK_PENALTY:
 		case SC_HERMODE:
-		case SC_TATAMIGAESHI:			/* +dXOP1DBX- */
+		case SC_TATAMIGAESHI:			/* 畳返し */
 		case SC_NPC_DEFENDER:
-		case SC_SLOWCAST:			/* +MLkw7TCmMK0w4zC5MMg- */
-		case SC_CRITICALWOUND:			/* +gfRUfVC3- */
-		case SC_MAGICMIRROR:			/* +MN4wuDDDMK8w3zDpMPw- */
-		case SC_ITEMDROPRATE:			/* +MNAw1jDrMKww4A- */
-		case SC_HAPPY:				/* +aX0wVzBEcrZhSw- */
-		case SC_NATURAL_HEAL_STOP:		/* +gepxNlbeX6lQXGti- */
-		case SC_REBIRTH:			/* +MOow0DD8MLk- */
-		case SC_HELLPOWER:			/* +MNgw6zDRMO8w/A- */
-		case SC_MANU_ATK:			/* +MN4wzDCvMNUwozD8MOswyQ-MOB(+cml0BjDAMOEw/DC4TgpmBw-) */
-		case SC_MANU_DEF:			/* +MN4wzDCvMNUwozD8MOswyQ-MOB(+MMAw4TD8MLhuG1wR-) */
-		case SC_MANU_MATK:			/* +MN4wzDCvMNUwozD8MOswyQ-MOB(+m1Rs1TDAMOEw/DC4TgpmBw-) */
-		case SC_SPL_ATK:			/* +MLkw1zDsMPMwxjCjMMMwyTDVMKMw/DDrMMk-MOB(+cml0BjDAMOEw/DC4TgpmBw-) */
-		case SC_SPL_DEF:			/* +MLkw1zDsMPMwxjCjMMMwyTDVMKMw/DDrMMk-MOB(+MMAw4TD8MLhuG1wR-) */
-		case SC_SPL_MATK:			/* +MLkw1zDsMPMwxjCjMMMwyTDVMKMw/DDrMMk-MOB(+m1Rs1TDAMOEw/DC4bhtcEQ-) */
-		case SC_ENCHANTBLADE:		/* +MKgw8zDBMOMw8zDIMNYw7DCkMMk- */
-		case SC_REFRESH:			/* +MOow1TDsMMMwtzDl- */
-		case SC_VITALITYACTIVATION:	/* +MNAwpDC/MOowxjCjMKIwrzDGMKMw2TD8MLcw5zDz- */
-		case SC_WEAPONBLOCKING_POSTDELAY:	/* +MKYwpzDdMPMw1jDtMMMwrTDzMLD/CDDWMO0wwzCv/wk- */
-		case SC_OFFERTORIUM:		/* +MKow1TCnMOswyDDqMKYw4A- */
-		case SC_WHITEIMPRISON:		/* +MNsw7zCkMMgwpDDzMNcw6jC6MPM- */
-		case SC_RECOGNIZEDSPELL:	/* +MOowtDCwMMowpDC6MMkwuTDaMOs- */
-		case SC_STASIS:				/* +MLkwxjCkMLcwuQ- */
-		case SC_SPELLBOOK:			/* +MLkw2jDrMNYwwzCv- */
-		case SC_FEARBREEZE:			/* +MNUwozCiMPww1jDqMPwwug- */
-		case SC_WUGBITE:			/* +MKYwqTD8MLAw0DCkMMg- */
-		case SC_HOVERING:			/* +MNsw0DD8MOow8zCw- */
-		case SC_STEALTHFIELD:		/* +MLkwxjDrMLkw1TCjMPww6zDJ- */
-		case SC__DEADLYINFECT:		/* +MMcwwzDJMOow/DCkMPMw1TCnMK8wyA- */
-		case SC__IGNORANCE:			/* +MN4wuTCrMOww/DDJ/xowpDCwMM4wojDpMPMwuQ- */
-		case SC__MANHOLE:			/* +MN4w8zDbMPww6w- */
-		case SC__ESCAPE:			/* +MKgwuTCxMPww1w- */
-		case SC_FALLENEMPIRE:		/* +WSd+j10pY3Y- */
-		case SC_CURSEDCIRCLE_USER:	/* +VGp+G5Zj-(+T391KIAF-) */
-		case SC_CURSEDCIRCLE:		/* +VGp+G5Zj- */
-		case SC_NETHERWORLD:		/* +VzBzRDBua0w- */
-		case SC_UNLIMITED_HUMMING_VOICE:	/* +MKgw8zDJMOwwuTDPMN8w8zCwMNwwpDC5- */
-		case SC_WARMER:				/* +MKYwqTD8MN4w/A- */
-		case SC_VACUUM_EXTREME:		/* +MNAwrTDlMPww4DCoMK8wuTDIMOow/DDg- */
-		case SC_THORNS_TRAP:		/* +ML0w/DDzMMgw6TDDMNc- */
-		case SC_SPORE_EXPLOSION:	/* +MLkw3TCiMKgwrzC5MNcw7TD8MLgw5zDz- */
-		case SC_KG_KAGEHUMI:		/* +XnuIUw- -+X3GODzB/-- */
-		case SC_KYOMU:				/* +XnuIUw- -+hlpxITBuX3E-- */
-		case SC_AKAITSUKI:			/* +XnuIUw- -+fQVnCA-- */
-		case SC_KO_ZENKAI:			/* +iFNfDw- -+XFWViw-- */
-		case SC_KO_JYUMONJIKIRI:	/* +U0Flh1tXZawwig- */
-		case SC_E_CHAIN:			/* +MKgwvzD8MMow6zDBMKcw/DDz- */
-		case SC_QD_SHOT_READY:		/* +MK8wpDDDMK8wyTDtMPwwtzDnMMMwyA-*/
-		case SC_FALLEN_ANGEL:		/* +MNUwqTD8MOow8zCoMPMwuDCnMOs- */
-		case SC_H_MINE:				/* +MM8wpjDqMPMwsDDeMKQw8w- */
-		case SC_CIRCLE_OF_FIRE:		/* +MLUw/DCvMOswqjDWMNUwoTCkMKI- */
-		case SC_TIDAL_WEAPON:		/* +ML8wpDDAMOswpjCnMN0w8w- */
-		case SC_SU_STOOP:			/* +MEYwWjBPMH4wiw- */
-		case SC_BITESCAR:			/* +ML8w7TCmMG5Qtw- */
-		case SC_TUNAPARTY:			/* +MN4wsDDtMLcw/DDrMMk- */
-		case SC_PROTECTIONOFSHRIMP:	/* +MKgw0zDRMPwwxjCjMPw- */
-		case SC_SPIRITOFLAND:		/* +WSdXMDBum0I- */
+		case SC_SLOWCAST:			/* スロウキャスト */
+		case SC_CRITICALWOUND:			/* 致命傷 */
+		case SC_MAGICMIRROR:			/* マジックミラー */
+		case SC_ITEMDROPRATE:			/* バブルガム */
+		case SC_HAPPY:				/* 楽しい状態 */
+		case SC_NATURAL_HEAL_STOP:		/* 自然回復停止 */
+		case SC_REBIRTH:			/* リバース */
+		case SC_HELLPOWER:			/* ヘルパワー */
+		case SC_MANU_ATK:			/* マヌクフィールドMOB(物理ダメージ上昇) */
+		case SC_MANU_DEF:			/* マヌクフィールドMOB(ダメージ減少) */
+		case SC_MANU_MATK:			/* マヌクフィールドMOB(魔法ダメージ上昇) */
+		case SC_SPL_ATK:			/* スプレンティッドフィールドMOB(物理ダメージ上昇) */
+		case SC_SPL_DEF:			/* スプレンティッドフィールドMOB(ダメージ減少) */
+		case SC_SPL_MATK:			/* スプレンティッドフィールドMOB(魔法ダメージ減少) */
+		case SC_ENCHANTBLADE:		/* エンチャントブレイド */
+		case SC_REFRESH:			/* リフレッシュ */
+		case SC_VITALITYACTIVATION:	/* バイタリティアクティベーション */
+		case SC_WEAPONBLOCKING_POSTDELAY:	/* ウェポンブロッキング（ブロック） */
+		case SC_OFFERTORIUM:		/* オフェルトリウム */
+		case SC_WHITEIMPRISON:		/* ホワイトインプリズン */
+		case SC_RECOGNIZEDSPELL:	/* リゴグナイズドスペル */
+		case SC_STASIS:				/* ステイシス */
+		case SC_SPELLBOOK:			/* スペルブック */
+		case SC_FEARBREEZE:			/* フィアーブリーズ */
+		case SC_WUGBITE:			/* ウォーグバイト */
+		case SC_HOVERING:			/* ホバーリング */
+		case SC_STEALTHFIELD:		/* ステルスフィールド */
+		case SC__DEADLYINFECT:		/* デッドリーインフェクト */
+		case SC__IGNORANCE:			/* マスカレード：イグノアランス */
+		case SC__MANHOLE:			/* マンホール */
+		case SC__ESCAPE:			/* エスケープ */
+		case SC_FALLENEMPIRE:		/* 大纏崩捶 */
+		case SC_CURSEDCIRCLE_USER:	/* 呪縛陣(使用者) */
+		case SC_CURSEDCIRCLE:		/* 呪縛陣 */
+		case SC_NETHERWORLD:		/* 地獄の歌 */
+		case SC_UNLIMITED_HUMMING_VOICE:	/* エンドレスハミングボイス */
+		case SC_WARMER:				/* ウォーマー */
+		case SC_VACUUM_EXTREME:		/* バキュームエクストリーム */
+		case SC_THORNS_TRAP:		/* ソーントラップ */
+		case SC_SPORE_EXPLOSION:	/* スポアエクスプロージョン */
+		case SC_KG_KAGEHUMI:		/* 幻術 -影踏み- */
+		case SC_KYOMU:				/* 幻術 -虚無の影- */
+		case SC_AKAITSUKI:			/* 幻術 -紅月- */
+		case SC_KO_ZENKAI:			/* 術式 -展開- */
+		case SC_KO_JYUMONJIKIRI:	/* 十文字斬り */
+		case SC_E_CHAIN:			/* エターナルチェーン */
+		case SC_QD_SHOT_READY:		/* クイックドローショット*/
+		case SC_FALLEN_ANGEL:		/* フォーリンエンジェル */
+		case SC_H_MINE:				/* ハウリングマイン */
+		case SC_CIRCLE_OF_FIRE:		/* サークルオブファイア */
+		case SC_TIDAL_WEAPON:		/* タイダルウェポン */
+		case SC_SU_STOOP:			/* うずくまる */
+		case SC_BITESCAR:			/* タロウの傷 */
+		case SC_TUNAPARTY:			/* マグロシールド */
+		case SC_PROTECTIONOFSHRIMP:	/* エビパーティー */
+		case SC_SPIRITOFLAND:		/* 大地の魂 */
 		case SC_JP_EVENT01:
 		case SC_JP_EVENT02:
 		case SC_JP_EVENT03:
 		case SC_JP_EVENT04:
 		case SC_SUPPORT_EXP:
 		case SC_RAID:
-		case SC_STYLE_CHANGE:		/* +MLkwvzCkMOswwTCnMPMwuA- */
-		case SC_PHI_DEMON:			/* +U+RO43y+lwowbjBKW4gwig- */
-		case SC_MAXPAIN:			/* +MN4wwzCvMLkw2jCkMPM- */
-		case SC_IMMUNE_PROPERTY_NOTHING:	/* +MKQw3zDlMPww8zDXMO0w0TDGMKM-(+MMsw5TD8MMgw6TDr-) */
-		case SC_IMMUNE_PROPERTY_WATER:	/* +MKQw3zDlMPww8zDXMO0w0TDGMKM-(+MKYwqTD8ML8-) */
-		case SC_IMMUNE_PROPERTY_GROUND:	/* +MKQw3zDlMPww8zDXMO0w0TDGMKM-(+MKIw/DC5-) */
-		case SC_IMMUNE_PROPERTY_FIRE:	/* +MKQw3zDlMPww8zDXMO0w0TDGMKM-(+MNUwoTCkMKI-) */
-		case SC_IMMUNE_PROPERTY_WIND	:	/* +MKQw3zDlMPww8zDXMO0w0TDGMKM-(+MKYwpDDzMMk-) */
-		case SC_IMMUNE_PROPERTY_DARKNESS:	/* +MKQw3zDlMPww8zDXMO0w0TDGMKM-(+MMAw/DCv-) */
-		case SC_IMMUNE_PROPERTY_SAINT:	/* +MKQw3zDlMPww8zDXMO0w0TDGMKM-(+MNsw/DDqMPw-) */
-		case SC_IMMUNE_PROPERTY_POISON:	/* +MKQw3zDlMPww8zDXMO0w0TDGMKM-(+MN0wpDC6MPM-) */
-		case SC_IMMUNE_PROPERTY_TELEKINESIS:	/* +MKQw3zDlMPww8zDXMO0w0TDGMKM-(+MLQw/DC5MMg-) */
-		case SC_IMMUNE_PROPERTY_UNDEAD:	/* +MKQw3zDlMPww8zDXMO0w0TDGMKM-(+MKIw8zDHMMMwyA-) */
-		case SC_PC_STOP:		/* +eftS1U4NU+8- */
-		case SC_CRUSHSTRIKE:		/* +MK8w6TDDMLcw5TC5MMgw6TCkMK8- */
-		case SC_WEAPONBLOCK_ON:		/* +MKswpjDzML8w/DC5MOkwwzC3MOU- */
-		case SC__FEINTBOMB:			/* +MNUwpzCkMPMwyDDcMOA- */
-		case SC_MAGICALBULLET:		/* +MN4wuDCrMOsw0DDsMMMwyA- */
-		case SC_SOULCURSE:		/* +a3uXCmGRT50- */
-		case SC_SWHOO:			/* +MKgwuTDVimBVMVPvgP1ytmFL- */
-		case SC_SERVANT_SIGN:		/* +MLUw/DD0MKEw8zDIMLUwpDDz- */
-		case SC_CHARGINGPIERCE:		/* +MMEw4zD8MLgw8zCwMNQwojD8MLk- */
-		case SC_DRAGONIC_AURA:		/* +MMkw6TC0MMswwzCvMKow/DDp- */
-		case SC_VIGOR:			/* +MPQwozC0MPww6w- */
-		case SC_MASSIVE_F_BLASTER:	/* +cI5wa27Fm1R5Xl8+- */
-		case SC_FIRST_BRAND:	/* +eyxOAGSD/xpw2VNw- */
-		case SC_FIRST_FAITH_POWER:	/* +eyxOAHrg/xpP4V/1MG5Smw- */
-		case SC_SECOND_JUDGE:	/* +eyxOjHrg/xpb6VIkgAU- */
-		case SC_SECOND_BRAND:	/* +eyxOjGSD/xpw2VNw- */
-		case SC_THIRD_EXOR_FLAME:	/* +ZwB9Qnrg/xpuxZtUMG5wjg- */
-		case SC_GUARDIAN_S:		/* +MKww/DDHMKMwojDzMLcw/DDrMMk- */
-		case SC_REBOUND_S:		/* +MOow0DCmMPMwyTC3MPww6zDJ- */
-		case SC_ULTIMATE_S:		/* +MKIw6zDGMKMw4TDDMMgwtTCvMOow1TChMKQwuQ- */
-		case SC_SPEAR_SCAR:		/* +MLAw6TDzMMkwuDDjMMMwuDDhMPMwyA- */
-		case SC_SHIELD_POWER:	/* +MLcw/DDrMMkwtzDlMPwwxjCjMPMwsA- */
-		case SC_SHADOW_EXCEED:	/* +MLcw4zDJMKYwqDCvMLcw/DDJ- */
-		case SC_AXE_STOMP:		/* +MKIwwzCvMLkwuTDIMPMw1w- */
-		case SC_ABR_BATTLE_WARIOR:	/* ABR +MNAwyDDrMKYwqTDqMKIw/A- */
-		case SC_ABR_DUAL_CANNON:	/* ABR +MMcw5TCiMOswrTDjMM4w8w- */
-		case SC_ABR_MOTHER_NET:		/* ABR +MN4wtjD8MM0wwzDI- */
-		case SC_ABR_INFINITY:		/* ABR +MKQw8zDVMKMwyzDGMKM- */
-		case SC_ABYSS_DAGGER:		/* +MKIw0zC5MMAwrDD8- */
-		case SC_CALAMITYGALE:		/* +MKsw6TDfMMYwozCyMKQw6w- */
-		case SC_CRESCIVEBOLT:		/* +MK8w7DDDMLcw1jDcMOswyA- */
-		case SC_PROTECTSHADOWEQUIP:	/* +MNUw6zC3MOMwyTCmMMEw4zD8MLg- */
-		case SC_RESEARCHREPORT:		/* +MOowtTD8MMEw7DDdMPwwyA- */
-		case SC_BO_WOODENWARRIOR:	/* +MKYwyTClMPMwpjCpMOowojD8- */
-		case SC_BO_WOODEN_FAIRY:	/* +MKYwyTClMPMw1TCnMKIw6jD8- */
-		case SC_BO_CREEPER:			/* +MK8w6jD8MNEw/A- */
-		case SC_BO_HELLTREE:		/* +MNgw6zDEMOow/A- */
-		case SC_KVASIR_SONATA:		/* +ML0wyjC/MKow1jCvMPQwoTC3MOs- */
-		case SC_ROSEBLOSSOM:		/* +MO0wvDDWMO0wwzC1MOA- */
-		case SC_ELEMENTAL_VEIL:		/* +MKgw7DDhMPMwvzDrMPQwpzD8MOs- */
-		case SC_H_MINE_SPLASH:		/* +MM8wpjDqMPMwsDDeMKQw8w-(+UgZlYw-) */
-		case SC_T_FIRST_GOD:		/* +l1KfjXsm- */
-		case SC_T_SECOND_GOD:		/* +dn2GTnsm- */
-		case SC_T_THIRD_GOD:		/* +ZzGWwHsm- */
-		case SC_T_FOURTH_GOD:		/* +c4RrZnsm- */
-		case SC_HOGOGONG:			/* +ML8wpDCsMPwwzzCmMOow8zCw- */
-		case SC_BLESSING_OF_M_C_DEBUFF:	/* +MGswgzCTMNYw7DDDMLcw8zCwMOow0DCmMPMwyQ- */
-		case SC_BREAKINGLIMIT:		/* +MNYw7DCkMK0w8zCwMOow3zDDMMg- */
-		case SC_RULEBREAK:			/* +MOsw/DDrMNYw7DCkMK8- */
-		case SC_RISING_SUN:			/* +ZeVR+g- */
-		case SC_NOON_SUN:			/* +a2NTSA- */
-		case SC_SUNSET_SUN:			/* +ZeVsoQ- */
-		case SC_RISING_MOON:		/* +ZwhR+g- */
-		case SC_MIDNIGHT_MOON:		/* +a2NbUA- */
-		case SC_DAWN_MOON:			/* +ZwhsoQ- */
-		case SC_STAR_BURST:			/* +WSlUfYQ9Zh8- */
-		case SC_NIGHTMARE:			/* +YKpZIg- */
+		case SC_STYLE_CHANGE:		/* スタイルチェンジ */
+		case SC_PHI_DEMON:			/* 古代精霊のお守り */
+		case SC_MAXPAIN:			/* マックスペイン */
+		case SC_IMMUNE_PROPERTY_NOTHING:	/* イミューンプロパティ(ニュートラル) */
+		case SC_IMMUNE_PROPERTY_WATER:	/* イミューンプロパティ(ウォータ) */
+		case SC_IMMUNE_PROPERTY_GROUND:	/* イミューンプロパティ(アース) */
+		case SC_IMMUNE_PROPERTY_FIRE:	/* イミューンプロパティ(ファイア) */
+		case SC_IMMUNE_PROPERTY_WIND	:	/* イミューンプロパティ(ウインド) */
+		case SC_IMMUNE_PROPERTY_DARKNESS:	/* イミューンプロパティ(ダーク) */
+		case SC_IMMUNE_PROPERTY_SAINT:	/* イミューンプロパティ(ホーリー) */
+		case SC_IMMUNE_PROPERTY_POISON:	/* イミューンプロパティ(ポイズン) */
+		case SC_IMMUNE_PROPERTY_TELEKINESIS:	/* イミューンプロパティ(ゴースト) */
+		case SC_IMMUNE_PROPERTY_UNDEAD:	/* イミューンプロパティ(アンデット) */
+		case SC_PC_STOP:		/* 移動不可 */
+		case SC_CRUSHSTRIKE:		/* クラッシュストライク */
+		case SC_WEAPONBLOCK_ON:		/* カウンタースラッシュ */
+		case SC__FEINTBOMB:			/* フェイントボム */
+		case SC_MAGICALBULLET:		/* マジカルバレット */
+		case SC_SOULCURSE:		/* 死霊憑依 */
+		case SC_SWHOO:			/* エスフ詠唱可能状態 */
+		case SC_SERVANT_SIGN:		/* サーヴァントサイン */
+		case SC_CHARGINGPIERCE:		/* チャージングピアース */
+		case SC_DRAGONIC_AURA:		/* ドラゴニックオーラ */
+		case SC_VIGOR:			/* ヴィゴール */
+		case SC_MASSIVE_F_BLASTER:	/* 炎火滅魔神弾 */
+		case SC_FIRST_BRAND:	/* 第一撃：烙印 */
+		case SC_FIRST_FAITH_POWER:	/* 第一章：信念の力 */
+		case SC_SECOND_JUDGE:	/* 第二章：審判者 */
+		case SC_SECOND_BRAND:	/* 第二撃：烙印 */
+		case SC_THIRD_EXOR_FLAME:	/* 最終章：滅魔の炎 */
+		case SC_GUARDIAN_S:		/* ガーディアンシールド */
+		case SC_REBOUND_S:		/* リバウンドシールド */
+		case SC_ULTIMATE_S:		/* アルティメットサクリファイス */
+		case SC_SPEAR_SCAR:		/* グランドジャッジメント */
+		case SC_SHIELD_POWER:	/* シールドシューティング */
+		case SC_SHADOW_EXCEED:	/* シャドウエクシード */
+		case SC_AXE_STOMP:		/* アックスストンプ */
+		case SC_ABR_BATTLE_WARIOR:	/* ABR バトルウォリアー */
+		case SC_ABR_DUAL_CANNON:	/* ABR デュアルキャノン */
+		case SC_ABR_MOTHER_NET:		/* ABR マザーネット */
+		case SC_ABR_INFINITY:		/* ABR インフィニティ */
+		case SC_ABYSS_DAGGER:		/* アビスダガー */
+		case SC_CALAMITYGALE:		/* カラミティゲイル */
+		case SC_CRESCIVEBOLT:		/* クレッシブボルト */
+		case SC_PROTECTSHADOWEQUIP:	/* フルシャドウチャージ */
+		case SC_RESEARCHREPORT:		/* リサーチレポート */
+		case SC_BO_WOODENWARRIOR:	/* ウドゥンウォリアー */
+		case SC_BO_WOODEN_FAIRY:	/* ウドゥンフェアリー */
+		case SC_BO_CREEPER:			/* クリーパー */
+		case SC_BO_HELLTREE:		/* ヘルツリー */
+		case SC_KVASIR_SONATA:		/* ソナタオブクヴァシル */
+		case SC_ROSEBLOSSOM:		/* ロゼブロッサム */
+		case SC_ELEMENTAL_VEIL:		/* エレメンタルヴェール */
+		case SC_H_MINE_SPLASH:		/* ハウリングマイン(分散) */
+		case SC_T_FIRST_GOD:		/* 青龍符 */
+		case SC_T_SECOND_GOD:		/* 白虎符 */
+		case SC_T_THIRD_GOD:		/* 朱雀符 */
+		case SC_T_FOURTH_GOD:		/* 玄武符 */
+		case SC_HOGOGONG:			/* タイガーハウリング */
+		case SC_BLESSING_OF_M_C_DEBUFF:	/* にゃんブレッシングリバウンド */
+		case SC_BREAKINGLIMIT:		/* ブレイキングリミット */
+		case SC_RULEBREAK:			/* ルールブレイク */
+		case SC_RISING_SUN:			/* 日出 */
+		case SC_NOON_SUN:			/* 正午 */
+		case SC_SUNSET_SUN:			/* 日没 */
+		case SC_RISING_MOON:		/* 月出 */
+		case SC_MIDNIGHT_MOON:		/* 正子 */
+		case SC_DAWN_MOON:			/* 月没 */
+		case SC_STAR_BURST:			/* 天命落星 */
+		case SC_NIGHTMARE:			/* 悪夢 */
 			break;
 
-		case SC_CONCENTRATE:			/* +lsZOLVKbVBFOCg- */
-		case SC_BLESSING:			/* +MNYw7DDDMLcw8zCw- */
-		case SC_ANGELUS:			/* +MKIw8zC8MOswuQ- */
+		case SC_CONCENTRATE:			/* 集中力向上 */
+		case SC_BLESSING:			/* ブレッシング */
+		case SC_ANGELUS:			/* アンゼルス */
 		case SC_RESISTWATER:
 		case SC_RESISTGROUND:
 		case SC_RESISTFIRE:
@@ -8549,53 +8528,53 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		case SC_RESISTTELEKINESIS:
 		case SC_RESISTUNDEAD:
 		case SC_RESISTALL:
-		case SC_IMPOSITIO:			/* +MKQw8zDdMLcwxjCjMKow3jDMMLk- */
-		case SC_GLORIA:				/* +MLAw7TDqMKI- */
-		case SC_LOUD:				/* +MOkwpjDJMNwwpDC5- */
-		case SC_MINDBREAKER:			/* +MN4wpDDzMMkw1jDsMPwwqzD8- */
-		case SC_ETERNALCHAOS:			/* +MKgwvzD8MMow6zCrMKowuQ- */
-		case SC_WHISTLE:			/* +U+N7Gw- */
-		case SC_ASSNCROS:			/* +WRWWfTBuMKIwtTC3MPMwrzDtMLk- */
-		case SC_APPLEIDUN:			/* +MKQwyTClMPMwbmeXao4- */
+		case SC_IMPOSITIO:			/* インポシティオマヌス */
+		case SC_GLORIA:				/* グロリア */
+		case SC_LOUD:				/* ラウドボイス */
+		case SC_MINDBREAKER:			/* マインドブレーカー */
+		case SC_ETERNALCHAOS:			/* エターナルカオス */
+		case SC_WHISTLE:			/* 口笛 */
+		case SC_ASSNCROS:			/* 夕陽のアサシンクロス */
+		case SC_APPLEIDUN:			/* イドゥンの林檎 */
 		case SC_SANTA:
 		case SC_SUMMER:
-		case SC_TRUESIGHT:			/* +MMgwpTDrMPwwtTCkMMg- */
-		case SC_SPIDERWEB:			/* +MLkw0TCkMMAw/DCmMKcwwzDW- */
-		case SC_CONCENTRATION:			/* +MLMw8zC7MPMwyDDsMPwwtzDnMPM- */
-		case SC_MARIONETTE:			/* +MN4w6jCqMM0wwzDIMLMw8zDIMO0w/DDr- */
-		case SC_MARIONETTE2:			/* +MN4w6jCqMM0wwzDIMLMw8zDIMO0w/DDr- */
-		case SC_WEDDING:			/* +fVBaWnUo-(+fVBaWohjiPMwazBqMGMwZmtpME8wbjBMkEUwRDBoMEs-) */
-		case SC_HUMMING:			/* +MM8w3zDzMLA- */
-		case SC_FORTUNE:			/* +XniQSzBuMK0wuQ- */
-		case SC_SERVICE4U:			/* +MLUw/DDTMLkw1TCpMPww5jD8- */
-		case SC_WHISTLE_:			/* +U+N7Gw- */
-		case SC_ASSNCROS_:			/* +WRWWfTBuMKIwtTC3MPMwrzDtMLk- */
-		case SC_APPLEIDUN_:			/* +MKQwyTClMPMwbmeXao4- */
-		case SC_HUMMING_:			/* +MM8w3zDzMLA- */
-		case SC_DONTFORGETME_:			/* +ecEwkl/YMIwwajBEMGc- */
-		case SC_FORTUNE_:			/* +XniQSzBuMK0wuQ- */
-		case SC_SERVICE4U_:			/* +MLUw/DDTMLkw1TCpMPww5jD8- */
-		case SC_INCATK:				/* ATK+TgpmBw- (+eV6RUnUo-) */
-		case SC_INCMATK:			/* MATK+TgpmBw- (+eV552DBug0l1KA-) */
-		case SC_INCHIT:				/* HIT+TgpmBw- */
-		case SC_INCMHP2:			/* MHP%+TgpmBw- */
-		case SC_INCMSP2:			/* MSP%+TgpmBw- */
-		case SC_INCATK2:			/* ATK%+TgpmBw- */
-		case SC_INCHIT2:			/* HIT%+TgpmBw- */
-		case SC_INCFLEE2:			/* FLEE%+TgpmBw- */
-		case SC_INCALLSTATUS:			/* +UWgwuTDGMPwwvzC5/ws-20 */
-		case SC_CHASEWALK_STR:			/* STR+TgpmBw- */
-		case SC_BATTLEORDER:			/* +gehiJmFLUuI- */
+		case SC_TRUESIGHT:			/* トゥルーサイト */
+		case SC_SPIDERWEB:			/* スパイダーウェッブ */
+		case SC_CONCENTRATION:			/* コンセントレーション */
+		case SC_MARIONETTE:			/* マリオネットコントロール */
+		case SC_MARIONETTE2:			/* マリオネットコントロール */
+		case SC_WEDDING:			/* 結婚用(結婚衣裳になって歩くのが遅いとか) */
+		case SC_HUMMING:			/* ハミング */
+		case SC_FORTUNE:			/* 幸運のキス */
+		case SC_SERVICE4U:			/* サービスフォーユー */
+		case SC_WHISTLE_:			/* 口笛 */
+		case SC_ASSNCROS_:			/* 夕陽のアサシンクロス */
+		case SC_APPLEIDUN_:			/* イドゥンの林檎 */
+		case SC_HUMMING_:			/* ハミング */
+		case SC_DONTFORGETME_:			/* 私を忘れないで */
+		case SC_FORTUNE_:			/* 幸運のキス */
+		case SC_SERVICE4U_:			/* サービスフォーユー */
+		case SC_INCATK:				/* ATK上昇 (神酒用) */
+		case SC_INCMATK:			/* MATK上昇 (神秘の草用) */
+		case SC_INCHIT:				/* HIT上昇 */
+		case SC_INCMHP2:			/* MHP%上昇 */
+		case SC_INCMSP2:			/* MSP%上昇 */
+		case SC_INCATK2:			/* ATK%上昇 */
+		case SC_INCHIT2:			/* HIT%上昇 */
+		case SC_INCFLEE2:			/* FLEE%上昇 */
+		case SC_INCALLSTATUS:			/* 全ステータス＋20 */
+		case SC_CHASEWALK_STR:			/* STR上昇 */
+		case SC_BATTLEORDER:			/* 臨戦態勢 */
 		case SC_THE_MAGICIAN:
 		case SC_STRENGTH:
 		case SC_THE_DEVIL:
 		case SC_THE_SUN:
-		case SC_SPURT:				/* +mcYwUY2zdSg-STR */
-		case SC_SUN_COMFORT:			/* +WSqWfTBuW4lpfQ- */
-		case SC_MOON_COMFORT:			/* +ZwgwbluJaX0- */
-		case SC_STAR_COMFORT:			/* +Zh8wbluJaX0- */
-		case SC_FUSION:				/* +WSqWfTBoZwgwaGYfMG6HjVQI- */
-		case SC_MEAL_INCHIT:	// +mN9Oi3Uo-
+		case SC_SPURT:				/* 駆け足用STR */
+		case SC_SUN_COMFORT:			/* 太陽の安楽 */
+		case SC_MOON_COMFORT:			/* 月の安楽 */
+		case SC_STAR_COMFORT:			/* 星の安楽 */
+		case SC_FUSION:				/* 太陽と月と星の融合 */
+		case SC_MEAL_INCHIT:	// 食事用
 		case SC_MEAL_INCFLEE:
 		case SC_MEAL_INCFLEE2:
 		case SC_MEAL_INCCRITICAL:
@@ -8603,159 +8582,159 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		case SC_MEAL_INCMDEF:
 		case SC_MEAL_INCATK:
 		case SC_MEAL_INCMATK:
-		case SC_SKE:				/* +MKgwuTCv- */
-		case SC_SKA:				/* +MKgwuTCr- */
-		case SC_CLOSECONFINE:			/* +MK8w7TD8MLowszDzMNUwoTCkMPM- */
-		case SC_STOP:				/* +MNsw/DDrMMkwpjCnMNY- */
-		case SC_FLING:				/* +MNUw6TCkMPMwsA- */
-		case SC_MADNESSCANCEL:			/* +MN4wwzDJMM0wuTCtMOMw8zC7MOkw/A- */
-		case SC_ADJUSTMENT:			/* +MKIwuDDjMLkwyDDhMPMwyA- */
-		case SC_INCREASING:			/* +MKQw8zCvMOow/DC4MPMwsDCiMK0w5TDpMLcw/A- */
-		case SC_NEN:				/* +X/U- */
-		case SC_AVOID:				/* +fcpgJVbekH8- */
-		case SC_CHANGE:				/* +MOEw8zC/MOswwTCnMPMwuA- */
-		case SC_DEFENCE:			/* +MMcwozDVMKcw8zC5- */
-		case SC_BLOODLUST:			/* +MNYw6TDDMMkw6TC5MMg- */
-		case SC_FLEET:				/* +MNUw6jD8MMgw4DD8MNY- */
-		case SC_SPEED:				/* +MKow/DDQMPwwyTC5MNQw/DDJ- */
-		case SC_STONESKIN:			/* +MLkwyDD8MPMwuTCtMPM- */
-		case SC_ANTIMAGIC:			/* +MKIw8zDBMN4wuDDDMK8- */
-		case SC_WEAPONQUICKEN:			/* +MKYwpzDdMPMwrzCkMMMwsTDz- */
-		case SC_WE_FEMALE:			/* +MEIwajBfMGtcPTBPMFcwfjBZ- */
-		case SC_GIANTGROWTH:		/* +MLgw4zCkMKIw8zDIMLAw7TD8MLk- */
-		case SC_INFRAREDSCAN:		/* +MKQw8zDVMOkw7DDDMMkwuTCtMOMw8w- */
-		case SC_ANALYZE:			/* +MKIwyjDpMKQwug- */
-		case SC_NEUTRALBARRIER_MASTER:	/* +MMsw5TD8MMgw6TDrMNAw6jCiMPw-(+T391KIAF-) */
-		case SC_NEUTRALBARRIER:		/* +MMsw5TD8MMgw6TDrMNAw6jCiMPw- */
-		case SC__BODYPAINT:			/* +MNwwxzCjMNowpDDzMMYwozDzMLA- */
-		case SC__ENERVATION:		/* +MN4wuTCrMOww/DDJ/xowqDDKMNkw/DC3MOcw8w- */
-		case SC__UNLUCKY:			/* +MN4wuTCrMOww/DDJ/xowojDzMOkwwzCtMPw- */
-		case SC__WEAKNESS:			/* +MN4wuTCrMOww/DDJ/xowpjCjMPwwrzDNMLk- */
-		case SC__STRIPACCESSARY:	/* +MLkwyDDqMMMw1zCiMK8wuzC1MOow/A- */
-		case SC__BLOODYLUST:		/* +MNYw6TDDMMcwozDpMLkwyA- */
-		case SC_EARTHDRIVE:			/* +MKIw/DC5MMkw6TCkMNY- */
-		case SC_HARMONIZE:			/* +MM8w/DDiMMowpDC6- */
-		case SC_GLOOMYDAY:			/* +MOEw6TDzMLMw6jD8- */
-		case SC_LERADS_DEW:			/* +MOww/DDpMLowbpcy- */
-		case SC_DANCE_WITH_WUG:		/* +MMAw8zC5MKYwozC6MKYwqTD8MLA- */
-		case SC_ILLUSIONDOPING:		/* +MKQw6jDlMPwwuDDnMPMwyTD8MNQw8zCw- */
-		case SC_NYANGGRASS:			/* +MMsw4zDzMLAw6TC5- */
-		case SC_MYSTERIOUS_POWDER:	/* +Tg1gHYtwMGp8iQ- */
-		case SC_BOOST500:			/* +MNYw/DC5MMg-500 */
-		case SC_FULL_SWING_K:		/* +MNUw6zC5MKQw8zCw-K */
-		case SC_MANA_PLUS:			/* +MN4wyjDXMOkwuQ- */
-		case SC_MUSTLE_M:			/* +MN4wwzC5MOs-M */
-		case SC_LIFE_FORCE_F:		/* +MOkwpDDVMNUwqTD8MLk-F */
-		case SC_PROMOTE_HEALTH_RESERCH:	/* HP+WJdSoDDdMPwwtzDnMPM- */
-		case SC_ENERGY_DRINK_RESERCH:	/* SP+WJdSoDDdMPwwtzDnMPM- */
-		case SC_EXTRACT_WHITE_POTION_Z:	/* +b8N+LjDbMO8wpDDIMN0w/DC3MOcw8w-Z */
-		case SC_VITATA_500:			/* +MNMwvzC/-500 */
-		case SC_EXTRACT_SALAMINE_JUICE:	/* +b8N+LjC1MOkw3jCkMPMwuDDlMPwwuQ- */
-		case SC_SAVAGE_STEAK:		/* +MLUw2TD8MLgwbk44cTwwTQ- */
-		case SC_COCKTAIL_WARG_BLOOD:	/* +MKswrzDGMOswpjCpMPwwsDDWMOkwwzDJ- */
-		case SC_MINOR_BBQ:			/* +MN8wzjC/MKYw7TC5MG5yWzCrMOsw0w- */
-		case SC_SIROMA_ICE_TEA:		/* +MLcw7TDeMKIwpDC5MMYwozD8- */
-		case SC_DROCERA_HERB_STEAMED:	/* +MMkw7TC7MOkwbjDPMPww1nFu- */
-		case SC_PUTTI_TAILS_NOODLES:	/* +MNcwxjCjMMMwyDBuMFcwYzB9nro- */
-		case SC_STOMACHACHE:		/* +gXl12w- */
-		case SC_ODINS_POWER:		/* +MKow/DDHMKMw8zBuUps- */
-		case SC_ZEPHYR:				/* +MLww1TChMPw- */
-		case SC_INVINCIBLE:			/* +MKQw8zDTMPMwtzDWMOs- */
-		case SC_INVINCIBLEOFF:		/* +MKQw8zDTMPMwtzDWMOswqjDV- */
+		case SC_SKE:				/* エスク */
+		case SC_SKA:				/* エスカ */
+		case SC_CLOSECONFINE:			/* クローズコンファイン */
+		case SC_STOP:				/* ホールドウェブ */
+		case SC_FLING:				/* フライング */
+		case SC_MADNESSCANCEL:			/* マッドネスキャンセラー */
+		case SC_ADJUSTMENT:			/* アジャストメント */
+		case SC_INCREASING:			/* インクリージングアキュラシー */
+		case SC_NEN:				/* 念 */
+		case SC_AVOID:				/* 緊急回避 */
+		case SC_CHANGE:				/* メンタルチェンジ */
+		case SC_DEFENCE:			/* ディフェンス */
+		case SC_BLOODLUST:			/* ブラッドラスト */
+		case SC_FLEET:				/* フリートムーブ */
+		case SC_SPEED:				/* オーバードスピード */
+		case SC_STONESKIN:			/* ストーンスキン */
+		case SC_ANTIMAGIC:			/* アンチマジック */
+		case SC_WEAPONQUICKEN:			/* ウェポンクイッケン */
+		case SC_WE_FEMALE:			/* あなたに尽くします */
+		case SC_GIANTGROWTH:		/* ジャイアントグロース */
+		case SC_INFRAREDSCAN:		/* インフラレッドスキャン */
+		case SC_ANALYZE:			/* アナライズ */
+		case SC_NEUTRALBARRIER_MASTER:	/* ニュートラルバリアー(使用者) */
+		case SC_NEUTRALBARRIER:		/* ニュートラルバリアー */
+		case SC__BODYPAINT:			/* ボディペインティング */
+		case SC__ENERVATION:		/* マスカレード：エナベーション */
+		case SC__UNLUCKY:			/* マスカレード：アンラッキー */
+		case SC__WEAKNESS:			/* マスカレード：ウィークネス */
+		case SC__STRIPACCESSARY:	/* ストリップアクセサリー */
+		case SC__BLOODYLUST:		/* ブラッディラスト */
+		case SC_EARTHDRIVE:			/* アースドライブ */
+		case SC_HARMONIZE:			/* ハーモナイズ */
+		case SC_GLOOMYDAY:			/* メランコリー */
+		case SC_LERADS_DEW:			/* レーラズの露 */
+		case SC_DANCE_WITH_WUG:		/* ダンスウィズウォーグ */
+		case SC_ILLUSIONDOPING:		/* イリュージョンドーピング */
+		case SC_NYANGGRASS:			/* ニャングラス */
+		case SC_MYSTERIOUS_POWDER:	/* 不思議な粉 */
+		case SC_BOOST500:			/* ブースト500 */
+		case SC_FULL_SWING_K:		/* フルスイングK */
+		case SC_MANA_PLUS:			/* マナプラス */
+		case SC_MUSTLE_M:			/* マッスルM */
+		case SC_LIFE_FORCE_F:		/* ライフフォースF */
+		case SC_PROMOTE_HEALTH_RESERCH:	/* HP増加ポーション */
+		case SC_ENERGY_DRINK_RESERCH:	/* SP増加ポーション */
+		case SC_EXTRACT_WHITE_POTION_Z:	/* 濃縮ホワイトポーションZ */
+		case SC_VITATA_500:			/* ビタタ500 */
+		case SC_EXTRACT_SALAMINE_JUICE:	/* 濃縮サラマインジュース */
+		case SC_SAVAGE_STEAK:		/* サベージの丸焼き */
+		case SC_COCKTAIL_WARG_BLOOD:	/* カクテルウォーグブラッド */
+		case SC_MINOR_BBQ:			/* ミノタウロスの牛カルビ */
+		case SC_SIROMA_ICE_TEA:		/* シロマアイスティー */
+		case SC_DROCERA_HERB_STEAMED:	/* ドロセラのハーブ煮 */
+		case SC_PUTTI_TAILS_NOODLES:	/* プティットのしっぽ麺 */
+		case SC_STOMACHACHE:		/* 腹痛 */
+		case SC_ODINS_POWER:		/* オーディンの力 */
+		case SC_ZEPHYR:				/* ゼファー */
+		case SC_INVINCIBLE:			/* インビンシブル */
+		case SC_INVINCIBLEOFF:		/* インビンシブルオフ */
 		case SC_ATKPOTION:
 		case SC_MATKPOTION:
 		case SC_ALMIGHTY:
 		case SC_SUPPORT_HPSP:
-		case SC_TINDER_BREAKER:		/* +Y1Vzcg- */
-		case SC_ALL_STAT_DOWN:	/* +MKow/DDrMLkwxjD8ML8wuTDAMKYw8w- */
-		case SC_ADORAMUS:		/* +MKIwyTDpMOAwuQ- */
-		case SC_DEADLY_DEFEASANCE:		/* +MMcwwzDJMOow/DDXMO0wuDCnMK8wtzDnMPM- */
+		case SC_TINDER_BREAKER:		/* 捕獲 */
+		case SC_ALL_STAT_DOWN:	/* オールステータスダウン */
+		case SC_ADORAMUS:		/* アドラムス */
+		case SC_DEADLY_DEFEASANCE:		/* デッドリープロジェクション */
 			calc_flag = 1;
 			break;
 
-		case SC_MONSTER_TRANSFORM:	/* +MOIw8zC5ML8w/FkJjqs- */
-			icon_val1 = val1;	// val1+MG8w4jDzMLkwvzD8-ID
+		case SC_MONSTER_TRANSFORM:	/* モンスター変身 */
+			icon_val1 = val1;	// val1はモンスターID
 			calc_flag = 1;
 			break;
-		case SC_ALL_RIDING:			/* +mg5OVzC3MLkwxjDg- */
+		case SC_ALL_RIDING:			/* 騎乗システム */
 			if(sd) {
-				// +ZeIwa2XiW1gwbk5XMIpyaTBrZC1OV04tMGcwQjCLWDRUCDBvT1UwgjBXMGowRA-
+				// 既に既存の乗り物に搭乗中である場合は何もしない
 				if(pc_isriding(sd) || pc_isdragon(sd) || pc_iswolfmount(sd) || pc_isgear(sd))
 					return 0;
-				icon_val1 = 1;	// val1+MG8-1
-				icon_val2 = 25;	// val2+MG8-25(+eftS1ZAfXqZUEU4K-)
+				icon_val1 = 1;	// val1は1
+				icon_val2 = 25;	// val2は25(移動速度向上)
 				clif_status_load_id(sd,SI_RIDING,1);
 			}
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
-		case SC_KYOUGAKU:			/* +XnuIUw- -+mlphFQ-- */
+		case SC_KYOUGAKU:			/* 幻術 -驚愕- */
 			icon_val1 = 1002;
 			calc_flag = 1;
 			break;
-		case SC_HAT_EFFECT:			/* +mC2IxVCZMKgw1TCnMK8wyA- */
+		case SC_HAT_EFFECT:			/* 頭装備エフェクト */
 			icon_val1 = val1;
 			break;
-		case SC_ACTIVE_MONSTER_TRANSFORM:	/* +MKIwrzDGMKMw1jDiMPMwuTC/MPxZCY6r- */
-			icon_val1 = val1;	// val1+MG8w4jDzMLkwvzD8-ID
+		case SC_ACTIVE_MONSTER_TRANSFORM:	/* アクティブモンスター変身 */
+			icon_val1 = val1;	// val1はモンスターID
 			break;
 
-		case SC_SPEEDUP0:			/* +eftS1ZAfXqZYl1Kg-(+MKIwpDDGMOA-) */
-		case SC_SPEEDUP1:			/* +MLkw1DD8MMkw3TD8MLcw5zDz- */
-		case SC_WALKSPEED:			/* +eftS1ZAfXqZYl1Kg-(+MLkwrzDqMNcwyA-) */
-		case SC_SLOWPOTION:			/* +eftS1ZAfXqZPTk4L-(+MKIwpDDGMOA-) */
-		case SC_STEELBODY:			/* +kdFSWw- */
-		case SC_INCFLEE:			/* FLEE+TgpmBw- */
-		case SC_GRAVITATION:			/* +MLAw6TDTMMYw/DC3MOcw8zDVMKMw/DDrMMk- */
-		case SC_SUITON:				/* +bDSQQQ- */
-		case SC_GATLINGFEVER:			/* +MKwwyDDqMPMwsDDVMKMw/DDQMPw- */
-		case SC_HALLUCINATIONWALK:	/* +MM8w6zC3MM0w/DC3MOcw8zCmMKkw/DCv- */
-		case SC_PARALIZE:			/* +MNEw6TDpMKQwug- */
-		case SC_FROSTMISTY:			/* +MNUw7TC5MMgw3zC5MMYwow- */
-		case SC_WUGDASH:			/* +MKYwqTD8MLAwwDDDMLcw5Q- */
-		case SC_ACCELERATION:		/* +MKIwrzC7MOkw7DD8MLcw5zDz- */
-		case SC_HALLUCINATIONWALK_POSTDELAY:	/* +MM8w6zC3MM0w/DC3MOcw8zCmMKkw/DCv-(+MNowyjDrMMYwow-) */
-		case SC__GROOMY:			/* +MN4wuTCrMOww/DDJ/xowsDDrMPww3zD8- */
-		case SC__LAZINESS:			/* +MN4wuTCrMOww/DDJ/xow7DCkMLgwzTC5- */
-		case SC_GN_CARTBOOST:		/* +MKsw/DDIMNYw/DC5MMg- */
-		case SC_MELON_BOMB:			/* +MOEw7TDzcgZfPg- */
-		case SC_POWER_OF_GAIA:		/* +MNEw7zD8MKow1jCsMKQwog- */
+		case SC_SPEEDUP0:			/* 移動速度増加(アイテム) */
+		case SC_SPEEDUP1:			/* スピードポーション */
+		case SC_WALKSPEED:			/* 移動速度増加(スクリプト) */
+		case SC_SLOWPOTION:			/* 移動速度低下(アイテム) */
+		case SC_STEELBODY:			/* 金剛 */
+		case SC_INCFLEE:			/* FLEE上昇 */
+		case SC_GRAVITATION:			/* グラビテーションフィールド */
+		case SC_SUITON:				/* 水遁 */
+		case SC_GATLINGFEVER:			/* ガトリングフィーバー */
+		case SC_HALLUCINATIONWALK:	/* ハルシネーションウォーク */
+		case SC_PARALIZE:			/* パラライズ */
+		case SC_FROSTMISTY:			/* フロストミスティ */
+		case SC_WUGDASH:			/* ウォーグダッシュ */
+		case SC_ACCELERATION:		/* アクセラレーション */
+		case SC_HALLUCINATIONWALK_POSTDELAY:	/* ハルシネーションウォーク(ペナルティ) */
+		case SC__GROOMY:			/* マスカレード：グルーミー */
+		case SC__LAZINESS:			/* マスカレード：レイジネス */
+		case SC_GN_CARTBOOST:		/* カートブースト */
+		case SC_MELON_BOMB:			/* メロン爆弾 */
+		case SC_POWER_OF_GAIA:		/* パワーオブガイア */
 		case SC_SUPPORT_SPEED:
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
 
-		case SC_PROVOKE:			/* +MNcw7TDcMMMwrw- */
+		case SC_PROVOKE:			/* プロボック */
 			calc_flag = 1;
-			if(tick <= 0) tick = 1000;	/* (+MKow/DDIMNAw/DC1MPwwrw-) */
+			if(tick <= 0) tick = 1000;	/* (オートバーサーク) */
 			break;
-		case SC_ENDURE:				/* +MKQw8zDHMOUwog- */
+		case SC_ENDURE:				/* インデュア */
 			if(tick <= 0) tick = 1000 * 60;
 			calc_flag = 1;
-			val2 = 7;	// 7+Vt5lO2SDMFUwjDBfMImJ45Zk-
+			val2 = 7;	// 7回攻撃されたら解除
 			if(sd && !map[bl->m].flag.gvg) {
-				// +iKswxzCjMNww/DC3MOcw84AFMIIwpDDzMMcw5TCiMGswWTCL-
+				// 被ディボーション者もインデュアにする
 				struct map_session_data *tsd;
 				int i;
-				for(i = 0; i < 5; i+-+-) {
+				for(i = 0; i < 5; i++) {
 					if(sd->dev.val1[i] && (tsd = map_id2sd(sd->dev.val1[i])) != NULL)
 						status_change_start(&tsd->bl,type,val1,0,0,0,skill_get_time(SM_ENDURE,val1),0);
 				}
 			}
 			break;
-		case SC_INCREASEAGI:		/* +kB9epliXUqA- */
+		case SC_INCREASEAGI:		/* 速度増加 */
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			if(sc->data[SC_DECREASEAGI].timer != -1)
 				status_change_end(bl,SC_DECREASEAGI,-1);
 			break;
-		case SC_DECREASEAGI:		/* +kB9epm4bXBE- */
+		case SC_DECREASEAGI:		/* 速度減少 */
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
-		case SC_SIGNUMCRUCIS:		/* +MLcwsDDKMOAwrzDrMLcwuQ- */
+		case SC_SIGNUMCRUCIS:		/* シグナムクルシス */
 			calc_flag = 1;
-			val2 = 10 +- val1*4;
+			val2 = 10 + val1*4;
 			tick = 600*1000;
 			clif_emotion(bl,4);
 			break;
@@ -8772,111 +8751,111 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				status_change_end(bl,SC_SPEEDPOTION2,-1);
 			calc_flag = 1;
 			break;
-		case SC_ADRENALINE:			/* +MKIwyTDsMMow6jDzMOkwwzC3MOU- */
+		case SC_ADRENALINE:			/* アドレナリンラッシュ */
 			calc_flag = 1;
 			if(sc->data[SC_ADRENALINE2].timer != -1)
 				status_change_end(bl,SC_ADRENALINE2,-1);
 			if(!(flag&2) && sd && pc_checkskill(sd,BS_HILTBINDING) > 0)
-				icon_tick = tick +-= tick / 10;
+				icon_tick = tick += tick / 10;
 			break;
-		case SC_ADRENALINE2:			/* +MNUw6zCiMMkw7DDKMOow8zDpMMMwtzDl- */
+		case SC_ADRENALINE2:			/* フルアドレナリンラッシュ */
 			calc_flag = 1;
 			if(sc->data[SC_ADRENALINE].timer != -1)
 				status_change_end(bl,SC_ADRENALINE,-1);
 			if(!(flag&2) && sd && pc_checkskill(sd,BS_HILTBINDING) > 0)
-				icon_tick = tick +-= tick / 10;
+				icon_tick = tick += tick / 10;
 			break;
-		case SC_WEAPONPERFECTION:		/* +MKYwpzDdMPMw0TD8MNUwpzCvMLcw5zDz- */
+		case SC_WEAPONPERFECTION:		/* ウェポンパーフェクション */
 			if(!(flag&2) && sd && pc_checkskill(sd,BS_HILTBINDING) > 0)
-				icon_tick = tick +-= tick / 10;
+				icon_tick = tick += tick / 10;
 			break;
-		case SC_OVERTHRUST:			/* +MKow/DDQMPwwyDDpMLkwyA- */
+		case SC_OVERTHRUST:			/* オーバートラスト */
 			if(sc->data[SC_OVERTHRUSTMAX].timer != -1)
 				return 0;
 			val3 = (val2)? val1*5 : val1;
 			if(!(flag&2) && sd && pc_checkskill(sd,BS_HILTBINDING) > 0)
-				icon_tick = tick +-= tick / 10;
+				icon_tick = tick += tick / 10;
 			break;
-		case SC_MAXIMIZEPOWER:		/* +MN4wrTC3MN4wpDC6MNEw7zD8- */
+		case SC_MAXIMIZEPOWER:		/* マキシマイズパワー */
 			if(sd)
-				tick = val2;	// SP+MEw-1+bhswi2ZClZM-
+				tick = val2;	// SPが1減る時間
 			else
 				tick = 5000*val1;
 			break;
-		case SC_ENCPOISON:			/* +MKgw8zDBMOMw8zDIMN0wpDC6MPM- */
+		case SC_ENCPOISON:			/* エンチャントポイズン */
 			calc_flag = 1;
-			val2 = (((val1 - 1) / 2) +- 3)*100;	// +a9JO2E4OeLpzhw-
+			val2 = (((val1 - 1) / 2) + 3)*100;	// 毒付与確率
 			status_enchant_elemental_end(bl,SC_ENCPOISON);
 			break;
-		case SC_EDP:			/* +MKgw8zDBMOMw8zDIMMcwwzDJMOow/DDdMKQwujDz- */
-			val2 = 250 +- val1 * 50;	// +cxtr0k7YTg54unOH-(%)
+		case SC_EDP:			/* エンチャントデッドリーポイズン */
+			val2 = 250 + val1 * 50;	// 猛毒付与確率(%)
 			break;
-		case SC_POISONREACT:	/* +MN0wpDC6MPMw6jCiMK8wyA- */
-			val2 = (val1 +- 1) / 2;
+		case SC_POISONREACT:	/* ポイズンリアクト */
+			val2 = (val1 + 1) / 2;
 			break;
-		case SC_ASPERSIO:			/* +MKIwuTDaMOswtzCq- */
+		case SC_ASPERSIO:			/* アスペルシオ */
 			status_enchant_elemental_end(bl,SC_ASPERSIO);
 			break;
-		case SC_BENEDICTIO:			/* +gFZPUw- */
+		case SC_BENEDICTIO:			/* 聖体 */
 			status_enchant_armor_elemental_end(bl,SC_BENEDICTIO);
 			break;
-		case SC_ELEMENTWATER:		// +bDQ-
+		case SC_ELEMENTWATER:		// 水
 			status_enchant_armor_elemental_end(bl,SC_ELEMENTWATER);
 			if(sd) {
-				// +ljJRdzBrbDRcXmAnMExO2E4OMFUwjDB+MFcwXzAC-
+				// 防具に水属性が付与されました。
 				clif_displaymessage(sd->fd, msg_txt(195));
 			}
 			break;
-		case SC_ELEMENTGROUND:		// +Vx8-
+		case SC_ELEMENTGROUND:		// 土
 			status_enchant_armor_elemental_end(bl,SC_ELEMENTGROUND);
 			if(sd) {
-				// +ljJRdzBrVx9cXmAnMExO2E4OMFUwjDB+MFcwXzAC-
+				// 防具に土属性が付与されました。
 				clif_displaymessage(sd->fd, msg_txt(196));
 			}
 			break;
-		case SC_ELEMENTFIRE:		// +cGs-
+		case SC_ELEMENTFIRE:		// 火
 			status_enchant_armor_elemental_end(bl,SC_ELEMENTFIRE);
 			if(sd) {
-				// +ljJRdzBrcGtcXmAnMExO2E4OMFUwjDB+MFcwXzAC-
+				// 防具に火属性が付与されました。
 				clif_displaymessage(sd->fd, msg_txt(197));
 			}
 			break;
-		case SC_ELEMENTWIND:		// +mKg-
+		case SC_ELEMENTWIND:		// 風
 			status_enchant_armor_elemental_end(bl,SC_ELEMENTWIND);
 			if(sd) {
-				// +ljJRdzBrmKhcXmAnMExO2E4OMFUwjDB+MFcwXzAC-
+				// 防具に風属性が付与されました。
 				clif_displaymessage(sd->fd, msg_txt(198));
 			}
 			break;
-		case SC_ELEMENTHOLY:		// +UUk-
+		case SC_ELEMENTHOLY:		// 光
 			status_enchant_armor_elemental_end(bl,SC_ELEMENTHOLY);
 			if(sd) {
-				// +ljJRdzBrgFZcXmAnMExO2E4OMFUwjDB+MFcwXzAC-
+				// 防具に聖属性が付与されました。
 				clif_displaymessage(sd->fd, msg_txt(199));
 			}
 			break;
-		case SC_ELEMENTDARK:		// +lcc-
+		case SC_ELEMENTDARK:		// 闇
 			status_enchant_armor_elemental_end(bl,SC_ELEMENTDARK);
 			if(sd) {
-				// +ljJRdzBrlcdcXmAnMExO2E4OMFUwjDB+MFcwXzAC-
+				// 防具に闇属性が付与されました。
 				clif_displaymessage(sd->fd, msg_txt(200));
 			}
 			break;
-		case SC_ELEMENTELEKINESIS:	// +X/U-
+		case SC_ELEMENTELEKINESIS:	// 念
 			status_enchant_armor_elemental_end(bl,SC_ELEMENTELEKINESIS);
 			if(sd) {
-				// +ljJRdzBrX/VcXmAnMExO2E4OMFUwjDB+MFcwXzAC-
+				// 防具に念属性が付与されました。
 				clif_displaymessage(sd->fd, msg_txt(201));
 			}
 			break;
-		case SC_ELEMENTPOISON:		// +a9I-
+		case SC_ELEMENTPOISON:		// 毒
 			status_enchant_armor_elemental_end(bl,SC_ELEMENTPOISON);
 			if(sd) {
-				// +ljJRdzBra9JcXmAnMExO2E4OMFUwjDB+MFcwXzAC-
+				// 防具に毒属性が付与されました。
 				clif_displaymessage(sd->fd, msg_txt(202));
 			}
 			break;
-		case SC_ELEMENTUNDEAD:		// +Tg1rew-
+		case SC_ELEMENTUNDEAD:		// 不死
 			status_enchant_armor_elemental_end(bl,SC_ELEMENTUNDEAD);
 			if(sc->data[SC_BLESSING].timer != -1)
 				status_change_end(bl,SC_BLESSING,-1);
@@ -8895,29 +8874,29 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		case SC_RACEDRAGON:
 			status_change_race_end(bl,type);
 			if(sd) {
-				const char *race_name[] = { "+cSFfYg-", "+Tg1rew-", "+UtVyaQ-", "+aQ1yaQ-", "+ZgaGaw-", "", "+m1qMnQ-", "+YKqbVA-", "+TrqVkw-", "+WSlPfw-", "+etw-" };
-				msg_output(sd->fd, msg_txt(204), race_name[type-SC_RACEUNKNOWN]);	// +ei5lzzBM-%s+MGswajCKMH4wVzBf-
+				const char *race_name[] = { "無形", "不死", "動物", "植物", "昆虫", "", "魚貝", "悪魔", "人間", "天使", "竜" };
+				msg_output(sd->fd, msg_txt(204), race_name[type-SC_RACEUNKNOWN]);	// 種族が%sになりました
 			}
 			break;
 		case SC_MAGICROD:
 			val2 = val1*20;
 			break;
-		case SC_KYRIE:				/* +MK0w6jCoMKgw7DCkML0w8w- */
-			// +MKIwuTDgMExjmzBLMGMwZjBEMF8wiYnjlmQwVzBm-
+		case SC_KYRIE:				/* キリエエレイソン */
+			// アスムが掛かっていたら解除して
 			if(sc->data[SC_ASSUMPTIO].timer != -1)
 				status_change_end(bl,SC_ASSUMPTIO,-1);
 			if(sc->data[SC_ASSUMPTIO2].timer != -1)
 				status_change_end(bl,SC_ASSUMPTIO2,-1);
-			// +MK0w6jCoMJJjmzBRMIs-
-			if(val4 > 0) {		// +MNcw6TCoMNUwoTDGMKMwqjBuWDRUCA-
-				val2 = (int)((atn_bignumber)status_get_max_hp(bl) * (val1 * 2 +- 16 +- val4 * 2) / 100);	// +gBBORV6m-
-				val3 = val1 +- 6;	// +Vt5lcA-
+			// キリエを掛ける
+			if(val4 > 0) {		// プラエファティオの場合
+				val2 = (int)((atn_bignumber)status_get_max_hp(bl) * (val1 * 2 + 16 + val4 * 2) / 100);	// 耐久度
+				val3 = val1 + 6;	// 回数
 			} else {
-				val2 = (int)((atn_bignumber)status_get_max_hp(bl) * (val1 * 2 +- 10) / 100);	// +gBBORV6m-
-				val3 = val1 / 2 +- 5;	// +Vt5lcA-
+				val2 = (int)((atn_bignumber)status_get_max_hp(bl) * (val1 * 2 + 10) / 100);	// 耐久度
+				val3 = val1 / 2 + 5;	// 回数
 			}
 			break;
-		case SC_QUAGMIRE:			/* +MK8woTCwMN4wpDCi- */
+		case SC_QUAGMIRE:			/* クァグマイア */
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			if(sc->data[SC_CONCENTRATE].timer != -1)
@@ -8943,23 +8922,23 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			if(sc->data[SC_SPEEDUP1].timer != -1)
 				status_change_end(bl,SC_SPEEDUP1,-1);
 			break;
-		case SC_MAGICPOWER:			/* +m1Rs1VKbWJdeRQ- */
-			val2 = 1;	// +TgBepjBgMFFYl15F-
+		case SC_MAGICPOWER:			/* 魔法力増幅 */
+			val2 = 1;	// 一度だけ増幅
 			break;
-		case SC_SACRIFICE:			/* +MLUwrzDqMNUwoTCkMLk- */
-			val2 = 5;	// 5+Vt4wbmU7ZIMwZ2cJUrk-
+		case SC_SACRIFICE:			/* サクリファイス */
+			val2 = 5;	// 5回の攻撃で有効
 			break;
-		case SC_FLAMELAUNCHER:		/* +MNUw7DD8MOAw6TDzMMEw4zD8- */
-		case SC_FROSTWEAPON:		/* +MNUw7TC5MMgwpjCnMN0w8w- */
-		case SC_LIGHTNINGLOADER:	/* +MOkwpDDIMMsw8zCwMO0w/DDAMPw- */
-		case SC_SEISMICWEAPON:		/* +MLUwpDC6MN8wwzCvMKYwpzDdMPM- */
-		case SC_DARKELEMENT:		/* +lcdcXmAn- */
-		case SC_ATTENELEMENT:		/* +X/VcXmAn- */
-		case SC_UNDEADELEMENT:		/* +Tg1re1xeYCc- */
+		case SC_FLAMELAUNCHER:		/* フレームランチャー */
+		case SC_FROSTWEAPON:		/* フロストウェポン */
+		case SC_LIGHTNINGLOADER:	/* ライトニングローダー */
+		case SC_SEISMICWEAPON:		/* サイズミックウェポン */
+		case SC_DARKELEMENT:		/* 闇属性 */
+		case SC_ATTENELEMENT:		/* 念属性 */
+		case SC_UNDEADELEMENT:		/* 不死属性 */
 			status_enchant_elemental_end(bl,type);
 			break;
-		case SC_SEVENWIND:			/* +ZpYwSzBEmKg- */
-			status_enchant_elemental_end(bl,SC_ENCPOISON);	// +MKgw8zDBMOMw8zDIMN0wpDC6MPMwb5HNiQcwVzBmMIIwiDBE/x8-
+		case SC_SEVENWIND:			/* 暖かい風 */
+			status_enchant_elemental_end(bl,SC_ENCPOISON);	// エンチャントポイズンは重複してもよい？
 #ifdef PRE_RENEWAL
 			switch(val1) {
 				case 1:  val2 = SI_SEISMICWEAPON;   val3 = ELE_EARTH; break;
@@ -8984,43 +8963,43 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				clif_status_change(bl,val2,1,icon_tick,0,0,0);
 			}
 			break;
-		case SC_PROVIDENCE:			/* +MNcw7TD0MKMwxzDzMLk- */
+		case SC_PROVIDENCE:			/* プロヴィデンス */
 			calc_flag = 1;
 			val2 = val1*5;
 			break;
 		case SC_REFLECTSHIELD:
-			// +MOow1TDsMK8wyDDAMOEw/DC4MExjmzBLMGMwZjBEMF8wiYnjlmQ-
+			// リフレクトダメージが掛かっていたら解除
 			if(sc->data[SC_REFLECTDAMAGE].timer != -1)
 				status_change_end(bl,SC_REFLECTDAMAGE,-1);
-			val2 = 10+-val1*3;
+			val2 = 10+val1*3;
 			if(sd) {
-				// +iKswxzCjMNww/DC3MOcw84AFMIIw6jDVMOwwrzDIMLcw/DDrMMkwazBZMIs-
+				// 被ディボーション者もリフレクトシールドにする
 				struct map_session_data *tsd;
 				int i;
-				for(i = 0; i < 5; i+-+-) {
+				for(i = 0; i < 5; i++) {
 					if(sd->dev.val1[i] && (tsd = map_id2sd(sd->dev.val1[i])) != NULL) {
 						status_change_start(&tsd->bl,type,val1,0,0,0,skill_get_time(CR_REFLECTSHIELD,val1),0);
 					}
 				}
 			}
 			break;
-		case SC_AUTOSPELL:			/* +MKow/DDIMLkw2jDr- */
-			val4 = 5 +- val1*2;
+		case SC_AUTOSPELL:			/* オートスペル */
+			val4 = 5 + val1*2;
 			break;
 		case SC_VOLCANO:
 			calc_flag = 1;
 			val3 = val1*10;
-			val4 = (val1 > 5)? 20: val1*(11-val1)/2 +- 5;
+			val4 = (val1 > 5)? 20: val1*(11-val1)/2 + 5;
 			break;
 		case SC_DELUGE:
 			calc_flag = 1;
 			val3 = (val1 > 5)? 15: val1*(11-val1)/2;
-			val4 = (val1 > 5)? 20: val1*(11-val1)/2 +- 5;
+			val4 = (val1 > 5)? 20: val1*(11-val1)/2 + 5;
 			break;
 		case SC_VIOLENTGALE:
 			calc_flag = 1;
 			val3 = val1*3;
-			val4 = (val1 > 5)? 20: val1*(11-val1)/2 +- 5;
+			val4 = (val1 > 5)? 20: val1*(11-val1)/2 + 5;
 			break;
 		case SC_TWOHANDQUICKEN:			/* 2HQ */
 			calc_flag = 1;
@@ -9029,50 +9008,50 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			else
 				val2 = 30;
 			break;
-		case SC_SPEARQUICKEN:		/* +MLkw1DCiMK8wpDDDMLEw8w- */
+		case SC_SPEARQUICKEN:		/* スピアクイッケン */
 			calc_flag = 1;
 #ifdef PRE_RENEWAL
-			val2 = 20+-val1;
+			val2 = 20+val1;
 #else
 			val2 = 30;
 #endif
 			break;
-		case SC_BLADESTOP:		/* +dn1SA1PWMIo- */
+		case SC_BLADESTOP:		/* 白刃取り */
 			if(val2 == 2)
 				clif_bladestop(map_id2bl(val3),val4,1);
 			break;
-		case SC_LULLABY:			/* +W1BbiFUE- */
+		case SC_LULLABY:			/* 子守唄 */
 			val2 = 11;
 			break;
-		case SC_DRUMBATTLE:			/* +YiZZKp8TMG6X/zBN- */
+		case SC_DRUMBATTLE:			/* 戦太鼓の響き */
 			calc_flag = 1;
 #ifdef PRE_RENEWAL
-			val2 = (val1+-1)*25;
-			val3 = (val1+-1)*2;
+			val2 = (val1+1)*25;
+			val3 = (val1+1)*2;
 #else
-			val2 = 100+-val1*30;
+			val2 = 100+val1*30;
 			val3 = val1*10;
 #endif
 			break;
-		case SC_NIBELUNGEN:			/* +MMsw/DDZMOsw8zCwMG5jB48q- */
+		case SC_NIBELUNGEN:			/* ニーベルングの指輪 */
 			calc_flag = 1;
 #ifdef PRE_RENEWAL
-			val2 = (val1+-2)*25;
+			val2 = (val1+2)*25;
 #else
 			val2 = val1*40;
 #endif
 			break;
-		case SC_SIEGFRIED:			/* +Tg1re46rMG4wuDD8MK8w1TDqMPwwyQ- */
+		case SC_SIEGFRIED:			/* 不死身のジークフリード */
 			calc_flag = 1;
-			val2 = 5 +- val1*15;
+			val2 = 5 + val1*15;
 			break;
-		case SC_DISSONANCE:			/* +Tg1TVFSMl/M- */
+		case SC_DISSONANCE:			/* 不協和音 */
 			val2 = 10;
 			break;
-		case SC_UGLYDANCE:			/* +gepSBlLdYkswajDAMPMwuQ- */
+		case SC_UGLYDANCE:			/* 自分勝手なダンス */
 			val2 = 10;
 			break;
-		case SC_DONTFORGETME:		/* +ecEwkl/YMIwwajBEMGc- */
+		case SC_DONTFORGETME:		/* 私を忘れないで */
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			if(sc->data[SC_INCREASEAGI].timer != -1)
@@ -9094,52 +9073,52 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			if(sc->data[SC_ONEHAND].timer != -1)
 				status_change_end(bl,SC_ONEHAND,-1);
 			break;
-		case SC_LONGINGFREEDOM:		/* +ecEwkmLYZ18wVzBqMEQwZw- */
+		case SC_LONGINGFREEDOM:		/* 私を拘束しないで */
 			calc_flag = 1;
 			val3 = 1;
 			tick = 1000;
 			break;
-		case SC_DANCING:			/* +MMAw8zC5-/+bxRZT04t- */
+		case SC_DANCING:			/* ダンス/演奏中 */
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			val3 = tick / 1000;
 			tick = 1000;
 			break;
-		case SC_EXPLOSIONSPIRITS:	/* +cgaIwmziUtU- */
+		case SC_EXPLOSIONSPIRITS:	/* 爆裂波動 */
 			calc_flag = 1;
-			val2 = 75 +- 25*val1;
+			val2 = 75 + 25*val1;
 			break;
 		case SC_AUTOCOUNTER:
 			val3 = 0;
 			val4 = 0;
 			break;
-		case SC_SPEEDPOTION0:		/* +WJeQHzDdMPwwtzDnMPM- */
+		case SC_SPEEDPOTION0:		/* 増速ポーション */
 		case SC_SPEEDPOTION1:
 		case SC_SPEEDPOTION2:
 			calc_flag = 1;
-			val2 = 5*(2+-type-SC_SPEEDPOTION0);
+			val2 = 5*(2+type-SC_SPEEDPOTION0);
 			break;
-		case SC_NOCHAT:		/* +MMEw4zDDMMh5gWticrZhSw- */
+		case SC_NOCHAT:		/* チャット禁止状態 */
 			{
 				time_t timer;
 				tick = 60000;
 				if(!val2)
 					val2 = (int)time(&timer);
 				if(sd)
-					clif_updatestatus(sd,SP_MANNER);	// +MLkwxjD8ML8wuTCSMK8w6TCkMKIw8zDIMGuQATCL-
+					clif_updatestatus(sd,SP_MANNER);	// ステータスをクライアントに送る
 			}
 			break;
-		case SC_SELFDESTRUCTION:	/* +gepyBg- */
+		case SC_SELFDESTRUCTION:	/* 自爆 */
 			tick = 100;
 			break;
 
 		/* option1 */
-		case SC_STONE:				/* +d/NTFg- */
+		case SC_STONE:				/* 石化 */
 			if(!(flag&2)) {
 #ifdef PRE_RENEWAL
-				tick +-= 100 * status_get_luk(bl) - status_get_mdef(bl) * tick / 100;
+				tick += 100 * status_get_luk(bl) - status_get_mdef(bl) * tick / 100;
 #else
-				tick +-= 3000 - tick * status_get_mdef(bl) / 100;
+				tick += 3000 - tick * status_get_mdef(bl) / 100;
 #endif
 			}
 			val3 = tick / 1000;
@@ -9150,45 +9129,45 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				tick = 1000;
 			val2 = 1;
 			break;
-		case SC_SLEEP:				/* +d2F3IA- */
+		case SC_SLEEP:				/* 睡眠 */
 			if(!(flag&2)) {
 #ifdef PRE_RENEWAL
-				tick +-= -10 * status_get_luk(bl) - tick * status_get_int(bl) / 100;
+				tick += -10 * status_get_luk(bl) - tick * status_get_int(bl) / 100;
 #else
-				tick +-= 1000 - tick * status_get_agi(bl) / 100;
+				tick += 1000 - tick * status_get_agi(bl) / 100;
 #endif
 			}
 			break;
-		case SC_FREEZE:				/* +Uc19UA- */
+		case SC_FREEZE:				/* 凍結 */
 			if(!(flag&2)) {
 #ifdef PRE_RENEWAL
-				tick +-= 10 * status_get_luk(bl) - tick * status_get_mdef(bl) / 100;
+				tick += 10 * status_get_luk(bl) - tick * status_get_mdef(bl) / 100;
 #else
-				tick +-= 3000 - tick * status_get_mdef(bl) / 100;
+				tick += 3000 - tick * status_get_mdef(bl) / 100;
 #endif
 			}
 			break;
-		case SC_STUN:				/* +MLkwvzDz/wg-val2+MGsw3zDqedIwuzDDMMj/CQ- */
+		case SC_STUN:				/* スタン（val2にミリ秒セット） */
 			if(!(flag&2)) {
 #ifdef PRE_RENEWAL
-				tick +-= -10 * status_get_luk(bl) - tick * status_get_vit(bl) / 100;
+				tick += -10 * status_get_luk(bl) - tick * status_get_vit(bl) / 100;
 #else
-				tick +-= 1000 - tick * status_get_vit(bl) / 100;
+				tick += 1000 - tick * status_get_vit(bl) / 100;
 #endif
 			}
 			break;
 		/* option2 */
-		case SC_DPOISON:			/* +cxtr0g- */
+		case SC_DPOISON:			/* 猛毒 */
 			{
 				int mhp = status_get_max_hp(bl);
 				int hp  = status_get_hp(bl);
 				if(!(flag&2)) {
-					if(bl->type == BL_PC)	// PC+MG5YNFQIMG4wf4oIe5dfDzBMkFUwRg-
-						tick = 5000 +- -10000 * status_get_luk(bl) / 100 - 45000 * status_get_vit(bl) / 100 +- 55000;
+					if(bl->type == BL_PC)	// PCの場合のみ計算式が違う
+						tick = 5000 + -10000 * status_get_luk(bl) / 100 - 45000 * status_get_vit(bl) / 100 + 55000;
 					else
 						tick = 30000 - 20000 * status_get_vit(bl) / 100;
 				}
-				// MHP+MG4-1/4+TuVOCzBrMG8wajCJMGowRA-
+				// MHPの1/4以下にはならない
 				if(hp > mhp>>2) {
 					int diff = 0;
 					if(sd)
@@ -9201,11 +9180,11 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				}
 			}
 			// fall through
-		case SC_POISON:				/* +a9I- */
+		case SC_POISON:				/* 毒 */
 			calc_flag = 1;
 			if(!(flag&2)) {
-				if(bl->type == BL_PC)	// PC+MG5YNFQIMG4wf4oIe5dfDzBMkFUwRg-
-					tick = 5000 +- -10000 * status_get_luk(bl) / 100 - 45000 * status_get_vit(bl) / 100 +- 55000;
+				if(bl->type == BL_PC)	// PCの場合のみ計算式が違う
+					tick = 5000 + -10000 * status_get_luk(bl) / 100 - 45000 * status_get_vit(bl) / 100 + 55000;
 				else
 					tick = 30000 - 20000 * status_get_vit(bl) / 100;
 			}
@@ -9213,7 +9192,7 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			if(val3 < 1) val3 = 1;
 			tick = 1000;
 			break;
-		case SC_SILENCE:			/* +bIie2Q- */
+		case SC_SILENCE:			/* 沈黙 */
 			skill_stop_dancing(bl,0);
 			if (sc->data[SC_GOSPEL].timer != -1) {
 				status_change_end(bl,SC_GOSPEL,-1);
@@ -9221,64 +9200,64 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			}
 			if(!(flag&2)) {
 #ifdef PRE_RENEWAL
-				tick +-= -10 * status_get_luk(bl) - tick * status_get_vit(bl) / 100;
+				tick += -10 * status_get_luk(bl) - tick * status_get_vit(bl) / 100;
 #else
-				tick +-= 1000 - tick * status_get_int(bl) / 100;
+				tick += 1000 - tick * status_get_int(bl) / 100;
 #endif
 			}
 			break;
-		case SC_BLIND:				/* +Zpee0g- */
+		case SC_BLIND:				/* 暗黒 */
 			calc_flag = 1;
 			if(!(flag&2)) {
 #ifdef PRE_RENEWAL
-				tick +-= -10 * status_get_luk(bl) - tick * (status_get_vit(bl) +- status_get_int(bl)) / 200;
+				tick += -10 * status_get_luk(bl) - tick * (status_get_vit(bl) + status_get_int(bl)) / 200;
 #else
-				tick +-= 1000 - tick * status_get_int(bl) / 100;
+				tick += 1000 - tick * status_get_int(bl) / 100;
 #endif
 			}
 			break;
-		case SC_CURSE:				/* +VGowRA- */
+		case SC_CURSE:				/* 呪い */
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			if(!(flag&2)) {
 #ifdef PRE_RENEWAL
-				tick +-= -10 * status_get_luk(bl) - tick * status_get_vit(bl) / 100;
+				tick += -10 * status_get_luk(bl) - tick * status_get_vit(bl) / 100;
 #else
-				tick +-= 1000 - tick * status_get_luk(bl) / 100;
+				tick += 1000 - tick * status_get_luk(bl) / 100;
 #endif
 			}
 			break;
-		case SC_CONFUSION:			/* +bfdOcQ- */
+		case SC_CONFUSION:			/* 混乱 */
 			if(!(flag&2)) {
 #ifdef PRE_RENEWAL
-				tick +-= -10 * status_get_luk(bl) - tick * (status_get_str(bl) +- status_get_int(bl)) / 200;
+				tick += -10 * status_get_luk(bl) - tick * (status_get_str(bl) + status_get_int(bl)) / 200;
 #else
-				tick +-= 1000 - tick * status_get_luk(bl) / 100;
+				tick += 1000 - tick * status_get_luk(bl) / 100;
 #endif
 			}
 			break;
-		case SC_BLEED:				/* +UfqIQA- */
+		case SC_BLEED:				/* 出血 */
 			if(!(flag&2)) {
 #ifdef PRE_RENEWAL
-				icon_tick = tick = -10 * status_get_luk(bl) - tick * status_get_vit(bl) / 100 +- tick;
+				icon_tick = tick = -10 * status_get_luk(bl) - tick * status_get_vit(bl) / 100 + tick;
 #else
-				icon_tick = tick = 1000 - tick * status_get_agi(bl) / 100 +- tick;
+				icon_tick = tick = 1000 - tick * status_get_agi(bl) / 100 + tick;
 #endif
 			}
 			val3 = (tick < 10000)? 1: tick / 10000;
-			tick = 10000;	// +MMAw4TD8MLh2enUfMG8-10sec+a84-
+			tick = 10000;	// ダメージ発生は10sec毎
 			break;
 
 		/* option */
-		case SC_HIDING:		/* +MM8wpDDHMKMw8zCw- */
+		case SC_HIDING:		/* ハイディング */
 			calc_flag = 1;
 			if(sd) {
-				val2 = tick / 1000;		/* +YwF9mmZClZM- */
+				val2 = tick / 1000;		/* 持続時間 */
 				tick = 1000;
 			}
 			break;
-		case SC_CHASEWALK:		/* +MMEwpzCkMLkwpjCpMPwwrw- */
-		case SC_CLOAKING:		/* +MK8w7TD8MK0w8zCw- */
+		case SC_CHASEWALK:		/* チェイスウォーク */
+		case SC_CLOAKING:		/* クローキング */
 			if(sd) {
 				calc_flag = 1;
 				tick = val2;
@@ -9286,11 +9265,11 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				tick = 5000*val1;
 			}
 			break;
-		case SC_INVISIBLE:		/* +MKQw8zDTMLgw1jDr- */
+		case SC_INVISIBLE:		/* インビジブル */
 			break;
-		case SC_SIGHTBLASTER:		/* +MLUwpDDIMNYw6TC5ML8w/A- */
-		case SC_SIGHT:			/* +MLUwpDDI- */
-		case SC_RUWACH:			/* +MOswojDV- */
+		case SC_SIGHTBLASTER:		/* サイトブラスター */
+		case SC_SIGHT:			/* サイト */
+		case SC_RUWACH:			/* ルアフ */
 			val2 = tick/250;
 			tick = 10;
 			break;
@@ -9301,10 +9280,10 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		case SC_AUTOGUARD:
 			val2 = (val1 > 10)? 30: (22 - val1) * val1 / 4;
 			if(sd) {
-				// +iKswxzCjMNww/DC3MOcw84AFMIIwqjD8MMgwrDD8MMkwazBZMIs-
+				// 被ディボーション者もオートガードにする
 				struct map_session_data *tsd;
 				int i;
-				for(i = 0; i < 5; i+-+-) {
+				for(i = 0; i < 5; i++) {
 					if(sd->dev.val1[i] && (tsd = map_id2sd(sd->dev.val1[i])) != NULL)
 						status_change_start(&tsd->bl,type,val1,0,0,0,skill_get_time(CR_AUTOGUARD,val1),0);
 				}
@@ -9313,13 +9292,13 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		case SC_DEFENDER:
 			calc_flag = 1;
 			ud->state.change_speed = 1;
-			val2 = 5 +- val1*15;
+			val2 = 5 + val1*15;
 			val3 = 250 - val1*50;
 			if(sd) {
-				// +iKswxzCjMNww/DC3MOcw84AFMJIwxzCjMNUwpzDzMMAw/DBrMFkwiw-
+				// 被ディボーション者をディフェンダーにする
 				struct map_session_data *tsd;
 				int i;
-				for(i = 0; i < 5; i+-+-) {
+				for(i = 0; i < 5; i++) {
 					if(sd->dev.val1[i] && (tsd = map_id2sd(sd->dev.val1[i])) != NULL)
 						status_change_start(&tsd->bl,type,val1,0,0,0,skill_get_time(CR_DEFENDER,val1),0);
 				}
@@ -9327,172 +9306,172 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			break;
 		case SC_HALLUCINATION:
 			if(sd && !battle_config.hallucianation_off) {
-				// on+MGowbjBnMKIwpDCzMPOIaHk6-
+				// onなのでアイコン表示
 				clif_status_change(bl, SI_HALLUCINATION, 1, icon_tick, 0, 0, 0);
 			}
 			break;
-		case SC_TENSIONRELAX:	/* +MMYw8zC3MOcw8zDqMOkwwzCvMLk- */
+		case SC_TENSIONRELAX:	/* テンションリラックス */
 			if(sd == NULL)
 				return 0;
 			tick = 10000;
 			break;
-		case SC_PARRYING:		/* +MNEw6jCkMPMwsA- */
-			val2 = 20 +- val1*3;
+		case SC_PARRYING:		/* パリイング */
+			val2 = 20 + val1*3;
 			break;
-		case SC_JOINTBEAT:		/* +MLgw5zCkMPMwyDDTMPwwyA- */
+		case SC_JOINTBEAT:		/* ジョイントビート */
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			val4 = atn_rand()%6;
 			if(val4 == 5) {
-				// +mZYwb183UjZ2hDBrUfqIQE7YUqA- +MPs- +T391KIAFMG4w7DDZMOswTFPWX5cwZzBNMGowRDBuMGcwaDCKMEIwSDBa-0+MJJfFWVwMGs-
+				// 首は強制的に出血付加 ・ 使用者のレベルが取得できないのでとりあえず0を引数に
 				if(atn_rand() % 10000 < status_change_rate(bl,SC_BLEED,10000,0))
 					status_change_start(bl,SC_BLEED,val1,0,0,0,skill_get_time2(LK_JOINTBEAT,val1),10);
 			}
 			if(!(flag&2)) {
-				tick = tick - (status_get_agi(bl)/10 +- status_get_luk(bl)/4)*1000;
+				tick = tick - (status_get_agi(bl)/10 + status_get_luk(bl)/4)*1000;
 			}
 			break;
-		case SC_WINDWALK:		/* +MKYwpDDzMMkwpjCpMPwwrw- */
+		case SC_WINDWALK:		/* ウインドウォーク */
 			calc_flag = 1;
 			ud->state.change_speed = 1;
-			val2 = val1 / 2;	// Flee+TgpmB3OH-
+			val2 = val1 / 2;	// Flee上昇率
 			break;
-		case SC_BERSERK:		/* +MNAw/DC1MPwwrw- */
+		case SC_BERSERK:		/* バーサーク */
 			unit_heal(bl,0,-status_get_sp(bl),0,0);
 			if(sd) {
-				clif_status_change(bl,SI_INCREASEAGI,1,icon_tick, 0, 0, 0);	// +MKIwpDCzMPOIaHk6-
+				clif_status_change(bl,SI_INCREASEAGI,1,icon_tick, 0, 0, 0);	// アイコン表示
 			}
 			tick = 1000;
 			calc_flag = 1;
 			break;
-		case SC_ASSUMPTIO:		/* +MKIwuTDgMNcwxjCjMKo- */
-		case SC_ASSUMPTIO2:		/* +MK0w4zDDMLcw5TCiMLkw4DDXMMYwozCq- */
-			// +MK0w6jCoMExjmzBLMGMwZjBEMF8wiYnjlmQ-
+		case SC_ASSUMPTIO:		/* アスムプティオ */
+		case SC_ASSUMPTIO2:		/* キャッシュアスムプティオ */
+			// キリエが掛かっていたら解除
 			if(sc->data[SC_KYRIE].timer != -1)
 				status_change_end(bl,SC_KYRIE,-1);
-			// +MKswpDDIMExjmzBLMGMwZjBEMF8wiYnjlmQ-
+			// カイトが掛かっていたら解除
 			if(sc->data[SC_KAITE].timer != -1)
 				status_change_end(bl,SC_KAITE,-1);
 			break;
-		case SC_CARTBOOST:		/* +MKsw/DDIMNYw/DC5MMg- */
+		case SC_CARTBOOST:		/* カートブースト */
 			calc_flag = 1;
 			if(sc->data[SC_DECREASEAGI].timer != -1)
 				status_change_end(bl,SC_DECREASEAGI,-1);
 			break;
-		case SC_REJECTSWORD:	/* +MOowuDCnMK8wyDC9MPwwyQ- */
-			val2 = 3; // 3+Vt5lO2SDMJKN8zBtj9QwWQ-
+		case SC_REJECTSWORD:	/* リジェクトソード */
+			val2 = 3; // 3回攻撃を跳ね返す
 			break;
-		case SC_MEMORIZE:		/* +MOEw4jDpMKQwug- */
-			val2 = 5; // 5+Vt6KYFUxMJI-1/2+MGswWTCL-
+		case SC_MEMORIZE:		/* メモライズ */
+			val2 = 5; // 5回詠唱を1/2にする
 			break;
-		case SC_GRAFFITI:		/* +MLAw6TDVMKMwxjCj- */
+		case SC_GRAFFITI:		/* グラフィティ */
 			{
 				struct skill_unit_group *sg = skill_unitsetting(bl,RG_GRAFFITI,val1,val2,val3,0);
 				if(sg)
 					val4 = sg->bl.id;
 			}
 			break;
-		case SC_OVERTHRUSTMAX:		/* +MKow/DDQMPwwyDDpMLkwyDDeMMMwrzC5- */
+		case SC_OVERTHRUSTMAX:		/* オーバートラストマックス */
 			if(sc->data[SC_OVERTHRUST].timer != -1)
 				status_change_end(bl,SC_OVERTHRUST,-1);
 			calc_flag = 1;
 			break;
 
-		case SC_MEAL_INCSTR:	// +mN9Oi3Uo-
+		case SC_MEAL_INCSTR:	// 食事用
 		case SC_MEAL_INCAGI:
 		case SC_MEAL_INCVIT:
 		case SC_MEAL_INCINT:
 		case SC_MEAL_INCDEX:
 		case SC_MEAL_INCLUK:
-			if(sc->data[type - SC_MEAL_INCSTR +- SC_MEAL_INCSTR2].timer != -1) {
-				// +UrlnnDBMT04wRFg0VAgwb1K5Z5wwajBX-
-				if(val1 < sc->data[type - SC_MEAL_INCSTR +- SC_MEAL_INCSTR2].val1)
+			if(sc->data[type - SC_MEAL_INCSTR + SC_MEAL_INCSTR2].timer != -1) {
+				// 効果が低い場合は効果なし
+				if(val1 < sc->data[type - SC_MEAL_INCSTR + SC_MEAL_INCSTR2].val1)
 					return 0;
-				// +VAx7STBLmtgwRFK5Z5wwajCJT391KE4tMG5SuWecMJJtiDBZ-
+				// 同等か高い効果なら使用中の効果を消す
 				else
-					status_change_end(bl, type - SC_MEAL_INCSTR +- SC_MEAL_INCSTR2, -1);
+					status_change_end(bl, type - SC_MEAL_INCSTR + SC_MEAL_INCSTR2, -1);
 			}
 			calc_flag = 1;
 			break;
-		case SC_MEAL_INCSTR2:	// +irKR0WWZdAZ1KA-
+		case SC_MEAL_INCSTR2:	// 課金料理用
 		case SC_MEAL_INCAGI2:
 		case SC_MEAL_INCVIT2:
 		case SC_MEAL_INCINT2:
 		case SC_MEAL_INCDEX2:
 		case SC_MEAL_INCLUK2:
-			if(sc->data[type - SC_MEAL_INCSTR2 +- SC_MEAL_INCSTR].timer != -1) {
-				// +UrlnnDBMT04wRFg0VAgwb1K5Z5wwajBX-
-				if(val1 < sc->data[type - SC_MEAL_INCSTR2 +- SC_MEAL_INCSTR].val1)
+			if(sc->data[type - SC_MEAL_INCSTR2 + SC_MEAL_INCSTR].timer != -1) {
+				// 効果が低い場合は効果なし
+				if(val1 < sc->data[type - SC_MEAL_INCSTR2 + SC_MEAL_INCSTR].val1)
 					return 0;
-				// +VAx7STBLmtgwRFK5Z5wwajCJT391KE4tMG5SuWecMJJtiDBZ-
+				// 同等か高い効果なら使用中の効果を消す
 				else
-					status_change_end(bl, type - SC_MEAL_INCSTR2 +- SC_MEAL_INCSTR, -1);
+					status_change_end(bl, type - SC_MEAL_INCSTR2 + SC_MEAL_INCSTR, -1);
 			}
 			calc_flag = 1;
 			break;
-		case SC_ELEMENTFIELD:		/* +XF5gJ1g0- */
+		case SC_ELEMENTFIELD:		/* 属性場 */
 			tick = val2;
 			break;
-		case SC_RUN:			/* +ML8wpDDqMK4- */
+		case SC_RUN:			/* タイリギ */
 			val4 = 0;
 			calc_flag = 1;
 			break;
-		case SC_KAUPE:			/* +MKswpjDX- */
+		case SC_KAUPE:			/* カウプ */
 			val2 = val1*33;
 			if(val1 >= 3)
 				val2 = 100;
 			break;
-		case SC_KAITE:			/* +MKswpDDI- */
-			// +MKIwuTDgMExjmzBLMGMwZjBEMF8wiYnjlmQwVzBm-
+		case SC_KAITE:			/* カイト */
+			// アスムが掛かっていたら解除して
 			if(sc->data[SC_ASSUMPTIO].timer != -1)
 				status_change_end(bl,SC_ASSUMPTIO,-1);
 			if(sc->data[SC_ASSUMPTIO2].timer != -1)
 				status_change_end(bl,SC_ASSUMPTIO2,-1);
-			// +U81cBFbeZXA-
-			val2 = val1 / 5 +- 1;
+			// 反射回数
+			val2 = val1 / 5 + 1;
 			break;
-		case SC_SWOO:			/* +MKgwuTCm- */
+		case SC_SWOO:			/* エスウ */
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			if(status_get_mode(bl)&MD_BOSS)
 				tick /= 5;
 			break;
-		case SC_MONK:			/* +MOIw8zCvMG6bQg- */
-		case SC_STAR:			/* +MLEw8zC7MKQwbptC- */
-		case SC_SAGE:			/* +MLsw/DC4MG6bQg- */
-		case SC_CRUSADER:		/* +MK8w6zC7MKQwwDD8MG6bQg- */
-		case SC_WIZARD:			/* +MKYwozC2MPwwyTBum0I- */
-		case SC_PRIEST:			/* +MNcw6jD8MLkwyDBum0I- */
-		case SC_ROGUE:			/* +MO0w/DCwMG6bQg- */
-		case SC_ASSASIN:		/* +MKIwtTC3MPMwbptC- */
-		case SC_SOULLINKER:		/* +ML0wpjDrMOow8zCrMPwwbptC- */
-		case SC_GUNNER:			/* +MKww8zC5MOow8zCsMPwwbptC- */
-		case SC_NINJA:			/* +X82ABTBum0I- */
-		case SC_DEATHKINGHT:		/* +MMcwuTDKMKQwyDBum0I- */
-		case SC_COLLECTOR:		/* +MLMw7DCvML8w/DBum0I- */
+		case SC_MONK:			/* モンクの魂 */
+		case SC_STAR:			/* ケンセイの魂 */
+		case SC_SAGE:			/* セージの魂 */
+		case SC_CRUSADER:		/* クルセイダーの魂 */
+		case SC_WIZARD:			/* ウィザードの魂 */
+		case SC_PRIEST:			/* プリーストの魂 */
+		case SC_ROGUE:			/* ローグの魂 */
+		case SC_ASSASIN:		/* アサシンの魂 */
+		case SC_SOULLINKER:		/* ソウルリンカーの魂 */
+		case SC_GUNNER:			/* ガンスリンガーの魂 */
+		case SC_NINJA:			/* 忍者の魂 */
+		case SC_DEATHKINGHT:		/* デスナイトの魂 */
+		case SC_COLLECTOR:		/* コレクターの魂 */
 			if(sd && battle_config.disp_job_soul_state_change)
-				clif_disp_onlyself(sd->fd, msg_txt(206));	// +m0JytmFLMGswajCKMH4wVzBf-
+				clif_disp_onlyself(sd->fd, msg_txt(206));	// 魂状態になりました
 			break;
-		case SC_KNIGHT:			/* +MMowpDDIMG6bQg- */
-		case SC_ALCHEMIST:		/* +MKIw6zCxMN8wuTDIMG6bQg- */
-		case SC_BARDDANCER:		/* +MNAw/DDJMGgwwDDzMLUw/DBum0I- */
-		case SC_BLACKSMITH:		/* +MNYw6TDDMK8wuTDfMLkwbptC- */
-		case SC_HUNTER:			/* +MM8w8zC/MPwwbptC- */
-		case SC_HIGH:			/* +TgBrIU4KT02Ad2ltMG6bQg- */
+		case SC_KNIGHT:			/* ナイトの魂 */
+		case SC_ALCHEMIST:		/* アルケミストの魂 */
+		case SC_BARDDANCER:		/* バードとダンサーの魂 */
+		case SC_BLACKSMITH:		/* ブラックスミスの魂 */
+		case SC_HUNTER:			/* ハンターの魂 */
+		case SC_HIGH:			/* 一次上位職業の魂 */
 			if(sd && battle_config.disp_job_soul_state_change)
-				clif_disp_onlyself(sd->fd, msg_txt(206));	// +m0JytmFLMGswajCKMH4wVzBf-
+				clif_disp_onlyself(sd->fd, msg_txt(206));	// 魂状態になりました
 			calc_flag = 1;
 			break;
-		case SC_SUPERNOVICE:		/* +MLkw/DDRMPwwzjD8MNMwuTBum0I- */
+		case SC_SUPERNOVICE:		/* スーパーノービスの魂 */
 			if(sd) {
-				// 1%+MGdre06hMNUw6TCwbYgwWQ-
+				// 1%で死亡フラグ消す
 				if(atn_rand()%10000 < battle_config.repeal_die_counter_rate) {
-					sd->status.die_counter = 0;	// +a3swazCrMKYw8zC/MPww6jC7MMMwyA-
+					sd->status.die_counter = 0;	// 死にカウンターリセット
 					if(sd->status.job_level >= 70 || sd->s_class.job == PC_JOB_ESNV)
-						clif_misceffect(&sd->bl,7);	// +MLkw0TDOMNNZKU9/-
+						clif_misceffect(&sd->bl,7);	// スパノビ天使
 				}
 				if(battle_config.disp_job_soul_state_change)
-					clif_disp_onlyself(sd->fd, msg_txt(206));	// +m0JytmFLMGswajCKMH4wVzBf-
+					clif_disp_onlyself(sd->fd, msg_txt(206));	// 魂状態になりました
 			}
 			calc_flag = 1;
 			break;
@@ -9500,7 +9479,7 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			if( status_get_hp(bl) < status_get_max_hp(bl) >> 2 &&
 			    (sc->data[SC_PROVOKE].timer == -1 || sc->data[SC_PROVOKE].val2 == 0) )
 			{
-				// +MKow/DDIMNAw/DC1MPwwr3Z6UtU-
+				// オートバーサーク発動
 				status_change_start(&sd->bl,SC_PROVOKE,10,1,0,0,0,0);
 			}
 			tick = 600*1000;
@@ -9511,173 +9490,173 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		case SC_READYCOUNTER:
 			tick = 600*1000;
 			break;
-		case SC_UTSUSEMI:		/* +enqHSQ- */
-			val3 = (val1+-1)/2;
+		case SC_UTSUSEMI:		/* 空蝉 */
+			val3 = (val1+1)/2;
 			break;
-		case SC_BUNSINJYUTSU:		/* +UgaOqzBuiFM- */
-			val3 = (val1+-1)/2;
+		case SC_BUNSINJYUTSU:		/* 分身の術 */
+			val3 = (val1+1)/2;
 			if(sd) {
 				val4 = sd->status.clothes_color;
 				pc_changelook(sd, LOOK_CLOTHES_COLOR, 0);
 			}
 			break;
-		case SC_BOSSMAPINFO:		/* +UfiXYpPh- */
+		case SC_BOSSMAPINFO:		/* 凸面鏡 */
 			if(map[bl->m].mvpboss == NULL) {
 				if(sd) {
-					// +XEUwajBEMG4wZzDhMMMwuzD8MLgwklH6MFcwZn1CToY-
+					// 居ないのでメッセージを出して終了
 					clif_bossmapinfo(sd, "", 0, 0, 0, 0);
 				}
 				tick = 0;
 			}
 			break;
-		case SC_STONEHARDSKIN:		/* +MLkwyDD8MPMwzzD8MMkwuTCtMPM- */
+		case SC_STONEHARDSKIN:		/* ストーンハードスキン */
 			{
 				val3 = (int)((atn_bignumber)status_get_hp(bl) * 20 / 100);
 				unit_heal(bl, -val3, 0, 0, 0);
 			}
 			break;
-		case SC_MILLENNIUMSHIELD:	/* +MN8w7DDLMKIw4DC3MPww6zDJ- */
-			val2 = 2 +- atn_rand()%3;
+		case SC_MILLENNIUMSHIELD:	/* ミレニアムシールド */
+			val2 = 2 + atn_rand()%3;
 			val3 = 1000;
 			if(sd)
 				clif_mshield(sd, val2);
 			break;
-		case SC_FIGHTINGSPIRIT:		/* +MNUwoTCkMMYwozDzMLAwuTDUMOowwzDI- */
+		case SC_FIGHTINGSPIRIT:		/* ファイティングスピリット */
 			calc_flag = 1;
 			val3 = (val3>9)? 4: (val3>7)? 3: (val3>4)? 2: (val3>2)? 1: 0;
 			break;
-		case SC_ABUNDANCE:			/* +MKIw0DDzMMAw8zC5- */
+		case SC_ABUNDANCE:			/* アバンダンス */
 			val3 = tick / 10000;
 			if(val3 < 1)
 				val3 = 1;
 			tick = 10000;
 			break;
-		case SC_DEATHBOUND:			/* +MMcwuTDQMKYw8zDJ- */
-			val2 = 500+-val1*100;
+		case SC_DEATHBOUND:			/* デスバウンド */
+			val2 = 500+val1*100;
 			break;
-		case SC_FEAR:				/* +YFBgFg- */
+		case SC_FEAR:				/* 恐怖 */
 			calc_flag = 1;
 			clif_emotion(bl,79);
 			val3 = (tick < 2000) ? 2000: tick - 2000;
 			tick = 2000;
 			break;
-		case SC_VENOMIMPRESS:		/* +MNkwyjDgMKQw8zDXMOwwuQ- */
+		case SC_VENOMIMPRESS:		/* ベナムインプレス */
 			val2 = val1 * 10;
 			break;
-		case SC_POISONINGWEAPON:	/* +MN0wpDC6MMsw8zCwMKYwpzDdMPM- */
-			val3 = 200 +- val1 * 200;
+		case SC_POISONINGWEAPON:	/* ポイズニングウェポン */
+			val3 = 200 + val1 * 200;
 			break;
-		case SC_WEAPONBLOCKING:		/* +MKYwpzDdMPMw1jDtMMMwrTDzMLA- */
-			val2 = 10 +- val1 * 2;
+		case SC_WEAPONBLOCKING:		/* ウェポンブロッキング */
+			val2 = 10 + val1 * 2;
 			val3 = tick / 5000;
 			tick = 5000;
 			break;
-		case SC_CLOAKINGEXCEED:		/* +MK8w7TD8MK0w8zCwMKgwrzC3MPwwyQ- */
+		case SC_CLOAKINGEXCEED:		/* クローキングエクシード */
 			calc_flag = 1;
-			val2 = (val1 +- 1) / 2;	// +MMAw4TD8MLiAEGAn-
+			val2 = (val1 + 1) / 2;	// ダメージ耐性
 			tick = 1000;
 			break;
-		case SC_ROLLINGCUTTER:		/* +MO0w/DDqMPMwsDCrMMMwvzD8- */
-			icon_val1 = val1;	// val1(+Vt6O4mVw-)+MJJuITBXMGYwojCkMLMw84hoeTowWTCL-
+		case SC_ROLLINGCUTTER:		/* ローリングカッター */
+			icon_val1 = val1;	// val1(回転数)を渡してアイコン表示する
 			break;
-		case SC_TOXIN:				/* +MMgwrTC3MPM- */
+		case SC_TOXIN:				/* トキシン */
 			val2 = tick / 10000;
 			tick = 10000;
 			break;
-		case SC_VENOMBLEED:			/* +MNkwyjDgMNYw6jD8MMk- */
+		case SC_VENOMBLEED:			/* ベナムブリード */
 			calc_flag = 1;
 			val2 = 15;
 			break;
-		case SC_MAGICMUSHROOM:		/* +MN4wuDDDMK8w3jDDMLcw5TDrMPww4A- */
-		case SC_OBLIVIONCURSE:		/* +MKow1jDqMNMwqjDzMKsw/DC5- */
+		case SC_MAGICMUSHROOM:		/* マジックマッシュルーム */
+		case SC_OBLIVIONCURSE:		/* オブリビオンカース */
 			val2 = tick / 2000;
 			tick = 2000;
 			break;
-		case SC_DEATHHURT:			/* +MMcwuTDPMPwwyA- */
+		case SC_DEATHHURT:			/* デスハート */
 			val2 = 20;
 			break;
-		case SC_PYREXIA:			/* +MNEwpDDsMMMwrzC3MKI- */
+		case SC_PYREXIA:			/* パイレックシア */
 			val2 = tick / 3000;
 			tick = 3000;
 			break;
-		case SC_LEECHEND:			/* +MOow/DDBMKgw8zDJ- */
+		case SC_LEECHEND:			/* リーチエンド */
 			val2 = tick / 1000;
 			tick = 1000;
 			break;
-		case SC_DARKCROW:			/* +MMAw/DCvMK8w7TD8- */
+		case SC_DARKCROW:			/* ダーククロー */
 			val2 = val1 * 30;
 			break;
-		case SC_EPICLESIS:			/* +MKgw1DCvMOwwtzC5- */
+		case SC_EPICLESIS:			/* エピクレシス */
 			calc_flag = 1;
 			val2 = val1 * 5;
 			break;
-		case SC_ORATIO:				/* +MKow6TDGMKMwqg- */
+		case SC_ORATIO:				/* オラティオ */
 			val2 = val1 * 5;
 			break;
-		case SC_LAUDAAGNUS:			/* +MOkwpjDAMKIwsDDMMLk- */
-		case SC_LAUDARAMUS:			/* +MOkwpjDAMOkw4DC5- */
+		case SC_LAUDAAGNUS:			/* ラウダアグヌス */
+		case SC_LAUDARAMUS:			/* ラウダラムス */
 			calc_flag = 1;
-			val2 = val1 +- 4;
+			val2 = val1 + 4;
 			break;
-		case SC_RENOVATIO:			/* +MOwwzjD0MKEwxjCjMKo- */
-			val2 = val1 * 2 +- 1;
+		case SC_RENOVATIO:			/* レノヴァティオ */
+			val2 = val1 * 2 + 1;
 			val3 = tick / 5000;
 			tick = 5000;
 			break;
-		case SC_EXPIATIO:			/* +MKgwrzC5MNQwojDGMKMwqg- */
+		case SC_EXPIATIO:			/* エクスピアティオ */
 			val2 = val1 * 20;
 			break;
-		case SC_DUPLELIGHT:			/* +MMcw5TDXMOww6TCkMMg- */
-			val2 = 10 +- val1 * 2;	// +cml0BmU7ZIN2enUfeLpzhw-
-			val3 = 10 +- val1 * 2;	// +m1Rs1WU7ZIN2enUfeLpzhw-
+		case SC_DUPLELIGHT:			/* デュプレライト */
+			val2 = 10 + val1 * 2;	// 物理攻撃発生確率
+			val3 = 10 + val1 * 2;	// 魔法攻撃発生確率
 			break;
-		case SC_SACRAMENT:			/* +MLUwrzDpMOEw8zDI- */
+		case SC_SACRAMENT:			/* サクラメント */
 			val2 = val1 * 10;
 			break;
-		case SC_MARSHOFABYSS:		/* +MN4w/DC3MOUwqjDWMKIw0zC5- */
+		case SC_MARSHOFABYSS:		/* マーシュオブアビス */
 			calc_flag = 1;
 			ud->state.change_speed = 1;
-			val2 = val1 * 10;	// +eftS1ZAfXqZuG1wRc4c-
-			val3 = val1 * 6;	// AGI/DEX+bhtcEXOH-
+			val2 = val1 * 10;	// 移動速度減少率
+			val3 = val1 * 6;	// AGI/DEX減少率
 			break;
-		case SC_SUMMONBALL1:		/* +MLUw4jDzMNww/DDr-(1+UAt27g-) */
-		case SC_SUMMONBALL2:		/* +MLUw4jDzMNww/DDr-(2+UAt27g-) */
-		case SC_SUMMONBALL3:		/* +MLUw4jDzMNww/DDr-(3+UAt27g-) */
-		case SC_SUMMONBALL4:		/* +MLUw4jDzMNww/DDr-(4+UAt27g-) */
-		case SC_SUMMONBALL5:		/* +MLUw4jDzMNww/DDr-(5+UAt27g-) */
-			icon_val1 = val2;	// val2(+XF5gJzBuei6YXg-)+MJJuITBXMGYwojCkMLMw84hoeTowWTCL-
+		case SC_SUMMONBALL1:		/* サモンボール(1個目) */
+		case SC_SUMMONBALL2:		/* サモンボール(2個目) */
+		case SC_SUMMONBALL3:		/* サモンボール(3個目) */
+		case SC_SUMMONBALL4:		/* サモンボール(4個目) */
+		case SC_SUMMONBALL5:		/* サモンボール(5個目) */
+			icon_val1 = val2;	// val2(属性の種類)を渡してアイコン表示する
 			val3 = tick / 1000;
 			tick = 1000;
 			break;
-		case SC_HELLINFERNO:		/* +MNgw6zCkMPMw1TCnMOswzg- */
+		case SC_HELLINFERNO:		/* ヘルインフェルノ */
 			calc_flag = 1;
 			val2 = tick / 1000;
 			val3 = 0;
 			tick = 1000;
 			break;
-		case SC_TELEKINESIS_INTENSE:	/* +MMYw7DCtMM0wtzC5MKQw8zDGMPMwuQ- */
-			val2 = val1 * 40;	// +WJdSoHOH-
-			val3 = val1 * 10;	// +bYiMuw-SP+jv1uG3OH-
+		case SC_TELEKINESIS_INTENSE:	/* テレキネシスインテンス */
+			val2 = val1 * 40;	// 増加率
+			val3 = val1 * 10;	// 消費SP軽減率
 			break;
-		case SC_ELECTRICSHOCKER:	/* +MKgw7DCvMMgw6jDDMK8wtzDnMMMwqzD8- */
+		case SC_ELECTRICSHOCKER:	/* エレクトリックショッカー */
 			val2 = tick / 1000;
 			tick = 1000;
 			break;
-		case SC_CAMOUFLAGE:			/* +MKsw4jDVMOkw/DC4MOU- */
+		case SC_CAMOUFLAGE:			/* カモフラージュ */
 			calc_flag = 1;
 			ud->state.change_speed = 1;
-			val2 = 0;			// 1+edIwVDBoMG5fN1MWUCQ-
+			val2 = 0;			// 1秒ごとの強化値
 			tick = 1000;
 			break;
-		case SC_UNLIMIT:			/* +MKIw8zDqMN8wwzDI- */
+		case SC_UNLIMIT:			/* アンリミット */
 			calc_flag = 1;
-			val2 = val1 * 50;	// +WJdSoHOH-
+			val2 = val1 * 50;	// 増加率
 			break;
-		case SC_OVERHEAT_LIMITPOINT:	/* +MKow/DDQMPww0jD8MMhSoHGxUCQ- */
-		case SC_OVERHEAT:				/* +MKow/DDQMPww0jD8MMg- */
+		case SC_OVERHEAT_LIMITPOINT:	/* オーバーヒート加熱値 */
+		case SC_OVERHEAT:				/* オーバーヒート */
 			icon_val1 = val1;
 			break;
-		case SC_SHAPESHIFT:			/* +MLcwpzCkMNcwtzDVMMg- */
+		case SC_SHAPESHIFT:			/* シェイプシフト */
 			switch(val1) {
 				case 1:  val2 = ELE_FIRE;  break;
 				case 2:  val2 = ELE_EARTH; break;
@@ -9685,30 +9664,30 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				default: val2 = ELE_WATER; break;
 			}
 			break;
-		case SC_MAGNETICFIELD:		/* +MN4wsDDNMMYwozDDMK8w1TCjMPww6zDJ- */
+		case SC_MAGNETICFIELD:		/* マグネティックフィールド */
 			val2 = tick / 1000;
 			tick = 1000;
 			break;
-		case SC_STEALTHFIELD_MASTER:	/* +MLkwxjDrMLkw1TCjMPww6zDJ-(+T391KIAF-) */
-			val3 = 1000 * (val1 +- 2);
+		case SC_STEALTHFIELD_MASTER:	/* ステルスフィールド(使用者) */
+			val3 = 1000 * (val1 + 2);
 			val2 = tick / val3;
 			tick = val3;
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
-		case SC__REPRODUCE:		/* +MOow1zDtMMcw5TD8MLk- */
+		case SC__REPRODUCE:		/* リプロデュース */
 			tick = 1000;
 			break;
-		case SC__AUTOSHADOWSPELL:	/* +MLcw4zDJMKYwqjD8MMgwuTDaMOs- */
-			val4 = 30 - ((val1%2)? 2: 0) - ((val1+-1)/2) * 2;		// +dnpS1Xi6c4c-
+		case SC__AUTOSHADOWSPELL:	/* シャドウオートスペル */
+			val4 = 30 - ((val1%2)? 2: 0) - ((val1+1)/2) * 2;		// 発動確率
 			val4 = (val4 < 1)? 1: val4;
 			break;
-		case SC__SHADOWFORM:		/* +MLcw4zDJMKYw1TCpMPww4A- */
-			val3 = 4 +- val1;	// +a4swilbeZXA-
+		case SC__SHADOWFORM:		/* シャドウフォーム */
+			val3 = 4 + val1;	// 残り回数
 			val4 = tick / 1000;
 			tick = 1000;
 			break;
-		case SC__INVISIBILITY:		/* +MKQw8zDTMLgw0zDqMMYwow- */
+		case SC__INVISIBILITY:		/* インビジビリティ */
 			if(sd) {
 				tick = 1000;
 				calc_flag = 1;
@@ -9716,25 +9695,25 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				tick = 5000*val1;
 			}
 			break;
-		case SC_REFLECTDAMAGE:		/* +MOow1TDsMK8wyDDAMOEw/DC4- */
-			// +MOow1TDsMK8wyDC3MPww6zDJMExjmzBLMGMwZjBEMF8wiYnjlmQ-
+		case SC_REFLECTDAMAGE:		/* リフレクトダメージ */
+			// リフレクトシールドが掛かっていたら解除
 			if(sc->data[SC_REFLECTSHIELD].timer != -1)
 				status_change_end(bl,SC_REFLECTSHIELD,-1);
 			val2 = tick / 10000;
-			val3 = val1 * 5 +- 15;	// +U81cBHOH-
-			val4 = val1 * 5 +- 25;	// +U81cBFbeZXA-
+			val3 = val1 * 5 + 15;	// 反射率
+			val4 = val1 * 5 + 25;	// 反射回数
 			tick = 10000;
 			break;
-		case SC_FORCEOFVANGUARD:	/* +MNUwqTD8MLkwqjDWMNAw8zCsMPwwyQ- */
+		case SC_FORCEOFVANGUARD:	/* フォースオブバンガード */
 			val2 = tick / 10000;
-			val3 = val1 * 12 +- 8;	// +YBIwijCrMKYw8zC/MPx2elLVc4c-
+			val3 = val1 * 12 + 8;	// 怒りカウンター発動率
 			tick = 10000;
 			icon_tick = -1;
 			calc_flag = 1;
 			break;
-		case SC_SHIELDSPELL_DEF:	/* +MLcw/DDrMMkwuTDaMOs-(DEF) */
-		case SC_SHIELDSPELL_MDEF:	/* +MLcw/DDrMMkwuTDaMOs-(MDEF) */
-		case SC_SHIELDSPELL_REF:	/* +MLcw/DDrMMkwuTDaMOs-(+fL6TLA-) */
+		case SC_SHIELDSPELL_DEF:	/* シールドスペル(DEF) */
+		case SC_SHIELDSPELL_MDEF:	/* シールドスペル(MDEF) */
+		case SC_SHIELDSPELL_REF:	/* シールドスペル(精錬) */
 			if(sc->data[SC_SHIELDSPELL_DEF].timer != -1)
 				status_change_end(bl,SC_SHIELDSPELL_DEF,-1);
 			if(sc->data[SC_SHIELDSPELL_MDEF].timer != -1)
@@ -9743,43 +9722,43 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				status_change_end(bl,SC_SHIELDSPELL_REF,-1);
 			calc_flag = 1;
 			break;
-		case SC_EXEEDBREAK:			/* +MKQwrzC3MPwwyTDWMOwwpDCv- */
+		case SC_EXEEDBREAK:			/* イクシードブレイク */
 			if(sd) {
 				int idx = sd->equip_index[EQUIP_INDEX_RARM];
-				val2 = 100 +- val1 * 150 +- sd->status.job_level * 15;
+				val2 = 100 + val1 * 150 + sd->status.job_level * 15;
 				if(idx >= 0 && sd->inventory_data[idx])
-					val2 +-= sd->inventory_data[idx]->weight/10 * sd->inventory_data[idx]->wlv * sd->status.base_level / 100;
+					val2 += sd->inventory_data[idx]->weight/10 * sd->inventory_data[idx]->wlv * sd->status.base_level / 100;
 			}
 			else {
 				val2 = val1 * 150;
 			}
 			tick = 600*1000;
 			break;
-		case SC_PRESTIGE:	/* +MNcw7DC5MMYwozD8MLg- */
-			val2 = val1 * 15 * status_get_lv(bl) / 100;		// Def+WJdSoFAk-
+		case SC_PRESTIGE:	/* プレスティージ */
+			val2 = val1 * 15 * status_get_lv(bl) / 100;		// Def増加値
 			if(sd) {
-				val2 +-= pc_checkskill(sd,CR_DEFENDER) / 5 * status_get_lv(bl) / 2;
+				val2 += pc_checkskill(sd,CR_DEFENDER) / 5 * status_get_lv(bl) / 2;
 			}
-			val3 = (1 +- status_get_agi(bl) / 20 +- status_get_luk(bl) / 40) * val1 / 2;		// +m1Rs1VbekH9zhw-
+			val3 = (1 + status_get_agi(bl) / 20 + status_get_luk(bl) / 40) * val1 / 2;		// 魔法回避率
 			calc_flag = 1;
 			break;
-		case SC_BANDING:	/* +MNAw8zDHMKMw8zCw- */
+		case SC_BANDING:	/* バンディング */
 			tick = 5000;
 			icon_tick = 9999;
 			calc_flag = 1;
 			break;
-		case SC_SITDOWN_FORCE:		/* +juJQEg- */
+		case SC_SITDOWN_FORCE:		/* 転倒 */
 			if(sd){
 				pc_setsit(sd);
 				clif_sitting(&sd->bl, 1);
 			}
 			break;
-		case SC_INSPIRATION:	/* +MKQw8zC5MNQw7DD8MLcw5zDz- */
+		case SC_INSPIRATION:	/* インスピレーション */
 			val2 = tick / 6000;
 			tick = 6000;
 			calc_flag = 1;
 			break;
-		case SC_KINGS_GRACE:	/* +MK0w8zCwMLkwsDDsMKQwuQ- */
+		case SC_KINGS_GRACE:	/* キングスグレイス */
 			status_change_end(bl,SC_POISON,-1);
 			status_change_end(bl,SC_BLIND,-1);
 			status_change_end(bl,SC_FREEZE,-1);
@@ -9802,167 +9781,167 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			unit_stopattack(bl);
 			unit_stop_walking(bl,0);
 			val2 = tick / 1000;
-			val4 = 3 +- val1;
+			val4 = 3 + val1;
 			tick = 1000;
 			break;
-		case SC_CRESCENTELBOW:		/* +eDR4jmfx- */
-			val2 = 40 +- val1 * 5 +- status_get_jlv(bl) / 2;		// +dnpS1XOH-
+		case SC_CRESCENTELBOW:		/* 破碎柱 */
+			val2 = 40 + val1 * 5 + status_get_jlv(bl) / 2;		// 発動率
 			break;
-		case SC_LIGHTNINGWALK:		/* +lYOW+2tp- */
-			val2 = 40 +- val1 * 5 +- status_get_jlv(bl) / 2;		// +dnpS1XOH-
+		case SC_LIGHTNINGWALK:		/* 閃電歩 */
+			val2 = 40 + val1 * 5 + status_get_jlv(bl) / 2;		// 発動率
 			break;
-		case SC_RAISINGDRAGON:	/* +b1yfjWYHWSk- */
+		case SC_RAISINGDRAGON:	/* 潜龍昇天 */
 			val2 = tick / 5000;
-			val3 = val1 +- 2;	// MaxHP,MaxSP+WJdSoHOH-
+			val3 = val1 + 2;	// MaxHP,MaxSP増加率
 			tick = 5000;
 			calc_flag = 1;
 			break;
-		case SC_GENTLETOUCH_ENERGYGAIN:	/* +cLl6dA- -+dAM-- */
-			// +cLl6dA- -+U80--+MExjmzBLMGMwZjBEMF8wiYnjlmQ-
+		case SC_GENTLETOUCH_ENERGYGAIN:	/* 点穴 -球- */
+			// 点穴 -反-が掛かっていたら解除
 			if(sc->data[SC_GENTLETOUCH_CHANGE].timer != -1)
 				status_change_end(bl,SC_GENTLETOUCH_CHANGE,-1);
-			// +cLl6dA- -+bTs--+MExjmzBLMGMwZjBEMF8wiYnjlmQ-
+			// 点穴 -活-が掛かっていたら解除
 			if(sc->data[SC_GENTLETOUCH_REVITALIZE].timer != -1)
 				status_change_end(bl,SC_GENTLETOUCH_REVITALIZE,-1);
-			val2 = val1 * 5 +- 10;	// +bBdfPnUfYhBzhw-
+			val2 = val1 * 5 + 10;	// 気弾生成率
 			break;
-		case SC_GENTLETOUCH_CHANGE:	/* +cLl6dA- -+U80-- */
-			// +cLl6dA- -+dAM--+MExjmzBLMGMwZjBEMF8wiYnjlmQ-
+		case SC_GENTLETOUCH_CHANGE:	/* 点穴 -反- */
+			// 点穴 -球-が掛かっていたら解除
 			if(sc->data[SC_GENTLETOUCH_ENERGYGAIN].timer != -1)
 				status_change_end(bl,SC_GENTLETOUCH_ENERGYGAIN,-1);
-			// +cLl6dA- -+bTs--+MExjmzBLMGMwZjBEMF8wiYnjlmQ-
+			// 点穴 -活-が掛かっていたら解除
 			if(sc->data[SC_GENTLETOUCH_REVITALIZE].timer != -1)
 				status_change_end(bl,SC_GENTLETOUCH_REVITALIZE,-1);
-			val4 = status_get_agi(bl) / 15;		// ASPD+TgpmB1Ak-
+			val4 = status_get_agi(bl) / 15;		// ASPD上昇値
 			calc_flag = 1;
 			break;
-		case SC_GENTLETOUCH_REVITALIZE:	/* +cLl6dA- -+bTs-- */
-			// +cLl6dA- -+dAM--+MExjmzBLMGMwZjBEMF8wiYnjlmQ-
+		case SC_GENTLETOUCH_REVITALIZE:	/* 点穴 -活- */
+			// 点穴 -球-が掛かっていたら解除
 			if(sc->data[SC_GENTLETOUCH_ENERGYGAIN].timer != -1)
 				status_change_end(bl,SC_GENTLETOUCH_ENERGYGAIN,-1);
-			// +cLl6dA- -+U80--+MExjmzBLMGMwZjBEMF8wiYnjlmQ-
+			// 点穴 -反-が掛かっていたら解除
 			if(sc->data[SC_GENTLETOUCH_CHANGE].timer != -1)
 				status_change_end(bl,SC_GENTLETOUCH_CHANGE,-1);
 			calc_flag = 1;
 			break;
-		case SC_SWING:				/* +MLkwpDDzMLAwwDDzMLk- */
-			val4 = (val1 * 5) +- (val2 * 2 / 10);
+		case SC_SWING:				/* スイングダンス */
+			val4 = (val1 * 5) + (val2 * 2 / 10);
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
-		case SC_RUSH_WINDMILL:		/* +mKiOyjBrVBEwSzBjMGZ6gWSD- */
-			val4 = (val1 * 6) +- (val2 / 5) +- val3;
+		case SC_RUSH_WINDMILL:		/* 風車に向かって突撃 */
+			val4 = (val1 * 6) + (val2 / 5) + val3;
 			calc_flag = 1;
 			break;
-		case SC_MOONLIT_SERENADE:	/* +ZwhmDjBLMIowbjC7MOwwyjD8MMc- */
-			val4 = (val1 * 5) +- (val2 / 4) +- val3;
+		case SC_MOONLIT_SERENADE:	/* 月明かりのセレナーデ */
+			val4 = (val1 * 5) + (val2 / 4) + val3;
 			calc_flag = 1;
 			break;
-		case SC_ECHOSONG:			/* +MKgwszD8MG5rTA- */
+		case SC_ECHOSONG:			/* エコーの歌 */
 			calc_flag = 1;
-			val4 = (val1 * 6) +- (val2 / 4) +- val3;
+			val4 = (val1 * 6) + (val2 / 4) + val3;
 			break;
-		case SC_SYMPHONY_LOVE:		/* +YEtOujBfMGEwbnC6MG4wtzDzMNUwqTDLMPw- */
+		case SC_SYMPHONY_LOVE:		/* 恋人たちの為のシンフォニー */
 			calc_flag = 1;
-			val4 = (val1 * 12) +- (val2 / 4) +- val3;
+			val4 = (val1 * 12) + (val2 / 4) + val3;
 			break;
-		case SC_WINKCHARM:	/* +m0Vg0TBuMKYwozDzMK8- */
-		case SC_SIREN:		/* +MLswpDDsMPww8zBuWPA- */
+		case SC_WINKCHARM:	/* 魅惑のウィンク */
+		case SC_SIREN:		/* セイレーンの声 */
 			val3 = tick / 3000;
 			tick = 3000;
 			break;
-		case SC_DEEP_SLEEP:		/* +W4kwiTBOMG5bUFuIVQQ- */
+		case SC_DEEP_SLEEP:		/* 安らぎの子守唄 */
 			val2 = tick / 2000;
 			tick = 2000;
 			break;
-		case SC_SIRCLEOFNATURE:		/* +X6p0sDBZMIuB6nE2MG6X8w- */
+		case SC_SIRCLEOFNATURE:		/* 循環する自然の音 */
 			val2 = tick / 1000;
 			tick = 1000;
 			break;
-		case SC_BEYOND_OF_WARCRY:	/* +MNMw6DDzMMkwqjDWMKYwqTD8MK8w6TCk- */
+		case SC_BEYOND_OF_WARCRY:	/* ビヨンドオブウォークライ */
 			val3 = val1 * 4;
 			val4 = val1;
 			if(val2 >= 3 && val2 <= 7) {
-				val3 +-= (val2-2) * 4;
-				val4 +-= val2-2;
+				val3 += (val2-2) * 4;
+				val4 += val2-2;
 			}
 			calc_flag = 1;
 			break;
-		case SC_MELODYOFSINK:		/* +MOEw7TDHMKMw/DCqMNYwtzDzMK8- */
+		case SC_MELODYOFSINK:		/* メロディーオブシンク */
 			val3 = val1 * 2;
 			val4 = val1;
 			if(val2 >= 3 && val2 <= 7) {
-				val3 +-= (val2-2) * 2;
-				val4 +-= val2-2;
+				val3 += (val2-2) * 2;
+				val4 += val2-2;
 			}
 			val2 = tick / 1000;
 			tick = 1000;
 			calc_flag = 1;
 			break;
-		case SC_SONG_OF_MANA:		/* +MN4wyjBua0w- */
+		case SC_SONG_OF_MANA:		/* マナの歌 */
 			val2 = tick / 5000;
 			tick = 5000;
 			break;
-		case SC_SATURDAY_NIGHT_FEVER:	/* +MNUw6TCkMMcw/DDKMKQwyDDVMKMw/DDQMPw- */
+		case SC_SATURDAY_NIGHT_FEVER:	/* フライデーナイトフィーバー */
 			val3 = 12000 - val1 * 2000;
 			val2 = tick / val3;
 			tick = val3;
 			calc_flag = 1;
 			break;
-		case SC_FRIGG_SONG:			/* +MNUw6jDDMLAwbmtM- */
+		case SC_FRIGG_SONG:			/* フリッグの歌 */
 			val2 = tick / 1000;
 			val3 = val1 * 5;
-			val4 = val1 * 20 +- 80;
+			val4 = val1 * 20 + 80;
 			calc_flag = 1;
 			break;
-		case SC_PROPERTYWALK:		/* +MNUwoTCkMKIw/A-/+MKgw7DCvMMgw6jDDMK8wpjCpMPwwrw- */
-			val3 = val1 * 2 +- 6;	// +dnp1H1ALZXA-
+		case SC_PROPERTYWALK:		/* ファイアー/エレクトリックウォーク */
+			val3 = val1 * 2 + 6;	// 発生個数
 			break;
-		case SC_DIAMONDDUST:		/* +MMAwpDDkMOIw8zDJMMAwuTDI- */
+		case SC_DIAMONDDUST:		/* ダイヤモンドダスト */
 			val2 = tick / 1000;
 			tick = 1000;
 			break;
-		case SC_SPELLFIST:		/* +MLkw2jDrMNUwozC5MMg- */
-			val4 = val1 * 7;	// +Vt5lcA-
+		case SC_SPELLFIST:		/* スペルフィスト */
+			val4 = val1 * 7;	// 回数
 			break;
-		case SC_STRIKING:			/* +MLkwyDDpMKQwrTDzMLA- */
+		case SC_STRIKING:			/* ストライキング */
 			val2 = tick / 1000;
 			tick = 1000;
 			calc_flag = 1;
 			break;
-		case SC_BLOOD_SUCKER:		/* +MNYw6TDDMMkwtTDDMKsw/A- */
+		case SC_BLOOD_SUCKER:		/* ブラッドサッカー */
 			val4 = tick / 1000;
-			tick = 1000;	// +MMAw4TD8MLh2enUflZOWlA-
+			tick = 1000;	// ダメージ発生間隔
 			break;
-		case SC_FIRE_EXPANSION_SMOKE_POWDER:	/* +MNUwoTCkMKIw/DCoMK8wuTDRMPMwtzDnMPM-(+cVleVQ-) */
-			val2 = 25;		// +j9GN3ZbiMPuQYI3dluIwwDDhMPwwuG4bXBFzhw-
-			val3 = 25;		// Flee+TgpmB3OH-
+		case SC_FIRE_EXPANSION_SMOKE_POWDER:	/* ファイアーエクスパンション(煙幕) */
+			val2 = 25;		// 近距離・遠距離ダメージ減少率
+			val3 = 25;		// Flee上昇率
 			calc_flag = 1;
 			break;
-		case SC_FIRE_EXPANSION_TEAR_GAS:	/* +MNUwoTCkMKIw/DCoMK8wuTDRMPMwtzDnMPM-(+UKxtmTCsMLk-) */
-			val2 = 25;		// Hit,Flee+bhtcEXOH-
+		case SC_FIRE_EXPANSION_TEAR_GAS:	/* ファイアーエクスパンション(催涙ガス) */
+			val2 = 25;		// Hit,Flee減少率
 			val3 = tick / 3000;
 			tick = 3000;
 			calc_flag = 1;
 			break;
-		case SC_MANDRAGORA:			/* +MM8wpjDqMPMwsDCqMNYw3jDzMMkw6TC0MOk- */
-			val2 = val1 * 5 +- 5;		// Int+bhtcEVAk-
-			val3 = 3000;		// +VvpbmopgVTFYl1KgUCQ-
+		case SC_MANDRAGORA:			/* ハウリングオブマンドラゴラ */
+			val2 = val1 * 5 + 5;		// Int減少値
+			val3 = 3000;		// 固定詠唱増加値
 			calc_flag = 1;
 			break;
-		case SC_BANANA_BOMB:		/* +MNAwyjDKcgZfPg- */
+		case SC_BANANA_BOMB:		/* バナナ爆弾 */
 			if(sd){
 				pc_setsit(sd);
 				clif_sitting(&sd->bl, 1);
 			}
 			calc_flag = 1;
 			break;
-		case SC_MEIKYOUSISUI:		/* +Zg6T4WtibDQ- */
+		case SC_MEIKYOUSISUI:		/* 明鏡止水 */
 			val2 = tick / 1000;
 			tick = 1000;
 			calc_flag = 1;
 			break;
-		case SC_IZAYOI:			/* +U0FRbVkc- */
+		case SC_IZAYOI:			/* 十六夜 */
 			if(sd) {
 				val2 = sd->status.job_level/2 * val1;
 			} else {
@@ -9972,71 +9951,71 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			tick = 1000;
 			calc_flag = 1;
 			break;
-		case SC_KAGEMUSYA:		/* +XnuIUw- -+UgaOqw-- */
-			val2 = 20;		// +MMAw4TD8MLhYl1Kgc4c-
+		case SC_KAGEMUSYA:		/* 幻術 -分身- */
+			val2 = 20;		// ダメージ増加率
 			val3 = tick / 1000;
 			tick = 1000;
 			calc_flag = 1;
 			break;
-		case SC_ZANGETSU:		/* +XnuIUw- -+a4tnCA-- */
+		case SC_ZANGETSU:		/* 幻術 -残月- */
 			if(status_get_hp(bl)%2 == 0)
-				val2 +-= status_get_lv(bl) / 3 +- val1 * 20; 	// HP+MExQdmVwMG5YNFQI-
+				val2 += status_get_lv(bl) / 3 + val1 * 20; 	// HPが偶数の場合
 			else
-				val2 -= status_get_lv(bl) / 3 +- val1 * 30; 	// HP+MExZR2VwMG5YNFQI-
+				val2 -= status_get_lv(bl) / 3 + val1 * 30; 	// HPが奇数の場合
 			if(status_get_sp(bl)%2 == 0)
-				val3 +-= status_get_lv(bl) / 3 +- val1 * 20; 	// SP+MExQdmVwMG5YNFQI-
+				val3 += status_get_lv(bl) / 3 + val1 * 20; 	// SPが偶数の場合
 			else
-				val3 -= status_get_lv(bl) / 3 +- val1 * 30; 	// SP+MExZR2VwMG5YNFQI-
+				val3 -= status_get_lv(bl) / 3 + val1 * 30; 	// SPが奇数の場合
 			calc_flag = 1;
 			break;
-		case SC_GENSOU:		/* +XnuIUw- -+Zydee2Dz-- */
-			val2 = val1 * 10; 	// +MMAw4TD8MLhTzVwEc4c-
+		case SC_GENSOU:		/* 幻術 -朧幻想- */
+			val2 = val1 * 10; 	// ダメージ反射率
 			break;
-		case SC_C_MARKER:		/* +MK8w6jDgML4w8zDeMPwwqzD8- */
+		case SC_C_MARKER:		/* クリムゾンマーカー */
 			if(val3 < 0 || val3 >= 3)
 				return 0;
 			val4 = tick/1000;
 			tick = 1000;
 			calc_flag = 1;
 			break;
-		case SC_B_TRAP:			/* +MNAwpDDzMMkwyDDpMMMw1w- */
+		case SC_B_TRAP:			/* バインドトラップ */
 			val3 = val1 * 25;
 			ud->state.change_speed = 1;
 			break;
-		case SC_HEAT_BARREL:		/* +MNIw/DDIMNAw7DDr- */
+		case SC_HEAT_BARREL:		/* ヒートバレル */
 			val2 = val4 * 5;		// fixcast
-			val3 = (6 +- val1 * 2) * val4; // atk
-			val4 = 25 +- val1 * 5; // hit
+			val3 = (6 + val1 * 2) * val4; // atk
+			val4 = 25 + val1 * 5; // hit
 			calc_flag = 1;
 			break;
-		case SC_P_ALTER:		/* +MNcw6TDBMMow4DCiMOswvzD8- */
+		case SC_P_ALTER:		/* プラチナムアルター */
 			if(sd) {
 				int idx = sd->equip_index[EQUIP_INDEX_ARROW];
 				if(idx >= 0 && sd->inventory_data[idx] &&
-					(sd->inventory_data[idx]->nameid == 13220 ||		// +MLUw8zCvML8w1TChMKQwyTDQMOwwwzDI-
-					sd->inventory_data[idx]->nameid == 13221)		// +MLcw6zDQMPww0DDsMMMwyA-C
+					(sd->inventory_data[idx]->nameid == 13220 ||		// サンクタファイドバレット
+					sd->inventory_data[idx]->nameid == 13221)		// シルバーバレットC
 				)
-					val2 = 10 +- 10 * val4; // atk
+					val2 = 10 + 10 * val4; // atk
 			}
 			else
-				val2 = 10 +- 10 * val4; // atk
-			val3 = (int)((atn_bignumber)status_get_max_hp(bl) * (val1 * 5) / 100);	// +gBBORV6m-
-			val4 = val1 +- 3;	// +Vt5lcA-
+				val2 = 10 + 10 * val4; // atk
+			val3 = (int)((atn_bignumber)status_get_max_hp(bl) * (val1 * 5) / 100);	// 耐久度
+			val4 = val1 + 3;	// 回数
 			break;
 		case SC_ANTI_M_BLAST:
-			val2 = 15 +- val1 * 2;
+			val2 = 15 + val1 * 2;
 			break;
-		case SC_SUHIDE:				/* +MEswTzCMMIs- */
+		case SC_SUHIDE:				/* かくれる */
 			tick = 60 * 1000;
 			break;
-		case SC_ARCLOUSEDASH:		/* +MKIwrzDpMKYwuTDAMMMwtzDl- */
-			val2 = 3 +- ((val1-1) / 2) * 6;	// AGI+WJdSoA-
-			val3 = 5 +- (val1/2) * 5;	// +kGCN3ZbiZTtkg1iXUqA-
+		case SC_ARCLOUSEDASH:		/* アクラウスダッシュ */
+			val2 = 3 + ((val1-1) / 2) * 6;	// AGI増加
+			val3 = 5 + (val1/2) * 5;	// 遠距離攻撃増加
 			ud->state.change_speed = 1;
 			calc_flag = 1;
 			break;
-		case SC_SHRIMP:		/* +MKgw004JZic- */
-			if(val2 >= 5)	// WATK/MATK+WJdSoA-
+		case SC_SHRIMP:		/* エビ三昧 */
+			if(val2 >= 5)	// WATK/MATK増加
 				val3 = 30;
 			else if(val2 == 1)
 				val3 = 5;
@@ -10044,62 +10023,62 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				val3 = (val2 - 1) * 5;
 			calc_flag = 1;
 			break;
-		case SC_FRESHSHRIMP:		/* +ZbCbrjBqMKgw0w- */
+		case SC_FRESHSHRIMP:		/* 新鮮なエビ */
 			val3 = 13000 - 2000 * val1;
 			val2 = tick / val3;
 			tick = val3;
 			break;
-		case SC_CHATTERING:			/* +MMEw4zC/MOow8zCw- */
-			if(val1 >= 5)	// ATK/MATK+WJdSoA-
+		case SC_CHATTERING:			/* チャタリング */
+			if(val1 >= 5)	// ATK/MATK増加
 				val2 = 150;
 			else if(val1 == 4)
 				val2 = 100;
 			else
-				val2 = 10 +- val1 * 20;
-			val3 = (val1>=5)? 35: 25;	// +eftS1ZAfXqZYl1Kg-
+				val2 = 10 + val1 * 20;
+			val3 = (val1>=5)? 35: 25;	// 移動速度増加
 			ud->state.change_speed = 1;
 			calc_flag = 1;
 			break;
-		case SC_HISS:				/* +i2ZiEg- */
+		case SC_HISS:				/* 警戒 */
 			val4 = tick / 1000;
 			tick = 1000;
 			ud->state.change_speed = 1;
 			calc_flag = 1;
 			break;
-		case SC_GROOMING:			/* +MLAw6zD8MN8w8zCw- */
-			val2 = val1 * 10;	// Flee+WJdSoA-
+		case SC_GROOMING:			/* グルーミング */
+			val2 = val1 * 10;	// Flee増加
 			calc_flag = 1;
 			break;
-		case SC_SV_ROOTTWIST:	/* +MN4wvzC/MNMwbmg5MGMwUw- */
+		case SC_SV_ROOTTWIST:	/* マタタビの根っこ */
 			val3 = tick / 1000;
 			tick = 1000;
 			break;
-		case SC_CATNIPPOWDER:		/* +MKQwzDDPMMMwqzC3MOMw7zD8- */
-			val2 = 30;	// +a2ZWaGU7ZINSmzBo-Matk+bhtcEQ-
-			val3 = 50;	// HP+MPs-SP+gepxNlbeX6mRz1iXUqA-
+		case SC_CATNIPPOWDER:		/* イヌハッカシャワー */
+			val2 = 30;	// 武器攻撃力とMatk減少
+			val3 = 50;	// HP・SP自然回復量増加
 			calc_flag = 1;
 			break;
-		case SC_BURNT:			/* +c0RwjlRq- */
+		case SC_BURNT:			/* 獄炎呪 */
 			val3 = tick / 1000;
 			tick = 1000;
 			calc_flag = 1;
 			break;
-		case SC_CHILL:			/* +bDhORZcc- */
+		case SC_CHILL:			/* 永久霜 */
 			status_change_end(bl,SC_BURNT,-1);
 			break;
-		case SC_MER_FLEE:		/* +UK1RdTDcMPwwyjC5-(FLEE) */
-		case SC_MER_ATK:		/* +UK1RdTDcMPwwyjC5-(ATK) */
-		case SC_MER_HIT:		/* +UK1RdTDcMPwwyjC5-(HIT) */
+		case SC_MER_FLEE:		/* 傭兵ボーナス(FLEE) */
+		case SC_MER_ATK:		/* 傭兵ボーナス(ATK) */
+		case SC_MER_HIT:		/* 傭兵ボーナス(HIT) */
 			val2 = val1 * 15;
 			calc_flag = 1;
 			break;
-		case SC_MER_HP:			/* +UK1RdTDcMPwwyjC5-(HP) */
-		case SC_MER_SP:			/* +UK1RdTDcMPwwyjC5-(SP) */
+		case SC_MER_HP:			/* 傭兵ボーナス(HP) */
+		case SC_MER_SP:			/* 傭兵ボーナス(SP) */
 			val2 = val1 * 5;
 			calc_flag = 1;
 			break;
-		case SC_ON_PUSH_CART:	/* +MKsw/DDI- */
-			icon_val1 = val1;	// +MKsw/DDIML8wpDDXMJJuITBZ-
+		case SC_ON_PUSH_CART:	/* カート */
+			icon_val1 = val1;	// カートタイプを渡す
 			ud->state.change_speed = 1;
 			calc_flag = 1;
 			if(sd && val2) {
@@ -10109,207 +10088,207 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			}
 			val2 = 1;
 			break;
-		case SC_SUMMON_ELEM:	/* +MLUw4jDzMKgw7DDhMPMwvzDr- */
+		case SC_SUMMON_ELEM:	/* サモンエレメンタル */
 			val2 = tick / 10000;
 			tick = 10000;
-			val3 = val1 * 3 +- 2;		// SP+bYiMu5HP-
+			val3 = val1 * 3 + 2;		// SP消費量
 			break;
-		case SC_FIRE_CLOAK:		/* +MNUwoTCkMKIw/DCvMO0w/DCv- */
-		case SC_WATER_DROP:		/* +MKYwqTD8ML8w/DDJMO0wwzDX- */
-		case SC_WIND_CURTAIN:	/* +MKYwozDzMMkwqzD8MMYw8w- */
-		case SC_STONE_SHIELD:	/* +MLkwyDD8MPMwtzD8MOswyQ- */
-			val2 = 100;		// +XF5gJ4AQYCdYl1KgUCQ-
-			val3 = 100;		// +XF5gJ4AQYCduG1wRUCQ-
+		case SC_FIRE_CLOAK:		/* ファイアークローク */
+		case SC_WATER_DROP:		/* ウォータードロップ */
+		case SC_WIND_CURTAIN:	/* ウィンドカーテン */
+		case SC_STONE_SHIELD:	/* ストーンシールド */
+			val2 = 100;		// 属性耐性増加値
+			val3 = 100;		// 属性耐性減少値
 			calc_flag = 1;
 			break;
-		case SC_WATER_SCREEN:	/* +MKYwqTD8ML8w/DC5MK8w6jD8MPM- */
+		case SC_WATER_SCREEN:	/* ウォータースクリーン */
 			val2 = tick / 5000;
 			tick = 5000;
 			break;
-		case SC_WIND_STEP:			/* +MKYwozDzMMkwuTDGMMMw1w- */
-			val2 = 10;	// Flee+WJdSoFAk-
-			val3 = 50;	// +eftS1ZAfXqZYl1Kgc4c-
+		case SC_WIND_STEP:			/* ウィンドステップ */
+			val2 = 10;	// Flee増加値
+			val3 = 50;	// 移動速度増加率
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
-		case SC_SOLID_SKIN:			/* +ML0w6jDDMMkwuTCtMPM- */
-			val2 = 10;	// Def+WJdSoHOH-
-			val3 = 25;	// MaxHP+WJdSoHOH-
+		case SC_SOLID_SKIN:			/* ソリッドスキン */
+			val2 = 10;	// Def増加率
+			val3 = 25;	// MaxHP増加率
 			calc_flag = 1;
 			break;
-		case SC_PYROTECHNIC:	/* +MNEwpDDtMMYwrzDLMMMwrw- */
-			val2 = 40;	// Atk+WJdSoFAk-
-			val3 = 10;	// +MMAw4TD8MLhYl1Kgc4c-
+		case SC_PYROTECHNIC:	/* パイロテクニック */
+			val2 = 40;	// Atk増加値
+			val3 = 10;	// ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_HEATER:	/* +MNIw/DC/MPw- */
-			val2 = 80;	// Atk+WJdSoFAk-
-			val3 = 20;	// +MMAw4TD8MLhYl1Kgc4c-
+		case SC_HEATER:	/* ヒーター */
+			val2 = 80;	// Atk増加値
+			val3 = 20;	// ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_TROPIC:	/* +MMgw7TDUMMMwrw- */
-			val2 = 120;	// Atk+WJdSoFAk-
+		case SC_TROPIC:	/* トロピック */
+			val2 = 120;	// Atk増加値
 			calc_flag = 1;
 			break;
-		case SC_AQUAPLAY:	/* +MKIwrzCiMNcw7DCk- */
-			val2 = 40;	// Matk+WJdSoFAk-
-			val3 = 10;	// +MMAw4TD8MLhYl1Kgc4c-
+		case SC_AQUAPLAY:	/* アクアプレイ */
+			val2 = 40;	// Matk増加値
+			val3 = 10;	// ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_COOLER:	/* +MK8w/DDpMPw- */
-			val2 = 80;	// Matk+WJdSoFAk-
-			val3 = 20;	// +MMAw4TD8MLhYl1Kgc4c-
+		case SC_COOLER:	/* クーラー */
+			val2 = 80;	// Matk増加値
+			val3 = 20;	// ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_CHILLY_AIR:	/* +MK8w/DDrMKgwojD8- */
-			val2 = 120;	// Matk+WJdSoFAk-
+		case SC_CHILLY_AIR:	/* クールエアー */
+			val2 = 120;	// Matk増加値
 			calc_flag = 1;
 			break;
-		case SC_GUST:	/* +MKwwuTDI- */
-			val2 = 50;	// Aspd+WJdSoFAk-
-			val3 = 10;	// +MMAw4TD8MLhYl1Kgc4c-
+		case SC_GUST:	/* ガスト */
+			val2 = 50;	// Aspd増加値
+			val3 = 10;	// ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_BLAST:	/* +MNYw6TC5MMg- */
-			val2 = 50;	// Aspd+WJdSoFAk-
-			val3 = 10;	// +MMAw4TD8MLhYl1Kgc4c-
+		case SC_BLAST:	/* ブラスト */
+			val2 = 50;	// Aspd増加値
+			val3 = 10;	// ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_WILD_STORM:	/* +MO8wpDDrMMkwuTDIMPww4A- */
-			val2 = 50;	// Aspd+WJdSoFAk-
+		case SC_WILD_STORM:	/* ワイルドストーム */
+			val2 = 50;	// Aspd増加値
 			calc_flag = 1;
 			break;
-		case SC_PETROLOGY:	/* +MNowyDDtMLgw/A- */
-			val2 = 5;	// MaxHP+WJdSoHOH-
-			val3 = 10;	// +MMAw4TD8MLhYl1Kgc4c-
+		case SC_PETROLOGY:	/* ペトロジー */
+			val2 = 5;	// MaxHP増加率
+			val3 = 10;	// ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_CURSED_SOIL:	/* +MKsw/DC5MMkwvTCkMOs- */
-			val2 = 10;	// MaxHP+WJdSoHOH-
-			val3 = 20;	// +MMAw4TD8MLhYl1Kgc4c-
+		case SC_CURSED_SOIL:	/* カースドソイル */
+			val2 = 10;	// MaxHP増加率
+			val3 = 20;	// ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_UPHEAVAL:	/* +MKIwwzDXMNgwpDDQMOs- */
-			val2 = 15;	// MaxHP+WJdSoHOH-
+		case SC_UPHEAVAL:	/* アップヘイバル */
+			val2 = 15;	// MaxHP増加率
 			calc_flag = 1;
 			break;
-		case SC_TIDAL_WEAPON_OPTION:	/* +ML8wpDDAMOswpjCnMN0w8w-(+fL6XCg-) */
-			val2 = 20;	// Atk+WJdSoHOH-
+		case SC_TIDAL_WEAPON_OPTION:	/* タイダルウェポン(精霊) */
+			val2 = 20;	// Atk増加率
 			calc_flag = 1;
 			break;
-		case SC_CIRCLE_OF_FIRE_OPTION:	/* +MLUw/DCvMOswqjDWMNUwoTCkMKI-(+fL6XCg-) */
-		case SC_FIRE_CLOAK_OPTION:		/* +MNUwoTCkMKIw/DCvMO0w/DCv-(+fL6XCg-) */
-		case SC_WATER_SCREEN_OPTION:	/* +MKYwqTD8ML8w/DC5MK8w6jD8MPM-(+fL6XCg-) */
-		case SC_WATER_DROP_OPTION:		/* +MKYwqTD8ML8w/DDJMO0wwzDX-(+fL6XCg-) */
-		case SC_WIND_STEP_OPTION:		/* +MKYwozDzMMkwuTDGMMMw1w-(+fL6XCg-) */
-		case SC_WIND_CURTAIN_OPTION:	/* +MKYwozDzMMkwqzD8MMYw8w-(+fL6XCg-) */
-		case SC_SOLID_SKIN_OPTION:		/* +ML0w6jDDMMkwuTCtMPM-(+fL6XCg-) */
-		case SC_STONE_SHIELD_OPTION:	/* +MLkwyDD8MPMwtzD8MOswyQ-(+fL6XCg-) */
+		case SC_CIRCLE_OF_FIRE_OPTION:	/* サークルオブファイア(精霊) */
+		case SC_FIRE_CLOAK_OPTION:		/* ファイアークローク(精霊) */
+		case SC_WATER_SCREEN_OPTION:	/* ウォータースクリーン(精霊) */
+		case SC_WATER_DROP_OPTION:		/* ウォータードロップ(精霊) */
+		case SC_WIND_STEP_OPTION:		/* ウィンドステップ(精霊) */
+		case SC_WIND_CURTAIN_OPTION:	/* ウィンドカーテン(精霊) */
+		case SC_SOLID_SKIN_OPTION:		/* ソリッドスキン(精霊) */
+		case SC_STONE_SHIELD_OPTION:	/* ストーンシールド(精霊) */
 			val2 = tick / 1000;
 			tick = 1000;
-			val3 = 5;		// SP+bYiMu5HP-
+			val3 = 5;		// SP消費量
 			break;
-		case SC_PYROTECHNIC_OPTION:	/* +MNEwpDDtMMYwrzDLMMMwrw-(+fL6XCg-) */
-		case SC_AQUAPLAY_OPTION:	/* +MKIwrzCiMNcw7DCk-(+fL6XCg-) */
-		case SC_GUST_OPTION:		/* +MKwwuTDI-(+fL6XCg-) */
-		case SC_PETROLOGY_OPTION:	/* +MNowyDDtMLgw/A-(+fL6XCg-) */
+		case SC_PYROTECHNIC_OPTION:	/* パイロテクニック(精霊) */
+		case SC_AQUAPLAY_OPTION:	/* アクアプレイ(精霊) */
+		case SC_GUST_OPTION:		/* ガスト(精霊) */
+		case SC_PETROLOGY_OPTION:	/* ペトロジー(精霊) */
 			val2 = tick / 10000;
 			tick = 10000;
-			val3 = 10;		// SP+bYiMu5HP-
+			val3 = 10;		// SP消費量
 			break;
-		case SC_HEATER_OPTION:		/* +MNIw/DC/MPw-(+fL6XCg-) */
-		case SC_COOLER_OPTION:		/* +MK8w/DDpMPw-(+fL6XCg-) */
-		case SC_BLAST_OPTION:		/* +MNYw6TC5MMg-(+fL6XCg-) */
-		case SC_CURSED_SOIL_OPTION:	/* +MKsw/DC5MMkwvTCkMOs-(+fL6XCg-) */
+		case SC_HEATER_OPTION:		/* ヒーター(精霊) */
+		case SC_COOLER_OPTION:		/* クーラー(精霊) */
+		case SC_BLAST_OPTION:		/* ブラスト(精霊) */
+		case SC_CURSED_SOIL_OPTION:	/* カースドソイル(精霊) */
 			val2 = tick / 10000;
 			tick = 10000;
-			val3 = 20;		// SP+bYiMu5HP-
+			val3 = 20;		// SP消費量
 			break;
-		case SC_TROPIC_OPTION:		/* +MMgw7TDUMMMwrw-(+fL6XCg-) */
-		case SC_CHILLY_AIR_OPTION:	/* +MK8w/DDrMKgwojD8-(+fL6XCg-) */
-		case SC_WILD_STORM_OPTION:	/* +MO8wpDDrMMkwuTDIMPww4A-(+fL6XCg-) */
-		case SC_UPHEAVAL_OPTION:	/* +MKIwwzDXMNgwpDDQMOs-(+fL6XCg-) */
+		case SC_TROPIC_OPTION:		/* トロピック(精霊) */
+		case SC_CHILLY_AIR_OPTION:	/* クールエアー(精霊) */
+		case SC_WILD_STORM_OPTION:	/* ワイルドストーム(精霊) */
+		case SC_UPHEAVAL_OPTION:	/* アップヘイバル(精霊) */
 			val2 = tick / 10000;
 			tick = 10000;
-			val3 = 30;		// SP+bYiMu5HP-
+			val3 = 30;		// SP消費量
 			break;
-		case SC_PARALYZE:			/* +nrt1+g- */
-			val2 = 1000;		// +XzdSNopgVTFmQpWT-(ms)
-			val3 = val1 * 5;	// Def, Mdef+bhtcEXOH-
+		case SC_PARALYZE:			/* 麻痺 */
+			val2 = 1000;		// 強制詠唱時間(ms)
+			val3 = val1 * 5;	// Def, Mdef減少率
 			break;
-		case SC_PAIN_KILLER:		/* +MNowpDDzMK0w6TD8- */
-			val4 = val1 * 100;	// +MMAw4TD8MLhuG1wRc4c-
+		case SC_PAIN_KILLER:		/* ペインキラー */
+			val4 = val1 * 100;	// ダメージ減少率
 			val4 = val4 * val2 / 100 * val3 / 150;
 			calc_flag = 1;
 			break;
-		case SC_LIGHT_OF_REGENE:	/* +UY11HzBuUUk- */
+		case SC_LIGHT_OF_REGENE:	/* 再生の光 */
 			val2 = 20 * val1;
 			break;
-		case SC_OVERED_BOOST:		/* +MKow/DDQMPwwyTDWMPwwuTDI- */
-			val3 = 300 +- val1 * 40;	// Flee+VvpbmlAk-
-			val4 = 410 - val1 * 40;	// Aspd+VvpbmlAk-
+		case SC_OVERED_BOOST:		/* オーバードブースト */
+			val3 = 300 + val1 * 40;	// Flee固定値
+			val4 = 410 - val1 * 40;	// Aspd固定値
 			calc_flag = 1;
 			break;
-		case SC_ANGRIFFS_MODUS:		/* +MKIw8zCwMOow1TC5MOIwyTC5- */
+		case SC_ANGRIFFS_MODUS:		/* アングリフスモドス */
 			val2 = tick / 1000;
-			val3 = 30 +- val1 * 20;	// Def+bhtcEVAk-
-			val4 = 40 +- val1 * 20;	// Flee+bhtcEVAk-
+			val3 = 30 + val1 * 20;	// Def減少値
+			val4 = 40 + val1 * 20;	// Flee減少値
 			tick = 1000;
 			calc_flag = 1;
 			break;
-		case SC_GOLDENE_FERSE:		/* +MLQw/DDrMMcw8zDaMOswuDCn- */
-			val2 = 10 +- val1 * 10;	// Flee+TgpmB1Ak-
-			val3 = 6 +- val1 * 4;	// Aspd+TgpmB3OH-
-			val4 = 25;			// +gFZcXmAnj/1SoDDAMOEw/DC4-
+		case SC_GOLDENE_FERSE:		/* ゴールデンペルジェ */
+			val2 = 10 + val1 * 10;	// Flee上昇値
+			val3 = 6 + val1 * 4;	// Aspd上昇率
+			val4 = 25;			// 聖属性追加ダメージ
 			calc_flag = 1;
 			break;
-		case SC_CBC:		/* +fV4wgWKA- */
+		case SC_CBC:		/* 絞め技 */
 			val2 = tick / 1000;
 			tick = 1000;
 			calc_flag = 1;
 			break;
 		case SC_EQC:				/* E.Q.C */
-			val3 = 2 * val1;	// MaxHP+bhtcEXOH-
-			val4 = 5 * val1;	// Atk+MAE-Def+bhtcEXOH-
+			val3 = 2 * val1;	// MaxHP減少率
+			val4 = 5 * val1;	// Atk、Def減少率
 			calc_flag = 1;
 			break;
-		case SC_MAGMA_FLOW:		/* +MN4wsDDeMNUw7TD8- */
-			val2 = 3 * val1;	// +dnpS1XOH-
+		case SC_MAGMA_FLOW:		/* マグマフロー */
+			val2 = 3 * val1;	// 発動率
 			break;
-		case SC_GRANITIC_ARMOR:	/* +MLAw6TDLMMYwozDDMK8wojD8MN4w/A- */
-			val2 = 2 * val1;	// +MMAw4TD8MLhuG1wRc4c-
-			if(val1 >= 4)	// +bYiMuw-HP+c4c-
+		case SC_GRANITIC_ARMOR:	/* グラニティックアーマー */
+			val2 = 2 * val1;	// ダメージ減少率
+			if(val1 >= 4)	// 消費HP率
 				val3 = (val1 - 2) * 5;
 			else if(val1 >= 2)
 				val3 = (val1 - 1) * 3;
 			else
 				val3 = 1;
 			break;
-		case SC_PYROCLASTIC:	/* +MNEwpDDtMK8w6TC5MMYwozDDMK8- */
-			val2 = 10 * val1 +- val4;	// +j/1SoA-Atk
-			val3 = 2 * val1;	// HF+c4c-
+		case SC_PYROCLASTIC:	/* パイロクラスティック */
+			val2 = 10 * val1 + val4;	// 追加Atk
+			val3 = 2 * val1;	// HF率
 			calc_flag = 1;
 			break;
-		case SC_VOLCANIC_ASH:	/* +cGtccXBw- */
+		case SC_VOLCANIC_ASH:	/* 火山灰 */
 			val2 = val3 = val4 = 0;
 			if(bl->type == BL_PC || bl->type == BL_MOB)
-				val2 = 50;	// +UWhb/oxh-
+				val2 = 50;	// 全対象
 			if(bl->type == BL_MOB) {
 				if(status_get_race(bl) == RCT_PLANT)
-					val3 = 50;	// +W/5pDXJp-Mob
+					val3 = 50;	// 対植物Mob
 				if((status_get_element(bl)%20) == ELE_WATER)
-					val4 = 50;	// +W/5sNFxeYCc-Mob
+					val4 = 50;	// 対水属性Mob
 			}
 			calc_flag = 1;
 			break;
-		case SC_FULL_THROTTLE:	/* +MNUw6zC5MO0wwzDIMOs- */
+		case SC_FULL_THROTTLE:	/* フルスロットル */
 			val2 = 20;
 			val3 = tick / 1000;
 			tick = 1000;
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
-		case SC_REBOUND:	/* +MOow0DCmMPMwyQ- */
+		case SC_REBOUND:	/* リバウンド */
 			val2 = tick / 2000;
 			tick = 2000;
 			calc_flag = 1;
@@ -10328,464 +10307,464 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				break;
 			}
 			break;
-		case SC_GRADUAL_GRAVITY:	/* +kc1Sm1iXUqA- */
-		case SC_KILLING_AURA:	/* +MK0w6jDzMLAwqjD8MOk- */
+		case SC_GRADUAL_GRAVITY:	/* 重力増加 */
+		case SC_KILLING_AURA:	/* キリングオーラ */
 			val3 = tick / 1000;
 			tick = 1000;
 			break;
-		case SC_LUNARSTANCE:	/* +ZwgwbmnLMEg- */
+		case SC_LUNARSTANCE:	/* 月の構え */
 			tick = 600*1000;
 			calc_flag = 1;
 			val2 = val1 * 10 - 5;
 			break;
-		case SC_UNIVERSESTANCE:	/* +W4dbmTBuacswSA- */
-		case SC_SUNSTANCE:	/* +WSqWfTBuacswSA- */
-		case SC_STARSTANCE:	/* +Zh8wbmnLMEg- */
+		case SC_UNIVERSESTANCE:	/* 宇宙の構え */
+		case SC_SUNSTANCE:	/* 太陽の構え */
+		case SC_STARSTANCE:	/* 星の構え */
 			tick = 600*1000;
 			calc_flag = 1;
 			val2 = val1 * 5;
 			break;
-		case SC_LIGHTOFMOON:	/* +ZwgwblFJ- */
-		case SC_LIGHTOFSUN:	/* +WSqWfTBuUUk- */
-		case SC_LIGHTOFSTAR:	/* +Zh8wblFJ- */
-			val2 = 5 * val1 +- 25;
+		case SC_LIGHTOFMOON:	/* 月の光 */
+		case SC_LIGHTOFSUN:	/* 太陽の光 */
+		case SC_LIGHTOFSTAR:	/* 星の光 */
+			val2 = 5 * val1 + 25;
 			break;
-		case SC_FLASHKICK:	/* +lYNRSYEa- */
-		case SC_NOVAEXPLOSING:	/* +ZbBmH3IGdno- */
-		case SC_GRAVITYCONTROL:	/* +kc1Sm4q/e8A- */
-		case SC_CREATINGSTAR:	/* +UnVmHzBuZvg- */
-		case SC_DIMENSION:	/* +ayFRQzBuZvg- */
-		case SC_DIMENSION1:	/* +ayFRQzBuZvg-(+ZbBmH3IGdno-) */
+		case SC_FLASHKICK:	/* 閃光脚 */
+		case SC_NOVAEXPLOSING:	/* 新星爆発 */
+		case SC_GRAVITYCONTROL:	/* 重力調節 */
+		case SC_CREATINGSTAR:	/* 創星の書 */
+		case SC_DIMENSION:	/* 次元の書 */
+		case SC_DIMENSION1:	/* 次元の書(新星爆発) */
 			break;
-		case SC_NEWMOON:		/* +ZxRnCIEa- */
-			val2 = 15;	// +MMAw4TD8MLiAEGAn-
+		case SC_NEWMOON:		/* 朔月脚 */
+			val2 = 15;	// ダメージ耐性
 			val3 = tick / 1000;
 			tick = 1000;
 			break;
-		case SC_FALLINGSTAR:	/* +bUFmH4Q9Tgs- */
+		case SC_FALLINGSTAR:	/* 流星落下 */
 			val2 = val1 <= 5 ? 20 : 25;
 			break;
-		case SC_DIMENSION2:	/* +ayFRQzBuZvg-(+Zh9eHZZNgeg-) */
-			val2 = 2;		// +dv4wblALZXA-
-			val3 = val4;	// +dv4wboAQTkVQJA-
+		case SC_DIMENSION2:	/* 次元の書(星帝降臨) */
+			val2 = 2;		// 盾の個数
+			val3 = val4;	// 盾の耐久値
 			if(sd)
 				clif_mshield(sd, val2);
 			break;
-		case SC_SOULCOLLECT:		/* +m0IwboTEek0- */
-			val2 = tick;		// +ML0wpjDrMKgwyjC4MPxzcl+XZkKVkw-
+		case SC_SOULCOLLECT:		/* 魂の蓄積 */
+			val2 = tick;		// ソウルエナジー獲得時間
 			icon_tick = -1;
 			break;
-		case SC_SOULREAPER:			/* +m0IwblPOems- */
-			val2 = val1;		// +ML0wpjDrMKgwyjC4MPxzcl+Xc4c-
+		case SC_SOULREAPER:			/* 魂の収穫 */
+			val2 = val1;		// ソウルエナジー獲得率
 			break;
-		case SC_SOULUNITY:		/* +m0IwbpAjfVA- */
+		case SC_SOULUNITY:		/* 魂の連結 */
 			{
 				int i, add = 600;
-				for(i = 0; i < val1; i+-+-) {
-					add +-= 100;
-					val2 = val2 +- add;		// HP+Vt5fqZHP-
+				for(i = 0; i < val1; i++) {
+					add += 100;
+					val2 = val2 + add;		// HP回復量
 				}
 				val3 = tick / 3000;
 				tick = 3000;
 			}
 			break;
-		case SC_SOULSHADOW:		/* +X3EwbptC- */
-			val2 = 70;				// Cri+WJdSoFAk-
-			val3 = (val1+-1)/2 * 10;	// Aspd+WJdSoFAk-
+		case SC_SOULSHADOW:		/* 影の魂 */
+			val2 = 70;				// Cri増加値
+			val3 = (val1+1)/2 * 10;	// Aspd増加値
 			calc_flag = 1;
 			break;
-		case SC_SOULFAIRY:		/* +WZZ8vjBum0I- */
-			val2 = 50;				// +iMVQmQ-Matk+WJdSoFAk-
-			val3 = 25 +- val1 * 5;	// +imBVMWZClZNuG1wRc4c-
+		case SC_SOULFAIRY:		/* 妖精の魂 */
+			val2 = 50;				// 装備Matk増加値
+			val3 = 25 + val1 * 5;	// 詠唱時間減少率
 			calc_flag = 1;
 			break;
-		case SC_SOULFALCON:		/* +nfkwbptC- */
-			val2 = 50;				// +iMVQmQ-Atk+WJdSoFAk-
-			val3 = 25 +- val1 * 25;	// Hit+WJdSoFAk-
+		case SC_SOULFALCON:		/* 鷹の魂 */
+			val2 = 50;				// 装備Atk増加値
+			val3 = 25 + val1 * 25;	// Hit増加値
 			calc_flag = 1;
 			break;
-		case SC_SOULGOLEM:		/* +MLQw/DDsMOAwbptC- */
-			val2 = 100;				// +iMVQmQ-Def+WJdSoFAk-
-			val3 = val1 * 10;		// +iMVQmQ-Mdef+WJdSoFAk-
+		case SC_SOULGOLEM:		/* ゴーレムの魂 */
+			val2 = 100;				// 装備Def増加値
+			val3 = val1 * 10;		// 装備Mdef増加値
 			calc_flag = 1;
 			break;
-		case SC_SOULDIVISION:	/* +m0IwblIGiMI- */
-			val2 = 100;				// +MMcwozDsMKRYl1Kgc4c-
+		case SC_SOULDIVISION:	/* 魂の分裂 */
+			val2 = 100;				// ディレイ増加率
 			break;
-		case SC_SHA:			/* +MKgwuTDP- */
-			val2 = 50;				// +eftS1ZAfXqZPTk4Lc4c-
+		case SC_SHA:			/* エスハ */
+			val2 = 50;				// 移動速度低下率
 			ud->state.change_speed = 1;
 			break;
-		case SC_HELPANGEL:		/* +WSlPfzBVMH5SqTBRMGY- */
+		case SC_HELPANGEL:		/* 天使さま助けて */
 			val2 = tick / 1000;
 			tick = 1000;
 			break;
-		case SC_HANDICAPSTATE_DEEPBLIND:		/* +bwae0g- */
+		case SC_HANDICAPSTATE_DEEPBLIND:		/* 漆黒 */
 			calc_flag = 1;
 			icon_tick = tick -= status_get_sta(bl) * 100;
 			break;
-		case SC_HANDICAPSTATE_DEEPSILENCE:		/* +l1lbwg- */
-			val2 = 500;		// ASPD+bhtcEVAk-
+		case SC_HANDICAPSTATE_DEEPSILENCE:		/* 静寂 */
+			val2 = 500;		// ASPD減少値
 			calc_flag = 1;
 			icon_tick = tick -= status_get_spl(bl) * 100;
 			break;
-		case SC_HANDICAPSTATE_LASSITUDE:		/* +cSFsF1Kb- */
+		case SC_HANDICAPSTATE_LASSITUDE:		/* 無気力 */
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			icon_tick = tick -= status_get_pow(bl) * 100;
 			break;
-		case SC_HANDICAPSTATE_FROSTBITE:		/* +YCVRtw- */
-			val2 = 50;		// Def/Mdef+bhtcEXOH-
+		case SC_HANDICAPSTATE_FROSTBITE:		/* 急冷 */
+			val2 = 50;		// Def/Mdef減少率
 			calc_flag = 1;
 			icon_tick = tick -= status_get_crt(bl) * 100;
 			break;
-		case SC_HANDICAPSTATE_SWOONING:			/* +WTF5Xg- */
+		case SC_HANDICAPSTATE_SWOONING:			/* 失神 */
 			icon_tick = tick -= status_get_sta(bl) * 100;
 			break;
-		case SC_HANDICAPSTATE_LIGHTNINGSTRIKE:	/* +b8BtQQ- */
-			val2 = 25;		// +VzBcXmAnMMAw4TD8MLhYl1Kgc4c-
+		case SC_HANDICAPSTATE_LIGHTNINGSTRIKE:	/* 激流 */
+			val2 = 25;		// 地属性ダメージ増加率
 			icon_tick = tick -= status_get_wis(bl) * 100;
 			break;
-		case SC_HANDICAPSTATE_CRYSTALLIZATION:	/* +fVBmdlMW- */
+		case SC_HANDICAPSTATE_CRYSTALLIZATION:	/* 結晶化 */
 			calc_flag = 1;
 			icon_tick = tick -= status_get_crt(bl) * 100;
 			break;
-		case SC_HANDICAPSTATE_CONFLAGRATION:	/* +cGtwfQ- */
+		case SC_HANDICAPSTATE_CONFLAGRATION:	/* 火災 */
 			icon_tick = tick -= status_get_spl(bl) * 100;
 			val2 = tick / 3000;
 			tick = 3000;
 			break;
-		case SC_HANDICAPSTATE_MISFORTUNE:		/* +Tg1eeA- */
+		case SC_HANDICAPSTATE_MISFORTUNE:		/* 不幸 */
 			calc_flag = 1;
 			icon_tick = tick -= status_get_crt(bl) * 100;
 			break;
-		case SC_HANDICAPSTATE_DEADLYPOISON:		/* +Xzdr0g- */
-			val2 = 25;		// +a9JcXmAnMMAw4TD8MLhYl1Kgc4c-
+		case SC_HANDICAPSTATE_DEADLYPOISON:		/* 強毒 */
+			val2 = 25;		// 毒属性ダメージ増加率
 			calc_flag = 1;
 			icon_tick = tick -= status_get_sta(bl) * 100;
 			val3 = tick / 1000;
 			tick = 1000;
 			break;
-		case SC_HANDICAPSTATE_DEPRESSION:		/* +YYKbMQ- */
+		case SC_HANDICAPSTATE_DEPRESSION:		/* 憂鬱 */
 			icon_tick = tick -= status_get_wis(bl) * 100;
 			val2 = tick / 3000;
 			tick = 3000;
 			break;
-		case SC_SERVANTWEAPON:		/* +MLUw/DD0MKEw8zDIMKYwpzDdMPM- */
-			val2 = 10 * val1;		// +a2ZWaE9TZTtkg3Z6UtVzhw-
-			val3 = skill_get_time2(DK_SERVANTWEAPON,val1);	// +a2ZWaE9TdR9iEGZClZM-
+		case SC_SERVANTWEAPON:		/* サーヴァントウェポン */
+			val2 = 10 * val1;		// 武器体攻撃発動率
+			val3 = skill_get_time2(DK_SERVANTWEAPON,val1);	// 武器体生成時間
 			val3 = (val3 < 100)? 100: val3;
 			val4 = tick / val3;
 			tick = val3;
 			if(sd)
 				pc_addball(sd,600000,MAX_BALL);
 			break;
-		case SC_CHARGINGPIERCE_COUNT:		/* +MMEw4zD8MLgw8zCwMLkw1DCi-(+Vt5lcA-) */
-			icon_val1 = val1;	// val1(+Vt5lcA-)+MJJuITBXMGYwojCkMLMw84hoeTowWTCL-
+		case SC_CHARGINGPIERCE_COUNT:		/* チャージングスピア(回数) */
+			icon_val1 = val1;	// val1(回数)を渡してアイコン表示する
 			break;
-		case SC_CLIMAX_DES_HU:	/* +MK8w6TCkMN4wwzCvMLkwzzDqMLEw/DDz- */
-			val2 = 200;			// Matk+WJdSoFAk-
-			val3 = 50;			// +mKhcXmAnMMAw4TD8MLhYl1Kgc4c-
+		case SC_CLIMAX_DES_HU:	/* クライマックスハリケーン */
+			val2 = 200;			// Matk増加値
+			val3 = 50;			// 風属性ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_CLIMAX:			/* +MK8w6TCkMN4wwzCvMLk- */
-			icon_val1 = val1;	// val1(+T391KDDsMNkw6w-)+MJJuITBXMGYwojCkMLMw84hoeTowWTCL-
+		case SC_CLIMAX:			/* クライマックス */
+			icon_val1 = val1;	// val1(使用レベル)を渡してアイコン表示する
 			break;
-		case SC_CLIMAX_EARTH:	/* +MK8w6TCkMN4wwzCvMLkwrzCoMKQwrw- */
-			val2 = 50;			// +VzBcXmAnMMAw4TD8MLhYl1Kgc4c-
+		case SC_CLIMAX_EARTH:	/* クライマックスクエイク */
+			val2 = 50;			// 地属性ダメージ増加率
 			break;
-		case SC_CLIMAX_BLOOM:	/* +MK8w6TCkMN4wwzCvMLkw1jDrMPww4A- */
-			val2 = 50;			// +cGtcXmAnMMAw4TD8MLhYl1Kgc4c-
+		case SC_CLIMAX_BLOOM:	/* クライマックスブルーム */
+			val2 = 50;			// 火属性ダメージ増加率
 			break;
-		case SC_CLIMAX_CRYIMP:	/* +MK8w6TCkMN4wwzCvMLkwpDDzMNEwrzDI- */
-			val2 = 300;			// Def+WJdSoFAk-
-			val3 = 50;			// Mdef+WJdSoFAk-
-			val4 = 25;			// +bDRcXmAnMMAw4TD8MLhuG1wRc4c-/+bDRcXmAnMMAw4TD8MLhYl1Kgc4c-
+		case SC_CLIMAX_CRYIMP:	/* クライマックスインパクト */
+			val2 = 300;			// Def増加値
+			val3 = 50;			// Mdef増加値
+			val4 = 25;			// 水属性ダメージ減少率/水属性ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_POWERFUL_FAITH:		/* +XzeXbTBqT+Ff9Q- */
-			val2 = 100;			// Atk+WJdSoFAk-
-			val3 = (val1 > 2)? 5*(val1-2): 1+-2*(val1-1);	// P.Atk+WJdSoFAk-
+		case SC_POWERFUL_FAITH:		/* 強靭な信念 */
+			val2 = 100;			// Atk増加値
+			val3 = (val1 > 2)? 5*(val1-2): 1+2*(val1-1);	// P.Atk増加値
 			calc_flag = 1;
 			break;
-		case SC_FIRM_FAITH:		/* +WAVW+jBqT+Ff9Q- */
-			val2 = 10;			// MaxHP+WJdSoHOH-
-			val3 = (val1 > 2)? 10+-30*(val1-2): 10*val1;		// Res+WJdSoFAk-
+		case SC_FIRM_FAITH:		/* 堅固な信念 */
+			val2 = 10;			// MaxHP増加率
+			val3 = (val1 > 2)? 10+30*(val1-2): 10*val1;		// Res増加値
 			calc_flag = 1;
 			break;
-		case SC_SINCERE_FAITH:		/* +X+BbnzBqT+Ff9Q- */
-			val2 = 10;			// Aspd+WJdSoFAk-
-			val3 = (val1 > 2)? 5*(val1-2): 1+-2*(val1-1);	// +X8VOLWU7ZINYl1Kgc4c-
+		case SC_SINCERE_FAITH:		/* 忠実な信念 */
+			val2 = 10;			// Aspd増加値
+			val3 = (val1 > 2)? 5*(val1-2): 1+2*(val1-1);	// 必中攻撃増加率
 			calc_flag = 1;
 			break;
-		case SC_GUARD_STANCE:		/* +MKww/DDJMLkwvzDzMLk- */
-			val2 = (val1 > 4)? 60*val1: 50*val1;		// Def+WJdSoFAk-
-			val3 = 10*val1;		// Atk+bhtcEVAk-
+		case SC_GUARD_STANCE:		/* ガードスタンス */
+			val2 = (val1 > 4)? 60*val1: 50*val1;		// Def増加値
+			val3 = 10*val1;		// Atk減少値
 			calc_flag = 1;
 			break;
-		case SC_ATTACK_STANCE:		/* +MKIwvzDDMK8wuTC/MPMwuQ- */
-			val2 = (val1 > 2)? 5*(val1-2): 1+-2*(val1-1);	// P.Atk/S.Matk+WJdSoFAk-
-			val3 = 10*val1;		// Def+bhtcEVAk-
+		case SC_ATTACK_STANCE:		/* アタックスタンス */
+			val2 = (val1 > 2)? 5*(val1-2): 1+2*(val1-1);	// P.Atk/S.Matk増加値
+			val3 = 10*val1;		// Def減少値
 			calc_flag = 1;
 			break;
-		case SC_HOLY_S:		/* +MNsw/DDqMPwwtzD8MOswyQ- */
-			val2 = 5*val1;		// +gFZcXmAnm1Rs1TDAMOEw/DC4WJdSoHOH-
-			val3 = 3*val1;		// +lcc-/+Tg1re1xeYCcwwDDhMPwwuG4bXBFzhw-
+		case SC_HOLY_S:		/* ホーリーシールド */
+			val2 = 5*val1;		// 聖属性魔法ダメージ増加率
+			val3 = 3*val1;		// 闇/不死属性ダメージ減少率
 			calc_flag = 1;
 			break;
-		case SC_MEDIALE:		/* +MOEwxzCjMKIw6jDcMMgwpTDg- */
-			//val2				// +UrlnnHvEVvI-(+MLkwrTDrT391KGZCMGuKLVua-)
-			val3 = skill_get_time2(CD_MEDIALE_VOTUM,val1);	// +Vt5fqZWTlpQ-
+		case SC_MEDIALE:		/* メディアリボトゥム */
+			//val2				// 効果範囲(スキル使用時に設定)
+			val3 = skill_get_time2(CD_MEDIALE_VOTUM,val1);	// 回復間隔
 			val3 = (val3 < 100)? 100: val3;
 			val4 = tick / val3;
 			tick = val3;
 			skill_castend_nodamage_id(bl,bl,CD_MEDIALE_VOTUM,val1,tick,0x10|val2);
 			break;
-		case SC_A_VITA:			/* +MKIw6zCwMMgwpTC5MPQwozC/- */
-			val2 = 5*val1;		// Mres+cSGJlnOH-
+		case SC_A_VITA:			/* アルグトゥスヴィタ */
+			val2 = 5*val1;		// Mres無視率
 			break;
-		case SC_A_TELUM:		/* +MKIw6zCwMMgwpTC5MMYw6zDg- */
-			val2 = 5*val1;		// Res+cSGJlnOH-
+		case SC_A_TELUM:		/* アルグトゥステルム */
+			val2 = 5*val1;		// Res無視率
 			break;
-		case SC_PRE_ACIES:		/* +MNcw7DC7MPMwuTCiMK0wqDD8MLk- */
-			val2 = 5*val1;		// C.Rate+WJdSoFAk-
+		case SC_PRE_ACIES:		/* プレセンスアキエース */
+			val2 = 5*val1;		// C.Rate増加値
 			calc_flag = 1;
 			break;
-		case SC_COMPETENTIA:	/* +MLMw8zDaMMYw8zDGMKMwog- */
-			val2 = 20+-val1*2;	// P.Atk+WJdSoFAk-
-			val3 = 20+-val1*2;	// S.Matk+WJdSoFAk-
+		case SC_COMPETENTIA:	/* コンペテンティア */
+			val2 = 20+val1*2;	// P.Atk増加値
+			val3 = 20+val1*2;	// S.Matk増加値
 			calc_flag = 1;
 			break;
-		case SC_RELIGIO:		/* +MOww6jCuMKo- */
-			// +MLUw8zDJMNUwpzC5MMYwozDQMOswTGObMEswYzBmMEQwXzCJieOWZA-
+		case SC_RELIGIO:		/* レリギオ */
+			// サンドフェスティバルが掛かっていたら解除
 			if(sc->data[SC_SANDY_FESTIVAL].timer != -1)
 				status_change_end(bl,SC_SANDY_FESTIVAL,-1);
-			val2 = val1*2;		// Sta+WJdSoFAk-
-			val3 = val1*2;		// Wis+WJdSoFAk-
-			val4 = val1*2;		// Spl+WJdSoFAk-
+			val2 = val1*2;		// Sta増加値
+			val3 = val1*2;		// Wis増加値
+			val4 = val1*2;		// Spl増加値
 			calc_flag = 1;
 			break;
-		case SC_BENEDICTUM:		/* +MNkwzTDHMKMwrzDIMKUw4A- */
-			// +MN4w6jDzMNUwpzC5MMYwozDQMOswTGObMEswYzBmMEQwXzCJieOWZA-
+		case SC_BENEDICTUM:		/* ベネディクトゥム */
+			// マリンフェスティバルが掛かっていたら解除
 			if(sc->data[SC_MARINE_FESTIVAL].timer != -1)
 				status_change_end(bl,SC_MARINE_FESTIVAL,-1);
-			val2 = val1*2;		// Pow+WJdSoFAk-
-			val3 = val1*2;		// Con+WJdSoFAk-
-			val4 = val1*2;		// Crt+WJdSoFAk-
+			val2 = val1*2;		// Pow増加値
+			val3 = val1*2;		// Con増加値
+			val4 = val1*2;		// Crt増加値
 			calc_flag = 1;
 			break;
-		case SC_DANCING_KNIFE:	/* +MMAw8zC3MPMwsDDKMKQw1Q- */
-			val2 = skill_get_time2(SHC_DANCING_KNIFE,val1);	// +ZTtkg5WTlpQ-
+		case SC_DANCING_KNIFE:	/* ダンシングナイフ */
+			val2 = skill_get_time2(SHC_DANCING_KNIFE,val1);	// 攻撃間隔
 			val2 = (val2 < 100)? 100: val2;
 			val3 = tick / val2;
 			tick = val2;
 			break;
-		case SC_E_SLASH_COUNT:		/* +MKgwvzD8MMow6zCrMKYw8zC/MPw- */
-			icon_val1 = val1;	// val1(+Vt5lcA-)+MJJuITBXMGYwojCkMLMw84hoeTowWTCL-
+		case SC_E_SLASH_COUNT:		/* エターナルカウンター */
+			icon_val1 = val1;	// val1(回数)を渡してアイコン表示する
 			break;
-		case SC_POTENT_VENOM:		/* +MN0wxjDzMMgw2TDKMOA- */
-			val2 = 20+-val1;		// Res+cSGJlnOH-
+		case SC_POTENT_VENOM:		/* ポテントベナム */
+			val2 = 20+val1;		// Res無視率
 			break;
-		case SC_SHADOW_WEAPON:		/* +MKgw8zDBMOMw8zDGMKMw8zCwMLcw4zDJMKY- */
-			val2 = val1;		// +MLcw4zDJMKYw2jCkMPNO2E4Oc4c-
+		case SC_SHADOW_WEAPON:		/* エンチャンティングシャドウ */
+			val2 = val1;		// シャドウペイン付与率
 			break;
-		case SC_SHADOW_SCAR:		/* +MLcw4zDJMKYw2jCkMPM- */
-			icon_val1 = val1;		// val1(+Vt5lcA-)+MJJuITBXMGYwojCkMLMw84hoeTowWTCL-
-			val2 = val1 * 3;		// +j9FjpTDAMOEw/DC4WJdSoHOH-
+		case SC_SHADOW_SCAR:		/* シャドウペイン */
+			icon_val1 = val1;		// val1(回数)を渡してアイコン表示する
+			val2 = val1 * 3;		// 近接ダメージ増加率
 			break;
-		case SC_RUSH_QUAKE1:		/* +MK8wqDCkMK8- */
-			val2 = 15;				// +cml0BjDAMOEw/DC4WJdSoHOH-
+		case SC_RUSH_QUAKE1:		/* クエイク */
+			val2 = 15;				// 物理ダメージ増加率
 			break;
-		case SC_RUSH_QUAKE2:		/* +MOkwwzC3MOU- */
-			val2 = val1 * 2;		// +j9FjpQ-/+kGCN3ZbiMMAw4TD8MLhYl1Kgc4c-
+		case SC_RUSH_QUAKE2:		/* ラッシュ */
+			val2 = val1 * 2;		// 近接/遠距離ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_A_MACHINE:		/* +ZTtkg4jFf25nCVK5UxY- */
-			val2 = skill_get_time2(MT_A_MACHINE,val1);	// +ZTtkg5WTlpQ-
+		case SC_A_MACHINE:		/* 攻撃装置有効化 */
+			val2 = skill_get_time2(MT_A_MACHINE,val1);	// 攻撃間隔
 			val2 = (val2 < 100)? 100: val2;
 			val3 = tick / val2;
 			tick = val2;
 			break;
-		case SC_D_MACHINE:		/* +ljJfoYjFf25nCVK5UxY- */
-			val2 = 300;			// Def+WJdSoFAk-
-			val3 = ((val1 < 4)? 10+-val1*10: (val1 == 4)? 60: 100);		// Res+WJdSoFAk-
+		case SC_D_MACHINE:		/* 防御装置有効化 */
+			val2 = 300;			// Def増加値
+			val3 = ((val1 < 4)? 10+val1*10: (val1 == 4)? 60: 100);		// Res増加値
 			calc_flag = 1;
 			break;
-		case SC_SHADOW_STRIP:	/* +MLkwyDDqMMMw1zC3MOMwyTCm- */
-			val2 = 50;			// Res/Mres+bhtcEVAk-
+		case SC_SHADOW_STRIP:	/* ストリップシャドウ */
+			val2 = 50;			// Res/Mres減少値
 			calc_flag = 1;
 			break;
-		case SC_ABYSS_SLAYER:	/* +MKIw0zC5MLkw7DCkMOQw/A- */
-			val2 = val1 * 2;		// P.Atk/S.Matk+WJdSoFAk-
-			val3 = (val1+-1)/2 * 50;	// Hit+WJdSoFAk-
+		case SC_ABYSS_SLAYER:	/* アビススレイヤー */
+			val2 = val1 * 2;		// P.Atk/S.Matk増加値
+			val3 = (val1+1)/2 * 50;	// Hit増加値
 			calc_flag = 1;
 			break;
-		case SC_ABYSSFORCEWEAPON:		/* +MNUw7TDgMLgwojDTMLk- */
-			val2 = 10 * val1;		// +MKIw0zC5dANPU2U7ZIN2elLVc4c-
-			val3 = skill_get_time2(ABC_FROM_THE_ABYSS,val1);	// +MKIw0zC5dANPU3UfYhBmQpWT-
+		case SC_ABYSSFORCEWEAPON:		/* フロムジアビス */
+			val2 = 10 * val1;		// アビス球体攻撃発動率
+			val3 = skill_get_time2(ABC_FROM_THE_ABYSS,val1);	// アビス球体生成時間
 			val3 = (val3 < 100)? 100: val3;
 			val4 = tick / val3;
 			tick = val3;
 			if(sd)
 				pc_addball(sd,600000,MAX_BALL);
 			break;
-		case SC_WINDSIGN:	/* +MKYwozDzMMkwtTCkMPM- */
-			val2 = 50 +- val1 * 10;		// AP+Vt5fqXi6c4c-
+		case SC_WINDSIGN:	/* ウィンドサイン */
+			val2 = 50 + val1 * 10;		// AP回復確率
 			break;
-		case SC_BO_HELL_DUSTY:		/* +MNgw6zDAMLkwxjCj- */
-			val2 = 20;		// +cSEw+2kNcmlfYjDAMOEw/DC4WJdSoHOH-
-			val3 = 20;		// +kGCN3ZbiMMAw4TD8MLhYl1Kgc4c-
+		case SC_BO_HELL_DUSTY:		/* ヘルダスティ */
+			val2 = 20;		// 無・植物形ダメージ増加率
+			val3 = 20;		// 遠距離ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_MYSTIC_SYMPHONY:	/* +MN8wuTDGMKMwwzCvMLcw8zDVMKkwyzD8- */
-			val2 = 50;		// +MMAw4TD8MLhYl1Kgc4c-
+		case SC_MYSTIC_SYMPHONY:	/* ミスティックシンフォニー */
+			val2 = 50;		// ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_SOUNDBLEND:			/* +MLUwpjDzMMkw1jDsMPMwyQ- */
+		case SC_SOUNDBLEND:			/* サウンドブレンド */
 			tick = tick - 200;
 			break;
-		case SC_GEF_NOCTURN:		/* +MLIw1TCnMMswojDOMK8wvzD8MPM- */
+		case SC_GEF_NOCTURN:		/* ゲフェニアノクターン */
 			val3 = 10 * val1;
-			if(val2 > 1) {		// +MNEw/DDIMMow/DBMXEUwi1g0VAg-
+			if(val2 > 1) {		// パートナーが居る場合
 				val3 = val3 * 15 / 10;
 			}
 			calc_flag = 1;
 			break;
-		case SC_AIN_RHAPSODY:		/* +knFU4TBuMOkw1zC9MMcwow- */
+		case SC_AIN_RHAPSODY:		/* 鉱員のラプソディ */
 			val3 = 10 * val1;
-			if(val2 > 1) {		// +MNEw/DDIMMow/DBMXEUwi1g0VAg-
+			if(val2 > 1) {		// パートナーが居る場合
 				val3 = val3 * 15 / 10;
 			}
 			calc_flag = 1;
 			break;
-		case SC_MUSICAL_INTERLUDE:	/* +MN8w5TD8MLgwqzDrMKQw8zC/MPww6zD8MMk- */
-			val3 = ((val1 < 4)? 10+-val1*10: (val1 == 4)? 60: 100);		// Res+WJdSoFAk-
-			if(val2 > 1) {		// +MNEw/DDIMMow/DBMXEUwi1g0VAg-
+		case SC_MUSICAL_INTERLUDE:	/* ミュージカルインタールード */
+			val3 = ((val1 < 4)? 10+val1*10: (val1 == 4)? 60: 100);		// Res増加値
+			if(val2 > 1) {		// パートナーが居る場合
 				val3 = val3 * 15 / 10;
 			}
 			calc_flag = 1;
 			break;
-		case SC_JAWAII_SERENADE:	/* +WRVxPDBRMG4wuzDsMMow/DDH- */
-			val3 = 1 +- ((val1 > 1)? 2: 0) +- ((val1 > 2)? 2: 0) +- ((val1 > 3)? 3: 0) +- ((val1 > 4)? 4: 0);		// S.Matk+WJdSoFAk-
-			if(val2 > 1) {		// +MNEw/DDIMMow/DBMXEUwi1g0VAg-
+		case SC_JAWAII_SERENADE:	/* 夕焼けのセレナーデ */
+			val3 = 1 + ((val1 > 1)? 2: 0) + ((val1 > 2)? 2: 0) + ((val1 > 3)? 3: 0) + ((val1 > 4)? 4: 0);		// S.Matk増加値
+			if(val2 > 1) {		// パートナーが居る場合
 				val3 = val3 * 15 / 10;
 			}
-			val4 = 35;			// +eftS1TDHMKMw7DCkbhtcEXOH-
+			val4 = 35;			// 移動ディレイ減少率
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
-		case SC_PRON_MARCH:			/* +MNcw7TDzMMYw6TDeMPwwwQ- */
-			val3 = 1 +- ((val1 > 1)? 2: 0) +- ((val1 > 2)? 2: 0) +- ((val1 > 3)? 3: 0) +- ((val1 > 4)? 4: 0);		// P.Atk+WJdSoFAk-
-			if(val2 > 1) {		// +MNEw/DDIMMow/DBMXEUwi1g0VAg-
+		case SC_PRON_MARCH:			/* プロンテラマーチ */
+			val3 = 1 + ((val1 > 1)? 2: 0) + ((val1 > 2)? 2: 0) + ((val1 > 3)? 3: 0) + ((val1 > 4)? 4: 0);		// P.Atk増加値
+			if(val2 > 1) {		// パートナーが居る場合
 				val3 = val3 * 15 / 10;
 			}
-			val4 = 35;			// +eftS1TDHMKMw7DCkbhtcEXOH-
+			val4 = 35;			// 移動ディレイ減少率
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
-		case SC_SPELL_ENCHANTING:	/* +MLkw2jDrMKgw8zDBMOMw8zDGMKMw8zCw- */
-			val2 = val1*5;	// S.Matk+WJdSoFAk-
+		case SC_SPELL_ENCHANTING:	/* スペルエンチャンティング */
+			val2 = val1*5;	// S.Matk増加値
 			calc_flag = 1;
 			break;
-		case SC_SUMMON_ELEMENTAL_ARDOR:			/* +MLUw4jDzMKIw6zDJMPww6w- */
-		case SC_SUMMON_ELEMENTAL_DILUVIO:		/* +MLUw4jDzMMcwozDrMNMwqg- */
-		case SC_SUMMON_ELEMENTAL_PROCELLA:		/* +MLUw4jDzMNcw7TC7MOk- */
-		case SC_SUMMON_ELEMENTAL_TERREMOTUS:	/* +MLUw4jDzMMYw7DDiMMgwpTC5- */
-		case SC_SUMMON_ELEMENTAL_SERPENS:		/* +MLUw4jDzMLUw/DDaMPMwuQ- */
-			val2 = 10;	// +XF5gJ5tUbNUwwDDhMPwwuFiXUqBzhw-
+		case SC_SUMMON_ELEMENTAL_ARDOR:			/* サモンアルドール */
+		case SC_SUMMON_ELEMENTAL_DILUVIO:		/* サモンディルビオ */
+		case SC_SUMMON_ELEMENTAL_PROCELLA:		/* サモンプロセラ */
+		case SC_SUMMON_ELEMENTAL_TERREMOTUS:	/* サモンテレモトゥス */
+		case SC_SUMMON_ELEMENTAL_SERPENS:		/* サモンサーペンス */
+			val2 = 10;	// 属性魔法ダメージ増加率
 			val3 = tick / 1000;
 			tick = 1000;
 			calc_flag = 1;
 			break;
-		case SC_FLAMETECHNIC:		/* +MNUw7DCkMOAwxjCvMMswwzCv- */
-		case SC_COLD_FORCE:			/* +MLMw/DDrMMkw1TCpMPwwuQ- */
-		case SC_GRACE_BREEZE:		/* +MLAw7DCkMLkw1jDqMPwwug- */
-		case SC_EARTH_CARE:			/* +MKIw/DC5MLEwog- */
-			val2 = 75;		// +MNww6zDIfPswwDDhMPwwuFiXUqBzhw-
+		case SC_FLAMETECHNIC:		/* フレイムテクニック */
+		case SC_COLD_FORCE:			/* コールドフォース */
+		case SC_GRACE_BREEZE:		/* グレイスブリーズ */
+		case SC_EARTH_CARE:			/* アースケア */
+			val2 = 75;		// ボルト系ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_DEEP_POISONING:		/* +MMcwozD8MNcw3TCkMLowyzDzMLA- */
-			val2 = 200;		// +MK8w6TCmMMkwrTDrMMAw4TD8MLhYl1Kgc4c-
+		case SC_DEEP_POISONING:		/* ディープポイズニング */
+			val2 = 200;		// クラウドキルダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_FLAMEARMOR:			/* +MNUw7DCkMOAwojD8MN4w/A- */
-		case SC_CRYSTAL_ARMOR:		/* +MK8w6jC5ML8w6zCiMPww3jD8- */
-		case SC_EYES_OF_STORM:		/* +MKIwpDC6MKow1jC5MMgw/DDg- */
-		case SC_STRONG_PROTECTION:	/* +MLkwyDDtMPMwsDDXMO0wxjCvMLcw5zDz- */
-		case SC_POISON_SHIELD:		/* +MN0wpDC6MPMwtzD8MOswyQ- */
-			val2 = 95;		// +XF5gJzDAMOEw/DC4jv1uG3OH-
+		case SC_FLAMEARMOR:			/* フレイムアーマー */
+		case SC_CRYSTAL_ARMOR:		/* クリスタルアーマー */
+		case SC_EYES_OF_STORM:		/* アイズオブストーム */
+		case SC_STRONG_PROTECTION:	/* ストロングプロテクション */
+		case SC_POISON_SHIELD:		/* ポイズンシールド */
+			val2 = 95;		// 属性ダメージ軽減率
 			calc_flag = 1;
 			break;
-		case SC_FLAMETECHNIC_OPTION:		/* +MNUw7DCkMOAwxjCvMMswwzCv-(+fL6XCg-) */
+		case SC_FLAMETECHNIC_OPTION:		/* フレイムテクニック(精霊) */
 			val2 = tick / 10000;
 			tick = 10000;
-			val3 = skill_get_sp(EM_EL_FLAMETECHNIC,val1);		// SP+bYiMu5HP-
+			val3 = skill_get_sp(EM_EL_FLAMETECHNIC,val1);		// SP消費量
 			break;
-		case SC_FLAMEARMOR_OPTION:			/* +MNUw7DCkMOAwojD8MN4w/A-(+fL6XCg-) */
+		case SC_FLAMEARMOR_OPTION:			/* フレイムアーマー(精霊) */
 			val2 = tick / 1000;
 			tick = 1000;
-			val3 = skill_get_sp(EM_EL_FLAMEARMOR,val1) / 10;		// SP+bYiMu5HP-
+			val3 = skill_get_sp(EM_EL_FLAMEARMOR,val1) / 10;		// SP消費量
 			break;
-		case SC_COLD_FORCE_OPTION:			/* +MLMw/DDrMMkw1TCpMPwwuQ-(+fL6XCg-) */
+		case SC_COLD_FORCE_OPTION:			/* コールドフォース(精霊) */
 			val2 = tick / 10000;
 			tick = 10000;
-			val3 = skill_get_sp(EM_EL_COLD_FORCE,val1);		// SP+bYiMu5HP-
+			val3 = skill_get_sp(EM_EL_COLD_FORCE,val1);		// SP消費量
 			break;
-		case SC_CRYSTAL_ARMOR_OPTION:		/* +MK8w6jC5ML8w6zCiMPww3jD8-(+fL6XCg-) */
+		case SC_CRYSTAL_ARMOR_OPTION:		/* クリスタルアーマー(精霊) */
 			val2 = tick / 1000;
 			tick = 1000;
-			val3 = skill_get_sp(EM_EL_CRYSTAL_ARMOR,val1) / 10;		// SP+bYiMu5HP-
+			val3 = skill_get_sp(EM_EL_CRYSTAL_ARMOR,val1) / 10;		// SP消費量
 			break;
-		case SC_GRACE_BREEZE_OPTION:		/* +MLAw7DCkMLkw1jDqMPwwug-(+fL6XCg-) */
+		case SC_GRACE_BREEZE_OPTION:		/* グレイスブリーズ(精霊) */
 			val2 = tick / 10000;
 			tick = 10000;
-			val3 = skill_get_sp(EM_EL_GRACE_BREEZE,val1);		// SP+bYiMu5HP-
+			val3 = skill_get_sp(EM_EL_GRACE_BREEZE,val1);		// SP消費量
 			break;
-		case SC_EYES_OF_STORM_OPTION:		/* +MKIwpDC6MKow1jC5MMgw/DDg-(+fL6XCg-) */
+		case SC_EYES_OF_STORM_OPTION:		/* アイズオブストーム(精霊) */
 			val2 = tick / 1000;
 			tick = 1000;
-			val3 = skill_get_sp(EM_EL_EYES_OF_STORM,val1) / 10;		// SP+bYiMu5HP-
+			val3 = skill_get_sp(EM_EL_EYES_OF_STORM,val1) / 10;		// SP消費量
 			break;
-		case SC_EARTH_CARE_OPTION:			/* +MKIw/DC5MLEwog-(+fL6XCg-) */
+		case SC_EARTH_CARE_OPTION:			/* アースケア(精霊) */
 			val2 = tick / 10000;
 			tick = 10000;
-			val3 = skill_get_sp(EM_EL_EARTH_CARE,val1);		// SP+bYiMu5HP-
+			val3 = skill_get_sp(EM_EL_EARTH_CARE,val1);		// SP消費量
 			break;
-		case SC_STRONG_PROTECTION_OPTION:	/* +MLkwyDDtMPMwsDDXMO0wxjCvMLcw5zDz-(+fL6XCg-) */
+		case SC_STRONG_PROTECTION_OPTION:	/* ストロングプロテクション(精霊) */
 			val2 = tick / 1000;
 			tick = 1000;
-			val3 = skill_get_sp(EM_EL_STRONG_PROTECTION,val1) / 10;		// SP+bYiMu5HP-
+			val3 = skill_get_sp(EM_EL_STRONG_PROTECTION,val1) / 10;		// SP消費量
 			break;
-		case SC_DEEP_POISONING_OPTION:		/* +MMcwozD8MNcw3TCkMLowyzDzMLA-(+fL6XCg-) */
+		case SC_DEEP_POISONING_OPTION:		/* ディープポイズニング(精霊) */
 			val2 = tick / 10000;
 			tick = 10000;
-			val3 = skill_get_sp(EM_EL_DEEP_POISONING,val1);		// SP+bYiMu5HP-
+			val3 = skill_get_sp(EM_EL_DEEP_POISONING,val1);		// SP消費量
 			break;
-		case SC_POISON_SHIELD_OPTION:		/* +MN0wpDC6MPMwtzD8MOswyQ-(+fL6XCg-) */
+		case SC_POISON_SHIELD_OPTION:		/* ポイズンシールド(精霊) */
 			val2 = tick / 1000;
 			tick = 1000;
-			val3 = skill_get_sp(EM_EL_POISON_SHIELD,val1) / 10;		// SP+bYiMu5HP-
+			val3 = skill_get_sp(EM_EL_POISON_SHIELD,val1) / 10;		// SP消費量
 			break;
-		case SC_INTENSIVE_AIM:			/* +MKQw8zDGMPMwtzDWMKgwpDDg- */
+		case SC_INTENSIVE_AIM:			/* インテンシブエイム */
 			tick = 300;
-			val2 = 100;			// +iMVQmQ-Atk+WJdSoFAk-
-			val3 = 250;			// Hit+WJdSoFAk-
-			val4 = 50;			// Cri+WJdSoFAk-
+			val2 = 100;			// 装備Atk増加値
+			val3 = 250;			// Hit増加値
+			val4 = 50;			// Cri増加値
 			calc_flag = 1;
 			break;
-		case SC_INTENSIVE_AIM_COUNT:	/* +MKQw8zDGMPMwtzDWMKgwpDDg-(+MKswpjDzMMg-) */
+		case SC_INTENSIVE_AIM_COUNT:	/* インテンシブエイム(カウント) */
 			tick = 600*1000;
-			icon_val1 = val1;	// val1(+Vt5lcA-)+MJJuITBXMGYwojCkMLMw84hoeTowWTCL-
+			icon_val1 = val1;	// val1(回数)を渡してアイコン表示する
 			break;
-		case SC_GRENADE_FRAGMENT_1:		/* +MLAw7DDNMPwwyTDVMOkwsDDhMPMwyA-(+bDRcXmAn-) */
-		case SC_GRENADE_FRAGMENT_2:		/* +MLAw7DDNMPwwyTDVMOkwsDDhMPMwyA-(+mKhcXmAn-) */
-		case SC_GRENADE_FRAGMENT_3:		/* +MLAw7DDNMPwwyTDVMOkwsDDhMPMwyA-(+VzBcXmAn-) */
-		case SC_GRENADE_FRAGMENT_4:		/* +MLAw7DDNMPwwyTDVMOkwsDDhMPMwyA-(+cGtcXmAn-) */
-		case SC_GRENADE_FRAGMENT_5:		/* +MLAw7DDNMPwwyTDVMOkwsDDhMPMwyA-(+lcdcXmAn-) */
-		case SC_GRENADE_FRAGMENT_6:		/* +MLAw7DDNMPwwyTDVMOkwsDDhMPMwyA-(+gFZcXmAn-) */
+		case SC_GRENADE_FRAGMENT_1:		/* グレネードフラグメント(水属性) */
+		case SC_GRENADE_FRAGMENT_2:		/* グレネードフラグメント(風属性) */
+		case SC_GRENADE_FRAGMENT_3:		/* グレネードフラグメント(地属性) */
+		case SC_GRENADE_FRAGMENT_4:		/* グレネードフラグメント(火属性) */
+		case SC_GRENADE_FRAGMENT_5:		/* グレネードフラグメント(闇属性) */
+		case SC_GRENADE_FRAGMENT_6:		/* グレネードフラグメント(聖属性) */
 			{
 				int i;
-				for(i = SC_GRENADE_FRAGMENT_1; i <= SC_GRENADE_FRAGMENT_6; i+-+-) {
+				for(i = SC_GRENADE_FRAGMENT_1; i <= SC_GRENADE_FRAGMENT_6; i++) {
 					if(i == type)
 						continue;
 					if(sc->data[i].timer != -1)
@@ -10793,73 +10772,73 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				}
 			}
 			break;
-		case SC_AUTO_FIRING_LAUNCHEREFST:	/* +MKow/DDIMNUwoTCkMKIw6jDzMLAw6TDzMMEw4zD8- */
-			val2 = 450 +- val1 * 50;		// +MNkw/DC3MMMwrzCwMOwwzTD8MMl4unOH-(+TgdSBnOH-)
-			val3 = 200 +- val1 * 50;		// +MNgwpDC5MMYwozDVMKEwpDCiMKQw8zC2MNsw/DDreLpzhw-(+TgdSBnOH-)
-			val4 = 100 +- val1 * 50;		// +MLAw7DDNMPwwujDJMO0wwzDUMPMwsHi6c4c-(+TgdSBnOH-)
+		case SC_AUTO_FIRING_LAUNCHEREFST:	/* オートファイアリングランチャー */
+			val2 = 450 + val1 * 50;		// ベーシックグレネード確率(万分率)
+			val3 = 200 + val1 * 50;		// ヘイスティファイアインザホール確率(万分率)
+			val4 = 100 + val1 * 50;		// グレネーズドロッピング確率(万分率)
 			break;
-		case SC_HIDDEN_CARD:			/* +MNIwyTClMPMwqzD8MMk- */
-			val2 = 5 +- val1;		// P.Atk+WJdSoFAk-
-			val3 = 100 +- val1 * 5;	// +kGCN3Zbicml0BliXUqBQJA-
+		case SC_HIDDEN_CARD:			/* ヒドゥンカード */
+			val2 = 5 + val1;		// P.Atk増加値
+			val3 = 100 + val1 * 5;	// 遠距離物理増加値
 			calc_flag = 1;
 			break;
-		case SC_TALISMAN_OF_PROTECTION:	/* +W4iLd3sm- */
+		case SC_TALISMAN_OF_PROTECTION:	/* 守護符 */
 			val3 = tick / 3000;
 			tick = 3000;
 			break;
-		case SC_TALISMAN_OF_WARRIOR:	/* +a2ZY63sm- */
-			val2 = val1 * 2;		// P.Atk+WJdSoFAk-
+		case SC_TALISMAN_OF_WARRIOR:	/* 武士符 */
+			val2 = val1 * 2;		// P.Atk増加値
 			calc_flag = 1;
 			break;
-		case SC_TALISMAN_OF_MAGICIAN:	/* +bNVeK3sm- */
-			val2 = val1 * 2;		// S.Matk+WJdSoFAk-
+		case SC_TALISMAN_OF_MAGICIAN:	/* 法師符 */
+			val2 = val1 * 2;		// S.Matk増加値
 			calc_flag = 1;
 			break;
-		case SC_TALISMAN_OF_FIVE_ELEMENTS:	/* +TpSITHsm- */
-			val2 = val1 * 2;		// +XF5gJzDiMPMwuTC/MPwwwDDhMPwwuFiXUqBzhw-
+		case SC_TALISMAN_OF_FIVE_ELEMENTS:	/* 五行符 */
+			val2 = val1 * 2;		// 属性モンスターダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_T_FIVETH_GOD:			/* +VttluU6UiEyWYw- */
-			val2 = val1 * 2;		// S.Matk+WJdSoFAk-
+		case SC_T_FIVETH_GOD:			/* 四方五行陣 */
+			val2 = val1 * 2;		// S.Matk増加値
 			calc_flag = 1;
 			break;
-		case SC_HEAVEN_AND_EARTH:		/* +WSlXMHlelwo- */
-			val2 = 10 +- val1;		// +MMAw4TD8MLhYl1Kgc4c-
+		case SC_HEAVEN_AND_EARTH:		/* 天地神霊 */
+			val2 = 10 + val1;		// ダメージ増加率
 			calc_flag = 1;
 			break;
-		case SC_MARINE_FESTIVAL:	/* +MN4w6jDzMNUwpzC5MMYwozDQMOs- */
-			// +MNkwzTDHMKMwrzDIMKUw4DBMY5swSzBjMGYwRDBfMImJ45Zk-
+		case SC_MARINE_FESTIVAL:	/* マリンフェスティバル */
+			// ベネディクトゥムが掛かっていたら解除
 			if(sc->data[SC_BENEDICTUM].timer != -1)
 				status_change_end(bl,SC_BENEDICTUM,-1);
-			val2 = val1*2;		// Pow+WJdSoFAk-
-			val3 = val1*2;		// Con+WJdSoFAk-
-			val4 = val1*2;		// Crt+WJdSoFAk-
+			val2 = val1*2;		// Pow増加値
+			val3 = val1*2;		// Con増加値
+			val4 = val1*2;		// Crt増加値
 			calc_flag = 1;
 			break;
-		case SC_SANDY_FESTIVAL:		/* +MLUw8zDJMNUwpzC5MMYwozDQMOs- */
-			// +MOww6jCuMKowTGObMEswYzBmMEQwXzCJieOWZA-
+		case SC_SANDY_FESTIVAL:		/* サンドフェスティバル */
+			// レリギオが掛かっていたら解除
 			if(sc->data[SC_RELIGIO].timer != -1)
 				status_change_end(bl,SC_RELIGIO,-1);
-			val2 = val1*2;		// Sta+WJdSoFAk-
-			val3 = val1*2;		// Wis+WJdSoFAk-
-			val4 = val1*2;		// Spl+WJdSoFAk-
+			val2 = val1*2;		// Sta増加値
+			val3 = val1*2;		// Wis増加値
+			val4 = val1*2;		// Spl増加値
 			calc_flag = 1;
 			break;
-		case SC_KI_SUL_RAMPAGE:		/* +ML8w/DDIMOsw6TDzMNow/DC4- */
-			//val2				// +XzdTFjDVMOkwsA-(+MLkwrTDrT391KGZCMGuKLVua-)
+		case SC_KI_SUL_RAMPAGE:		/* タートルランページ */
+			//val2				// 強化フラグ(スキル使用時に設定)
 			val3 = tick / 1000;
 			tick = 1000;
 			skill_castend_nodamage_id(bl,bl,SH_KI_SUL_RAMPAGE,val1,tick,0x10|val2);
 			break;
-		case SC_COLORS_OF_HYUN_ROK_1:		/* +MOwwpDDzMNww/DDbMPww8w-(+bDRcXmAn-) */
-		case SC_COLORS_OF_HYUN_ROK_2:		/* +MOwwpDDzMNww/DDbMPww8w-(+mKhcXmAn-) */
-		case SC_COLORS_OF_HYUN_ROK_3:		/* +MOwwpDDzMNww/DDbMPww8w-(+VzBcXmAn-) */
-		case SC_COLORS_OF_HYUN_ROK_4:		/* +MOwwpDDzMNww/DDbMPww8w-(+cGtcXmAn-) */
-		case SC_COLORS_OF_HYUN_ROK_5:		/* +MOwwpDDzMNww/DDbMPww8w-(+lcdcXmAn-) */
-		case SC_COLORS_OF_HYUN_ROK_6:		/* +MOwwpDDzMNww/DDbMPww8w-(+gFZcXmAn-) */
+		case SC_COLORS_OF_HYUN_ROK_1:		/* レインボーホーン(水属性) */
+		case SC_COLORS_OF_HYUN_ROK_2:		/* レインボーホーン(風属性) */
+		case SC_COLORS_OF_HYUN_ROK_3:		/* レインボーホーン(地属性) */
+		case SC_COLORS_OF_HYUN_ROK_4:		/* レインボーホーン(火属性) */
+		case SC_COLORS_OF_HYUN_ROK_5:		/* レインボーホーン(闇属性) */
+		case SC_COLORS_OF_HYUN_ROK_6:		/* レインボーホーン(聖属性) */
 			{
 				int i;
-				for(i = SC_COLORS_OF_HYUN_ROK_1; i <= SC_COLORS_OF_HYUN_ROK_6; i+-+-) {
+				for(i = SC_COLORS_OF_HYUN_ROK_1; i <= SC_COLORS_OF_HYUN_ROK_6; i++) {
 					if(i == type)
 						continue;
 					if(sc->data[i].timer != -1)
@@ -10867,43 +10846,43 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 				}
 			}
 			break;
-		case SC_TEMPORARY_COMMUNION:	/* +TgmXCk4AT1M- */
-			val2 = val1 * 3;		// P.Atk+WJdSoFAk-
-			val3 = val1 * 3;		// S.Matk+WJdSoFAk-
-			val4 = val1 * 3;		// H.Plus+WJdSoFAk-
+		case SC_TEMPORARY_COMMUNION:	/* 三霊一体 */
+			val2 = val1 * 3;		// P.Atk増加値
+			val3 = val1 * 3;		// S.Matk増加値
+			val4 = val1 * 3;		// H.Plus増加値
 			calc_flag = 1;
 			break;
-		case SC_BLESSING_OF_M_CREATURES:	/* +MGswgzCTMNYw7DDDMLcw8zCw- */
-			val2 = val1 * 5;		// P.Atk+WJdSoFAk-
-			val3 = val1 * 5;		// S.Matk+WJdSoFAk-
+		case SC_BLESSING_OF_M_CREATURES:	/* にゃんブレッシング */
+			val2 = val1 * 5;		// P.Atk増加値
+			val3 = val1 * 5;		// S.Matk増加値
 			calc_flag = 1;
 			break;
-		case SC_SHIELDCHAINRUSH:		/* +MLcw/DDrMMkwwTCnMPww8zDpMMMwtzDl- */
-			val2 = 10;	// +cml0BjDAMOEw/DC4WJdSoHOH/whnKlufiMX/CQ-
-			val3 = 20;	// +eftS1ZAfXqZPTk4Lc4c-
-			calc_flag = 1;
-			ud->state.change_speed = 1;
-			break;
-		case SC_MISTYFROST:			/* +MLgw4zDDMK8w1TDtMLkwyDDOMPQwoQ- */
-			val2 = 15;	// +bDRcXmAnMMAw4TD8MLhYl1Kgc4c-
-			break;
-		case SC_GROUNDGRAVITY:		/* +MLAw6TCmMPMwyTCwMOkw0zDGMPwwtzDnMPM- */
-			val2 = 10;	// +MMAw4TD8MLhYl1Kgc4f/CGcqW5+Ixf8J-
-			val3 = 30;	// +eftS1ZAfXqZPTk4Lc4c-
+		case SC_SHIELDCHAINRUSH:		/* シールドチェーンラッシュ */
+			val2 = 10;	// 物理ダメージ増加率（未実装）
+			val3 = 20;	// 移動速度低下率
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
-		case SC_SHADOW_CLOCK:		/* +X3GWoDCM- */
-			val2 = 85;	// +cml0BjD7m1Rs1TDAMOEw/DC4bhtcEXOH/whnKlufiMX/CQ-
-			val3 = 30;	// +eftS1ZAfXqZYl1Kgc4c-
+		case SC_MISTYFROST:			/* ジャックフロストノヴァ */
+			val2 = 15;	// 水属性ダメージ増加率
+			break;
+		case SC_GROUNDGRAVITY:		/* グラウンドグラビテーション */
+			val2 = 10;	// ダメージ増加率（未実装）
+			val3 = 30;	// 移動速度低下率
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
-		case SC_SKY_ENCHANT:		/* +WSlsFzBujqs- */
+		case SC_SHADOW_CLOCK:		/* 影隠れ */
+			val2 = 85;	// 物理・魔法ダメージ減少率（未実装）
+			val3 = 30;	// 移動速度増加率
+			calc_flag = 1;
+			ud->state.change_speed = 1;
+			break;
+		case SC_SKY_ENCHANT:		/* 天気の身 */
 			{
 				int i;
-				// +ZeVR+v9eZwhsoTBvieOWZA-
-				for(i = SC_RISING_SUN; i <= SC_DAWN_MOON; i+-+-) {
+				// 日出～月没は解除
+				for(i = SC_RISING_SUN; i <= SC_DAWN_MOON; i++) {
 					if(sc->data[i].timer != -1)
 						status_change_end(bl,i,-1);
 				}
@@ -10911,7 +10890,7 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			break;
 		default:
 			if(battle_config.error_log)
-				printf("UnknownStatusChange [%d]+AFw-n", type);
+				printf("UnknownStatusChange [%d]\n", type);
 			return 0;
 	}
 
@@ -10919,45 +10898,45 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		return 0;
 
 	if(StatusIconChangeTable[type] != SI_BLANK)
-		clif_status_change(bl,StatusIconChangeTable[type],1,icon_tick,icon_val1,icon_val2,icon_val3);	// +MKIwpDCzMPOIaHk6-
+		clif_status_change(bl,StatusIconChangeTable[type],1,icon_tick,icon_val1,icon_val2,icon_val3);	// アイコン表示
 
-	/* +UfiXYpPhMG8wojCkMLMw85ABT+FfjDBrUeZ0BjBZMIs- */
+	/* 凸面鏡はアイコン送信後に処理する */
 	if(type == SC_BOSSMAPINFO) {
 		struct mob_data *mmd = map[bl->m].mvpboss;
 		if(sd && mmd) {
-			if(mmd->bl.prev == NULL) {	// +UY1suDBNX4UwYU4t-
+			if(mmd->bl.prev == NULL) {	// 再沸き待ち中
 				int diff = DIFF_TICK(mmd->last_spawntime, current_tick);
 				if(diff < 0)
 					diff = 0;
 				clif_bossmapinfo(sd, mmd->name, 0, 0, diff, 3);
 				val3 = -1;
 				val4 = -1;
-			} else {			// +Ufpz/k4t-
+			} else {			// 出現中
 				clif_bossmapinfo(sd, mmd->name, 0, 0, 0, 2);
 				if(mmd->bl.m == bl->m) {
 					clif_bossmapinfo(sd, "", mmd->bl.x, mmd->bl.y, 0, 1);
 				}
 				val3 = mmd->bl.m;
-				val4 = mmd->bl.x +- (mmd->bl.y << 16);
+				val4 = mmd->bl.x + (mmd->bl.y << 16);
 			}
 		}
 		val2 = tick / 1000;
 		tick = 1000;
 	}
 
-	/* option+MG5ZCWb0- */
+	/* optionの変更 */
 	switch(type) {
 		// opt1
 		case SC_STONE:
 		case SC_FREEZE:
 		case SC_STUN:
 		case SC_SLEEP:
-			unit_stopattack(bl);	// +ZTtkg1Bca2I-
-			skill_stop_dancing(bl,0);	// +bxRZTw-/+MMAw8zC5MG5OLWWt-
+			unit_stopattack(bl);	// 攻撃停止
+			skill_stop_dancing(bl,0);	// 演奏/ダンスの中断
 			{
-				// +VAxmQjBrY5swSzCJMGowRDC5MMYw/DC/MLl1cF44MJKJ45Zk-
+				// 同時に掛からないステータス異常を解除
 				int i;
-				for(i = SC_STONE; i <= SC_SLEEP; i+-+-) {
+				for(i = SC_STONE; i <= SC_SLEEP; i++) {
 					if(sc->data[i].timer != -1) {
 						sc->count--;
 						delete_timer(sc->data[i].timer, status_change_timer);
@@ -10968,7 +10947,7 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			if(type == SC_STONE)
 				sc->opt1 = OPT1_STONECURSE_ING;
 			else
-				sc->opt1 = type - SC_STONE +- 1;
+				sc->opt1 = type - SC_STONE + 1;
 
 			if(md) {
 				mob_unlocktarget(md, current_tick);
@@ -10977,11 +10956,11 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			}
 			opt_flag = 1;
 			break;
-		case SC_HELLINFERNO:		/* +MNgw6zCkMPMw1TCnMOswzg- */
+		case SC_HELLINFERNO:		/* ヘルインフェルノ */
 			sc->opt1 = OPT1_BURNNING;
 			opt_flag = 1;
 			break;
-		case SC_WHITEIMPRISON:		/* +MNsw7zCkMMgwpDDzMNcw6jC6MPM- */
+		case SC_WHITEIMPRISON:		/* ホワイトインプリズン */
 			sc->opt1 = OPT1_IMPRISON;
 			opt_flag = 1;
 			break;
@@ -11002,7 +10981,7 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 					md->target_id = 0;
 			}
 			break;
-		case SC_ANGELUS:			/* +MKIw8zC8MOswuQ- */
+		case SC_ANGELUS:			/* アンゼルス */
 			sc->opt2 |= OPT2_ANGELUS;
 			opt_flag = 1;
 			break;
@@ -11021,61 +11000,61 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 		// opt3
 		case SC_ONEHAND:		/* 1HQ */
 		case SC_TWOHANDQUICKEN:		/* 2HQ */
-		case SC_SPEARQUICKEN:		/* +MLkw1DCiMK8wpDDDMLEw8w- */
-		case SC_CONCENTRATION:		/* +MLMw8zC7MPMwyDDsMPwwtzDnMPM- */
-		case SC_WEAPONQUICKEN:		/* +MKYwpzDdMPMwrzCkMMMwsTDz- */
+		case SC_SPEARQUICKEN:		/* スピアクイッケン */
+		case SC_CONCENTRATION:		/* コンセントレーション */
+		case SC_WEAPONQUICKEN:		/* ウェポンクイッケン */
 			sc->opt3 |= OPT3_QUICKEN;
 			opt_flag = 2;
 			break;
-		case SC_OVERTHRUST:		/* +MKow/DDQMPwwyDDpMLkwyA- */
-		case SC_SWOO:			/* +MKgwuTCm- */
+		case SC_OVERTHRUST:		/* オーバートラスト */
+		case SC_SWOO:			/* エスウ */
 			sc->opt3 |= OPT3_OVERTHRUST;
 			opt_flag = 2;
 			break;
-		case SC_ENERGYCOAT:		/* +MKgwyjC4MPwwszD8MMg- */
-		case SC_SKE:			/* +MKgwuTCv- */
+		case SC_ENERGYCOAT:		/* エナジーコート */
+		case SC_SKE:			/* エスク */
 			sc->opt3 |= OPT3_ENERGYCOAT;
 			opt_flag = 2;
 			break;
-		case SC_EXPLOSIONSPIRITS:	/* +cgaIwmziUtU- */
+		case SC_EXPLOSIONSPIRITS:	/* 爆裂波動 */
 			sc->opt3 |= OPT3_EXPLOSIONSPIRITS;
 			opt_flag = 2;
 			break;
-		case SC_STEELBODY:		/* +kdFSWw- */
-		case SC_SKA:			/* +MKgwuTCr- */
+		case SC_STEELBODY:		/* 金剛 */
+		case SC_SKA:			/* エスカ */
 			sc->opt3 |= OPT3_STEELBODY;
 			opt_flag = 2;
 			break;
-		case SC_BLADESTOP:		/* +dn1SA1PWMIo- */
+		case SC_BLADESTOP:		/* 白刃取り */
 			sc->opt3 |= OPT3_BLADESTOP;
 			opt_flag = 2;
 			break;
-		case SC_AURABLADE:			/* +MKow/DDpMNYw7DD8MMk- */
+		case SC_AURABLADE:			/* オーラブレード */
 			sc->opt3 |= OPT3_AURABLADE;
 			opt_flag = 2;
 			break;
-		case SC_BERSERK:		/* +MNAw/DC1MPwwrw- */
+		case SC_BERSERK:		/* バーサーク */
 			sc->opt3 |= OPT3_BERSERK;
 			opt_flag = 2;
 			break;
-		case SC_DANCING:			/* +MMAw8zC5-/+bxRZT04t- */
+		case SC_DANCING:			/* ダンス/演奏中 */
 			if(sc->data[SC_DANCING].val1 != CG_MOONLIT)
 				break;
 			sc->opt3 |= OPT3_MOON;
 			opt_flag = 2;
 			break;
-		case SC_MARIONETTE:		/* +MN4w6jCqMM0wwzDIMLMw8zDIMO0w/DDr- */
-		case SC_MARIONETTE2:		/* +MN4w6jCqMM0wwzDIMLMw8zDIMO0w/DDr- */
+		case SC_MARIONETTE:		/* マリオネットコントロール */
+		case SC_MARIONETTE2:		/* マリオネットコントロール */
 			sc->opt3 |= OPT3_MARIONETTE;
 			opt_flag = 2;
 			break;
-		case SC_ASSUMPTIO:		/* +MKIwuTDgMNcwxjCjMKo- */
-		case SC_ASSUMPTIO2:		/* +MK0w4zDDMLcw5TCiMLkw4DDXMMYwozCq- */
+		case SC_ASSUMPTIO:		/* アスムプティオ */
+		case SC_ASSUMPTIO2:		/* キャッシュアスムプティオ */
 			sc->opt3 |= OPT3_ASSUMPTIO;
 			clif_misceffect2(bl,375);
 			opt_flag = 2;
 			break;
-		case SC_WARM:			/* +bikwgjCK- */
+		case SC_WARM:			/* 温もり */
 			sc->opt3 |= OPT3_SUN_WARM;
 			opt_flag = 2;
 			break;
@@ -11083,35 +11062,35 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			sc->opt3 |= OPT3_KAITE;
 			opt_flag = 2;
 			break;
-		case SC_BUNSINJYUTSU:		/* +UgaOqzBuiFM- */
+		case SC_BUNSINJYUTSU:		/* 分身の術 */
 			sc->opt3 |= OPT3_BUNSIN;
 			opt_flag = 2;
 			break;
-		case SC_MONK:			/* +MOIw8zCvMG6bQg- */
-		case SC_STAR:			/* +MLEw8zC7MKQwbptC- */
-		case SC_SAGE:			/* +MLsw/DC4MG6bQg- */
-		case SC_CRUSADER:		/* +MK8w6zC7MKQwwDD8MG6bQg- */
-		case SC_WIZARD:			/* +MKYwozC2MPwwyTBum0I- */
-		case SC_PRIEST:			/* +MNcw6jD8MLkwyDBum0I- */
-		case SC_ROGUE:			/* +MO0w/DCwMG6bQg- */
-		case SC_ASSASIN:		/* +MKIwtTC3MPMwbptC- */
-		case SC_SOULLINKER:		/* +ML0wpjDrMOow8zCrMPwwbptC- */
-		case SC_KNIGHT:			/* +MMowpDDIMG6bQg- */
-		case SC_ALCHEMIST:		/* +MKIw6zCxMN8wuTDIMG6bQg- */
-		case SC_BARDDANCER:		/* +MNAw/DDJMGgwwDDzMLUw/DBum0I- */
-		case SC_BLACKSMITH:		/* +MNYw6TDDMK8wuTDfMLkwbptC- */
-		case SC_HUNTER:			/* +MM8w8zC/MPwwbptC- */
-		case SC_HIGH:			/* +TgBrIU4KT02Ad2ltMG6bQg- */
-		case SC_SUPERNOVICE:		/* +MLkw/DDRMPwwzjD8MNMwuTBum0I- */
-		case SC_GUNNER:			/* +MKww8zC5MOow8zCsMPwwbptC- */
-		case SC_NINJA:			/* +X82ABTBum0I- */
-		case SC_DEATHKINGHT:		/* +MMcwuTDKMKQwyDBum0I- */
-		case SC_COLLECTOR:		/* +MLMw7DCvML8w/DBum0I- */
+		case SC_MONK:			/* モンクの魂 */
+		case SC_STAR:			/* ケンセイの魂 */
+		case SC_SAGE:			/* セージの魂 */
+		case SC_CRUSADER:		/* クルセイダーの魂 */
+		case SC_WIZARD:			/* ウィザードの魂 */
+		case SC_PRIEST:			/* プリーストの魂 */
+		case SC_ROGUE:			/* ローグの魂 */
+		case SC_ASSASIN:		/* アサシンの魂 */
+		case SC_SOULLINKER:		/* ソウルリンカーの魂 */
+		case SC_KNIGHT:			/* ナイトの魂 */
+		case SC_ALCHEMIST:		/* アルケミストの魂 */
+		case SC_BARDDANCER:		/* バードとダンサーの魂 */
+		case SC_BLACKSMITH:		/* ブラックスミスの魂 */
+		case SC_HUNTER:			/* ハンターの魂 */
+		case SC_HIGH:			/* 一次上位職業の魂 */
+		case SC_SUPERNOVICE:		/* スーパーノービスの魂 */
+		case SC_GUNNER:			/* ガンスリンガーの魂 */
+		case SC_NINJA:			/* 忍者の魂 */
+		case SC_DEATHKINGHT:		/* デスナイトの魂 */
+		case SC_COLLECTOR:		/* コレクターの魂 */
 			sc->opt3 |= OPT3_SOULLINK;
 			clif_misceffect2(bl,424);
 			opt_flag = 2;
 			break;
-		case SC_ELEMENTUNDEAD:		// +Tg1rew-
+		case SC_ELEMENTUNDEAD:		// 不死
 			sc->opt3 |= OPT3_UNDEAD;
 			opt_flag = 2;
 			break;
@@ -11121,22 +11100,22 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			opt_flag = 1;
 			break;
 		case SC_HIDING:
-			if(sd && val3 == 0)	// +lx5lrDCKMGcwajBEkBpeODBuMM8wpDDJMGowiTCiMKQwszDziGh5Og-
+			if(sd && val3 == 0)	// 霞斬りでない通常のハイドならアイコン表示
 				clif_status_change(bl,SI_HIDING,1,icon_tick,0,0,0);
 			unit_stopattack(bl);
 			sc->option |= OPTION_HIDE;
 			opt_flag = 1;
 			break;
 		case SC_CLOAKING:
-		case SC_CLOAKINGEXCEED:		/* +MK8w7TD8MK0w8zCwMKgwrzC3MPwwyQ- */
-		case SC_NEWMOON:			/* +ZxRnCIEa- */
-		case SC__INVISIBILITY:		/* +MKQw8zDTMLgw0zDqMMYwow- */
+		case SC_CLOAKINGEXCEED:		/* クローキングエクシード */
+		case SC_NEWMOON:			/* 朔月脚 */
+		case SC__INVISIBILITY:		/* インビジビリティ */
 			unit_stopattack(bl);
 			sc->option |= OPTION_CLOAKING;
 			opt_flag = 1;
 			break;
 		case SC_INVISIBLE:
-		case SC__FEINTBOMB:			/* +MNUwpzCkMPMwyDDcMOA- */
+		case SC__FEINTBOMB:			/* フェイントボム */
 			unit_stopattack(bl);
 			sc->option |= OPTION_SPECIALHIDING;
 			opt_flag = 1;
@@ -11170,16 +11149,16 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			sc->option |= OPTION_SUMMER;
 			opt_flag = 1;
 			break;
-		case SC_ON_PUSH_CART:	/* +MKsw/DDI- */
+		case SC_ON_PUSH_CART:	/* カート */
 #if PACKETVER < 20120201
-			// +U+QwRDCvMOkwpDCiMPMwyDBvMKow1zC3MOcw8zCSZvRlsDBZMIs-
-			sc->option = (sc->option & +AH4-OPTION_CARTMASK) | val1;
+			// 古いクライアントはオプションを更新する
+			sc->option = (sc->option & ~OPTION_CARTMASK) | val1;
 			opt_flag = 1;
 #endif
 			break;
 	}
 
-	/* option+MG5ZCWb0- */
+	/* optionの変更 */
 	if(opt_flag == 1) {
 		clif_changeoption(bl);
 	} else if(opt_flag == 2) {
@@ -11190,17 +11169,17 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 	status_calloc_sc_data(sc);
 #endif
 
-	sc->count+-+-;	/* +MLkwxjD8ML8wuXVwXjgwbmVw- */
+	sc->count++;	/* ステータス異常の数 */
 
 	sc->data[type].val1 = val1;
 	sc->data[type].val2 = val2;
 	sc->data[type].val3 = val3;
 	sc->data[type].val4 = val4;
-	/* +ML8wpDDeMPyKLVua- */
-	sc->data[type].timer = add_timer(current_tick +- tick, status_change_timer, bl->id, INT2PTR(type));
+	/* タイマー設定 */
+	sc->data[type].timer = add_timer(current_tick + tick, status_change_timer, bl->id, INT2PTR(type));
 
 	if(calc_flag) {
-		// +MLkwxjD8ML8wuVGNigh7lw-
+		// ステータス再計算
 		if(sd) {
 			if(!(flag&4))
 				status_calc_pc(sd,0);
@@ -11216,11 +11195,11 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 			clif_send_elemstatus(eld->msd);
 		}
 	}
-	// +igh7l1+MMGuNcDCJMFswiw-
+	// 計算後に走らせる
 	switch(type) {
 		case SC_RUN:
 		case SC_WUGDASH:
-			// clif_skill_nodamage() +MG9fxTBa- clif_status_change() +MGg- clif_walkok() +MG6VkzBrVHwwc1H6MFk-
+			// clif_skill_nodamage() は必ず clif_status_change() と clif_walkok() の間に呼び出す
 			if(type == SC_RUN)
 				clif_skill_nodamage(bl,bl,TK_RUN,val1,1);
 			else if(type == SC_WUGDASH)
@@ -11238,7 +11217,7 @@ int status_change_start(struct block_list *bl,int type,int val1,int val2,int val
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjh9Qk6G-
+ * ステータス異常終了
  *------------------------------------------
  */
 int status_change_end(struct block_list* bl, int type, int tid)
@@ -11275,7 +11254,7 @@ int status_change_end(struct block_list* bl, int type, int tid)
 				break;
 			default:
 				if(battle_config.error_log)
-					printf("UnknownStatusChangeEnd [%d]+AFw-n", type);
+					printf("UnknownStatusChangeEnd [%d]\n", type);
 				break;
 		}
 		return 0;
@@ -11287,10 +11266,10 @@ int status_change_end(struct block_list* bl, int type, int tid)
 	if(tid != -1 && sc->data[type].timer != tid)
 		return 0;
 
-	if(tid == -1)	/* +ML8wpDDeMEswiVR8MHAwjDBmMEQwajBEMGowiTC/MKQw3lJKlmQwkjBZMIs- */
+	if(tid == -1)	/* タイマから呼ばれていないならタイマ削除をする */
 		delete_timer(sc->data[type].timer,status_change_timer);
 
-	/* +inJfUzBudXBeODCSa2NeODBrYjswWQ- */
+	/* 該当の異常を正常に戻す */
 	sc->data[type].timer = -1;
 	sc->count--;
 
@@ -11300,43 +11279,43 @@ int status_change_end(struct block_list* bl, int type, int tid)
 	mcd = BL_DOWNCAST( BL_MERC, bl );
 	eld = BL_DOWNCAST( BL_ELEM, bl );
 
-	switch(type) {	/* +dXBeODBuei6YXjBUMGgwblHmdAY- */
-		case SC_PROVOKE:			/* +MNcw7TDcMMMwrw- */
-		case SC_CONCENTRATE:			/* +lsZOLVKbVBFOCg- */
-		case SC_BLESSING:			/* +MNYw7DDDMLcw8zCw- */
-		case SC_ANGELUS:			/* +MKIw8zC8MOswuQ- */
-		case SC_SIGNUMCRUCIS:			/* +MLcwsDDKMOAwrzDrMLcwuQ- */
+	switch(type) {	/* 異常の種類ごとの処理 */
+		case SC_PROVOKE:			/* プロボック */
+		case SC_CONCENTRATE:			/* 集中力向上 */
+		case SC_BLESSING:			/* ブレッシング */
+		case SC_ANGELUS:			/* アンゼルス */
+		case SC_SIGNUMCRUCIS:			/* シグナムクルシス */
 		case SC_HIDING:
 		case SC_CLOAKING:
 		case SC_TWOHANDQUICKEN:			/* 2HQ */
 		case SC_ONEHAND:			/* 1HQ */
-		case SC_ADRENALINE:			/* +MKIwyTDsMMow6jDzMOkwwzC3MOU- */
-		case SC_ENCPOISON:			/* +MKgw8zDBMOMw8zDIMN0wpDC6MPM- */
-		case SC_IMPOSITIO:			/* +MKQw8zDdMLcwxjCjMKow3jDMMLk- */
-		case SC_GLORIA:				/* +MLAw7TDqMKI- */
-		case SC_LOUD:				/* +MOkwpjDJMNwwpDC5- */
-		case SC_MINDBREAKER:			/* +MN4wpDDzMMkw1jDsMPwwqzD8- */
-		case SC_PROVIDENCE:			/* +MNcw7TD0MKMwxzDzMLk- */
-		case SC_SPEARQUICKEN:			/* +MLkw1DCiMK8wpDDDMLEw8w- */
+		case SC_ADRENALINE:			/* アドレナリンラッシュ */
+		case SC_ENCPOISON:			/* エンチャントポイズン */
+		case SC_IMPOSITIO:			/* インポシティオマヌス */
+		case SC_GLORIA:				/* グロリア */
+		case SC_LOUD:				/* ラウドボイス */
+		case SC_MINDBREAKER:			/* マインドブレーカー */
+		case SC_PROVIDENCE:			/* プロヴィデンス */
+		case SC_SPEARQUICKEN:			/* スピアクイッケン */
 		case SC_VOLCANO:
 		case SC_DELUGE:
 		case SC_VIOLENTGALE:
-		case SC_ETERNALCHAOS:			/* +MKgwvzD8MMow6zCrMKowuQ- */
-		case SC_DRUMBATTLE:			/* +YiZZKp8TMG6X/zBN- */
-		case SC_NIBELUNGEN:			/* +MMsw/DDZMOsw8zCwMG5jB48q- */
-		case SC_SIEGFRIED:			/* +Tg1re46rMG4wuDD8MK8w1TDqMPwwyQ- */
-		case SC_EXPLOSIONSPIRITS:		/* +cgaIwmziUtU- */
-		case SC_SPEEDPOTION0:			/* +WJeQHzDdMPwwtzDnMPM- */
+		case SC_ETERNALCHAOS:			/* エターナルカオス */
+		case SC_DRUMBATTLE:			/* 戦太鼓の響き */
+		case SC_NIBELUNGEN:			/* ニーベルングの指輪 */
+		case SC_SIEGFRIED:			/* 不死身のジークフリード */
+		case SC_EXPLOSIONSPIRITS:		/* 爆裂波動 */
+		case SC_SPEEDPOTION0:			/* 増速ポーション */
 		case SC_SPEEDPOTION1:
 		case SC_SPEEDPOTION2:
 		case SC_BLADESTOP_WAIT:
-		case SC_CONCENTRATION:			/* +MLMw8zC7MPMwyDDsMPwwtzDnMPM- */
-		case SC_TRUESIGHT:			/* +MMgwpTDrMPwwtTCkMMg- */
-		case SC_SPIDERWEB:			/* +MLkw0TCkMMAw/DCmMKcwwzDW- */
-		case SC_CARTBOOST:			/* +MKsw/DDIMNYw/DC5MMg- */
-		case SC_INCATK:				/* ATK+TgpmBw- (+eV6RUnUo-) */
-		case SC_INCMATK:			/* MATK+TgpmBw- (+eV552DBug0l1KA-) */
-		case SC_WEDDING:			/* +MKYwpzDHMKMw8zCw- */
+		case SC_CONCENTRATION:			/* コンセントレーション */
+		case SC_TRUESIGHT:			/* トゥルーサイト */
+		case SC_SPIDERWEB:			/* スパイダーウェッブ */
+		case SC_CARTBOOST:			/* カートブースト */
+		case SC_INCATK:				/* ATK上昇 (神酒用) */
+		case SC_INCMATK:			/* MATK上昇 (神秘の草用) */
+		case SC_WEDDING:			/* ウェディング */
 		case SC_SANTA:
 		case SC_SUMMER:
 		case SC_INCALLSTATUS:
@@ -11347,10 +11326,10 @@ int status_change_end(struct block_list* bl, int type, int tid)
 		case SC_INCHIT2:
 		case SC_INCFLEE2:
 		case SC_OVERTHRUSTMAX:
-		case SC_CHASEWALK:			/* +MMEwpzCkMLkwpjCpMPwwrw- */
+		case SC_CHASEWALK:			/* チェイスウォーク */
 		case SC_CHASEWALK_STR:
 		case SC_BATTLEORDER:
-		case SC_MEAL_INCSTR:	// +mN9Oi3Uo-
+		case SC_MEAL_INCSTR:	// 食事用
 		case SC_MEAL_INCAGI:
 		case SC_MEAL_INCVIT:
 		case SC_MEAL_INCINT:
@@ -11364,18 +11343,18 @@ int status_change_end(struct block_list* bl, int type, int tid)
 		case SC_MEAL_INCMDEF:
 		case SC_MEAL_INCATK:
 		case SC_MEAL_INCMATK:
-		case SC_MEAL_INCSTR2:	// +irKR0WWZdAZ1KA-
+		case SC_MEAL_INCSTR2:	// 課金料理用
 		case SC_MEAL_INCAGI2:
 		case SC_MEAL_INCVIT2:
 		case SC_MEAL_INCINT2:
 		case SC_MEAL_INCDEX2:
 		case SC_MEAL_INCLUK2:
 		case SC_SPURT:
-		case SC_SUN_COMFORT:			/* +WSqWfTBuW4lpfQ- */
-		case SC_MOON_COMFORT:			/* +ZwgwbluJaX0- */
-		case SC_STAR_COMFORT:			/* +Zh8wbluJaX0- */
-		case SC_FUSION:				/* +WSqWfTBoZwgwaGYfMG6HjVQI- */
-		case SC_ADRENALINE2:			/* +MNUw6zCiMMkw7DDKMOow8zDpMMMwtzDl- */
+		case SC_SUN_COMFORT:			/* 太陽の安楽 */
+		case SC_MOON_COMFORT:			/* 月の安楽 */
+		case SC_STAR_COMFORT:			/* 星の安楽 */
+		case SC_FUSION:				/* 太陽と月と星の融合 */
+		case SC_ADRENALINE2:			/* フルアドレナリンラッシュ */
 		case SC_RESISTWATER:
 		case SC_RESISTGROUND:
 		case SC_RESISTFIRE:
@@ -11392,234 +11371,234 @@ int status_change_end(struct block_list* bl, int type, int tid)
 		case SC_STRENGTH:
 		case SC_THE_DEVIL:
 		case SC_THE_SUN:
-		case SC_FLING:				/* +MNUw6TCkMPMwsA- */
-		case SC_MADNESSCANCEL:			/* +MN4wwzDJMM0wuTCtMOMw8zC7MOkw/A- */
-		case SC_ADJUSTMENT:			/* +MKIwuDDjMLkwyDDhMPMwyA- */
-		case SC_INCREASING:			/* +MKQw8zCvMOow/DC4MPMwsDCiMK0w5TDpMLcw/A- */
-		case SC_NEN:				/* +X/U- */
-		case SC_AVOID:				/* +fcpgJVbekH8- */
-		case SC_CHANGE:				/* +MOEw8zC/MOswwTCnMPMwuA- */
-		case SC_DEFENCE:			/* +MMcwozDVMKcw8zC5- */
-		case SC_BLOODLUST:			/* +MNYw6TDDMMkw6TC5MMg- */
-		case SC_FLEET:				/* +MNUw6jD8MMgw4DD8MNY- */
-		case SC_SPEED:				/* +MKow/DDQMPwwyTC5MNQw/DDJ- */
-		case SC_STONESKIN:			/* +MLkwyDD8MPMwuTCtMPM- */
-		case SC_ANTIMAGIC:			/* +MKIw8zDBMN4wuDDDMK8- */
-		case SC_WEAPONQUICKEN:			/* +MKYwpzDdMPMwrzCkMMMwsTDz- */
-		case SC_WE_FEMALE:			/* +MEIwajBfMGtcPTBPMFcwfjBZ- */
-		case SC_GIANTGROWTH:		/* +MLgw4zCkMKIw8zDIMLAw7TD8MLk- */
-		case SC_FIGHTINGSPIRIT:		/* +MNUwoTCkMMYwozDzMLAwuTDUMOowwzDI- */
-		case SC_FEAR:				/* +YFBgFg- */
-		case SC_UNLIMIT:			/* +MKIw8zDqMN8wwzDI- */
-		case SC_EPICLESIS:			/* +MKgw1DCvMOwwtzC5- */
-		case SC_LAUDAAGNUS:			/* +MOkwpjDAMKIwsDDMMLk- */
-		case SC_LAUDARAMUS:			/* +MOkwpjDAMOkw4DC5- */
-		case SC_TELEKINESIS_INTENSE:	/* +MMYw7DCtMM0wtzC5MKQw8zDGMPMwuQ- */
-		case SC_VENOMIMPRESS:		/* +MNkwyjDgMKQw8zDXMOwwuQ- */
-		case SC_CLOAKINGEXCEED:		/* +MK8w7TD8MK0w8zCwMKgwrzC3MPwwyQ- */
-		case SC_VENOMBLEED:			/* +MNkwyjDgMNYw6jD8MMk- */
-		case SC_INFRAREDSCAN:		/* +MKQw8zDVMOkw7DDDMMkwuTCtMOMw8w- */
-		case SC_ANALYZE:			/* +MKIwyjDpMKQwug- */
-		case SC_NEUTRALBARRIER:		/* +MMsw5TD8MMgw6TDrMNAw6jCiMPw- */
-		case SC__BODYPAINT:			/* +MNwwxzCjMNowpDDzMMYwozDzMLA- */
-		case SC__INVISIBILITY:		/* +MKQw8zDTMLgw0zDqMMYwow- */
-		case SC__ENERVATION:		/* +MN4wuTCrMOww/DDJ/xowqDDKMNkw/DC3MOcw8w- */
-		case SC__UNLUCKY:			/* +MN4wuTCrMOww/DDJ/xowojDzMOkwwzCtMPw- */
-		case SC__STRIPACCESSARY:	/* +MLkwyDDqMMMw1zCiMK8wuzC1MOow/A- */
-		case SC__BLOODYLUST:		/* +MNYw6TDDMMcwozDpMLkwyA- */
-		case SC_SHIELDSPELL_DEF:	/* +MLcw/DDrMMkwuTDaMOs-(DEF) */
-		case SC_SHIELDSPELL_MDEF:	/* +MLcw/DDrMMkwuTDaMOs-(MDEF) */
-		case SC_SHIELDSPELL_REF:	/* +MLcw/DDrMMkwuTDaMOs-(+fL6TLA-) */
-		case SC_PRESTIGE:			/* +MNcw7DC5MMYwozD8MLg- */
-		case SC_EARTHDRIVE:			/* +MKIw/DC5MMkw6TCkMNY- */
-		case SC_INSPIRATION:		/* +MKQw8zC5MNQw7DD8MLcw5zDz- */
-		case SC_GENTLETOUCH_CHANGE:	/* +cLl6dA- -+U80-- */
-		case SC_GENTLETOUCH_REVITALIZE:	/* +cLl6dA- -+bTs-- */
-		case SC_SYMPHONY_LOVE:		/* +YEtOujBfMGEwbnC6MG4wtzDzMNUwqTDLMPw- */
-		case SC_ECHOSONG:			/* +MKgwszD8MG5rTA- */
-		case SC_HARMONIZE:			/* +MM8w/DDiMMowpDC6- */
-		case SC_GLOOMYDAY:			/* +MOEw6TDzMLMw6jD8- */
-		case SC_LERADS_DEW:			/* +MOww/DDpMLowbpcy- */
-		case SC_DANCE_WITH_WUG:		/* +MMAw8zC5MKYwozC6MKYwqTD8MLA- */
-		case SC_BEYOND_OF_WARCRY:	/* +MNMw6DDzMMkwqjDWMKYwqTD8MK8w6TCk- */
-		case SC_MELODYOFSINK:		/* +MOEw7TDHMKMw/DCqMNYwtzDzMK8- */
-		case SC_FRIGG_SONG:			/* +MNUw6jDDMLAwbmtM- */
-		case SC_STRIKING:			/* +MLkwyDDpMKQwrTDzMLA- */
-		case SC_FIRE_EXPANSION_SMOKE_POWDER:	/* +MNUwoTCkMKIw/DCoMK8wuTDRMPMwtzDnMPM-(+cVleVQ-) */
-		case SC_FIRE_EXPANSION_TEAR_GAS:	/* +MNUwoTCkMKIw/DCoMK8wuTDRMPMwtzDnMPM-(+UKxtmTCsMLk-) */
-		case SC_MANDRAGORA:			/* +MM8wpjDqMPMwsDCqMNYw3jDzMMkw6TC0MOk- */
-		case SC_BANANA_BOMB:		/* +MNAwyjDKcgZfPg- */
-		case SC_MYSTERIOUS_POWDER:	/* +Tg1gHYtwMGp8iQ- */
-		case SC_BOOST500:			/* +MNYw/DC5MMg-500 */
-		case SC_FULL_SWING_K:		/* +MNUw6zC5MKQw8zCw-K */
-		case SC_MANA_PLUS:			/* +MN4wyjDXMOkwuQ- */
-		case SC_MUSTLE_M:			/* +MN4wwzC5MOs-M */
-		case SC_LIFE_FORCE_F:		/* +MOkwpDDVMNUwqTD8MLk-F */
-		case SC_PROMOTE_HEALTH_RESERCH:	/* HP+WJdSoDDdMPwwtzDnMPM- */
-		case SC_ENERGY_DRINK_RESERCH:	/* SP+WJdSoDDdMPwwtzDnMPM- */
-		case SC_EXTRACT_WHITE_POTION_Z:	/* +b8N+LjDbMO8wpDDIMN0w/DC3MOcw8w-Z */
-		case SC_VITATA_500:			/* +MNMwvzC/-500 */
-		case SC_EXTRACT_SALAMINE_JUICE:	/* +b8N+LjC1MOkw3jCkMPMwuDDlMPwwuQ- */
-		case SC_SAVAGE_STEAK:		/* +MLUw2TD8MLgwbk44cTwwTQ- */
-		case SC_COCKTAIL_WARG_BLOOD:	/* +MKswrzDGMOswpjCpMPwwsDDWMOkwwzDJ- */
-		case SC_MINOR_BBQ:			/* +MN8wzjC/MKYw7TC5MG5yWzCrMOsw0w- */
-		case SC_SIROMA_ICE_TEA:		/* +MLcw7TDeMKIwpDC5MMYwozD8- */
-		case SC_DROCERA_HERB_STEAMED:	/* +MMkw7TC7MOkwbjDPMPww1nFu- */
-		case SC_PUTTI_TAILS_NOODLES:	/* +MNcwxjCjMMMwyDBuMFcwYzB9nro- */
-		case SC_STOMACHACHE:		/* +gXl12w- */
-		case SC_MONSTER_TRANSFORM:	/* +MOIw8zC5ML8w/FkJjqs- */
-		case SC_MEIKYOUSISUI:		/* +Zg6T4WtibDQ- */
-		case SC_IZAYOI:				/* +U0FRbVkc- */
-		case SC_KG_KAGEHUMI:		/* +XnuIUw- -+X3GODzB/-- */
-		case SC_KYOMU:				/* +XnuIUw- -+hlpxITBuX3E-- */
-		case SC_KAGEMUSYA:			/* +XnuIUw- -+UgaOqw-- */
-		case SC_ZANGETSU:			/* +XnuIUw- -+a4tnCA-- */
-		case SC_AKAITSUKI:			/* +XnuIUw- -+fQVnCA-- */
-		case SC_KYOUGAKU:			/* +XnuIUw- -+mlphFQ-- */
-		case SC_SHRIMP:				/* +MKgw004JZic- */
-		case SC_GROOMING:			/* +MLAw6zD8MN8w8zCw- */
-		case SC_NYANGGRASS:			/* +MMsw4zDzMLAw6TC5- */
-		case SC_BURNT:				/* +c0RwjlRq- */
-		case SC_ODINS_POWER:		/* +MKow/DDHMKMw8zBuUps- */
-		case SC_MER_FLEE:			/* +UK1RdTDcMPwwyjC5-(FLEE) */
-		case SC_MER_ATK:			/* +UK1RdTDcMPwwyjC5-(ATK) */
-		case SC_MER_HP:				/* +UK1RdTDcMPwwyjC5-(HP) */
-		case SC_MER_SP:				/* +UK1RdTDcMPwwyjC5-(SP) */
-		case SC_MER_HIT:			/* +UK1RdTDcMPwwyjC5-(HIT) */
-		case SC_FIRE_CLOAK:			/* +MNUwoTCkMKIw/DCvMO0w/DCv- */
-		case SC_WATER_DROP:			/* +MKYwqTD8ML8w/DDJMO0wwzDX- */
-		case SC_WIND_CURTAIN:		/* +MKYwozDzMMkwqzD8MMYw8w- */
-		case SC_SOLID_SKIN:			/* +ML0w6jDDMMkwuTCtMPM- */
-		case SC_STONE_SHIELD:		/* +MLkwyDD8MPMwtzD8MOswyQ- */
-		case SC_PYROTECHNIC:		/* +MNEwpDDtMMYwrzDLMMMwrw- */
-		case SC_HEATER:				/* +MNIw/DC/MPw- */
-		case SC_TROPIC:				/* +MMgw7TDUMMMwrw- */
-		case SC_AQUAPLAY:			/* +MKIwrzCiMNcw7DCk- */
-		case SC_COOLER:				/* +MK8w/DDpMPw- */
-		case SC_CHILLY_AIR:			/* +MK8w/DDrMKgwojD8- */
-		case SC_GUST:				/* +MKwwuTDI- */
-		case SC_BLAST:				/* +MNYw6TC5MMg- */
-		case SC_WILD_STORM:			/* +MO8wpDDrMMkwuTDIMPww4A- */
-		case SC_PETROLOGY:			/* +MNowyDDtMLgw/A- */
-		case SC_CURSED_SOIL:		/* +MKsw/DC5MMkwvTCkMOs- */
-		case SC_UPHEAVAL:			/* +MKIwwzDXMNgwpDDQMOs- */
-		case SC_TIDAL_WEAPON_OPTION:	/* +ML8wpDDAMOswpjCnMN0w8w-(+fL6XCg-) */
-		case SC_INVINCIBLE:			/* +MKQw8zDTMPMwtzDWMOs- */
-		case SC_INVINCIBLEOFF:		/* +MKQw8zDTMPMwtzDWMOswqjDV- */
+		case SC_FLING:				/* フライング */
+		case SC_MADNESSCANCEL:			/* マッドネスキャンセラー */
+		case SC_ADJUSTMENT:			/* アジャストメント */
+		case SC_INCREASING:			/* インクリージングアキュラシー */
+		case SC_NEN:				/* 念 */
+		case SC_AVOID:				/* 緊急回避 */
+		case SC_CHANGE:				/* メンタルチェンジ */
+		case SC_DEFENCE:			/* ディフェンス */
+		case SC_BLOODLUST:			/* ブラッドラスト */
+		case SC_FLEET:				/* フリートムーブ */
+		case SC_SPEED:				/* オーバードスピード */
+		case SC_STONESKIN:			/* ストーンスキン */
+		case SC_ANTIMAGIC:			/* アンチマジック */
+		case SC_WEAPONQUICKEN:			/* ウェポンクイッケン */
+		case SC_WE_FEMALE:			/* あなたに尽くします */
+		case SC_GIANTGROWTH:		/* ジャイアントグロース */
+		case SC_FIGHTINGSPIRIT:		/* ファイティングスピリット */
+		case SC_FEAR:				/* 恐怖 */
+		case SC_UNLIMIT:			/* アンリミット */
+		case SC_EPICLESIS:			/* エピクレシス */
+		case SC_LAUDAAGNUS:			/* ラウダアグヌス */
+		case SC_LAUDARAMUS:			/* ラウダラムス */
+		case SC_TELEKINESIS_INTENSE:	/* テレキネシスインテンス */
+		case SC_VENOMIMPRESS:		/* ベナムインプレス */
+		case SC_CLOAKINGEXCEED:		/* クローキングエクシード */
+		case SC_VENOMBLEED:			/* ベナムブリード */
+		case SC_INFRAREDSCAN:		/* インフラレッドスキャン */
+		case SC_ANALYZE:			/* アナライズ */
+		case SC_NEUTRALBARRIER:		/* ニュートラルバリアー */
+		case SC__BODYPAINT:			/* ボディペインティング */
+		case SC__INVISIBILITY:		/* インビジビリティ */
+		case SC__ENERVATION:		/* マスカレード：エナベーション */
+		case SC__UNLUCKY:			/* マスカレード：アンラッキー */
+		case SC__STRIPACCESSARY:	/* ストリップアクセサリー */
+		case SC__BLOODYLUST:		/* ブラッディラスト */
+		case SC_SHIELDSPELL_DEF:	/* シールドスペル(DEF) */
+		case SC_SHIELDSPELL_MDEF:	/* シールドスペル(MDEF) */
+		case SC_SHIELDSPELL_REF:	/* シールドスペル(精錬) */
+		case SC_PRESTIGE:			/* プレスティージ */
+		case SC_EARTHDRIVE:			/* アースドライブ */
+		case SC_INSPIRATION:		/* インスピレーション */
+		case SC_GENTLETOUCH_CHANGE:	/* 点穴 -反- */
+		case SC_GENTLETOUCH_REVITALIZE:	/* 点穴 -活- */
+		case SC_SYMPHONY_LOVE:		/* 恋人たちの為のシンフォニー */
+		case SC_ECHOSONG:			/* エコーの歌 */
+		case SC_HARMONIZE:			/* ハーモナイズ */
+		case SC_GLOOMYDAY:			/* メランコリー */
+		case SC_LERADS_DEW:			/* レーラズの露 */
+		case SC_DANCE_WITH_WUG:		/* ダンスウィズウォーグ */
+		case SC_BEYOND_OF_WARCRY:	/* ビヨンドオブウォークライ */
+		case SC_MELODYOFSINK:		/* メロディーオブシンク */
+		case SC_FRIGG_SONG:			/* フリッグの歌 */
+		case SC_STRIKING:			/* ストライキング */
+		case SC_FIRE_EXPANSION_SMOKE_POWDER:	/* ファイアーエクスパンション(煙幕) */
+		case SC_FIRE_EXPANSION_TEAR_GAS:	/* ファイアーエクスパンション(催涙ガス) */
+		case SC_MANDRAGORA:			/* ハウリングオブマンドラゴラ */
+		case SC_BANANA_BOMB:		/* バナナ爆弾 */
+		case SC_MYSTERIOUS_POWDER:	/* 不思議な粉 */
+		case SC_BOOST500:			/* ブースト500 */
+		case SC_FULL_SWING_K:		/* フルスイングK */
+		case SC_MANA_PLUS:			/* マナプラス */
+		case SC_MUSTLE_M:			/* マッスルM */
+		case SC_LIFE_FORCE_F:		/* ライフフォースF */
+		case SC_PROMOTE_HEALTH_RESERCH:	/* HP増加ポーション */
+		case SC_ENERGY_DRINK_RESERCH:	/* SP増加ポーション */
+		case SC_EXTRACT_WHITE_POTION_Z:	/* 濃縮ホワイトポーションZ */
+		case SC_VITATA_500:			/* ビタタ500 */
+		case SC_EXTRACT_SALAMINE_JUICE:	/* 濃縮サラマインジュース */
+		case SC_SAVAGE_STEAK:		/* サベージの丸焼き */
+		case SC_COCKTAIL_WARG_BLOOD:	/* カクテルウォーグブラッド */
+		case SC_MINOR_BBQ:			/* ミノタウロスの牛カルビ */
+		case SC_SIROMA_ICE_TEA:		/* シロマアイスティー */
+		case SC_DROCERA_HERB_STEAMED:	/* ドロセラのハーブ煮 */
+		case SC_PUTTI_TAILS_NOODLES:	/* プティットのしっぽ麺 */
+		case SC_STOMACHACHE:		/* 腹痛 */
+		case SC_MONSTER_TRANSFORM:	/* モンスター変身 */
+		case SC_MEIKYOUSISUI:		/* 明鏡止水 */
+		case SC_IZAYOI:				/* 十六夜 */
+		case SC_KG_KAGEHUMI:		/* 幻術 -影踏み- */
+		case SC_KYOMU:				/* 幻術 -虚無の影- */
+		case SC_KAGEMUSYA:			/* 幻術 -分身- */
+		case SC_ZANGETSU:			/* 幻術 -残月- */
+		case SC_AKAITSUKI:			/* 幻術 -紅月- */
+		case SC_KYOUGAKU:			/* 幻術 -驚愕- */
+		case SC_SHRIMP:				/* エビ三昧 */
+		case SC_GROOMING:			/* グルーミング */
+		case SC_NYANGGRASS:			/* ニャングラス */
+		case SC_BURNT:				/* 獄炎呪 */
+		case SC_ODINS_POWER:		/* オーディンの力 */
+		case SC_MER_FLEE:			/* 傭兵ボーナス(FLEE) */
+		case SC_MER_ATK:			/* 傭兵ボーナス(ATK) */
+		case SC_MER_HP:				/* 傭兵ボーナス(HP) */
+		case SC_MER_SP:				/* 傭兵ボーナス(SP) */
+		case SC_MER_HIT:			/* 傭兵ボーナス(HIT) */
+		case SC_FIRE_CLOAK:			/* ファイアークローク */
+		case SC_WATER_DROP:			/* ウォータードロップ */
+		case SC_WIND_CURTAIN:		/* ウィンドカーテン */
+		case SC_SOLID_SKIN:			/* ソリッドスキン */
+		case SC_STONE_SHIELD:		/* ストーンシールド */
+		case SC_PYROTECHNIC:		/* パイロテクニック */
+		case SC_HEATER:				/* ヒーター */
+		case SC_TROPIC:				/* トロピック */
+		case SC_AQUAPLAY:			/* アクアプレイ */
+		case SC_COOLER:				/* クーラー */
+		case SC_CHILLY_AIR:			/* クールエアー */
+		case SC_GUST:				/* ガスト */
+		case SC_BLAST:				/* ブラスト */
+		case SC_WILD_STORM:			/* ワイルドストーム */
+		case SC_PETROLOGY:			/* ペトロジー */
+		case SC_CURSED_SOIL:		/* カースドソイル */
+		case SC_UPHEAVAL:			/* アップヘイバル */
+		case SC_TIDAL_WEAPON_OPTION:	/* タイダルウェポン(精霊) */
+		case SC_INVINCIBLE:			/* インビンシブル */
+		case SC_INVINCIBLEOFF:		/* インビンシブルオフ */
 		case SC_ATKPOTION:
 		case SC_MATKPOTION:
 		case SC_ALMIGHTY:
-		case SC_PARALYZE:			/* +nrt1+g- */
-		case SC_PAIN_KILLER:		/* +MNowpDDzMK0w6TD8- */
-		case SC_ANGRIFFS_MODUS:		/* +MKIw8zCwMOow1TC5MOIwyTC5- */
-		case SC_GOLDENE_FERSE:		/* +MLQw/DDrMMcw8zDaMOswuDCn- */
-		case SC_TINDER_BREAKER:		/* +Y1Vzcg- */
-		case SC_CBC:				/* +fV4wgWKA- */
+		case SC_PARALYZE:			/* 麻痺 */
+		case SC_PAIN_KILLER:		/* ペインキラー */
+		case SC_ANGRIFFS_MODUS:		/* アングリフスモドス */
+		case SC_GOLDENE_FERSE:		/* ゴールデンペルジェ */
+		case SC_TINDER_BREAKER:		/* 捕獲 */
+		case SC_CBC:				/* 絞め技 */
 		case SC_EQC:				/* E.Q.C */
-		case SC_ALL_STAT_DOWN:	/* +MKow/DDrMLkwxjD8ML8wuTDAMKYw8w- */
-		case SC_LUNARSTANCE:		/* +ZwgwbmnLMEg- */
-		case SC_UNIVERSESTANCE:		/* +W4dbmTBuacswSA- */
-		case SC_SUNSTANCE:			/* +WSqWfTBuacswSA- */
-		case SC_STARSTANCE:			/* +Zh8wbmnLMEg- */
-		case SC_SOULSHADOW:		/* +X3EwbptC- */
-		case SC_SOULFAIRY:		/* +WZZ8vjBum0I- */
-		case SC_SOULFALCON:		/* +nfkwbptC- */
-		case SC_SOULGOLEM:		/* +MLQw/DDsMOAwbptC- */
-		case SC_HANDICAPSTATE_DEEPBLIND:		/* +bwae0g- */
-		case SC_HANDICAPSTATE_DEEPSILENCE:		/* +l1lbwg- */
-		case SC_HANDICAPSTATE_FROSTBITE:		/* +YCVRtw- */
-		case SC_HANDICAPSTATE_CRYSTALLIZATION:	/* +fVBmdlMW- */
-		case SC_HANDICAPSTATE_MISFORTUNE:		/* +Tg1eeA- */
-		case SC_HANDICAPSTATE_DEADLYPOISON:		/* +Xzdr0g- */
-		case SC_DEADLY_DEFEASANCE:		/* +MMcwwzDJMOow/DDXMO0wuDCnMK8wtzDnMPM- */
-		case SC_CLIMAX_DES_HU:		/* +MK8w6TCkMN4wwzCvMLkwzzDqMLEw/DDz- */
-		case SC_CLIMAX_CRYIMP:		/* +MK8w6TCkMN4wwzCvMLkwpDDzMNEwrzDI- */
-		case SC_POWERFUL_FAITH:		/* +XzeXbTBqT+Ff9Q- */
-		case SC_FIRM_FAITH:		/* +WAVW+jBqT+Ff9Q- */
-		case SC_SINCERE_FAITH:		/* +X+BbnzBqT+Ff9Q- */
-		case SC_ATTACK_STANCE:		/* +MKIwvzDDMK8wuTC/MPMwuQ- */
-		case SC_HOLY_S:		/* +MNsw/DDqMPwwtzD8MOswyQ- */
-		case SC_PRE_ACIES:		/* +MNcw7DC7MPMwuTCiMK0wqDD8MLk- */
-		case SC_COMPETENTIA:	/* +MLMw8zDaMMYw8zDGMKMwog- */
-		case SC_RELIGIO:		/* +MOww6jCuMKo- */
-		case SC_BENEDICTUM:		/* +MNkwzTDHMKMwrzDIMKUw4A- */
-		case SC_RUSH_QUAKE2:		/* +MOkwwzC3MOU- */
-		case SC_D_MACHINE:		/* +ljJfoYjFf25nCVK5UxY- */
-		case SC_SHADOW_STRIP:	/* +MLkwyDDqMMMw1zC3MOMwyTCm- */
-		case SC_ABYSS_SLAYER:	/* +MKIw0zC5MLkw7DCkMOQw/A- */
-		case SC_BO_HELL_DUSTY:	/* +MNgw6zDAMLkwxjCj- */
-		case SC_MYSTIC_SYMPHONY:	/* +MN8wuTDGMKMwwzCvMLcw8zDVMKkwyzD8- */
-		case SC_GEF_NOCTURN:		/* +MLIw1TCnMMswojDOMK8wvzD8MPM- */
-		case SC_AIN_RHAPSODY:		/* +knFU4TBuMOkw1zC9MMcwow- */
-		case SC_MUSICAL_INTERLUDE:	/* +MN8w5TD8MLgwqzDrMKQw8zC/MPww6zD8MMk- */
-		case SC_SPELL_ENCHANTING:	/* +MLkw2jDrMKgw8zDBMOMw8zDGMKMw8zCw- */
-		case SC_FLAMETECHNIC:		/* +MNUw7DCkMOAwxjCvMMswwzCv- */
-		case SC_COLD_FORCE:			/* +MLMw/DDrMMkw1TCpMPwwuQ- */
-		case SC_GRACE_BREEZE:		/* +MLAw7DCkMLkw1jDqMPwwug- */
-		case SC_EARTH_CARE:			/* +MKIw/DC5MLEwog- */
-		case SC_DEEP_POISONING:		/* +MMcwozD8MNcw3TCkMLowyzDzMLA- */
-		case SC_FLAMEARMOR:			/* +MNUw7DCkMOAwojD8MN4w/A- */
-		case SC_CRYSTAL_ARMOR:		/* +MK8w6jC5ML8w6zCiMPww3jD8- */
-		case SC_EYES_OF_STORM:		/* +MKIwpDC6MKow1jC5MMgw/DDg- */
-		case SC_STRONG_PROTECTION:	/* +MLkwyDDtMPMwsDDXMO0wxjCvMLcw5zDz- */
-		case SC_POISON_SHIELD:		/* +MN0wpDC6MPMwtzD8MOswyQ- */
-		case SC_HIDDEN_CARD:		/* +MNIwyTClMPMwqzD8MMk- */
-		case SC_TALISMAN_OF_WARRIOR:	/* +a2ZY63sm- */
-		case SC_TALISMAN_OF_MAGICIAN:	/* +bNVeK3sm- */
-		case SC_TALISMAN_OF_FIVE_ELEMENTS:	/* +TpSITHsm- */
-		case SC_T_FIVETH_GOD:		/* +VttluU6UiEyWYw- */
-		case SC_HEAVEN_AND_EARTH:	/* +WSlXMHlelwo- */
-		case SC_MARINE_FESTIVAL:	/* +MN4w6jDzMNUwpzC5MMYwozDQMOs- */
-		case SC_SANDY_FESTIVAL:		/* +MLUw8zDJMNUwpzC5MMYwozDQMOs- */
-		case SC_TEMPORARY_COMMUNION:	/* +TgmXCk4AT1M- */
+		case SC_ALL_STAT_DOWN:	/* オールステータスダウン */
+		case SC_LUNARSTANCE:		/* 月の構え */
+		case SC_UNIVERSESTANCE:		/* 宇宙の構え */
+		case SC_SUNSTANCE:			/* 太陽の構え */
+		case SC_STARSTANCE:			/* 星の構え */
+		case SC_SOULSHADOW:		/* 影の魂 */
+		case SC_SOULFAIRY:		/* 妖精の魂 */
+		case SC_SOULFALCON:		/* 鷹の魂 */
+		case SC_SOULGOLEM:		/* ゴーレムの魂 */
+		case SC_HANDICAPSTATE_DEEPBLIND:		/* 漆黒 */
+		case SC_HANDICAPSTATE_DEEPSILENCE:		/* 静寂 */
+		case SC_HANDICAPSTATE_FROSTBITE:		/* 急冷 */
+		case SC_HANDICAPSTATE_CRYSTALLIZATION:	/* 結晶化 */
+		case SC_HANDICAPSTATE_MISFORTUNE:		/* 不幸 */
+		case SC_HANDICAPSTATE_DEADLYPOISON:		/* 強毒 */
+		case SC_DEADLY_DEFEASANCE:		/* デッドリープロジェクション */
+		case SC_CLIMAX_DES_HU:		/* クライマックスハリケーン */
+		case SC_CLIMAX_CRYIMP:		/* クライマックスインパクト */
+		case SC_POWERFUL_FAITH:		/* 強靭な信念 */
+		case SC_FIRM_FAITH:		/* 堅固な信念 */
+		case SC_SINCERE_FAITH:		/* 忠実な信念 */
+		case SC_ATTACK_STANCE:		/* アタックスタンス */
+		case SC_HOLY_S:		/* ホーリーシールド */
+		case SC_PRE_ACIES:		/* プレセンスアキエース */
+		case SC_COMPETENTIA:	/* コンペテンティア */
+		case SC_RELIGIO:		/* レリギオ */
+		case SC_BENEDICTUM:		/* ベネディクトゥム */
+		case SC_RUSH_QUAKE2:		/* ラッシュ */
+		case SC_D_MACHINE:		/* 防御装置有効化 */
+		case SC_SHADOW_STRIP:	/* ストリップシャドウ */
+		case SC_ABYSS_SLAYER:	/* アビススレイヤー */
+		case SC_BO_HELL_DUSTY:	/* ヘルダスティ */
+		case SC_MYSTIC_SYMPHONY:	/* ミスティックシンフォニー */
+		case SC_GEF_NOCTURN:		/* ゲフェニアノクターン */
+		case SC_AIN_RHAPSODY:		/* 鉱員のラプソディ */
+		case SC_MUSICAL_INTERLUDE:	/* ミュージカルインタールード */
+		case SC_SPELL_ENCHANTING:	/* スペルエンチャンティング */
+		case SC_FLAMETECHNIC:		/* フレイムテクニック */
+		case SC_COLD_FORCE:			/* コールドフォース */
+		case SC_GRACE_BREEZE:		/* グレイスブリーズ */
+		case SC_EARTH_CARE:			/* アースケア */
+		case SC_DEEP_POISONING:		/* ディープポイズニング */
+		case SC_FLAMEARMOR:			/* フレイムアーマー */
+		case SC_CRYSTAL_ARMOR:		/* クリスタルアーマー */
+		case SC_EYES_OF_STORM:		/* アイズオブストーム */
+		case SC_STRONG_PROTECTION:	/* ストロングプロテクション */
+		case SC_POISON_SHIELD:		/* ポイズンシールド */
+		case SC_HIDDEN_CARD:		/* ヒドゥンカード */
+		case SC_TALISMAN_OF_WARRIOR:	/* 武士符 */
+		case SC_TALISMAN_OF_MAGICIAN:	/* 法師符 */
+		case SC_TALISMAN_OF_FIVE_ELEMENTS:	/* 五行符 */
+		case SC_T_FIVETH_GOD:		/* 四方五行陣 */
+		case SC_HEAVEN_AND_EARTH:	/* 天地神霊 */
+		case SC_MARINE_FESTIVAL:	/* マリンフェスティバル */
+		case SC_SANDY_FESTIVAL:		/* サンドフェスティバル */
+		case SC_TEMPORARY_COMMUNION:	/* 三霊一体 */
 			calc_flag = 1;
 			break;
-		case SC_NEWMOON:			/* +ZxRnCIEa- */
-		case SC_SPEEDUP0:			/* +eftS1ZAfXqZYl1Kg-(+MKIwpDDGMOA-) */
-		case SC_SPEEDUP1:			/* +MLkw1DD8MMkw3TD8MLcw5zDz- */
-		case SC_WALKSPEED:			/* +eftS1ZAfXqZYl1Kg-(+MLkwrzDqMNcwyA-) */
-		case SC_SLOWPOTION:			/* +eftS1ZAfXqZPTk4L-(+MKIwpDDGMOA-) */
-		case SC_STEELBODY:			/* +kdFSWw- */
-		case SC_INCREASEAGI:			/* +kB9epk4KZgc- */
-		case SC_WINDWALK:			/* +MKYwpDDzMMkwpjCpMPwwrw- */
+		case SC_NEWMOON:			/* 朔月脚 */
+		case SC_SPEEDUP0:			/* 移動速度増加(アイテム) */
+		case SC_SPEEDUP1:			/* スピードポーション */
+		case SC_WALKSPEED:			/* 移動速度増加(スクリプト) */
+		case SC_SLOWPOTION:			/* 移動速度低下(アイテム) */
+		case SC_STEELBODY:			/* 金剛 */
+		case SC_INCREASEAGI:			/* 速度上昇 */
+		case SC_WINDWALK:			/* ウインドウォーク */
 		case SC_INCFLEE:
-		case SC_DECREASEAGI:			/* +kB9epm4bXBE- */
-		case SC_QUAGMIRE:			/* +MK8woTCwMN4wpDCi- */
-		case SC_MARSHOFABYSS:		/* +MN4w/DC3MOUwqjDWMKIw0zC5- */
-		case SC_DEFENDER:			/* +MMcwozDVMKcw8zDAMPw- */
+		case SC_DECREASEAGI:			/* 速度減少 */
+		case SC_QUAGMIRE:			/* クァグマイア */
+		case SC_MARSHOFABYSS:		/* マーシュオブアビス */
+		case SC_DEFENDER:			/* ディフェンダー */
 		case SC_GRAVITATION:
-		case SC_SUITON:				/* +bDSQQQ- */
-		case SC_GATLINGFEVER:			/* +MKwwyDDqMPMwsDDVMKMw/DDQMPw- */
-		case SC_HALLUCINATIONWALK_POSTDELAY:	/* +MM8w6zC3MM0w/DC3MOcw8zCmMKkw/DCv-(+MNowyjDrMMYwow-) */
-		case SC_PARALIZE:			/* +MNEw6TDpMKQwug- */
-		case SC_FROSTMISTY:			/* +MNUw7TC5MMgw3zC5MMYwow- */
-		case SC_CAMOUFLAGE:			/* +MKsw4jDVMOkw/DC4MOU- */
-		case SC__GROOMY:			/* +MN4wuTCrMOww/DDJ/xowsDDrMPww3zD8- */
-		case SC__LAZINESS:			/* +MN4wuTCrMOww/DDJ/xow7DCkMLgwzTC5- */
-		case SC_SWING:				/* +MLkwpDDzMLAwwDDzMLk- */
-		case SC_GN_CARTBOOST:		/* +MKsw/DDIMNYw/DC5MMg- */
-		case SC_MELON_BOMB:			/* +MOEw7TDzcgZfPg- */
-		case SC_HISS:				/* +i2ZiEg- */
-		case SC_ARCLOUSEDASH:		/* +MKIwrzDpMKYwuTDAMMMwtzDl- */
-		case SC_CHATTERING:			/* +MMEw4zC/MOow8zCw- */
-		case SC_WIND_STEP:			/* +MKYwozDzMMkwuTDGMMMw1w- */
-		case SC_REBOUND:			/* +MOow0DCmMPMwyQ- */
-		case SC_HANDICAPSTATE_LASSITUDE:		/* +cSFsF1Kb- */
-		case SC_JAWAII_SERENADE:	/* +WRVxPDBRMG4wuzDsMMow/DDH- */
-		case SC_PRON_MARCH:			/* +MNcw7TDzMMYw6TDeMPwwwQ- */
-		case SC_SHIELDCHAINRUSH:	/* +MLcw/DDrMMkwwTCnMPww8zDpMMMwtzDl- */
-		case SC_GROUNDGRAVITY:		/* +MLAw6TCmMPMwyTCwMOkw0zDGMPwwtzDnMPM- */
-		case SC_SHADOW_CLOCK:		/* +X3GWoDCM- */
+		case SC_SUITON:				/* 水遁 */
+		case SC_GATLINGFEVER:			/* ガトリングフィーバー */
+		case SC_HALLUCINATIONWALK_POSTDELAY:	/* ハルシネーションウォーク(ペナルティ) */
+		case SC_PARALIZE:			/* パラライズ */
+		case SC_FROSTMISTY:			/* フロストミスティ */
+		case SC_CAMOUFLAGE:			/* カモフラージュ */
+		case SC__GROOMY:			/* マスカレード：グルーミー */
+		case SC__LAZINESS:			/* マスカレード：レイジネス */
+		case SC_SWING:				/* スイングダンス */
+		case SC_GN_CARTBOOST:		/* カートブースト */
+		case SC_MELON_BOMB:			/* メロン爆弾 */
+		case SC_HISS:				/* 警戒 */
+		case SC_ARCLOUSEDASH:		/* アクラウスダッシュ */
+		case SC_CHATTERING:			/* チャタリング */
+		case SC_WIND_STEP:			/* ウィンドステップ */
+		case SC_REBOUND:			/* リバウンド */
+		case SC_HANDICAPSTATE_LASSITUDE:		/* 無気力 */
+		case SC_JAWAII_SERENADE:	/* 夕焼けのセレナーデ */
+		case SC_PRON_MARCH:			/* プロンテラマーチ */
+		case SC_SHIELDCHAINRUSH:	/* シールドチェーンラッシュ */
+		case SC_GROUNDGRAVITY:		/* グラウンドグラビテーション */
+		case SC_SHADOW_CLOCK:		/* 影隠れ */
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
-		case SC_ALL_RIDING:			/* +mg5OVzC3MLkwxjDg- */
+		case SC_ALL_RIDING:			/* 騎乗システム */
 			if(sd)
 				clif_status_load_id(sd,SI_RIDING,0);
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
-		case SC_ON_PUSH_CART:		/* +MKsw/DDI- */
+		case SC_ON_PUSH_CART:		/* カート */
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			if(sc->data[SC_CARTBOOST].timer != -1)
@@ -11629,17 +11608,17 @@ int status_change_end(struct block_list* bl, int type, int tid)
 			if(sd)
 				clif_cart_clear(sd);
 			break;
-		case SC_ELEMENTWATER:		// +bDQ-
-		case SC_ELEMENTGROUND:		// +Vx8-
-		case SC_ELEMENTFIRE:		// +cGs-
-		case SC_ELEMENTWIND:		// +mKg-
-		case SC_ELEMENTHOLY:		// +UUk-
-		case SC_ELEMENTDARK:		// +lcc-
-		case SC_ELEMENTELEKINESIS:	// +X/U-
-		case SC_ELEMENTPOISON:		// +a9I-
-		//case SC_ELEMENTUNDEAD:	// +Tg1rew-
+		case SC_ELEMENTWATER:		// 水
+		case SC_ELEMENTGROUND:		// 土
+		case SC_ELEMENTFIRE:		// 火
+		case SC_ELEMENTWIND:		// 風
+		case SC_ELEMENTHOLY:		// 光
+		case SC_ELEMENTDARK:		// 闇
+		case SC_ELEMENTELEKINESIS:	// 念
+		case SC_ELEMENTPOISON:		// 毒
+		//case SC_ELEMENTUNDEAD:	// 不死
 			if(sd)
-				clif_displaymessage(sd->fd, msg_txt(203));	// +ljJRdzBuXF5gJzBMUUMwa2I7MIowfjBXMF8-
+				clif_displaymessage(sd->fd, msg_txt(203));	// 防具の属性が元に戻りました
 			break;
 		case SC_RACEUNKNOWN:
 		case SC_RACEUNDEAD:
@@ -11652,108 +11631,108 @@ int status_change_end(struct block_list* bl, int type, int tid)
 		case SC_RACEANGEL:
 		case SC_RACEDRAGON:
 			if(sd)
-				clif_displaymessage(sd->fd, msg_txt(205));	// +ei5lzzBMUUMwa2I7MIowfjBXMF8-
+				clif_displaymessage(sd->fd, msg_txt(205));	// 種族が元に戻りました
 			break;
-		case SC_RUN:			/* +ML8wpDDqMK4- */
-		case SC_WUGDASH:		/* +MKYwqTD8MLAwwDDDMLcw5Q- */
+		case SC_RUN:			/* タイリギ */
+		case SC_WUGDASH:		/* ウォーグダッシュ */
 			unit_stop_walking(bl,0);
 			calc_flag = 1;
 			break;
-		case SC_MONK:			/* +MOIw8zCvMG6bQg- */
-		case SC_STAR:			/* +MLEw8zC7MKQwbptC- */
-		case SC_SAGE:			/* +MLsw/DC4MG6bQg- */
-		case SC_CRUSADER:		/* +MK8w6zC7MKQwwDD8MG6bQg- */
-		case SC_WIZARD:			/* +MKYwozC2MPwwyTBum0I- */
-		case SC_PRIEST:			/* +MNcw6jD8MLkwyDBum0I- */
-		case SC_ROGUE:			/* +MO0w/DCwMG6bQg- */
-		case SC_ASSASIN:		/* +MKIwtTC3MPMwbptC- */
-		case SC_SOULLINKER:		/* +ML0wpjDrMOow8zCrMPwwbptC- */
-		case SC_SUPERNOVICE:		/* +MLkw/DDRMPwwzjD8MNMwuTBum0I- */
-		case SC_GUNNER:			/* +MKww8zC5MOow8zCsMPwwbptC- */
-		case SC_NINJA:			/* +X82ABTBum0I- */
-		case SC_DEATHKINGHT:		/* +MMcwuTDKMKQwyDBum0I- */
-		case SC_COLLECTOR:		/* +MLMw7DCvML8w/DBum0I- */
+		case SC_MONK:			/* モンクの魂 */
+		case SC_STAR:			/* ケンセイの魂 */
+		case SC_SAGE:			/* セージの魂 */
+		case SC_CRUSADER:		/* クルセイダーの魂 */
+		case SC_WIZARD:			/* ウィザードの魂 */
+		case SC_PRIEST:			/* プリーストの魂 */
+		case SC_ROGUE:			/* ローグの魂 */
+		case SC_ASSASIN:		/* アサシンの魂 */
+		case SC_SOULLINKER:		/* ソウルリンカーの魂 */
+		case SC_SUPERNOVICE:		/* スーパーノービスの魂 */
+		case SC_GUNNER:			/* ガンスリンガーの魂 */
+		case SC_NINJA:			/* 忍者の魂 */
+		case SC_DEATHKINGHT:		/* デスナイトの魂 */
+		case SC_COLLECTOR:		/* コレクターの魂 */
 			if(sd && battle_config.disp_job_soul_state_change)
-				clif_disp_onlyself(sd->fd, msg_txt(207));	// +m0JytmFLMEx9Qk6GMFcwfjBXMF8-
+				clif_disp_onlyself(sd->fd, msg_txt(207));	// 魂状態が終了しました
 			break;
-		case SC_KNIGHT:			/* +MMowpDDIMG6bQg- */
-		case SC_ALCHEMIST:		/* +MKIw6zCxMN8wuTDIMG6bQg- */
-		case SC_BARDDANCER:		/* +MNAw/DDJMGgwwDDzMLUw/DBum0I- */
-		case SC_BLACKSMITH:		/* +MNYw6TDDMK8wuTDfMLkwbptC- */
-		case SC_HUNTER:			/* +MM8w8zC/MPwwbptC- */
-		case SC_HIGH:			/* +TgBrIU4KT02Ad2ltMG6bQg- */
+		case SC_KNIGHT:			/* ナイトの魂 */
+		case SC_ALCHEMIST:		/* アルケミストの魂 */
+		case SC_BARDDANCER:		/* バードとダンサーの魂 */
+		case SC_BLACKSMITH:		/* ブラックスミスの魂 */
+		case SC_HUNTER:			/* ハンターの魂 */
+		case SC_HIGH:			/* 一次上位職業の魂 */
 			if(sd && battle_config.disp_job_soul_state_change)
-				clif_disp_onlyself(sd->fd, msg_txt(207));	// +m0JytmFLMEx9Qk6GMFcwfjBXMF8-
+				clif_disp_onlyself(sd->fd, msg_txt(207));	// 魂状態が終了しました
 			calc_flag = 1;
 			break;
-		case SC_POEMBRAGI:			/* +MNYw6TCu- */
-		case SC_WHISTLE:			/* +U+N7Gw- */
-		case SC_ASSNCROS:			/* +WRWWfTBuMKIwtTC3MPMwrzDtMLk- */
-		case SC_APPLEIDUN:			/* +MKQwyTClMPMwbmeXao4- */
-		case SC_HUMMING:			/* +MM8w3zDzMLA- */
-		case SC_DONTFORGETME:			/* +ecEwkl/YMIwwajBEMGc- */
-		case SC_FORTUNE:			/* +XniQSzBuMK0wuQ- */
-		case SC_SERVICE4U:			/* +MLUw/DDTMLkw1TCpMPww5jD8- */
+		case SC_POEMBRAGI:			/* ブラギ */
+		case SC_WHISTLE:			/* 口笛 */
+		case SC_ASSNCROS:			/* 夕陽のアサシンクロス */
+		case SC_APPLEIDUN:			/* イドゥンの林檎 */
+		case SC_HUMMING:			/* ハミング */
+		case SC_DONTFORGETME:			/* 私を忘れないで */
+		case SC_FORTUNE:			/* 幸運のキス */
+		case SC_SERVICE4U:			/* サービスフォーユー */
 			calc_flag = 1;
 			if(type == SC_DONTFORGETME)
 				ud->state.change_speed = 1;
-			// +jgowim8UWU9jAX2aMLswwzDI-
-			if(sc->data[type +- SC_WHISTLE_ - SC_WHISTLE].timer == -1)
-				status_change_start(bl,type +- SC_WHISTLE_ - SC_WHISTLE,sc->data[type].val1,
+			// 踊り演奏持続セット
+			if(sc->data[type + SC_WHISTLE_ - SC_WHISTLE].timer == -1)
+				status_change_start(bl,type + SC_WHISTLE_ - SC_WHISTLE,sc->data[type].val1,
 					sc->data[type].val2,sc->data[type].val3,sc->data[type].val4,battle_config.dance_and_play_duration,0);
 			break;
-		case SC_WHISTLE_:			/* +U+N7Gw- */
-		case SC_ASSNCROS_:			/* +WRWWfTBuMKIwtTC3MPMwrzDtMLk- */
-		case SC_APPLEIDUN_:			/* +MKQwyTClMPMwbmeXao4- */
-		case SC_HUMMING_:			/* +MM8w3zDzMLA- */
-		case SC_DONTFORGETME_:			/* +ecEwkl/YMIwwajBEMGc- */
-		case SC_FORTUNE_:			/* +XniQSzBuMK0wuQ- */
-		case SC_SERVICE4U_:			/* +MLUw/DDTMLkw1TCpMPww5jD8- */
+		case SC_WHISTLE_:			/* 口笛 */
+		case SC_ASSNCROS_:			/* 夕陽のアサシンクロス */
+		case SC_APPLEIDUN_:			/* イドゥンの林檎 */
+		case SC_HUMMING_:			/* ハミング */
+		case SC_DONTFORGETME_:			/* 私を忘れないで */
+		case SC_FORTUNE_:			/* 幸運のキス */
+		case SC_SERVICE4U_:			/* サービスフォーユー */
 			calc_flag = 1;
 			break;
-		case SC_MARIONETTE:			/* +MN4w6jCqMM0wwzDIMLMw8zDIMO0w/DDr- (+gepSBg-) */
-		case SC_MARIONETTE2:			/* +MN4w6jCqMM0wwzDIMLMw8zDIMO0w/DDr- (+dvhiSw-) */
+		case SC_MARIONETTE:			/* マリオネットコントロール (自分) */
+		case SC_MARIONETTE2:			/* マリオネットコントロール (相手) */
 			{
 				struct block_list *tbl = map_id2bl(sc->data[type].val2);
 				if(tbl) {
 					struct status_change *tsc = status_get_sc(tbl);
 					int tmp = (type == SC_MARIONETTE)? SC_MARIONETTE2: SC_MARIONETTE;
-					// +dvhluTBMMN4w6jCqMM0wwzDIcrZhSzBqMIkwRDBjMFcwhzBrieOWZA-
+					// 相方がマリオネット状態ならいっしょに解除
 					if(tsc && tsc->data[tmp].timer != -1)
 						status_change_end(tbl, tmp, -1);
 				}
 			}
 			calc_flag = 1;
 			break;
-		case SC_BERSERK:			/* +MNAw/DC1MPwwrw- */
+		case SC_BERSERK:			/* バーサーク */
 			calc_flag = 1;
 			if(sd) {
-				clif_status_load_id(sd,SI_INCREASEAGI,0);	// +MKIwpDCzMPNtiFO7-
+				clif_status_load_id(sd,SI_INCREASEAGI,0);	// アイコン消去
 				status_change_start(bl,SC_NATURAL_HEAL_STOP,0,0,0,0,skill_get_time2(LK_BERSERK,sc->data[type].val1),0);
 			}
 			break;
 		case SC_HALLUCINATION:
 			if(sd)
-				clif_status_load_id(sd,SI_HALLUCINATION,0);	// +MKIwpDCzMPNtiFO7-
+				clif_status_load_id(sd,SI_HALLUCINATION,0);	// アイコン消去
 			break;
 
-		case SC_ENDURE:				/* +MKQw8zDHMOUwog- */
+		case SC_ENDURE:				/* インデュア */
 			calc_flag = 1;
 			// fall through
-		case SC_AUTOGUARD:			/* +MKow/DDIMKww/DDJ- */
-		case SC_REFLECTSHIELD:			/* +MOow1TDsMK8wyDC3MPww6zDJ- */
+		case SC_AUTOGUARD:			/* オートガード */
+		case SC_REFLECTSHIELD:			/* リフレクトシールド */
 			if(sd) {
 				struct map_session_data *tsd;
 				int i;
-				// +iKswxzCjMNww/DC3MOcw84AFMIKJ45ZkMFkwiw-
-				for(i = 0; i < 5; i+-+-) {
+				// 被ディボーション者も解除する
+				for(i = 0; i < 5; i++) {
 					if(sd->dev.val1[i] && (tsd = map_id2sd(sd->dev.val1[i])) != NULL && tsd->sc.data[type].timer != -1)
 						status_change_end(&tsd->bl, type, -1);
 				}
 			}
 			break;
 
-		case SC_DEVOTION:		/* +MMcwozDcMPwwtzDnMPM- */
+		case SC_DEVOTION:		/* ディボーション */
 			{
 				struct map_session_data *dsd = map_id2sd(sc->data[type].val1);
 
@@ -11777,7 +11756,7 @@ int status_change_end(struct block_list* bl, int type, int tid)
 				struct block_list *tbl = map_id2bl(sc->data[type].val4);
 				if(tbl) {
 					struct status_change *tsc = status_get_sc(tbl);
-					// +ckdluTBMUgcwjDBfMG4wZ3b4YkswbnZ9UgNytmFLMExSBzCMMGYwajBEMG4wajCJieOWZA-
+					// 片方が切れたので相手の白刃状態が切れてないのなら解除
 					if(tsc && tsc->data[SC_BLADESTOP].timer != -1)
 						status_change_end(tbl,SC_BLADESTOP,-1);
 					if(sc->data[type].val2 == 2)
@@ -11791,7 +11770,7 @@ int status_change_end(struct block_list* bl, int type, int tid)
 				struct block_list *tbl = map_id2bl(sc->data[type].val4);
 				if(tbl) {
 					struct status_change *tsc = status_get_sc(tbl);
-					// +ckdluTBMUgcwjDBfMG4wZ3b4YkswTFIHMIwwZjBqMEQwbjBqMImJ45Zk-
+					// 片方が切れたので相手が切れてないのなら解除
 					if(tsc && tsc->data[type].timer != -1)
 						status_change_end(tbl,type,-1);
 				}
@@ -11801,12 +11780,12 @@ int status_change_end(struct block_list* bl, int type, int tid)
 		case SC_DANCING:
 			{
 				struct map_session_data *dsd;
-				// +ZwhmDjCKMGAwUTBTMFMwZzCiMKQwszDzbYhTuw-
+				// 月明りだけここでアイコン消去
 				if(sc->data[type].val1 == CG_MOONLIT)
-					clif_status_change(bl,SI_MOONLIT,0,0,0,0,0);	// +MKIwpDCzMPNtiFO7-
+					clif_status_change(bl,SI_MOONLIT,0,0,0,0,0);	// アイコン消去
 
 				if(sc->data[type].val4 && (dsd = map_id2sd(sc->data[type].val4))) {
-					// +VAhZTzBndvhiSzBMMEQwi1g0VAh2+GJLMG4-val4+MJI-0+MGswWTCL-
+					// 合奏で相手がいる場合相手のval4を0にする
 					if(dsd->sc.data[type].timer != -1)
 						dsd->sc.data[type].val4 = 0;
 				}
@@ -11822,52 +11801,52 @@ int status_change_end(struct block_list* bl, int type, int tid)
 		case SC_GRAVITATION_USER:
 		case SC_DANCING_KNIFE:
 			{
-				struct skill_unit_group *sg = map_id2sg(sc->data[type].val4);	// val4+MEw-group_id
+				struct skill_unit_group *sg = map_id2sg(sc->data[type].val4);	// val4がgroup_id
 				sc->data[type].val4 = 0;
 				if(sg)
 					skill_delunitgroup(sg);
 			}
 			break;
-		case SC_NOCHAT:			/* +MMEw4zDDMMh5gWticrZhSw- */
+		case SC_NOCHAT:			/* チャット禁止状態 */
 			if(sd)
 				clif_updatestatus(sd,SP_MANNER);
 			break;
-		case SC_SPLASHER:		/* +MNkwyjDgMLkw1zDpMMMwtzDjMPw- */
+		case SC_SPLASHER:		/* ベナムスプラッシャー */
 			{
 				struct block_list *src = map_id2bl(sc->data[type].val3);
 				if(src && tid != -1) {
-					// +gepSBjBrMMAw4TD8MLj/BlRoVvI-3*3+MGswwDDhMPwwuA-
+					// 自分にダメージ＆周囲3*3にダメージ
 					skill_castend_damage_id(src,bl,sc->data[type].val2,sc->data[type].val1,gettick(),0);
 				}
 			}
 			break;
 		case SC_ANKLE:
-		case SC_THORNS_TRAP:	/* +ML0w/DDzMMgw6TDDMNc- */
+		case SC_THORNS_TRAP:	/* ソーントラップ */
 			{
 				struct skill_unit_group *sg = map_id2sg(sc->data[type].val2);
-				// skill_delunitgroup+MEswiQ-status_change_end +MExUfDBwMIwwajBEcLowazAB-
-				// +TgB673Z6UtUwVzBmMEQwajBEToswazBXMGYwSzCJMLAw6zD8MNdSSpZkMFkwizAC-
+				// skill_delunitgroupからstatus_change_end が呼ばれない為に、
+				// 一端発動していない事にしてからグループ削除する。
 				if(sg) {
 					sg->val2 = 0;
 					skill_delunitgroup(sg);
 				}
 			}
 			break;
-		case SC_SELFDESTRUCTION:	/* +gepyBg- */
+		case SC_SELFDESTRUCTION:	/* 自爆 */
 			unit_stop_walking(bl,5);
 			if(md) {
-				md->mode &= +AH4-MD_CANMOVE;
+				md->mode &= ~MD_CANMOVE;
 				md->state.special_mob_ai = 2;
 			}
 			break;
-		case SC_BUNSINJYUTSU:	/* +UgaOqzBuiFM- */
+		case SC_BUNSINJYUTSU:	/* 分身の術 */
 			if(sd) {
 				int color = sc->data[SC_BUNSINJYUTSU].val4;
 				if(color > 0)
 					pc_changelook(sd, LOOK_CLOTHES_COLOR, color);
 			}
 			break;
-		case SC_SEVENWIND:	/* +ZpYwSzBEmKg- */
+		case SC_SEVENWIND:	/* 暖かい風 */
 			if(sd)
 				clif_status_load_id(sd,sc->data[type].val2,0);
 			break;
@@ -11876,34 +11855,34 @@ int status_change_end(struct block_list* bl, int type, int tid)
 				status_change_end(bl,SC_PROVOKE,-1);
 			}
 			break;
-		case SC_HALLUCINATIONWALK:	/* +MM8w6zC3MM0w/DC3MOcw8zCmMKkw/DCv- */
-			// +MNowyjDrMMYwo5WLWcs-
+		case SC_HALLUCINATIONWALK:	/* ハルシネーションウォーク */
+			// ペナルティ開始
 			status_change_start(bl,SC_HALLUCINATIONWALK_POSTDELAY,0,0,0,0,skill_get_time2(GC_HALLUCINATIONWALK,sc->data[type].val1),0);
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
-		case SC_MILLENNIUMSHIELD:	/* +MN8w7DDLMKIw4DC3MPww6zDJ- */
+		case SC_MILLENNIUMSHIELD:	/* ミレニアムシールド */
 			if(sd)
 				clif_mshield(sd, 0);
 			break;
-		case SC_WHITEIMPRISON:	/* +MNsw7zCkMMgwpDDzMNcw6jC6MPM- */
+		case SC_WHITEIMPRISON:	/* ホワイトインプリズン */
 			{
 				int dmg = 400 * sc->data[type].val1;
 				clif_damage(bl,bl,gettick(),0,0,dmg,0,9,0,0);
 				battle_damage(bl,bl,dmg,0,0,0);
 			}
 			break;
-		case SC_SPELLBOOK:			/* +MLkw2jDrMNYwwzCv- */
+		case SC_SPELLBOOK:			/* スペルブック */
 			if(sd) {
-				// +T91bWDC5MK0w62DFWDEwklIdZx9TFg-
+				// 保存スキル情報を初期化
 				memset(sd->freeze_sp_skill, 0, sizeof(sd->freeze_sp_skill[0])*MAX_FREEZE_SPELL);
-				sd->freeze_sp_slot = 0;		// +MLkw7TDDMMhlcDCSUh1nH1MW-
+				sd->freeze_sp_slot = 0;		// スロット数を初期化
 			}
 			break;
-		case SC_NEUTRALBARRIER_MASTER:	/* +MMsw5TD8MMgw6TDrMNAw6jCiMPw-(+T391KIAF-) */
-		case SC_STEALTHFIELD_MASTER:	/* +MLkwxjDrMLkw1TCjMPww6zDJ-(+T391KIAF-) */
+		case SC_NEUTRALBARRIER_MASTER:	/* ニュートラルバリアー(使用者) */
+		case SC_STEALTHFIELD_MASTER:	/* ステルスフィールド(使用者) */
 			{
-				struct skill_unit_group *sg = map_id2sg(sc->data[type].val4);	// val4+MEw-group_id
+				struct skill_unit_group *sg = map_id2sg(sc->data[type].val4);	// val4がgroup_id
 				sc->data[type].val4 = 0;
 				if(sg)
 					skill_delunitgroup(sg);
@@ -11911,19 +11890,19 @@ int status_change_end(struct block_list* bl, int type, int tid)
 				ud->state.change_speed = 1;
 			}
 			break;
-		case SC__SHADOWFORM:		/* +MLcw4zDJMKYw1TCpMPww4A- */
+		case SC__SHADOWFORM:		/* シャドウフォーム */
 			{
 				struct map_session_data *dsd;
 				if((dsd = map_id2sd(sc->data[type].val2)) != NULL)
 					dsd->shadowform_id = 0;
 			}
 			break;
-		case SC_FORCEOFVANGUARD:	/* +MNUwqTD8MLkwqjDWMNAw8zCsMPwwyQ- */
+		case SC_FORCEOFVANGUARD:	/* フォースオブバンガード */
 			if(sd)
 				clif_mshield(sd, 0);
 			calc_flag = 1;
 			break;
-		case SC_BANDING:		/* +MNAw8zDHMKMw8zCw- */
+		case SC_BANDING:		/* バンディング */
 			{
 				struct skill_unit_group *sg = map_id2sg(sc->data[type].val4);
 				sc->data[type].val4 = 0;
@@ -11932,7 +11911,7 @@ int status_change_end(struct block_list* bl, int type, int tid)
 				calc_flag = 1;
 			}
 			break;
-		case SC_RAISINGDRAGON:		/* +b1yfjWYHWSk- */
+		case SC_RAISINGDRAGON:		/* 潜龍昇天 */
 			if(sd) {
 				int max = pc_checkskill(sd,MO_CALLSPIRITS);
 				if(sd->spiritball.num > max)
@@ -11940,11 +11919,11 @@ int status_change_end(struct block_list* bl, int type, int tid)
 			}
 			calc_flag = 1;
 			break;
-		case SC_SATURDAY_NIGHT_FEVER:	/* +MNUw6TCkMMcw/DDKMKQwyDDVMKMw/DDQMPw- */
+		case SC_SATURDAY_NIGHT_FEVER:	/* フライデーナイトフィーバー */
 			status_change_start(bl,SC_SITDOWN_FORCE,0,0,0,0,3000,0);
 			calc_flag = 1;
 			break;
-		case SC_SPORE_EXPLOSION:	/* +MLkw3TCiMKgwrzC5MNcw7TD8MLgw5zDz- */
+		case SC_SPORE_EXPLOSION:	/* スポアエクスプロージョン */
 			{
 				struct block_list *src = map_id2bl(sc->data[type].val3);
 				if(src && tid != -1) {
@@ -11952,11 +11931,11 @@ int status_change_end(struct block_list* bl, int type, int tid)
 				}
 			}
 			break;
-		case SC_SUMMON_ELEM:	/* +MLUw4jDzMKgw7DDhMPMwvzDr- */
+		case SC_SUMMON_ELEM:	/* サモンエレメンタル */
 			if(sd && sd->eld)
 				elem_delete_data(sd);
 			break;
-		case SC_OVERED_BOOST:		/* +MKow/DDQMPwwyTDWMPwwuTDI- */
+		case SC_OVERED_BOOST:		/* オーバードブースト */
 			if(sd) {
 				int sp = status_get_max_sp(bl) / 2;
 				if(sd->status.sp > sp)
@@ -11968,47 +11947,47 @@ int status_change_end(struct block_list* bl, int type, int tid)
 			else if(hd) {
 				hd->status.hungry -= 50;
 				if(hd->status.hungry <= 0) {
-					hd->status.hungry = 1;	// 0+MGswbzBqMIkwajBE-
+					hd->status.hungry = 1;	// 0にはならない
 				}
 			}
 			calc_flag = 1;
 			break;
-		case SC_GRANITIC_ARMOR:		/* +MLAw6TDLMMYwozDDMK8wojD8MN4w/A- */
+		case SC_GRANITIC_ARMOR:		/* グラニティックアーマー */
 			{
 				int dmg = (int)((atn_bignumber)status_get_max_hp(bl) * sc->data[type].val3 / 100);
 				unit_heal(bl, -dmg, 0, 0, 0);
 			}
 			break;
-		case SC_PYROCLASTIC:		/* +MNEwpDDtMK8w6TC5MMYwozDDMK8- */
+		case SC_PYROCLASTIC:		/* パイロクラスティック */
 			if(sd)
 				pc_break_equip(sd, LOC_RARM);
 			calc_flag = 1;
 			break;
-		case SC_FULL_THROTTLE:		/* +MNUw6zC5MO0wwzDIMOs- */
+		case SC_FULL_THROTTLE:		/* フルスロットル */
 			status_change_start(bl,SC_REBOUND,0,0,0,0,10000,0);
 			calc_flag = 1;
 			ud->state.change_speed = 1;
 			break;
-		case SC_SERVANTWEAPON:		/* +MLUw/DD0MKEw8zDIMKYwpzDdMPM- */
+		case SC_SERVANTWEAPON:		/* サーヴァントウェポン */
 			if(sd)
 				pc_delball(sd,sd->ball.num,0);
 			break;
-		case SC_CHARGINGPIERCE:		/* +MMEw4zD8MLgw8zCwMLkw1DCi- */
+		case SC_CHARGINGPIERCE:		/* チャージングスピア */
 			if(sc->data[SC_CHARGINGPIERCE_COUNT].timer != -1)
 				status_change_end(bl,SC_CHARGINGPIERCE_COUNT,-1);
 			break;
-		case SC_GUARD_STANCE:		/* +MKww/DDJMLkwvzDzMLk- */
+		case SC_GUARD_STANCE:		/* ガードスタンス */
 			if(sc->data[SC_GUARDIAN_S].timer != -1)
 				status_change_end(bl,SC_GUARDIAN_S,-1);
 			if(sc->data[SC_REBOUND_S].timer != -1)
 				status_change_end(bl,SC_REBOUND_S,-1);
 			calc_flag = 1;
 			break;
-		case SC_ABYSSFORCEWEAPON:		/* +MNUw7TDgMLgwojDTMLk- */
+		case SC_ABYSSFORCEWEAPON:		/* フロムジアビス */
 			if(sd)
 				pc_delball(sd,sd->ball.num,0);
 			break;
-		case SC_ROSEBLOSSOM:			/* +MO0wvDDWMO0wwzC1MOA- */
+		case SC_ROSEBLOSSOM:			/* ロゼブロッサム */
 			{
 				struct block_list *src = map_id2bl(sc->data[type].val2);
 				if(src && tid != -1) {
@@ -12016,37 +11995,37 @@ int status_change_end(struct block_list* bl, int type, int tid)
 				}
 			}
 			break;
-		case SC_SUMMON_ELEMENTAL_ARDOR:		/* +MLUw4jDzMKIw6zDJMPww6w- */
+		case SC_SUMMON_ELEMENTAL_ARDOR:		/* サモンアルドール */
 			if(sd && sd->eld && sd->eld->status.class_ == ELEMID_EM_ARDOR)
 				elem_delete_data(sd);
 			calc_flag = 1;
 			break;
-		case SC_SUMMON_ELEMENTAL_DILUVIO:		/* +MLUw4jDzMMcwozDrMNMwqg- */
+		case SC_SUMMON_ELEMENTAL_DILUVIO:		/* サモンディルビオ */
 			if(sd && sd->eld && sd->eld->status.class_ == ELEMID_EM_DILUVIO)
 				elem_delete_data(sd);
 			calc_flag = 1;
 			break;
-		case SC_SUMMON_ELEMENTAL_PROCELLA:		/* +MLUw4jDzMNcw7TC7MOk- */
+		case SC_SUMMON_ELEMENTAL_PROCELLA:		/* サモンプロセラ */
 			if(sd && sd->eld && sd->eld->status.class_ == ELEMID_EM_PROCELLA)
 				elem_delete_data(sd);
 			calc_flag = 1;
 			break;
-		case SC_SUMMON_ELEMENTAL_TERREMOTUS:	/* +MLUw4jDzMMYw7DDiMMgwpTC5- */
+		case SC_SUMMON_ELEMENTAL_TERREMOTUS:	/* サモンテレモトゥス */
 			if(sd && sd->eld && sd->eld->status.class_ == ELEMID_EM_TERREMOTUS)
 				elem_delete_data(sd);
 			calc_flag = 1;
 			break;
-		case SC_SUMMON_ELEMENTAL_SERPENS:		/* +MLUw4jDzMLUw/DDaMPMwuQ- */
+		case SC_SUMMON_ELEMENTAL_SERPENS:		/* サモンサーペンス */
 			if(sd && sd->eld && sd->eld->status.class_ == ELEMID_EM_SERPENS)
 				elem_delete_data(sd);
 			calc_flag = 1;
 			break;
-		case SC_INTENSIVE_AIM:			/* +MKQw8zDGMPMwtzDWMKgwpDDg- */
+		case SC_INTENSIVE_AIM:			/* インテンシブエイム */
 			if(sc->data[SC_INTENSIVE_AIM_COUNT].timer != -1)
 				status_change_end(bl,SC_INTENSIVE_AIM_COUNT,-1);
 			calc_flag = 1;
 			break;
-		case SC_BLESSING_OF_M_CREATURES:	/* +MGswgzCTMNYw7DDDMLcw8zCw- */
+		case SC_BLESSING_OF_M_CREATURES:	/* にゃんブレッシング */
 			unit_heal(bl,0,0,-200,0);
 			status_change_start(bl,SC_BLESSING_OF_M_C_DEBUFF,sc->data[type].val1,0,0,0,skill_get_time2(SH_BLESSING_OF_MYSTICAL_CREATURES,sc->data[type].val1),0);
 			calc_flag = 1;
@@ -12057,12 +12036,12 @@ int status_change_end(struct block_list* bl, int type, int tid)
 			break;
 
 		/* option2 */
-		case SC_POISON:				/* +a9I- */
-		case SC_BLIND:				/* +Zpee0g- */
+		case SC_POISON:				/* 毒 */
+		case SC_BLIND:				/* 暗黒 */
 		case SC_CURSE:
 			calc_flag = 1;
 			break;
-		case SC_GRAVITYCONTROL:	/* +kc1Sm4q/e8A- */
+		case SC_GRAVITYCONTROL:	/* 重力調節 */
 			{
 				int fall_damage = sc->data[type].val2;
 				if( fall_damage > 0 ){
@@ -12071,16 +12050,16 @@ int status_change_end(struct block_list* bl, int type, int tid)
 				}
 			}
 			break;
-		case SC_DIMENSION2:	/* +ayFRQzBuZvg-(+Zh9eHZZNgeg-) */
+		case SC_DIMENSION2:	/* 次元の書(星帝降臨) */
 			if(sd)
 				clif_mshield(sd, 0);
 			break;
 	}
 
-	if(StatusIconChangeTable[type] != SI_BLANK)	// +MKIwpDCzMPNtiFO7-
+	if(StatusIconChangeTable[type] != SI_BLANK)	// アイコン消去
 		clif_status_load(bl,StatusIconChangeTable[type],0);
 
-	switch(type) {	/* +a2NeODBrYjswizBoME0wajBrMEtR5nQGMExfxYmB- */
+	switch(type) {	/* 正常に戻るときなにか処理が必要 */
 		// opt1
 		case SC_STONE:
 		case SC_FREEZE:
@@ -12093,204 +12072,204 @@ int status_change_end(struct block_list* bl, int type, int tid)
 			break;
 		// opt2
 		case SC_POISON:
-			sc->opt2 &= +AH4-OPT2_POISON;
+			sc->opt2 &= ~OPT2_POISON;
 			opt_flag = 1;
 			break;
 		case SC_CURSE:
 		case SC_SILENCE:
 		case SC_CONFUSION:
-			sc->opt2 &= +AH4-(OPT2_POISON<<(type-SC_POISON));
+			sc->opt2 &= ~(OPT2_POISON<<(type-SC_POISON));
 			opt_flag = 1;
 			if(type == SC_CURSE)
 				ud->state.change_speed = 1;
 			break;
 		case SC_FOGWALLPENALTY:
 			if(sc->data[SC_BLIND].timer == -1) {
-				sc->opt2 &= +AH4-OPT2_BLIND;
+				sc->opt2 &= ~OPT2_BLIND;
 				opt_flag = 1;
 			}
 			break;
 		case SC_BLIND:
 			if(sc->data[SC_FOGWALLPENALTY].timer == -1) {
-				sc->opt2 &= +AH4-OPT2_BLIND;
+				sc->opt2 &= ~OPT2_BLIND;
 				opt_flag = 1;
 			}
 			break;
-		case SC_ANGELUS:			/* +MKIw8zC8MOswuQ- */
-			sc->opt2 &= +AH4-OPT2_ANGELUS;
+		case SC_ANGELUS:			/* アンゼルス */
+			sc->opt2 &= ~OPT2_ANGELUS;
 			opt_flag = 1;
 			break;
 		case SC_DPOISON:
-			sc->opt2 &= +AH4-OPT2_HEAVYPOISON;
+			sc->opt2 &= ~OPT2_HEAVYPOISON;
 			opt_flag = 1;
 			break;
 		case SC_BLEED:
-			sc->opt2 &= +AH4-OPT2_BLEEDING;
+			sc->opt2 &= ~OPT2_BLEEDING;
 			opt_flag = 1;
 			break;
 		case SC_FEAR:
-			sc->opt2 &= +AH4-OPT2_FEAR;
+			sc->opt2 &= ~OPT2_FEAR;
 			opt_flag = 1;
 			break;
 		// opt3
 		case SC_ONEHAND:		/* 1HQ */
 		case SC_TWOHANDQUICKEN:		/* 2HQ */
-		case SC_SPEARQUICKEN:		/* +MLkw1DCiMK8wpDDDMLEw8w- */
-		case SC_CONCENTRATION:		/* +MLMw8zC7MPMwyDDsMPwwtzDnMPM- */
-		case SC_WEAPONQUICKEN:		/* +MKYwpzDdMPMwrzCkMMMwsTDz- */
-			sc->opt3 &= +AH4-OPT3_QUICKEN;
+		case SC_SPEARQUICKEN:		/* スピアクイッケン */
+		case SC_CONCENTRATION:		/* コンセントレーション */
+		case SC_WEAPONQUICKEN:		/* ウェポンクイッケン */
+			sc->opt3 &= ~OPT3_QUICKEN;
 			opt_flag = 2;
 			break;
-		case SC_OVERTHRUST:		/* +MKow/DDQMPwwyDDpMLkwyA- */
-		case SC_SWOO:			/* +MKgwuTCm- */
-			sc->opt3 &= +AH4-OPT3_OVERTHRUST;
+		case SC_OVERTHRUST:		/* オーバートラスト */
+		case SC_SWOO:			/* エスウ */
+			sc->opt3 &= ~OPT3_OVERTHRUST;
 			opt_flag = 2;
 			if(type == SC_SWOO)
 				ud->state.change_speed = 1;
 			break;
-		case SC_ENERGYCOAT:		/* +MKgwyjC4MPwwszD8MMg- */
-		case SC_SKE:			/* +MKgwuTCv- */
-			sc->opt3 &= +AH4-OPT3_ENERGYCOAT;
+		case SC_ENERGYCOAT:		/* エナジーコート */
+		case SC_SKE:			/* エスク */
+			sc->opt3 &= ~OPT3_ENERGYCOAT;
 			opt_flag = 2;
 			break;
-		case SC_EXPLOSIONSPIRITS:	/* +cgaIwmziUtU- */
-			sc->opt3 &= +AH4-OPT3_EXPLOSIONSPIRITS;
+		case SC_EXPLOSIONSPIRITS:	/* 爆裂波動 */
+			sc->opt3 &= ~OPT3_EXPLOSIONSPIRITS;
 			opt_flag = 2;
 			break;
-		case SC_STEELBODY:		/* +kdFSWw- */
-		case SC_SKA:			/* +MKgwuTCr- */
-			sc->opt3 &= +AH4-OPT3_STEELBODY;
+		case SC_STEELBODY:		/* 金剛 */
+		case SC_SKA:			/* エスカ */
+			sc->opt3 &= ~OPT3_STEELBODY;
 			opt_flag = 2;
 			break;
-		case SC_BLADESTOP:		/* +dn1SA1PWMIo- */
-			sc->opt3 &= +AH4-OPT3_BLADESTOP;
+		case SC_BLADESTOP:		/* 白刃取り */
+			sc->opt3 &= ~OPT3_BLADESTOP;
 			opt_flag = 2;
 			break;
-		case SC_AURABLADE:			/* +MKow/DDpMNYw7DD8MMk- */
-			sc->opt3 &= +AH4-OPT3_AURABLADE;
+		case SC_AURABLADE:			/* オーラブレード */
+			sc->opt3 &= ~OPT3_AURABLADE;
 			opt_flag = 2;
 			break;
-		case SC_BERSERK:		/* +MNAw/DC1MPwwrw- */
-			sc->opt3 &= +AH4-OPT3_BERSERK;
+		case SC_BERSERK:		/* バーサーク */
+			sc->opt3 &= ~OPT3_BERSERK;
 			opt_flag = 2;
 			break;
-		case SC_DANCING:			/* +MMAw8zC5-/+bxRZT04t- */
+		case SC_DANCING:			/* ダンス/演奏中 */
 			if(sc->data[SC_DANCING].val1 != CG_MOONLIT)
 				break;
-			sc->opt3 &= +AH4-OPT3_MOON;
+			sc->opt3 &= ~OPT3_MOON;
 			opt_flag = 2;
 			break;
-		case SC_MARIONETTE:		/* +MN4w6jCqMM0wwzDIMLMw8zDIMO0w/DDr- */
-		case SC_MARIONETTE2:		/* +MN4w6jCqMM0wwzDIMLMw8zDIMO0w/DDr- */
-			sc->opt3 &= +AH4-OPT3_MARIONETTE;
+		case SC_MARIONETTE:		/* マリオネットコントロール */
+		case SC_MARIONETTE2:		/* マリオネットコントロール */
+			sc->opt3 &= ~OPT3_MARIONETTE;
 			opt_flag = 2;
 			break;
-		case SC_ASSUMPTIO:		/* +MKIwuTDgMNcwxjCjMKo- */
-		case SC_ASSUMPTIO2:		/* +MK0w4zDDMLcw5TCiMLkw4DDXMMYwozCq- */
-			sc->opt3 &= +AH4-OPT3_ASSUMPTIO;
+		case SC_ASSUMPTIO:		/* アスムプティオ */
+		case SC_ASSUMPTIO2:		/* キャッシュアスムプティオ */
+			sc->opt3 &= ~OPT3_ASSUMPTIO;
 			opt_flag = 2;
 			break;
-		case SC_WARM:			/* +bikwgjCK- */
-			sc->opt3 &= +AH4-OPT3_SUN_WARM;
+		case SC_WARM:			/* 温もり */
+			sc->opt3 &= ~OPT3_SUN_WARM;
 			opt_flag = 2;
 			break;
-		case SC_KAITE:			/* +MKswpDDI- */
-			sc->opt3 &= +AH4-OPT3_KAITE;
+		case SC_KAITE:			/* カイト */
+			sc->opt3 &= ~OPT3_KAITE;
 			opt_flag = 2;
 			break;
-		case SC_BUNSINJYUTSU:		/* +UgaOqzBuiFM- */
-			sc->opt3 &= +AH4-OPT3_BUNSIN;
+		case SC_BUNSINJYUTSU:		/* 分身の術 */
+			sc->opt3 &= ~OPT3_BUNSIN;
 			opt_flag = 2;
 			break;
-		case SC_MONK:			/* +MOIw8zCvMG6bQg- */
-		case SC_STAR:			/* +MLEw8zC7MKQwbptC- */
-		case SC_SAGE:			/* +MLsw/DC4MG6bQg- */
-		case SC_CRUSADER:		/* +MK8w6zC7MKQwwDD8MG6bQg- */
-		case SC_WIZARD:			/* +MKYwozC2MPwwyTBum0I- */
-		case SC_PRIEST:			/* +MNcw6jD8MLkwyDBum0I- */
-		case SC_ROGUE:			/* +MO0w/DCwMG6bQg- */
-		case SC_ASSASIN:		/* +MKIwtTC3MPMwbptC- */
-		case SC_SOULLINKER:		/* +ML0wpjDrMOow8zCrMPwwbptC- */
-		case SC_KNIGHT:			/* +MMowpDDIMG6bQg- */
-		case SC_ALCHEMIST:		/* +MKIw6zCxMN8wuTDIMG6bQg- */
-		case SC_BARDDANCER:		/* +MNAw/DDJMGgwwDDzMLUw/DBum0I- */
-		case SC_BLACKSMITH:		/* +MNYw6TDDMK8wuTDfMLkwbptC- */
-		case SC_HUNTER:			/* +MM8w8zC/MPwwbptC- */
-		case SC_HIGH:			/* +TgBrIU4KT02Ad2ltMG6bQg- */
-		case SC_SUPERNOVICE:		/* +MLkw/DDRMPwwzjD8MNMwuTBum0I- */
-		case SC_GUNNER:			/* +MKww8zC5MOow8zCsMPwwbptC- */
-		case SC_NINJA:			/* +X82ABTBum0I- */
-		case SC_DEATHKINGHT:		/* +MMcwuTDKMKQwyDBum0I- */
-		case SC_COLLECTOR:		/* +MLMw7DCvML8w/DBum0I- */
-			sc->opt3 &= +AH4-OPT3_SOULLINK;
+		case SC_MONK:			/* モンクの魂 */
+		case SC_STAR:			/* ケンセイの魂 */
+		case SC_SAGE:			/* セージの魂 */
+		case SC_CRUSADER:		/* クルセイダーの魂 */
+		case SC_WIZARD:			/* ウィザードの魂 */
+		case SC_PRIEST:			/* プリーストの魂 */
+		case SC_ROGUE:			/* ローグの魂 */
+		case SC_ASSASIN:		/* アサシンの魂 */
+		case SC_SOULLINKER:		/* ソウルリンカーの魂 */
+		case SC_KNIGHT:			/* ナイトの魂 */
+		case SC_ALCHEMIST:		/* アルケミストの魂 */
+		case SC_BARDDANCER:		/* バードとダンサーの魂 */
+		case SC_BLACKSMITH:		/* ブラックスミスの魂 */
+		case SC_HUNTER:			/* ハンターの魂 */
+		case SC_HIGH:			/* 一次上位職業の魂 */
+		case SC_SUPERNOVICE:		/* スーパーノービスの魂 */
+		case SC_GUNNER:			/* ガンスリンガーの魂 */
+		case SC_NINJA:			/* 忍者の魂 */
+		case SC_DEATHKINGHT:		/* デスナイトの魂 */
+		case SC_COLLECTOR:		/* コレクターの魂 */
+			sc->opt3 &= ~OPT3_SOULLINK;
 			opt_flag = 2;
 			break;
-		case SC_ELEMENTUNDEAD:		// +Tg1rew-
-			sc->opt3 &= +AH4-OPT3_UNDEAD;
+		case SC_ELEMENTUNDEAD:		// 不死
+			sc->opt3 &= ~OPT3_UNDEAD;
 			opt_flag = 2;
 			break;
 		// option
 		case SC_SIGHT:
-			sc->option &= +AH4-OPTION_SIGHT;
+			sc->option &= ~OPTION_SIGHT;
 			opt_flag = 1;
 			break;
 		case SC_HIDING:
-			// +lx5lrDCKMGcwajBEkBpeODBuMM8wpDDJMGowiTCiMKQwszDzbYhTuw-
+			// 霞斬りでない通常のハイドならアイコン消去
 			if(sd && sc->data[type].val3 == 0)
 				clif_status_load_id(sd,SI_HIDING,0);
-			sc->option &= +AH4-OPTION_HIDE;
+			sc->option &= ~OPTION_HIDE;
 			opt_flag = 1;
 			break;
 		case SC_CLOAKING:
-		case SC_CLOAKINGEXCEED:		/* +MK8w7TD8MK0w8zCwMKgwrzC3MPwwyQ- */
-		case SC_NEWMOON:			/* +ZxRnCIEa- */
-		case SC__INVISIBILITY:		/* +MKQw8zDTMLgw0zDqMMYwow- */
-			sc->option &= +AH4-OPTION_CLOAKING;
+		case SC_CLOAKINGEXCEED:		/* クローキングエクシード */
+		case SC_NEWMOON:			/* 朔月脚 */
+		case SC__INVISIBILITY:		/* インビジビリティ */
+			sc->option &= ~OPTION_CLOAKING;
 			opt_flag = 1;
 			break;
 		case SC_INVISIBLE:
-		case SC__FEINTBOMB:			/* +MNUwpzCkMPMwyDDcMOA- */
-			sc->option &= +AH4-OPTION_SPECIALHIDING;
+		case SC__FEINTBOMB:			/* フェイントボム */
+			sc->option &= ~OPTION_SPECIALHIDING;
 			opt_flag = 1;
 			break;
 		case SC_REVERSEORCISH:
-			sc->option &= +AH4-OPTION_ORCFACE;
+			sc->option &= ~OPTION_ORCFACE;
 			opt_flag = 1;
 			break;
-		case SC_WEDDING:		/* +MKYwpzDHMKMw8zCw- */
-			sc->option &= +AH4-OPTION_MARRIED;
+		case SC_WEDDING:		/* ウェディング */
+			sc->option &= ~OPTION_MARRIED;
 			opt_flag = 1;
 			break;
 		case SC_RUWACH:
-			sc->option &= +AH4-OPTION_RUWACH;
+			sc->option &= ~OPTION_RUWACH;
 			opt_flag = 1;
 			break;
-		case SC_CHASEWALK:		/* +MMEwpzCkMLkwpjCpMPwwrw- */
-			sc->option &= +AH4-(OPTION_CLOAKING | OPTION_FOOTPRINT);
+		case SC_CHASEWALK:		/* チェイスウォーク */
+			sc->option &= ~(OPTION_CLOAKING | OPTION_FOOTPRINT);
 			opt_flag = 1;
 			break;
 		case SC_FUSION:
-			sc->option &= +AH4-OPTION_STAR2;
+			sc->option &= ~OPTION_STAR2;
 			opt_flag = 1;
 			break;
 		case SC_SANTA:
-			sc->option &= +AH4-OPTION_SANTA;
+			sc->option &= ~OPTION_SANTA;
 			opt_flag = 1;
 			break;
 		case SC_SUMMER:
-			sc->option &= +AH4-OPTION_SUMMER;
+			sc->option &= ~OPTION_SUMMER;
 			opt_flag = 1;
 			break;
 		case SC_ON_PUSH_CART:
 #if PACKETVER < 20120201
-			// +U+QwRDCvMOkwpDCiMPMwyDBvMKow1zC3MOcw8zCSZvRlsDBZMIs-
-			sc->option &= +AH4-sc->data[type].val1;
+			// 古いクライアントはオプションを更新する
+			sc->option &= ~sc->data[type].val1;
 			opt_flag = 1;
 #endif
 			break;
 	}
 
-	/* option+MG5ZCWb0- */
+	/* optionの変更 */
 	if(opt_flag == 1) {
 		clif_changeoption(bl);
 	} else if(opt_flag == 2) {
@@ -12302,7 +12281,7 @@ int status_change_end(struct block_list* bl, int type, int tid)
 		status_free_sc_data(sc);
 #endif
 
-	/* +MLkwxjD8ML8wuVGNigh7lw- */
+	/* ステータス再計算 */
 	if(sd) {
 		if(calc_flag || sd->auto_status_calc_pc[type] == 1) {
 			status_calc_pc(sd,0);
@@ -12329,7 +12308,7 @@ int status_change_end(struct block_list* bl, int type, int tid)
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuVGNigh7lzCSTgBmQlBca2IwWTCL-
+ * ステータス再計算を一時停止する
  *------------------------------------------
  */
 int status_calc_pc_stop_begin(struct block_list *bl)
@@ -12337,12 +12316,12 @@ int status_calc_pc_stop_begin(struct block_list *bl)
 	nullpo_retr(0, bl);
 
 	if(bl->type == BL_PC)
-		((struct map_session_data *)bl)->stop_status_calc_pc+-+-;
+		((struct map_session_data *)bl)->stop_status_calc_pc++;
 	return 0;
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuVGNigh7lzCSUY2VizBZMIs-
+ * ステータス再計算を再開する
  *------------------------------------------
  */
 int status_calc_pc_stop_end(struct block_list *bl)
@@ -12355,14 +12334,14 @@ int status_calc_pc_stop_end(struct block_list *bl)
 		if(sd->stop_status_calc_pc == 0 && sd->call_status_calc_pc_while_stopping > 0)
 			status_calc_pc(sd,0);
 		if(sd->stop_status_calc_pc < 0) {
-			printf("status_calc_pc_stop_end+MExODWtjMGtUfDBzUfowVTCMMGYwRDB+MFkAXA-n");
+			printf("status_calc_pc_stop_endが不正に呼び出されています\n");
 		}
 	}
 	return 0;
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjiVi1nLML8wpDDeMPw-
+ * ステータス異常開始タイマー
  *------------------------------------------
  */
 static int status_pretimer_timer(int tid, unsigned int tick, int id, void *data)
@@ -12372,7 +12351,7 @@ static int status_pretimer_timer(int tid, unsigned int tick, int id, void *data)
 	struct unit_data *ud;
 
 	if(bl == NULL)
-		return 0;	// +inJfUw-ID+MEwwWTBnMGttiG7FMFcwZjBEMIs-
+		return 0;	// 該当IDがすでに消滅している
 
 	nullpo_retr(0, ud = unit_bl2ud(bl));
 
@@ -12384,7 +12363,7 @@ static int status_pretimer_timer(int tid, unsigned int tick, int id, void *data)
 		stpt->timer = -1;
 
 		if(linkdb_erase(&ud->statuspretimer, stpt) == NULL) {
-			printf("status_pretimer: data lost !!+AFw-n");
+			printf("status_pretimer: data lost !!\n");
 			break;
 		}
 
@@ -12406,7 +12385,7 @@ static int status_pretimer_timer(int tid, unsigned int tick, int id, void *data)
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjiVi1nLML8wpDDeMPwwblJKlmQ-
+ * ステータス異常開始タイマーの削除
  *------------------------------------------
  */
 int status_clearpretimer(struct block_list *bl)
@@ -12433,7 +12412,7 @@ int status_clearpretimer(struct block_list *bl)
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjiVi1nLML8wpDDeMPwwbjC7MMMwyA-
+ * ステータス異常開始タイマーのセット
  *------------------------------------------
  */
 int status_change_pretimer(struct block_list *bl,int type,int val1,int val2,int val3,int val4,int tick,int flag,int pre_tick)
@@ -12464,16 +12443,16 @@ int status_change_pretimer(struct block_list *bl,int type,int val1,int val2,int 
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjh9Qk6GML8wpDDeMPw-
+ * ステータス異常終了タイマー
  *
- * +ML0w/DC5MJJP7mtjMFkwi2W5MHgwbmzoYQ8-
+ * ソースを修正する方への注意
  *
- * +MPtytmFLdXBeOH2ZfZpmQjBrMG8wAQ-add_timer() +MFcwX3b0X4wwaw- break +MFkwizBTMGg-
- * +MPtytmFLdXBeOH1CToZmQjBrMG8wAZWiZXAwbmcAX4wwazBCMIs-status_change_end() +MG4-
- *   +VHwwc1H6MFdSTTBr- return +MFcwajBEMFMwaA-
+ * ・状態異常継続時には、add_timer() した直後に break すること
+ * ・状態異常終了時には、関数の最後にあるstatus_change_end() の
+ *   呼び出し前に return しないこと
  *
- * +MFMwbv8ScLkwTFuIMIkwjDBmMEQwajBEMGgwAU7WTrowbnK2YUt1cF44MExS3WJLMGuJ45ZkMFUwjDBfMIowAQ-
- * delete_timer error+MExR+jBmME8wizBqMGkwbjDQMLAwTHZ6dR8wVzB+MFkwAg-
+ * この２点が守られていないと、他人の状態異常が勝手に解除されたり、
+ * delete_timer errorが出てくるなどのバグが発生します。
  *------------------------------------------
  */
 int status_change_timer(int tid, unsigned int tick, int id, void *data)
@@ -12492,7 +12471,7 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 		return 0;
 
 	if((bl = map_id2bl(id)) == NULL)
-		return 0;	// +inJfUw-ID+MEwwWTBnMGttiG7FMFcwZjBEMIswaDBEMEYwbjBvMEQwSzBrMIIwQjCKMF0wRjBqMG4wZzC5MOsw/DBXMGYwfzCL-
+		return 0;	// 該当IDがすでに消滅しているというのはいかにもありそうなのでスルーしてみる
 
 	nullpo_retr(0, sc = status_get_sc(bl));
 
@@ -12504,68 +12483,68 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 
 	if(sc->data[type].timer != tid) {
 		if(battle_config.error_log)
-			printf("status_change_timer %d != %d (type = %d)+AFw-n",tid,sc->data[type].timer,type);
+			printf("status_change_timer %d != %d (type = %d)\n",tid,sc->data[type].timer,type);
 		return 0;
 	}
 
 	map_freeblock_lock();
 
-	switch(type) {	/* +cnlrijBqUeZ0BjBrMGowi1g0VAg- */
-	case SC_MAXIMIZEPOWER:	/* +MN4wrTC3MN4wpDC6MNEw7zD8- */
-	case SC_CLOAKING:	/* +MK8w7TD8MK0w8zCw- */
+	switch(type) {	/* 特殊な処理になる場合 */
+	case SC_MAXIMIZEPOWER:	/* マキシマイズパワー */
+	case SC_CLOAKING:	/* クローキング */
 		if(sd) {
-			if(sd->status.sp > 0) {	/* SP+UgcwjDCLMH4wZ2MBfZo- */
+			if(sd->status.sp > 0) {	/* SP切れるまで持続 */
 				sd->status.sp--;
 				clif_updatestatus(sd,SP_SP);
-				timer = add_timer(	/* +ML8wpDDeMPxRjYotW5o- */
-					sc->data[type].val2+-tick, status_change_timer,
+				timer = add_timer(	/* タイマー再設定 */
+					sc->data[type].val2+tick, status_change_timer,
 					bl->id, data);
 			}
 		}
 		break;
 
-	case SC_CHASEWALK:	/* +MMEwpzCkMLkwpjCpMPwwrw- */
+	case SC_CHASEWALK:	/* チェイスウォーク */
 		if(sd) {
-			int sp = 10+-sc->data[SC_CHASEWALK].val1*2;
+			int sp = 10+sc->data[SC_CHASEWALK].val1*2;
 			if(map[sd->bl.m].flag.gvg)
 				sp *= 5;
 			if(sd->status.sp > sp) {
 				sd->status.sp -= sp;
 				clif_updatestatus(sd,SP_SP);
-				if((+-+-sc->data[SC_CHASEWALK].val4) == 1) {
-					// +MO0w/DCwMG6bQjBqMIlSuWecZkKVkw-10+UA0-
+				if((++sc->data[SC_CHASEWALK].val4) == 1) {
+					// ローグの魂なら効果時間10倍
 					status_change_start(
 						bl, SC_CHASEWALK_STR, 1<<(sc->data[SC_CHASEWALK].val1-1), 0, 0, 0,
 						((sc->data[SC_ROGUE].timer != -1)? 300000: 30000), 0
 					);
 				}
-				timer = add_timer( /* +ML8wpDDeMPxRjYotW5o- */
-					sc->data[type].val2+-tick, status_change_timer, bl->id, data);
+				timer = add_timer( /* タイマー再設定 */
+					sc->data[type].val2+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
 
-	case SC_HIDING:		/* +MM8wpDDHMKMw8zCw- */
-		if(sd) {		/* SP+MEwwQjBjMGYwAWZClZNSNpZQMG6VkzBvYwF9mg- */
+	case SC_HIDING:		/* ハイディング */
+		if(sd) {		/* SPがあって、時間制限の間は持続 */
 			if(sd->status.sp > 0 && (--sc->data[type].val2) > 0) {
 #ifdef PRE_RENEWAL
-				if(sc->data[type].val2 % (sc->data[type].val1+-3) == 0) {
+				if(sc->data[type].val2 % (sc->data[type].val1+3) == 0) {
 #else
-				if(sc->data[type].val2 % (sc->data[type].val1+-4) == 0) {
+				if(sc->data[type].val2 % (sc->data[type].val1+4) == 0) {
 #endif
 					sd->status.sp--;
 					clif_updatestatus(sd,SP_SP);
 				}
-				timer = add_timer(	/* +ML8wpDDeMPxRjYotW5o- */
-					1000+-tick, status_change_timer,
+				timer = add_timer(	/* タイマー再設定 */
+					1000+tick, status_change_timer,
 					bl->id, data);
 			}
 		}
 		break;
 
 	case SC_SIGHTBLASTER:
-	case SC_SIGHT:		/* +MLUwpDDI- */
-	case SC_RUWACH:		/* +MOswojDV- */
+	case SC_SIGHT:		/* サイト */
+	case SC_RUWACH:		/* ルアフ */
 		{
 			int range;
 			if(type == SC_RUWACH)
@@ -12576,35 +12555,35 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 				range = (sc->data[type].val4 == NPC_WIDESIGHT)? 14: 3;
 
 			map_foreachinarea(status_change_timer_sub,
-				bl->m, bl->x-range, bl->y-range, bl->x+-range,bl->y+-range, BL_CHAR,
+				bl->m, bl->x-range, bl->y-range, bl->x+range,bl->y+range, BL_CHAR,
 				bl, type, sc->data[type].val1, tick);
 
 			if((--sc->data[type].val2) > 0) {
-				timer = add_timer(	/* +ML8wpDDeMPxRjYotW5o- */
-					250+-tick, status_change_timer,
+				timer = add_timer(	/* タイマー再設定 */
+					250+tick, status_change_timer,
 					bl->id, data);
 			}
 		}
 		break;
 
-	case SC_SIGNUMCRUCIS:		/* +MLcwsDDKMOAwrzDrMLcwuQ- */
+	case SC_SIGNUMCRUCIS:		/* シグナムクルシス */
 		{
 			int race = status_get_race(bl);
 			if(race == RCT_DEMON || battle_check_undead(race,status_get_elem_type(bl))) {
-				timer = add_timer(1000*600+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000*600+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
 
-	case SC_PROVOKE:	/* +MNcw7TDcMMMwrw-/+MKow/DDIMNAw/DC1MPwwrw- */
-		if(sc->data[type].val2 != 0) {	/* +MKow/DDIMNAw/DC1MPwwr/8I/xF50jBUMGgwaw-HP+MMEwpzDDMK//CQ- */
-			if(status_get_hp(bl) > status_get_max_hp(bl)>>2)	/* +UFxrYg- */
+	case SC_PROVOKE:	/* プロボック/オートバーサーク */
+		if(sc->data[type].val2 != 0) {	/* オートバーサーク（１秒ごとにHPチェック） */
+			if(status_get_hp(bl) > status_get_max_hp(bl)>>2)	/* 停止 */
 				break;
-			timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		break;
 
-	case SC_DISSONANCE:	/* +Tg1TVFSMl/M- */
+	case SC_DISSONANCE:	/* 不協和音 */
 		if((--sc->data[type].val2) > 0) {
 			struct skill_unit *unit = map_id2su(sc->data[type].val4);
 			struct block_list *src;
@@ -12615,11 +12594,11 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 				break;
 			battle_skill_attack(BF_MISC,src,&unit->bl,bl,unit->group->skill_id,sc->data[type].val1,tick,0);
 			timer = add_timer(
-				skill_get_time2(unit->group->skill_id,unit->group->skill_lv)+-tick, status_change_timer,
+				skill_get_time2(unit->group->skill_id,unit->group->skill_lv)+tick, status_change_timer,
 				bl->id, data);
 		}
 		break;
-	case SC_UGLYDANCE:	/* +gepSBlLdYkswajDAMPMwuQ- */
+	case SC_UGLYDANCE:	/* 自分勝手なダンス */
 		if((--sc->data[type].val2) > 0) {
 			struct skill_unit *unit = map_id2su(sc->data[type].val4);
 			struct block_list *src;
@@ -12630,12 +12609,12 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 				break;
 			skill_additional_effect(src,bl,unit->group->skill_id,sc->data[type].val1,0,tick);
 			timer = add_timer(
-				skill_get_time2(unit->group->skill_id,unit->group->skill_lv)+-tick, status_change_timer,
+				skill_get_time2(unit->group->skill_id,unit->group->skill_lv)+tick, status_change_timer,
 				bl->id, data);
 		}
 		break;
 
-	case SC_LULLABY:	/* +W1BbiFUE- */
+	case SC_LULLABY:	/* 子守唄 */
 		if((--sc->data[type].val2) > 0) {
 			struct skill_unit *unit = map_id2su(sc->data[type].val4);
 			int interval;
@@ -12648,7 +12627,7 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 			interval = skill_get_time(unit->group->skill_id,unit->group->skill_lv)/15;
 #endif
 			skill_additional_effect(bl,bl,unit->group->skill_id,sc->data[type].val1,BF_LONG|BF_SKILL|BF_MISC,tick);
-			timer = add_timer(interval+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(interval+tick, status_change_timer, bl->id, data);
 		}
 		break;
 
@@ -12659,66 +12638,66 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 			unit_stop_walking(bl,1);
 			sc->opt1 = OPT1_STONECURSE;
 			clif_changeoption(bl);
-			timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		else if((--sc->data[type].val3) > 0) {
 			int hp = status_get_max_hp(bl);
-			if((+-+-sc->data[type].val4)%5 == 0 && status_get_hp(bl) > hp>>2) {
+			if((++sc->data[type].val4)%5 == 0 && status_get_hp(bl) > hp>>2) {
 				hp = (hp < 100)? 1: hp/100;
 				unit_heal(bl,-hp,0,0,0);
 			}
-			timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		break;
 	case SC_POISON:
 		if(sc->data[SC_SLOWPOISON].timer == -1 && (--sc->data[type].val3) > 0) {
 			int hp    = status_get_hp(bl);
 			int p_dmg = status_get_max_hp(bl);
-			if(hp > p_dmg>>2) {		// +ZwBZJw-HP+MG4-25%+TuVOCg-
-				p_dmg = 3 +- p_dmg*3/200;
+			if(hp > p_dmg>>2) {		// 最大HPの25%以上
+				p_dmg = 3 + p_dmg*3/200;
 				if(p_dmg >= hp)
-					p_dmg = hp-1;	// +a9IwZzBva3swajBqMEQ-
+					p_dmg = hp-1;	// 毒では死なない
 				unit_heal(bl, -p_dmg, 0, 0, 0);
 			}
 		}
 		if(sc->data[type].val3 > 0) {
-			timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		break;
 	case SC_DPOISON:
 		if(sc->data[SC_SLOWPOISON].timer == -1 && (--sc->data[type].val3) > 0) {
 			int hp = status_get_max_hp(bl);
 			if(status_get_hp(bl) > hp>>2) {
-				hp = 3 +- hp/50;
+				hp = 3 + hp/50;
 				unit_heal(bl, -hp, 0, 0, 0);
 			}
 		}
 		if(sc->data[type].val3 > 0 && !unit_isdead(bl) && sc->data[type].timer != -1) {
-			// +dR8wTTBmMEQwZonjlmRuCDB/MGcwajBEMGowiX2ZfZo-
-			timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+			// 生きていて解除済みでないなら継続
+			timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		break;
 	case SC_BLEED:
 		if(--sc->data[type].val3 > 0) {
-			int dmg = atn_rand()%600 +- 200;
+			int dmg = atn_rand()%600 + 200;
 			if(md) {
-				// mob+MG8-HP50+TuVOCzBrMGowiTBqMEQ-
+				// mobはHP50以下にならない
 				md->hp = (md->hp - dmg < 50)? 50: md->hp - dmg;
 			} else {
 				unit_heal(bl, -dmg, 0, 0, 0);
 			}
 			if(!unit_isdead(bl) && sc->data[type].timer != -1) {
-				// +dR8wTTBmMEQwZonjlmRuCDB/MGcwajBEMGowiX2ZfZo-
-				timer = add_timer(10000+-tick, status_change_timer, bl->id, data);
+				// 生きていて解除済みでないなら継続
+				timer = add_timer(10000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_TENSIONRELAX:	/* +MMYw8zC3MOcw8zDqMOkwwzCvMLk- */
-		if(sd) {		/* HP+MExugDC/MPMwZzBqMFEwjDBwfZl9mg- */
+	case SC_TENSIONRELAX:	/* テンションリラックス */
+		if(sd) {		/* HPが満タンでなければ継続 */
 			if(sd->status.max_hp > sd->status.hp) {
-				if(sc->data[type].val2 % (sc->data[type].val1+-3) == 0)
-					timer = add_timer(	/* +ML8wpDDeMPxRjYotW5o- */
-						10000+-tick, status_change_timer,
+				if(sc->data[type].val2 % (sc->data[type].val1+3) == 0)
+					timer = add_timer(	/* タイマー再設定 */
+						10000+tick, status_change_timer,
 						bl->id, data);
 			} else if(sd->status.max_hp <= sd->status.hp) {
 				status_change_end(&sd->bl,SC_TENSIONRELAX,-1);
@@ -12726,12 +12705,12 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 		}
 		break;
 
-	/* +ZkKVk1IHMIxxITBX/x//Hw- */
+	/* 時間切れ無し？？ */
 	case SC_AETERNA:
 	case SC_TRICKDEAD:
-	case SC_REJECTSWORD:		/* +MOowuDCnMK8wyDC9MPwwyQ- */
-	case SC_MEMORIZE:		/* +MOEw4jDpMKQwug- */
-	case SC_SACRIFICE:		/* +MLUwrzDqMNUwoTCkMLk- */
+	case SC_REJECTSWORD:		/* リジェクトソード */
+	case SC_MEMORIZE:		/* メモライズ */
+	case SC_SACRIFICE:		/* サクリファイス */
 	case SC_READYSTORM:
 	case SC_READYDOWN:
 	case SC_READYTURN:
@@ -12749,20 +12728,20 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 	case SC_WUGDASH:
 	case SC_EXEEDBREAK:
 	case SC_SUHIDE:
-	case SC_ALL_RIDING:	/* +mg5OVzC3MLkwxjDg- */
-	case SC_ON_PUSH_CART:	/* +MKsw/DDI- */
-	case SC_HAT_EFFECT:	/* +mC2IxVCZMKgw1TCnMK8wyA- */
-	case SC_ACTIVE_MONSTER_TRANSFORM:	/* +MKIwrzDGMKMw1jDiMPMwuTC/MPxZCY6r- */
-	case SC_INVINCIBLE:	/* +MKQw8zDTMPMwtzDWMOs- */
-	case SC_STYLE_CHANGE:		/* +MLkwvzCkMOswwTCnMPMwuA- */
-	case SC_GUARD_STANCE:		/* +MKww/DDJMLkwvzDzMLk- */
-	case SC_ATTACK_STANCE:		/* +MKIwvzDDMK8wuTC/MPMwuQ- */
-	case SC_INTENSIVE_AIM_COUNT:	/* +MKQw8zDGMPMwtzDWMKgwpDDg-(+MKswpjDzMMg-) */
-		timer = add_timer(1000 * 600 +- tick, status_change_timer, bl->id, data);
+	case SC_ALL_RIDING:	/* 騎乗システム */
+	case SC_ON_PUSH_CART:	/* カート */
+	case SC_HAT_EFFECT:	/* 頭装備エフェクト */
+	case SC_ACTIVE_MONSTER_TRANSFORM:	/* アクティブモンスター変身 */
+	case SC_INVINCIBLE:	/* インビンシブル */
+	case SC_STYLE_CHANGE:		/* スタイルチェンジ */
+	case SC_GUARD_STANCE:		/* ガードスタンス */
+	case SC_ATTACK_STANCE:		/* アタックスタンス */
+	case SC_INTENSIVE_AIM_COUNT:	/* インテンシブエイム(カウント) */
+		timer = add_timer(1000 * 600 + tick, status_change_timer, bl->id, data);
 		break;
 	case SC_MODECHANGE:
 		clif_emotion(bl,1);
-		timer = add_timer(1500 +- tick, status_change_timer, bl->id, data);
+		timer = add_timer(1500 + tick, status_change_timer, bl->id, data);
 		break;
 	case SC_LONGINGFREEDOM:
 		if(sd && sd->status.sp >= 3) {
@@ -12772,11 +12751,11 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 				clif_updatestatus(sd, SP_SP);
 				sc->data[type].val3 = 3;
 			}
-			timer = add_timer(1000 +- tick, status_change_timer, bl->id, data);
+			timer = add_timer(1000 + tick, status_change_timer, bl->id, data);
 		}
 		break;
 	case SC_DANCING:
-		if(sd) {	// +MMAw8zC5MLkwrTDrMG5mQpWT-SP+bYiMuw-
+		if(sd) {	// ダンススキルの時間SP消費
 			int cost = 1;
 			if(sc->data[type].val1 == CG_HERMODE)
 				cost = 5;
@@ -12786,35 +12765,35 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 				int s = 0;
 
 				switch(sc->data[type].val1) {
-				case BD_RICHMANKIM:			/* +MMsw6DDrMMkwblu0- 3+edIwaw-SP1 */
-				case BD_DRUMBATTLEFIELD:		/* +YiZZKp8TMG6X/zBN- 3+edIwaw-SP1 */
-				case BD_RINGNIBELUNGEN:			/* +MMsw/DDZMOsw8zCwMG5jB48q- 3+edIwaw-SP1 */
-				case BD_SIEGFRIED:			/* +Tg1re46rMG4wuDD8MK8w1TDqMPwwyQ- 3+edIwaw-SP1 */
-				case BA_DISSONANCE:			/* +Tg1TVFSMl/M- 3+edIwZw-SP1 */
-				case BA_ASSASSINCROSS:			/* +WRWWfTBuMKIwtTC3MPMwrzDtMLk- 3+edIwZw-SP1 */
-				case DC_UGLYDANCE:			/* +gepSBlLdYkswajDAMPMwuQ- 3+edIwZw-SP1 */
+				case BD_RICHMANKIM:			/* ニヨルドの宴 3秒にSP1 */
+				case BD_DRUMBATTLEFIELD:		/* 戦太鼓の響き 3秒にSP1 */
+				case BD_RINGNIBELUNGEN:			/* ニーベルングの指輪 3秒にSP1 */
+				case BD_SIEGFRIED:			/* 不死身のジークフリード 3秒にSP1 */
+				case BA_DISSONANCE:			/* 不協和音 3秒でSP1 */
+				case BA_ASSASSINCROSS:			/* 夕陽のアサシンクロス 3秒でSP1 */
+				case DC_UGLYDANCE:			/* 自分勝手なダンス 3秒でSP1 */
 				case CG_LONGINGFREEDOM:
 					s = 3;
 					break;
-				case BD_LULLABY:			/* +W1BbiGtM- 4+edIwaw-SP1 */
-				case BD_ETERNALCHAOS:			/* +bDiQYDBubfdsjA- 4+edIwaw-SP1 */
-				case BD_ROKISWEIL:			/* +MO0wrTBuU+swcw- 4+edIwaw-SP1 */
-				case DC_FORTUNEKISS:			/* +XniQSzBuMK0wuQ- 4+edIwZw-SP1 */
+				case BD_LULLABY:			/* 子守歌 4秒にSP1 */
+				case BD_ETERNALCHAOS:			/* 永遠の混沌 4秒にSP1 */
+				case BD_ROKISWEIL:			/* ロキの叫び 4秒にSP1 */
+				case DC_FORTUNEKISS:			/* 幸運のキス 4秒でSP1 */
 					s = 4;
 					break;
-				case BD_INTOABYSS:			/* +bfFt9TBuTi0waw- 5+edIwaw-SP1 */
-				case BA_WHISTLE:			/* +U+N7Gw- 5+edIwZw-SP1 */
-				case DC_HUMMING:			/* +MM8w3zDzMLA- 5+edIwZw-SP1 */
-				case BA_POEMBRAGI:			/* +MNYw6TCuMG6KaQ- 5+edIwZw-SP1 */
-				case DC_SERVICEFORYOU:			/* +MLUw/DDTMLkw1TCpMPww5jD8- 5+edIwZw-SP1 */
-				case CG_HERMODE:			/* +MNgw6zDiMPwwyTBuZ1Y- */
+				case BD_INTOABYSS:			/* 深淵の中に 5秒にSP1 */
+				case BA_WHISTLE:			/* 口笛 5秒でSP1 */
+				case DC_HUMMING:			/* ハミング 5秒でSP1 */
+				case BA_POEMBRAGI:			/* ブラギの詩 5秒でSP1 */
+				case DC_SERVICEFORYOU:			/* サービスフォーユー 5秒でSP1 */
+				case CG_HERMODE:			/* ヘルモードの杖 */
 					s = 5;
 					break;
-				case BA_APPLEIDUN:			/* +MKQwyTClMPMwbmeXao4- 6+edIwZw-SP1 */
+				case BA_APPLEIDUN:			/* イドゥンの林檎 6秒でSP1 */
 					s = 6;
 					break;
-				case DC_DONTFORGETME:			/* +ecEwkl/YMIwwajBEMGcgJg- 10+edIwZw-SP1 */
-				case CG_MOONLIT:			/* +ZwhmDjCKMG5OCzBn- 10+edIwZw-SP1+/x8- */
+				case DC_DONTFORGETME:			/* 私を忘れないで… 10秒でSP1 */
+				case CG_MOONLIT:			/* 月明りの下で 10秒でSP1？ */
 					s = 10;
 					break;
 				}
@@ -12822,14 +12801,14 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 					sd->status.sp -= cost;
 					clif_updatestatus(sd,SP_SP);
 				}
-				timer = add_timer(	/* +ML8wpDDeMPxRjYotW5o- */
-					1000+-tick, status_change_timer,
+				timer = add_timer(	/* タイマー再設定 */
+					1000+tick, status_change_timer,
 					bl->id, data);
 			}
 		} else if(md)
-			timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		break;
-	case SC_BERSERK:		/* +MNAw/DC1MPwwrw- */
+	case SC_BERSERK:		/* バーサーク */
 		{
 			int dmg = (int)((atn_bignumber)status_get_max_hp(bl) * 5 / 100);
 			if(status_get_hp(bl) - dmg > 100) {
@@ -12843,8 +12822,8 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 					mcd->status.hp -= dmg;
 					clif_mercupdatestatus(mcd->msd,SP_HP);
 				}
-				timer = add_timer(	/* +ML8wpDDeMPxRjYotW5o- */
-					10000+-tick, status_change_timer,
+				timer = add_timer(	/* タイマー再設定 */
+					10000+tick, status_change_timer,
 					bl->id, data);
 			} else {
 				if(sd) {
@@ -12860,36 +12839,36 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 			}
 		}
 		break;
-	case SC_NOCHAT:			/* +MMEw4zDDMMh5gWticrZhSw- */
+	case SC_NOCHAT:			/* チャット禁止状態 */
 		if(sd) {
-			if(+-+-sd->status.manner && time(NULL) < (sc->data[type].val2 - 60*sd->status.manner)) {	// +lYtZyzBLMIk-status.manner+UgZ9TDBjMGYwajBEMG4wZ32ZfZo-
+			if(++sd->status.manner && time(NULL) < (sc->data[type].val2 - 60*sd->status.manner)) {	// 開始からstatus.manner分経ってないので継続
 				clif_updatestatus(sd,SP_MANNER);
-				timer = add_timer(	/* +ML8wpDDeMPxRjYotW5o-(60+edI-) */
-					60000+-tick, status_change_timer,
+				timer = add_timer(	/* タイマー再設定(60秒) */
+					60000+tick, status_change_timer,
 					bl->id, data);
 			}
 		}
 		break;
-	case SC_SELFDESTRUCTION:		/* +gepyBg- */
+	case SC_SELFDESTRUCTION:		/* 自爆 */
 		if(md && unit_iscasting(&md->bl) && md->state.special_mob_ai == 3 && md->mode&MD_CANMOVE && md->speed > 0) {
 			md->speed -= 5;
 			if(md->speed <= 0)
 				md->speed = 1;
 			md->dir = sc->data[type].val4;
-			unit_walktodir(&md->bl,1);	// +kB9epjBMWQkwjzCLMG4wZ2vOVt5UfDBzUfowWQ-
+			unit_walktodir(&md->bl,1);	// 速度が変わるので毎回呼び出す
 
-			/* +ML8wpDDeMPxRjYotW5o- */
-			timer = add_timer(100+-tick, status_change_timer, bl->id, data);
+			/* タイマー再設定 */
+			timer = add_timer(100+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_BOSSMAPINFO:			/* +UfiXYpPh- */
+	case SC_BOSSMAPINFO:			/* 凸面鏡 */
 		if(sd && --sc->data[type].val2 > 0) {
 			struct mob_data *mmd = map[sd->bl.m].mvpboss;
 			if(mmd == NULL)
 				break;
 			if(mmd->bl.prev == NULL) {
 				if(sc->data[type].val3 >= 0) {
-					// +UBIwVTCMMF8wbjBnayFW3jBuUfpz/mZClZMwkjCiMMowpjDzMLkwVzBmfUJOhg-
+					// 倒されたので次回の出現時間をアナウンスして終了
 					int diff = DIFF_TICK(mmd->last_spawntime, gettick());
 					if(diff < 0)
 						diff = 0;
@@ -12898,40 +12877,40 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 				}
 			} else {
 				if(sc->data[type].val3 < 0) {
-					// +Ufpz/jBXMF8wbjBnMKIwyjCmMPMwuQ-
+					// 出現したのでアナウンス
 					clif_bossmapinfo(sd, mmd->name, 0, 0, 0, 2);
 				}
-				if(sc->data[type].val3 != mmd->bl.m || sc->data[type].val4 != mmd->bl.x +- (mmd->bl.y << 16)) {
-					// +Ufpz/k4tMGdep2oZMExZCVMWMFcwZjBEMIswbjBnMN8wyw-MAP+MG4wyTDDMMgwkmb0ZbA-
+				if(sc->data[type].val3 != mmd->bl.m || sc->data[type].val4 != mmd->bl.x + (mmd->bl.y << 16)) {
+					// 出現中で座標が変化しているのでミニMAPのドットを更新
 					if(mmd->bl.m == sd->bl.m) {
 						clif_bossmapinfo(sd, "", mmd->bl.x, mmd->bl.y, 0, 1);
 					} else {
 						clif_bossmapinfo(sd, "", -1, -1, 0, 1);
 					}
 					sc->data[type].val3 = mmd->bl.m;
-					sc->data[type].val4 = mmd->bl.x +- (mmd->bl.y << 16);
+					sc->data[type].val4 = mmd->bl.x + (mmd->bl.y << 16);
 				}
 			}
-			/* +ML8wpDDeMPxRjYotW5o- */
-			timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+			/* タイマー再設定 */
+			timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_CHANGE:		/* +MOEw8zC/MOswwTCnMPMwuA- */
-		unit_heal(bl, -status_get_hp(bl)+-10, -status_get_sp(bl)+-10, 0, 0);	// +ZkKVk1IHMIwwbjBoME0wbjB/-HP,SP+MEw-10+MGswajCL-
+	case SC_CHANGE:		/* メンタルチェンジ */
+		unit_heal(bl, -status_get_hp(bl)+10, -status_get_sp(bl)+10, 0, 0);	// 時間切れのときのみHP,SPが10になる
 		break;
-	case SC_ABUNDANCE:		/* +MKIw0DDzMMAw8zC5- */
+	case SC_ABUNDANCE:		/* アバンダンス */
 		if((--sc->data[type].val3) > 0) {
 			unit_heal(bl, 0, 60, 0, 1);
-			timer = add_timer(10000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(10000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_FEAR:				/* +YFBgFg- */
+	case SC_FEAR:				/* 恐怖 */
 		if(sc->data[type].val3 > 0) {
-			timer = add_timer(sc->data[type].val3+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(sc->data[type].val3+tick, status_change_timer, bl->id, data);
 			sc->data[type].val3 = 0;
 		}
 		break;
-	case SC_WEAPONBLOCKING:		/* +MKYwpzDdMPMw1jDtMMMwrTDzMLA- */
+	case SC_WEAPONBLOCKING:		/* ウェポンブロッキング */
 		if((--sc->data[type].val3) > 0) {
 			if(sd) {
 				if(sd->status.sp < 3)
@@ -12939,30 +12918,30 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 				sd->status.sp -= 3;
 				clif_updatestatus(sd,SP_SP);
 			}
-			timer = add_timer(5000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(5000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_CLOAKINGEXCEED:	/* +MK8w7TD8MK0w8zCwMKgwrzC3MPwwyQ- */
+	case SC_CLOAKINGEXCEED:	/* クローキングエクシード */
 		if(sd) {
 			int sp = 10 - sc->data[type].val1;
 			if(sp > 0 && sd->status.sp >= sp) {
 				sd->status.sp -= sp;
 				clif_updatestatus(sd,SP_SP);
-				timer = add_timer(1000+-tick, status_change_timer,bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer,bl->id, data);
 			}
 		}
 		break;
-	case SC_TOXIN:		/* +MMgwrTC3MPM- */
+	case SC_TOXIN:		/* トキシン */
 		if((--sc->data[type].val2) > 0) {
 			int damage = (int)((atn_bignumber)status_get_max_sp(bl) * 3 / 100);
 			if(damage)
 				unit_heal(bl, 0, -damage, 0, 0);
 			clif_damage(bl,bl,tick,0,status_get_dmotion(bl),1,0,0,0,0);
-			unit_skillcastcancel(bl,0);		// +imBVMVmoW7M-
-			timer = add_timer(10000+-tick, status_change_timer, bl->id, data);
+			unit_skillcastcancel(bl,0);		// 詠唱妨害
+			timer = add_timer(10000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_MAGICMUSHROOM:	/* +MN4wuDDDMK8w3jDDMLcw5TDrMPww4A- */
+	case SC_MAGICMUSHROOM:	/* マジックマッシュルーム */
 		if((--sc->data[type].val2) > 0) {
 			clif_emotion(bl,18);
 			if(sc->data[type].val2 % 2 == 0) {
@@ -12977,39 +12956,39 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 					unit_heal(bl, -damage, 0, 0, 0);
 			}
 			if(!unit_isdead(bl) && sc->data[type].timer != -1) {
-				// +dR8wTTBmMEQwZonjlmRuCDB/MGcwajBEMGowiX2ZfZo-
-				timer = add_timer(2000+-tick, status_change_timer, bl->id, data);
+				// 生きていて解除済みでないなら継続
+				timer = add_timer(2000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_PYREXIA:	/* +MNEwpDDsMMMwrzC3MKI- */
+	case SC_PYREXIA:	/* パイレックシア */
 		if((--sc->data[type].val2) > 0) {
 			clif_damage(bl,bl,tick,0,status_get_dmotion(bl),100,0,0,0,0);
 			battle_damage(bl,bl,100,0,0,0);
 			if(!unit_isdead(bl) && sc->data[type].timer != -1) {
-				// +dR8wTTBmMEQwZonjlmRuCDB/MGcwajBEMGowiX2ZfZo-
-				timer = add_timer(3000+-tick, status_change_timer, bl->id, data);
+				// 生きていて解除済みでないなら継続
+				timer = add_timer(3000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_OBLIVIONCURSE:	/* +MKow1jDqMNMwqjDzMKsw/DC5- */
+	case SC_OBLIVIONCURSE:	/* オブリビオンカース */
 		if((--sc->data[type].val2) > 0) {
 			clif_emotion(bl,1);
-			timer = add_timer(2000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(2000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_LEECHEND:		/* +MOow/DDBMKgw8zDJ- */
+	case SC_LEECHEND:		/* リーチエンド */
 		if((--sc->data[type].val2) > 0) {
 			int damage = status_get_max_hp(bl) / 100;
 			if(damage)
 				unit_heal(bl, -damage, 0, 0, 0);
 			if(!unit_isdead(bl) && sc->data[type].timer != -1) {
-				// +dR8wTTBmMEQwZonjlmRuCDB/MGcwajBEMGowiX2ZfZo-
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				// 生きていて解除済みでないなら継続
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_RENOVATIO:		/* +MOwwzjD0MKEwxjCjMKo- */
+	case SC_RENOVATIO:		/* レノヴァティオ */
 		if((--sc->data[type].val3) > 0) {
 			int heal = (int)((atn_bignumber)status_get_max_hp(bl) * sc->data[type].val2 / 100);
 			if(heal) {
@@ -13019,213 +12998,213 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 					unit_heal(bl,heal,0,0,1);
 			}
 			if(!unit_isdead(bl) && sc->data[type].timer != -1) {
-				// +dR8wTTBmMEQwZonjlmRuCDB/MGcwajBEMGowiX2ZfZo-
-				timer = add_timer(5000+-tick, status_change_timer, bl->id, data);
+				// 生きていて解除済みでないなら継続
+				timer = add_timer(5000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_SUMMONBALL1:		/* +MLUw4jDzMNww/DDr-(1+UAt27g-) */
-	case SC_SUMMONBALL2:		/* +MLUw4jDzMNww/DDr-(2+UAt27g-) */
-	case SC_SUMMONBALL3:		/* +MLUw4jDzMNww/DDr-(3+UAt27g-) */
-	case SC_SUMMONBALL4:		/* +MLUw4jDzMNww/DDr-(4+UAt27g-) */
-	case SC_SUMMONBALL5:		/* +MLUw4jDzMNww/DDr-(5+UAt27g-) */
+	case SC_SUMMONBALL1:		/* サモンボール(1個目) */
+	case SC_SUMMONBALL2:		/* サモンボール(2個目) */
+	case SC_SUMMONBALL3:		/* サモンボール(3個目) */
+	case SC_SUMMONBALL4:		/* サモンボール(4個目) */
+	case SC_SUMMONBALL5:		/* サモンボール(5個目) */
 		if((--sc->data[type].val3) > 0) {
-			// SP+bYiMuw-
+			// SP消費
 			if(sd) {
 				int sp = 6 - sc->data[type].val1;
 				if(sd->status.sp >= sp) {
 					sd->status.sp -= sp;
 					clif_updatestatus(sd,SP_SP);
-					timer = add_timer(1000 +- tick, status_change_timer, bl->id, data);
+					timer = add_timer(1000 + tick, status_change_timer, bl->id, data);
 				}
 			}
 			else
-				timer = add_timer(1000 +- tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000 + tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_HELLINFERNO:	/* +MNgw6zCkMPMw1TCnMOswzg- */
+	case SC_HELLINFERNO:	/* ヘルインフェルノ */
 		if((--sc->data[type].val2) > 0) {
-			if(+-+-sc->data[type].val3 % 3 == 0) {
+			if(++sc->data[type].val3 % 3 == 0) {
 				int damage = (int)((atn_bignumber)status_get_max_hp(bl) * 3 / 100);
 				sc->data[type].val3 = 0;
-				clif_damage(bl,bl,tick,0,0,1000 +- damage,0,9,0,0);
-				battle_damage(bl,bl,1000 +- damage,0,0,0);
+				clif_damage(bl,bl,tick,0,0,1000 + damage,0,9,0,0);
+				battle_damage(bl,bl,1000 + damage,0,0,0);
 			}
 			if(!unit_isdead(bl) && sc->data[type].timer != -1) {
-				// +dR8wTTBmMEQwZonjlmRuCDB/MGcwajBEMGowiX2ZfZo-
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				// 生きていて解除済みでないなら継続
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_SPELLBOOK:	/* +MLkw2jDrMNYwwzCv- */
+	case SC_SPELLBOOK:	/* スペルブック */
 		if(sd) {
 			int sp = sd->freeze_sp_slot;
 			if(sp > 0 && sd->status.sp >= sp) {
 				sd->status.sp -= sp;
 				clif_updatestatus(sd,SP_SP);
-				timer = add_timer(10000 +- tick, status_change_timer, bl->id, data);
+				timer = add_timer(10000 + tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_ELECTRICSHOCKER:	/* +MKgw7DCvMMgw6jDDMK8wtzDnMMMwqzD8- */
+	case SC_ELECTRICSHOCKER:	/* エレクトリックショッカー */
 		if((--sc->data[type].val2) > 0) {
 			int damage = (int)((atn_bignumber)status_get_max_sp(bl) * sc->data[type].val1 * 5 / 100);
 			if(damage)
 				unit_heal(bl, 0, -damage, 0, 0);
-			timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_CAMOUFLAGE:	/* +MKsw4jDVMOkw/DC4MOU- */
-		if((+-+-sc->data[type].val2) > 10)
+	case SC_CAMOUFLAGE:	/* カモフラージュ */
+		if((++sc->data[type].val2) > 10)
 			sc->data[type].val2 = 10;
 		if(sd) {
 			int sp = 7 - sc->data[type].val1;
 			if(sp > 0 && sd->status.sp >= sp) {
 				sd->status.sp -= sp;
 				clif_updatestatus(sd,SP_SP);
-				timer = add_timer(1000+-tick, status_change_timer,bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer,bl->id, data);
 			}
 		} else {
-			timer = add_timer(1000+-tick, status_change_timer,bl->id, data);
+			timer = add_timer(1000+tick, status_change_timer,bl->id, data);
 		}
 		break;
-	case SC_OVERHEAT_LIMITPOINT:		/* +MKow/DDQMPww0jD8MMhSoHGxUCQ- */
-		if(sd && !pc_isgear(sd))		// +m1RcDjCuMKKXXmQtTlcwajCJMHBrYjCBMIs-
+	case SC_OVERHEAT_LIMITPOINT:		/* オーバーヒート加熱値 */
+		if(sd && !pc_isgear(sd))		// 魔導ギア非搭乗ならば止める
 			break;
-		if(sc->data[type].val2 > 0)		// +UbdTdGZClZP/CA-10+edL/CTBMa4swYzBmMEQwiw-
+		if(sc->data[type].val2 > 0)		// 冷却時間（10秒）が残っている
 			sc->data[type].val2--;
-		if(sc->data[type].val2 <= 0)	// +UbdTdGZClZMwTG6AToYwVzBmMEQwXzCJUqBxsVAkMJJuG3uX-
+		if(sc->data[type].val2 <= 0)	// 冷却時間が満了していたら加熱値を減算
 			sc->data[type].val1--;
-		if(sc->data[type].val1 > 0)		// +UqBxsVAkMExrizBjMGYwRDCLMF8wgX2ZfZo-
-			timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+		if(sc->data[type].val1 > 0)		// 加熱値が残っているため継続
+			timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		break;
-	case SC_OVERHEAT:			/* +MKow/DDQMPww0jD8MMg- */
-		if(sd && !pc_isgear(sd))		// +m1RcDjCuMKKXXmQtTlcwajCJMHBrYjCBMIs-
+	case SC_OVERHEAT:			/* オーバーヒート */
+		if(sd && !pc_isgear(sd))		// 魔導ギア非搭乗ならば止める
 			break;
-		if(sc->data[SC_OVERHEAT_LIMITPOINT].timer == -1)	// +MKow/DDQMPww0jD8MMhSoHGxUCQwTFKge5cwVTCMMGYwajBRMIwwcGtiMIEwiw-
+		if(sc->data[SC_OVERHEAT_LIMITPOINT].timer == -1)	// オーバーヒート加熱値が加算されてなければ止める
 			break;
 		else {
 			int damage = status_get_max_hp(bl) / 100;
 			int hp = status_get_hp(bl);
 			if(damage && hp) {
 				if(damage >= hp)
-					damage = hp - 1;	// +MKow/DDQMPww0jD8MMgwZzBva3swajBqMEQ-
+					damage = hp - 1;	// オーバーヒートでは死なない
 				unit_heal(bl, -damage, 0, 0, 0);
 			}
-			timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_MAGNETICFIELD:		/* +MN4wsDDNMMYwozDDMK8w1TCjMPww6zDJ- */
+	case SC_MAGNETICFIELD:		/* マグネティックフィールド */
 		if((--sc->data[type].val2) > 0) {
 			unit_heal(bl, 0, -50, 0, 0);
-			timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_STEALTHFIELD_MASTER:	/* +MLkwxjDrMLkw1TCjMPww6zDJ-(+T391KIAF-) */
-		if(sd && !pc_isgear(sd))		// +m1RcDjCuMKKXXmQtTlcwajCJMHBrYjCBMIs-
+	case SC_STEALTHFIELD_MASTER:	/* ステルスフィールド(使用者) */
+		if(sd && !pc_isgear(sd))		// 魔導ギア非搭乗ならば止める
 			break;
 		else if((--sc->data[type].val2) > 0) {
 			int damage = status_get_max_sp(bl) / 100;
 			if(damage)
 				unit_heal(bl, 0, -damage, 0, 0);
-			timer = add_timer(tick+-sc->data[type].val3, status_change_timer, bl->id, data);
+			timer = add_timer(tick+sc->data[type].val3, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC__REPRODUCE:		/* +MOow1zDtMMcw5TD8MLk- */
+	case SC__REPRODUCE:		/* リプロデュース */
 		if(sd) {
-			int sp = 9 - (sc->data[type].val1 +- 1) / 2;
+			int sp = 9 - (sc->data[type].val1 + 1) / 2;
 			if(sp > 0 && sd->status.sp >= sp) {
 				sd->status.sp -= sp;
 				clif_updatestatus(sd,SP_SP);
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 			}
 		} else {
-			timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC__SHADOWFORM:		/* +MLcw4zDJMKYw1TCpMPww4A- */
+	case SC__SHADOWFORM:		/* シャドウフォーム */
 		if((--sc->data[type].val4) > 0) {
 			if(sd) {
 				int sp = 11 - sc->data[type].val1;
 				if(sp > 0 && sd->status.sp >= sp) {
 					sd->status.sp -= sp;
 					clif_updatestatus(sd,SP_SP);
-					timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+					timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 				}
 			} else {
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC__INVISIBILITY:		/* +MKQw8zDTMLgw0zDqMMYwow- */
+	case SC__INVISIBILITY:		/* インビジビリティ */
 		if(sd) {
 			int sp = sd->status.max_sp * 5 / 100;
 			if(sp > 0 && sd->status.sp >= sp) {
 				sd->status.sp -= sp;
 				clif_updatestatus(sd,SP_SP);
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_REFLECTDAMAGE:		/* +MOow1TDsMK8wyDDAMOEw/DC4- */
+	case SC_REFLECTDAMAGE:		/* リフレクトダメージ */
 		if((--sc->data[type].val2) > 0) {
 			if(sd) {
-				int sp = 20 +- sc->data[type].val1 * 10;
+				int sp = 20 + sc->data[type].val1 * 10;
 				if(sd->status.sp >= sp) {
 					sd->status.sp -= sp;
 					clif_updatestatus(sd,SP_SP);
-					timer = add_timer(10000+-tick, status_change_timer,bl->id, data);
+					timer = add_timer(10000+tick, status_change_timer,bl->id, data);
 				}
 			} else {
-				timer = add_timer(10000+-tick, status_change_timer,bl->id, data);
+				timer = add_timer(10000+tick, status_change_timer,bl->id, data);
 			}
 		}
 		break;
-	case SC_FORCEOFVANGUARD:	/* +MNUwqTD8MLkwqjDWMNAw8zCsMPwwyQ- */
+	case SC_FORCEOFVANGUARD:	/* フォースオブバンガード */
 		if(sd) {
 			int sp = 24 - sc->data[type].val1 * 4;
 			if(sd->status.sp >= sp) {
 				sd->status.sp -= sp;
 				clif_updatestatus(sd,SP_SP);
-				timer = add_timer(10000+-tick, status_change_timer,bl->id, data);	
+				timer = add_timer(10000+tick, status_change_timer,bl->id, data);	
 			}
 		}
 		break;
-	case SC_BANDING:		/* +MNAw8zDHMKMw8zCw- */
+	case SC_BANDING:		/* バンディング */
 		if(sd) {
 			int sp = 7 - sc->data[type].val1;
 			if(sd->status.sp >= sp) {
 				sd->status.sp -= sp;
 				clif_updatestatus(sd,SP_SP);
-				timer = add_timer(5000+-tick, status_change_timer,bl->id, data);	
+				timer = add_timer(5000+tick, status_change_timer,bl->id, data);	
 			}
 		}
 		break;
-	case SC_INSPIRATION:	/* +MKQw8zC5MNQw7DD8MLcw5zDz- */
+	case SC_INSPIRATION:	/* インスピレーション */
 		if((--sc->data[type].val2) > 0) {
 			if(sd) {
 				int hp = sd->status.max_hp / 100;
 				int sp = sd->status.max_sp / 100;
 				unit_heal(bl, -hp, -sp, 0, 0);
 				if(sd->status.sp > 0 && !unit_isdead(bl) && sc->data[type].timer != -1) {
-					// +dR8wTTBmMEQwZonjlmRuCDB/MGcwajBEMGowiX2ZfZo-
-					timer = add_timer(6000+-tick, status_change_timer,bl->id, data);
+					// 生きていて解除済みでないなら継続
+					timer = add_timer(6000+tick, status_change_timer,bl->id, data);
 				}
 			} else {
-				timer = add_timer(6000+-tick, status_change_timer,bl->id, data);
+				timer = add_timer(6000+tick, status_change_timer,bl->id, data);
 			}
 		}
 		break;
-	case SC_KINGS_GRACE:	/* +MK0w8zCwMLkwsDDsMKQwuQ- */
+	case SC_KINGS_GRACE:	/* キングスグレイス */
 		if((--sc->data[type].val2) > 0) {
 			if(sd) {
 				int hp = sd->status.max_hp * sc->data[type].val4 / 100;
 				unit_heal(bl, hp, 0, 0, 0);
 			}
-			timer = add_timer(1000+-tick, status_change_timer,bl->id, data);
+			timer = add_timer(1000+tick, status_change_timer,bl->id, data);
 		}
 		break;
-	case SC_RAISINGDRAGON:		/* +b1yfjWYHWSk- */
+	case SC_RAISINGDRAGON:		/* 潜龍昇天 */
 		if((--sc->data[type].val2) > 0) {
 			if(sd) {
 				int hp = sd->status.max_hp / 100;
@@ -13233,22 +13212,22 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 					sd->status.hp -= hp;
 					clif_updatestatus(sd,SP_HP);
 					if(sd->status.max_hp * 15 / 100 < sd->status.hp) {
-						timer = add_timer(5000+-tick, status_change_timer, bl->id, data);
+						timer = add_timer(5000+tick, status_change_timer, bl->id, data);
 					}
 				}
 			} else {
-				timer = add_timer(5000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(5000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_WINKCHARM:	/* +m0Vg0TBuMKYwozDzMK8- */
-	case SC_SIREN:		/* +MLswpDDsMPww8zBuWPA- */
+	case SC_WINKCHARM:	/* 魅惑のウィンク */
+	case SC_SIREN:		/* セイレーンの声 */
 		if((--sc->data[type].val3) > 0) {
 			clif_emotion(bl,3);
-			timer = add_timer(3000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(3000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_DEEP_SLEEP:		/* +W4kwiTBOMG5bUFuIVQQ- */
+	case SC_DEEP_SLEEP:		/* 安らぎの子守唄 */
 		if((--sc->data[type].val2) > 0) {
 			int hp, sp = 0;
 			hp = (int)((atn_bignumber)status_get_max_hp(bl) * 3 / 100);
@@ -13256,48 +13235,48 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 				sp = (int)((atn_bignumber)status_get_max_sp(bl) * 3 / 100);
 			if(hp || sp)
 				unit_heal(bl, hp, sp, 0, 0);
-			timer = add_timer(2000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(2000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_SIRCLEOFNATURE:		/* +X6p0sDBZMIuB6nE2MG6X8w- */
+	case SC_SIRCLEOFNATURE:		/* 循環する自然の音 */
 		if((--sc->data[type].val2) > 0) {
 			int hp = 300 * sc->data[type].val1;
 			if(sd) {
 				int sp = 4 * sc->data[type].val1;
 				if(sd && sd->status.sp >= sp) {
 					unit_heal(bl, hp, -sp, 0, 0);
-					timer = add_timer(1000+-tick, status_change_timer,bl->id, data);	
+					timer = add_timer(1000+tick, status_change_timer,bl->id, data);	
 				}
 			} else {
 				unit_heal(bl, hp, 0, 0, 0);
-				timer = add_timer(1000+-tick, status_change_timer,bl->id, data);	
+				timer = add_timer(1000+tick, status_change_timer,bl->id, data);	
 			}
 		}
 		break;
-	case SC_MELODYOFSINK:		/* +MOEw7TDHMKMw/DCqMNYwtzDzMK8- */
+	case SC_MELODYOFSINK:		/* メロディーオブシンク */
 		if((--sc->data[type].val2) > 0) {
 			if(sd) {
 				unit_heal(bl, 0, -(sd->status.max_sp * sc->data[type].val3 / 100), 0, 0);
 			}
-			timer = add_timer(1000+-tick, status_change_timer,bl->id, data);	
+			timer = add_timer(1000+tick, status_change_timer,bl->id, data);	
 		}
 		break;
-	case SC_SONG_OF_MANA:		/* +MN4wyjBua0w- */
+	case SC_SONG_OF_MANA:		/* マナの歌 */
 		if((--sc->data[type].val2) > 0) {
 			if(sd) {
-				int sp = 10 +- 2 * sc->data[type].val4;
-				if(sd->status.sp +- sp > sd->status.max_sp) {
+				int sp = 10 + 2 * sc->data[type].val4;
+				if(sd->status.sp + sp > sd->status.max_sp) {
 					sp = sd->status.max_sp - sd->status.sp;
 					sd->status.sp = sd->status.max_sp;
 				} else {
-					sd->status.sp +-= sp;
+					sd->status.sp += sp;
 				}
 				clif_updatestatus(sd,SP_SP);
 			}
-			timer = add_timer(5000+-tick, status_change_timer,bl->id, data);	
+			timer = add_timer(5000+tick, status_change_timer,bl->id, data);	
 		}
 		break;
-	case SC_SATURDAY_NIGHT_FEVER:		/* +MNUw6TCkMMcw/DDKMKQwyDDVMKMw/DDQMPw- */
+	case SC_SATURDAY_NIGHT_FEVER:		/* フライデーナイトフィーバー */
 		if(--sc->data[type].val2 > 0) {
 			int hp = 0,sp = 0;
 			hp = (int)((atn_bignumber)status_get_max_hp(bl) / 100);
@@ -13305,17 +13284,17 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 				sp = (int)((atn_bignumber)status_get_max_sp(bl) / 100);
 			unit_heal(bl, -hp, -sp, 0, 0);
 			if(!unit_isdead(bl) && sc->data[type].timer != -1)
-				timer = add_timer(sc->data[type].val3+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(sc->data[type].val3+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_FRIGG_SONG:			/* +MNUw6jDDMLAwbmtM- */
+	case SC_FRIGG_SONG:			/* フリッグの歌 */
 		if(--sc->data[type].val2 > 0) {
 			unit_heal(bl, sc->data[type].val4, 0, 0, 0);
 			if(!unit_isdead(bl) && sc->data[type].timer != -1)
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_DIAMONDDUST:		/* +MMAwpDDkMOIw8zDJMMAwuTDI- */
+	case SC_DIAMONDDUST:		/* ダイヤモンドダスト */
 		if(--sc->data[type].val2 > 0) {
 			int hp = 0,sp = 0;
 			hp = (int)((atn_bignumber)status_get_max_hp(bl) * 2 / 100);
@@ -13325,107 +13304,107 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 				hp = status_get_hp(bl) - 1;
 			unit_heal(bl, -hp, -sp, 0, 0);
 			if(!unit_isdead(bl) && sc->data[type].timer != -1)
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_STRIKING:		/* +MLkwyDDpMKQwrTDzMLA- */
+	case SC_STRIKING:		/* ストライキング */
 		if((--sc->data[type].val2) > 0) {
 			if(sd) {
 				int sp = 6 - sc->data[type].val1;
 				if(sp > 0 && sd->status.sp >= sp) {
 					sd->status.sp -= sp;
 					clif_updatestatus(sd,SP_SP);
-					timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+					timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 				}
 			} else {
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_BLOOD_SUCKER:		/* +MNYw6TDDMMkwtTDDMKsw/A- */
+	case SC_BLOOD_SUCKER:		/* ブラッドサッカー */
 		if((--sc->data[type].val4) > 0) {
 			struct block_list *src = map_id2bl(sc->data[type].val3);
 			if(src && tid != -1) {
 				skill_castend_damage_id(src,bl,sc->data[type].val2,sc->data[type].val1,gettick(),0);
 			}
 			if(!unit_isdead(bl) && sc->data[type].timer != -1) {
-				// +dR8wTTBmMEQwZonjlmRuCDB/MGcwajBEMGowiX2ZfZo-
-				timer = add_timer(1000+-tick, status_change_timer,bl->id, data);
+				// 生きていて解除済みでないなら継続
+				timer = add_timer(1000+tick, status_change_timer,bl->id, data);
 			}
 		}
 		break;
-	case SC_FIRE_EXPANSION_TEAR_GAS:		/* +MNUwoTCkMKIw/DCoMK8wuTDRMPMwtzDnMPM-(+UKxtmQ-) */
+	case SC_FIRE_EXPANSION_TEAR_GAS:		/* ファイアーエクスパンション(催涙) */
 		if((--sc->data[type].val3) > 0) {
 			int hp = (int)((atn_bignumber)status_get_max_hp(bl) / 100);
 			clif_emotion(bl,28);
-			// +MNUwoTCkMKIw/DCoMK8wuTDRMPMwtzDnMPM-(+UKxtmQ-)+MGcwb2t7MGowajBEMFMwaDBrMFkwi/8ITu7/CQ-
+			// ファイアーエクスパンション(催涙)では死なないことにする（仮）
 			if(hp >= status_get_hp(bl))
 				hp = status_get_hp(bl) - 1;
 			unit_heal(bl, -hp, 0, 0, 0);
 			if(!unit_isdead(bl) && sc->data[type].timer != -1)
-				timer = add_timer(3000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(3000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_MEIKYOUSISUI:		/* +Zg6T4WtibDQ- */
+	case SC_MEIKYOUSISUI:		/* 明鏡止水 */
 		if((--sc->data[type].val2) > 0) {
 			if(sd) {
 				int hp = (int)((atn_bignumber)status_get_max_hp(&sd->bl) * (sc->data[type].val1 * 2) / 100);
 				int sp = (int)((atn_bignumber)status_get_max_sp(&sd->bl) * sc->data[type].val1 / 100);
-				if(sd->status.max_hp >= sd->status.hp +- hp) {
-					sd->status.hp +-= hp;
+				if(sd->status.max_hp >= sd->status.hp + hp) {
+					sd->status.hp += hp;
 					clif_updatestatus(sd,SP_HP);
 				} else {
 					sd->status.hp = sd->status.max_hp;
 					clif_updatestatus(sd,SP_HP);
 				}
-				if(sd->status.max_sp >= sd->status.sp +- sp) {
-					sd->status.sp +-= sp;
+				if(sd->status.max_sp >= sd->status.sp + sp) {
+					sd->status.sp += sp;
 					clif_updatestatus(sd,SP_SP);
 				} else {
 					sd->status.sp = sd->status.max_sp;
 					clif_updatestatus(sd,SP_SP);
 				}
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 			} else {
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_IZAYOI:		/* +U0FRbVkc- */
+	case SC_IZAYOI:		/* 十六夜 */
 		if((--sc->data[type].val3) > 0) {
 			if(sd) {
 				int sp = 1 * sc->data[type].val1;
 				if(sd->status.sp >= sp) {
 					sd->status.sp -= sp;
 					clif_updatestatus(sd,SP_SP);
-					timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+					timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 				}
 			} else {
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_KAGEMUSYA:	/* +XnuIUw- -+UgaOqw-- */
+	case SC_KAGEMUSYA:	/* 幻術 -分身- */
 		if((--sc->data[type].val3) > 0) {
 			if(sd) {
 				if(sd->status.sp >= 1) {
 					sd->status.sp -= 1;
 					clif_updatestatus(sd,SP_SP);
-					timer = add_timer(1000+-tick, status_change_timer,bl->id, data);
+					timer = add_timer(1000+tick, status_change_timer,bl->id, data);
 				}
 			} else {
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_C_MARKER:	/* +MK8w6jDgML4w8zDeMPwwqzD8- */
+	case SC_C_MARKER:	/* クリムゾンマーカー */
 		{
 			struct map_session_data *tmpsd = map_id2sd(sc->data[type].val2);
 			if((--sc->data[type].val4) > 0) {
 				if(tmpsd && tmpsd->c_marker[sc->data[type].val3] == bl->id) {
 					clif_crimson_marker(tmpsd, bl, false);
 				}
-				timer = add_timer(1000+-tick, status_change_timer,bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer,bl->id, data);
 			}
 			else if(sd) {
 				sd->c_marker[sc->data[type].val3] = 0;
@@ -13433,111 +13412,111 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 			}
 		}
 		break;
-	case SC_FRESHSHRIMP:		/* +ZbCbrjBqMKgw0w- */
+	case SC_FRESHSHRIMP:		/* 新鮮なエビ */
 		if((--sc->data[type].val2) > 0) {
 			unit_heal(bl, sc->data[type].val4, 0, 0, 1);
-			timer = add_timer(sc->data[type].val3+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(sc->data[type].val3+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_HISS:				/* +i2ZiEg- */
+	case SC_HISS:				/* 警戒 */
 		if((--sc->data[type].val4) > 0) {
 			if(sc->data[type].val1 > 0)
 				sc->data[type].val1--;
-			timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_SV_ROOTTWIST:	/* +MN4wvzC/MNMwbmg5MGMwUw- */
+	case SC_SV_ROOTTWIST:	/* マタタビの根っこ */
 		if((--sc->data[type].val3) > 0) {
 			struct block_list *src = map_id2bl(sc->data[type].val2);
 			if(src && tid != -1) {
 				battle_skill_attack(BF_MISC,src,src,bl,SU_SV_ROOTTWIST_ATK,sc->data[type].val1,tick,(0x0f<<20)|0x500);
 			}
 			if(!unit_isdead(bl) && sc->data[type].timer != -1) {
-				// +dR8wTTBmMEQwZonjlmRuCDB/MGcwajBEMGowiX2ZfZo-
-				timer = add_timer(1000+-tick, status_change_timer,bl->id, data);
+				// 生きていて解除済みでないなら継続
+				timer = add_timer(1000+tick, status_change_timer,bl->id, data);
 			}
 		}
 		break;
-	case SC_BURNT:			/* +c0RwjlRq- */
+	case SC_BURNT:			/* 獄炎呪 */
 		if((--sc->data[type].val3) > 0) {
 			int hp = 2000;
-			// +c0RwjlRqMGcwb2t7MGowajBEMFMwaDBrMFkwi/8ITu7/CQ-
+			// 獄炎呪では死なないことにする（仮）
 			if(hp >= status_get_hp(bl))
 				hp = status_get_hp(bl) - 1;
 			unit_heal(bl, -hp, 0, 0, 0);
 			if(!unit_isdead(bl) && sc->data[type].timer != -1)
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_SUMMON_ELEM:	/* +MLUw4jDzMKgw7DDhMPMwvzDr- */
+	case SC_SUMMON_ELEM:	/* サモンエレメンタル */
 		if((--sc->data[type].val2) > 0) {
 			if(sd) {
-				// +U+xVmjBXMGYwRDCLfL6XCjBMMEQwajBRMIwwcH1CToY-
+				// 召喚している精霊がいなければ終了
 				if(!sd->eld)
 					break;
 				if(sd->status.sp >= sc->data[type].val3) {
 					sd->status.sp -= sc->data[type].val3;
 					clif_updatestatus(sd,SP_SP);
-					timer = add_timer(10000+-tick, status_change_timer, bl->id, data);
+					timer = add_timer(10000+tick, status_change_timer, bl->id, data);
 				}
 			} else {
-				timer = add_timer(10000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(10000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_WATER_SCREEN:	/* +MKYwqTD8ML8w/DC5MK8w6jD8MPM- */
+	case SC_WATER_SCREEN:	/* ウォータースクリーン */
 		if((--sc->data[type].val2) > 0) {
 			int heal = (int)((atn_bignumber)status_get_max_hp(bl) * 3 / 100);
 			if(heal)
 				unit_heal(bl, heal, 0, 0, 1);
-			timer = add_timer(5000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(5000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_CIRCLE_OF_FIRE_OPTION:	/* +MLUw/DCvMOswqjDWMNUwoTCkMKI-(+fL6XCg-) */
-	case SC_FIRE_CLOAK_OPTION:		/* +MNUwoTCkMKIw/DCvMO0w/DCv-(+fL6XCg-) */
-	case SC_WATER_SCREEN_OPTION:	/* +MKYwqTD8ML8w/DC5MK8w6jD8MPM-(+fL6XCg-) */
-	case SC_WATER_DROP_OPTION:		/* +MKYwqTD8ML8w/DDJMO0wwzDX-(+fL6XCg-) */
-	case SC_WIND_STEP_OPTION:		/* +MKYwozDzMMkwuTDGMMMw1w-(+fL6XCg-) */
-	case SC_WIND_CURTAIN_OPTION:	/* +MKYwozDzMMkwqzD8MMYw8w-(+fL6XCg-) */
-	case SC_SOLID_SKIN_OPTION:		/* +ML0w6jDDMMkwuTCtMPM-(+fL6XCg-) */
-	case SC_STONE_SHIELD_OPTION:	/* +MLkwyDD8MPMwtzD8MOswyQ-(+fL6XCg-) */
+	case SC_CIRCLE_OF_FIRE_OPTION:	/* サークルオブファイア(精霊) */
+	case SC_FIRE_CLOAK_OPTION:		/* ファイアークローク(精霊) */
+	case SC_WATER_SCREEN_OPTION:	/* ウォータースクリーン(精霊) */
+	case SC_WATER_DROP_OPTION:		/* ウォータードロップ(精霊) */
+	case SC_WIND_STEP_OPTION:		/* ウィンドステップ(精霊) */
+	case SC_WIND_CURTAIN_OPTION:	/* ウィンドカーテン(精霊) */
+	case SC_SOLID_SKIN_OPTION:		/* ソリッドスキン(精霊) */
+	case SC_STONE_SHIELD_OPTION:	/* ストーンシールド(精霊) */
 		if((--sc->data[type].val2) > 0) {
 			if(eld) {
 				if(eld->status.sp >= sc->data[type].val3) {
 					eld->status.sp -= sc->data[type].val3;
 					clif_elemupdatestatus(eld->msd,SP_SP);
-					timer = add_timer(1000+-tick, status_change_timer,bl->id, data);
+					timer = add_timer(1000+tick, status_change_timer,bl->id, data);
 				}
 			} else {
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_PYROTECHNIC_OPTION:	/* +MNEwpDDtMMYwrzDLMMMwrw-(+fL6XCg-) */
-	case SC_AQUAPLAY_OPTION:	/* +MKIwrzCiMNcw7DCk-(+fL6XCg-) */
-	case SC_GUST_OPTION:		/* +MKwwuTDI-(+fL6XCg-) */
-	case SC_PETROLOGY_OPTION:	/* +MNowyDDtMLgw/A-(+fL6XCg-) */
-	case SC_HEATER_OPTION:		/* +MNIw/DC/MPw-(+fL6XCg-) */
-	case SC_COOLER_OPTION:		/* +MK8w/DDpMPw-(+fL6XCg-) */
-	case SC_BLAST_OPTION:		/* +MNYw6TC5MMg-(+fL6XCg-) */
-	case SC_CURSED_SOIL_OPTION:	/* +MKsw/DC5MMkwvTCkMOs-(+fL6XCg-) */
-	case SC_TROPIC_OPTION:		/* +MMgw7TDUMMMwrw-(+fL6XCg-) */
-	case SC_CHILLY_AIR_OPTION:	/* +MK8w/DDrMKgwojD8-(+fL6XCg-) */
-	case SC_WILD_STORM_OPTION:	/* +MO8wpDDrMMkwuTDIMPww4A-(+fL6XCg-) */
-	case SC_UPHEAVAL_OPTION:	/* +MKIwwzDXMNgwpDDQMOs-(+fL6XCg-) */
+	case SC_PYROTECHNIC_OPTION:	/* パイロテクニック(精霊) */
+	case SC_AQUAPLAY_OPTION:	/* アクアプレイ(精霊) */
+	case SC_GUST_OPTION:		/* ガスト(精霊) */
+	case SC_PETROLOGY_OPTION:	/* ペトロジー(精霊) */
+	case SC_HEATER_OPTION:		/* ヒーター(精霊) */
+	case SC_COOLER_OPTION:		/* クーラー(精霊) */
+	case SC_BLAST_OPTION:		/* ブラスト(精霊) */
+	case SC_CURSED_SOIL_OPTION:	/* カースドソイル(精霊) */
+	case SC_TROPIC_OPTION:		/* トロピック(精霊) */
+	case SC_CHILLY_AIR_OPTION:	/* クールエアー(精霊) */
+	case SC_WILD_STORM_OPTION:	/* ワイルドストーム(精霊) */
+	case SC_UPHEAVAL_OPTION:	/* アップヘイバル(精霊) */
 		if((--sc->data[type].val2) > 0) {
 			if(eld) {
 				if(eld->status.sp >= sc->data[type].val3) {
 					eld->status.sp -= sc->data[type].val3;
 					clif_elemupdatestatus(eld->msd,SP_SP);
-					timer = add_timer(10000+-tick, status_change_timer,bl->id, data);
+					timer = add_timer(10000+tick, status_change_timer,bl->id, data);
 				}
 			} else {
-				timer = add_timer(10000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(10000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_ANGRIFFS_MODUS:		/* +MKIw8zCwMOow1TC5MOIwyTC5- */
+	case SC_ANGRIFFS_MODUS:		/* アングリフスモドス */
 		if((--sc->data[type].val2) > 0) {
 			if(hd && hd->status.sp > 0) {
 				if(hd->status.hp >= 100)
@@ -13547,27 +13526,27 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 				else
 					hd->status.sp -= 20;
 				clif_send_homstatus(hd->msd,0);
-				timer = add_timer(1000+-tick, status_change_timer,bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer,bl->id, data);
 			}
 		}
 		break;
-	case SC_CBC:				/* +fV4wgWKA- */
+	case SC_CBC:				/* 絞め技 */
 		if((--sc->data[type].val2) > 0) {
 			int hp = 0, sp = 0;
-			if(sc->data[type].val2 % 2) {	// 2+edJrzg-
+			if(sc->data[type].val2 % 2) {	// 2秒毎
 				hp = sc->data[type].val3;
 			}
-			if(sc->data[type].val2 % 3) {	// 3+edJrzg-
+			if(sc->data[type].val2 % 3) {	// 3秒毎
 				if(bl->type != BL_MOB)
 					sp = sc->data[type].val4;
 				else
 					hp = sc->data[type].val4 * 10;
 			}
 			unit_heal(bl, -hp, -sp, 0, 0);
-			timer = add_timer(1000+-tick, status_change_timer,bl->id, data);
+			timer = add_timer(1000+tick, status_change_timer,bl->id, data);
 		}
 		break;
-	case SC_FULL_THROTTLE:		/* +MNUw6zC5MO0wwzDIMOs- */
+	case SC_FULL_THROTTLE:		/* フルスロットル */
 		if((--sc->data[type].val3) > 0) {
 			if(sd) {
 				int sp = (int)((atn_bignumber)status_get_max_sp(&sd->bl) * 5 / 100);
@@ -13575,292 +13554,292 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 					if(sd->status.sp >= sp) {
 						sd->status.sp -= sp;
 						clif_updatestatus(sd,SP_SP);
-						timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+						timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 					}
 					else if(sd->status.sp > 0) {
 						sd->status.sp = 0;
 						clif_updatestatus(sd,SP_SP);
-						timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+						timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 					}
 				}
 			}
 		}
 		break;
-	case SC_REBOUND:	/* +MOow0DCmMPMwyQ- */
+	case SC_REBOUND:	/* リバウンド */
 		clif_emotion(bl,4);
 		if((--sc->data[type].val2) > 0) {
-			timer = add_timer(2000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(2000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_GRADUAL_GRAVITY:	/* +kc1Sm1iXUqA- */
+	case SC_GRADUAL_GRAVITY:	/* 重力増加 */
 		if((--sc->data[type].val3) >= 0) {
 			if(sd) {
 				int hp = (int)((atn_bignumber)status_get_max_hp(&sd->bl) * sc->data[type].val2 / 100);
 				unit_heal(bl, -hp, 0, 0, 0);
 				if(!unit_isdead(bl) && sc->data[type].timer != -1) {
-					// +dR8wTTBmMEQwZonjlmRuCDB/MGcwajBEMGowiX2ZfZo-
-					timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+					// 生きていて解除済みでないなら継続
+					timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 				}
 			} else {
-				timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+				timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_KILLING_AURA:	/* +MK0w6jDzMLAwqjD8MOk- */
+	case SC_KILLING_AURA:	/* キリングオーラ */
 		if((--sc->data[type].val3) > 0) {
 			if(bl && tid != -1) {
 				skill_castend_damage_id(bl,bl,NPC_KILLING_AURA,sc->data[type].val1,gettick(),0);
 			}
 			if(!unit_isdead(bl) && sc->data[type].timer != -1) {
-				// +dR8wTTBmMEQwZonjlmRuCDB/MGcwajBEMGowiX2ZfZo-
-				timer = add_timer(1000+-tick, status_change_timer,bl->id, data);
+				// 生きていて解除済みでないなら継続
+				timer = add_timer(1000+tick, status_change_timer,bl->id, data);
 			}
 		}
 		break;
-	case SC_NEWMOON:	/* +ZxRnCIEa- */
+	case SC_NEWMOON:	/* 朔月脚 */
 		if((--sc->data[type].val3) > 0) {
 			if(sd) {
 				int sp = 1;
 				if(sp > 0 && sd->status.sp >= sp) {
 					sd->status.sp -= sp;
 					clif_updatestatus(sd,SP_SP);
-					timer = add_timer(1000+-tick, status_change_timer,bl->id, data);
+					timer = add_timer(1000+tick, status_change_timer,bl->id, data);
 				}
 			}
 		}
 		break;
-	case SC_FLASHKICK:		/* +Zh8wblNw- */
+	case SC_FLASHKICK:		/* 星の印 */
 		{
 			struct map_session_data *tsd = map_id2sd(sc->data[type].val2);
 			if( tsd )
 				tsd->stellar_mark[sc->data[type].val3] = 0;
 		}
 		break;
-	case SC_SOULCOLLECT:		/* +m0IwboTEek0- */
+	case SC_SOULCOLLECT:		/* 魂の蓄積 */
 		if(sd) {
 			pc_addsoulenergy(sd,600000,1);
-			timer = add_timer(tick+-sc->data[type].val2, status_change_timer,bl->id, data);
+			timer = add_timer(tick+sc->data[type].val2, status_change_timer,bl->id, data);
 		}
 		break;
-	case SC_SOULUNITY:		/* +m0IwbpAjfVA- */
+	case SC_SOULUNITY:		/* 魂の連結 */
 		if((--sc->data[type].val3) > 0) {
 			unit_heal(bl, sc->data[type].val2, 0, 0, 1);
-			timer = add_timer(3000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(3000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_HELPANGEL:		/* +WSlPfzBVMH5SqTBRMGY- */
+	case SC_HELPANGEL:		/* 天使さま助けて */
 		if((--sc->data[type].val2) > 0) {
 			unit_heal(bl, 1000, 350, 0, 1);
-			timer = add_timer(1000+-tick, status_change_timer, bl->id, data);
+			timer = add_timer(1000+tick, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_HANDICAPSTATE_CONFLAGRATION:	/* +cGtwfQ- */
+	case SC_HANDICAPSTATE_CONFLAGRATION:	/* 火災 */
 		{
 			int hp = (int)((atn_bignumber)status_get_max_hp(bl) * 15 / 100);
 			unit_heal(bl,-hp,0,0,0);
 			if(!unit_isdead(bl) && (--sc->data[type].val2) > 0 && sc->data[type].timer != -1) {
-				// +dR8wTTBmMEQwZonjlmRuCDB/MGcwajBEMGowiX2ZfZo-
-				timer = add_timer(tick+-3000, status_change_timer,bl->id, data);
+				// 生きていて解除済みでないなら継続
+				timer = add_timer(tick+3000, status_change_timer,bl->id, data);
 			}
 		}
 		break;
-	case SC_HANDICAPSTATE_DEADLYPOISON:		/* +Xzdr0g- */
+	case SC_HANDICAPSTATE_DEADLYPOISON:		/* 強毒 */
 		{
 			int hp = (int)((atn_bignumber)status_get_max_hp(bl) * 10 / 100);
 			unit_heal(bl,-hp,0,0,0);
 			if(!unit_isdead(bl) && (--sc->data[type].val3) > 0 && sc->data[type].timer != -1) {
-				// +dR8wTTBmMEQwZonjlmRuCDB/MGcwajBEMGowiX2ZfZo-
-				timer = add_timer(tick+-1000, status_change_timer,bl->id, data);
+				// 生きていて解除済みでないなら継続
+				timer = add_timer(tick+1000, status_change_timer,bl->id, data);
 			}
 		}
 		break;
-	case SC_HANDICAPSTATE_DEPRESSION:		/* +YYKbMQ- */
+	case SC_HANDICAPSTATE_DEPRESSION:		/* 憂鬱 */
 		unit_heal(bl,0,-(status_get_max_sp(bl)/100),0,0);
 		if((--sc->data[type].val2) > 0) {
-			timer = add_timer(tick+-3000, status_change_timer, bl->id, data);
+			timer = add_timer(tick+3000, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_SERVANTWEAPON:		/* +MLUw/DD0MKEw8zDIMKYwpzDdMPM- */
+	case SC_SERVANTWEAPON:		/* サーヴァントウェポン */
 		if((--sc->data[type].val4) > 0) {
 			if(sd)
 				pc_addball(sd,600000,1);
-			timer = add_timer(tick+-sc->data[type].val3, status_change_timer,bl->id, data);
+			timer = add_timer(tick+sc->data[type].val3, status_change_timer,bl->id, data);
 		}
 		break;
-	case SC_DANCING_KNIFE:		/* +MMAw8zC3MPMwsDDKMKQw1Q- */
+	case SC_DANCING_KNIFE:		/* ダンシングナイフ */
 		if((--sc->data[type].val3) > 0) {
 			skill_castend_damage_id(bl,bl,SHC_DANCING_KNIFE,sc->data[type].val1,tick,0);
-			timer = add_timer(tick+-sc->data[type].val2, status_change_timer,bl->id, data);
+			timer = add_timer(tick+sc->data[type].val2, status_change_timer,bl->id, data);
 		}
 		break;
-	case SC_MEDIALE:		/* +MOEwxzCjMKIw6jDcMMgwpTDg- */
+	case SC_MEDIALE:		/* メディアリボトゥム */
 		if((--sc->data[type].val4) > 0) {
 			skill_castend_nodamage_id(bl,bl,CD_MEDIALE_VOTUM,sc->data[type].val1,tick,0x10|sc->data[type].val2);
-			timer = add_timer(tick+-sc->data[type].val3, status_change_timer,bl->id, data);
+			timer = add_timer(tick+sc->data[type].val3, status_change_timer,bl->id, data);
 		}
 		break;
-	case SC_A_MACHINE:		/* +ZTtkg4jFf25nCVK5UxY- */
+	case SC_A_MACHINE:		/* 攻撃装置有効化 */
 		if((--sc->data[type].val3) > 0) {
 			skill_castend_damage_id(bl,bl,MT_A_MACHINE,sc->data[type].val1,tick,0);
-			timer = add_timer(tick+-sc->data[type].val2, status_change_timer,bl->id, data);
+			timer = add_timer(tick+sc->data[type].val2, status_change_timer,bl->id, data);
 		}
 		break;
-	case SC_ABYSSFORCEWEAPON:		/* +MNUw7TDgMLgwojDTMLk- */
+	case SC_ABYSSFORCEWEAPON:		/* フロムジアビス */
 		if((--sc->data[type].val4) > 0) {
 			if(sd)
 				pc_addball(sd,600000,1);
-			timer = add_timer(tick+-sc->data[type].val3, status_change_timer,bl->id, data);
+			timer = add_timer(tick+sc->data[type].val3, status_change_timer,bl->id, data);
 		}
 		break;
-	case SC_SOUNDBLEND:			/* +MLUwpjDzMMkw1jDsMPMwyQ- */
+	case SC_SOUNDBLEND:			/* サウンドブレンド */
 		if(sc->data[type].val2 != 0) {
 			struct block_list *src = map_id2bl(sc->data[type].val2);
 			if(src) {
 				skill_castend_damage_id(src,bl,TR_SOUNDBLEND,sc->data[type].val1,tick,0);
 			}
 			sc->data[type].val2 = 0;
-			timer = add_timer(tick+-200, status_change_timer, bl->id, data);
+			timer = add_timer(tick+200, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_SUMMON_ELEMENTAL_ARDOR:		/* +MLUw4jDzMKIw6zDJMPww6w- */
+	case SC_SUMMON_ELEMENTAL_ARDOR:		/* サモンアルドール */
 		if((--sc->data[type].val3) > 0) {
 			if(sd) {
-				// +U+xVmjBXMGYwRDCLfL6XCjBMMEQwajBRMIwwcH1CToY-
+				// 召喚している精霊がいなければ終了
 				if(!sd->eld)
 					break;
 				if(sd->eld->status.class_ != ELEMID_EM_ARDOR)
 					break;
 			}
-			timer = add_timer(tick+-1000, status_change_timer, bl->id, data);
+			timer = add_timer(tick+1000, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_SUMMON_ELEMENTAL_DILUVIO:		/* +MLUw4jDzMMcwozDrMNMwqg- */
+	case SC_SUMMON_ELEMENTAL_DILUVIO:		/* サモンディルビオ */
 		if((--sc->data[type].val3) > 0) {
 			if(sd) {
-				// +U+xVmjBXMGYwRDCLfL6XCjBMMEQwajBRMIwwcH1CToY-
+				// 召喚している精霊がいなければ終了
 				if(!sd->eld)
 					break;
 				if(sd->eld->status.class_ != ELEMID_EM_DILUVIO)
 					break;
 			}
-			timer = add_timer(tick+-1000, status_change_timer, bl->id, data);
+			timer = add_timer(tick+1000, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_SUMMON_ELEMENTAL_PROCELLA:		/* +MLUw4jDzMNcw7TC7MOk- */
+	case SC_SUMMON_ELEMENTAL_PROCELLA:		/* サモンプロセラ */
 		if((--sc->data[type].val3) > 0) {
 			if(sd) {
-				// +U+xVmjBXMGYwRDCLfL6XCjBMMEQwajBRMIwwcH1CToY-
+				// 召喚している精霊がいなければ終了
 				if(!sd->eld)
 					break;
 				if(sd->eld->status.class_ != ELEMID_EM_PROCELLA)
 					break;
 			}
-			timer = add_timer(tick+-1000, status_change_timer, bl->id, data);
+			timer = add_timer(tick+1000, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_SUMMON_ELEMENTAL_TERREMOTUS:	/* +MLUw4jDzMMYw7DDiMMgwpTC5- */
+	case SC_SUMMON_ELEMENTAL_TERREMOTUS:	/* サモンテレモトゥス */
 		if((--sc->data[type].val3) > 0) {
 			if(sd) {
-				// +U+xVmjBXMGYwRDCLfL6XCjBMMEQwajBRMIwwcH1CToY-
+				// 召喚している精霊がいなければ終了
 				if(!sd->eld)
 					break;
 				if(sd->eld->status.class_ != ELEMID_EM_TERREMOTUS)
 					break;
 			}
-			timer = add_timer(tick+-1000, status_change_timer, bl->id, data);
+			timer = add_timer(tick+1000, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_SUMMON_ELEMENTAL_SERPENS:		/* +MLUw4jDzMLUw/DDaMPMwuQ- */
+	case SC_SUMMON_ELEMENTAL_SERPENS:		/* サモンサーペンス */
 		if((--sc->data[type].val3) > 0) {
 			if(sd) {
-				// +U+xVmjBXMGYwRDCLfL6XCjBMMEQwajBRMIwwcH1CToY-
+				// 召喚している精霊がいなければ終了
 				if(!sd->eld)
 					break;
 				if(sd->eld->status.class_ != ELEMID_EM_SERPENS)
 					break;
 			}
-			timer = add_timer(tick+-1000, status_change_timer, bl->id, data);
+			timer = add_timer(tick+1000, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_FLAMETECHNIC_OPTION:		/* +MNUw7DCkMOAwxjCvMMswwzCv-(+fL6XCg-) */
-	case SC_COLD_FORCE_OPTION:			/* +MLMw/DDrMMkw1TCpMPwwuQ-(+fL6XCg-) */
-	case SC_GRACE_BREEZE_OPTION:		/* +MLAw7DCkMLkw1jDqMPwwug-(+fL6XCg-) */
-	case SC_EARTH_CARE_OPTION:			/* +MKIw/DC5MLEwog-(+fL6XCg-) */
-	case SC_DEEP_POISONING_OPTION:		/* +MMcwozD8MNcw3TCkMLowyzDzMLA-(+fL6XCg-) */
+	case SC_FLAMETECHNIC_OPTION:		/* フレイムテクニック(精霊) */
+	case SC_COLD_FORCE_OPTION:			/* コールドフォース(精霊) */
+	case SC_GRACE_BREEZE_OPTION:		/* グレイスブリーズ(精霊) */
+	case SC_EARTH_CARE_OPTION:			/* アースケア(精霊) */
+	case SC_DEEP_POISONING_OPTION:		/* ディープポイズニング(精霊) */
 		if((--sc->data[type].val2) > 0) {
 			if(eld) {
 				if(eld->status.sp >= sc->data[type].val3) {
 					eld->status.sp -= sc->data[type].val3;
 					clif_elemupdatestatus(eld->msd,SP_SP);
-					timer = add_timer(tick+-10000, status_change_timer,bl->id, data);
+					timer = add_timer(tick+10000, status_change_timer,bl->id, data);
 				} else {
 					eld->status.sp = 0;
 					clif_elemupdatestatus(eld->msd,SP_SP);
 					elem_change_mode(eld,ELMODE_WAIT);
 				}
 			} else {
-				timer = add_timer(tick+-10000, status_change_timer, bl->id, data);
+				timer = add_timer(tick+10000, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_FLAMEARMOR_OPTION:			/* +MNUw7DCkMOAwojD8MN4w/A-(+fL6XCg-) */
-	case SC_CRYSTAL_ARMOR_OPTION:		/* +MK8w6jC5ML8w6zCiMPww3jD8-(+fL6XCg-) */
-	case SC_EYES_OF_STORM_OPTION:		/* +MKIwpDC6MKow1jC5MMgw/DDg-(+fL6XCg-) */
-	case SC_STRONG_PROTECTION_OPTION:	/* +MLkwyDDtMPMwsDDXMO0wxjCvMLcw5zDz-(+fL6XCg-) */
-	case SC_POISON_SHIELD_OPTION:		/* +MN0wpDC6MPMwtzD8MOswyQ-(+fL6XCg-) */
+	case SC_FLAMEARMOR_OPTION:			/* フレイムアーマー(精霊) */
+	case SC_CRYSTAL_ARMOR_OPTION:		/* クリスタルアーマー(精霊) */
+	case SC_EYES_OF_STORM_OPTION:		/* アイズオブストーム(精霊) */
+	case SC_STRONG_PROTECTION_OPTION:	/* ストロングプロテクション(精霊) */
+	case SC_POISON_SHIELD_OPTION:		/* ポイズンシールド(精霊) */
 		if((--sc->data[type].val2) > 0) {
 			if(eld) {
 				if(eld->status.sp >= sc->data[type].val3) {
 					eld->status.sp -= sc->data[type].val3;
 					clif_elemupdatestatus(eld->msd,SP_SP);
-					timer = add_timer(tick+-1000, status_change_timer,bl->id, data);
+					timer = add_timer(tick+1000, status_change_timer,bl->id, data);
 				} else {
 					eld->status.sp = 0;
 					clif_elemupdatestatus(eld->msd,SP_SP);
 					elem_change_mode(eld,ELMODE_WAIT);
 				}
 			} else {
-				timer = add_timer(tick+-1000, status_change_timer, bl->id, data);
+				timer = add_timer(tick+1000, status_change_timer, bl->id, data);
 			}
 		}
 		break;
-	case SC_INTENSIVE_AIM:			/* +MKQw8zDGMPMwtzDWMKgwpDDg- */
+	case SC_INTENSIVE_AIM:			/* インテンシブエイム */
 		if(sc->data[SC_INTENSIVE_AIM_COUNT].timer != -1) {
 			if(sc->data[SC_INTENSIVE_AIM_COUNT].val1 < 10) {
-				status_change_start(bl,SC_INTENSIVE_AIM_COUNT,sc->data[SC_INTENSIVE_AIM_COUNT].val1+-1,0,0,0,0,0);
+				status_change_start(bl,SC_INTENSIVE_AIM_COUNT,sc->data[SC_INTENSIVE_AIM_COUNT].val1+1,0,0,0,0,0);
 			}
 		} else {
 			status_change_start(bl,SC_INTENSIVE_AIM_COUNT,1,0,0,0,0,0);
 		}
-		timer = add_timer(tick+-300, status_change_timer, bl->id, data);
+		timer = add_timer(tick+300, status_change_timer, bl->id, data);
 		break;
-	case SC_TALISMAN_OF_PROTECTION:		/* +W4iLd3sm- */
+	case SC_TALISMAN_OF_PROTECTION:		/* 守護符 */
 		if((--sc->data[type].val3) > 0) {
 			clif_misceffect_value(bl, 312, sc->data[type].val2);
 			clif_misceffect_value(bl, 657, sc->data[type].val2);
 			unit_heal(bl,sc->data[type].val2,0,0,1);
-			timer = add_timer(tick+-3000, status_change_timer, bl->id, data);
+			timer = add_timer(tick+3000, status_change_timer, bl->id, data);
 		}
 		break;
-	case SC_KI_SUL_RAMPAGE:		/* +ML8w/DDIMOsw6TDzMNow/DC4- */
+	case SC_KI_SUL_RAMPAGE:		/* タートルランページ */
 		if((--sc->data[type].val3) > 0) {
 			skill_castend_nodamage_id(bl,bl,SH_KI_SUL_RAMPAGE,sc->data[type].val1,tick,0x10|sc->data[type].val2);
-			timer = add_timer(tick+-1000, status_change_timer, bl->id, data);
+			timer = add_timer(tick+1000, status_change_timer, bl->id, data);
 		}
 		break;
 	}
 
 	if(timer == -1 && sd && sd->eternal_status_change[type] > 0 && !unit_isdead(&sd->bl))
 	{
-		timer = add_timer(	/* +ML8wpDDeMPxRjYotW5o- */
-			sd->eternal_status_change[type]+-tick, status_change_timer,
+		timer = add_timer(	/* タイマー再設定 */
+			sd->eternal_status_change[type]+tick, status_change_timer,
 			bl->id, data);
 	}
 
 	map_freeblock_unlock();
 
 	if(timer != -1) {
-		// +ML8wpDDeMPw-ID+MJJP3VtYMFcwZn2ZfZowWTCL-
+		// タイマーIDを保存して継続する
 		sc->data[type].timer = timer;
 		return 0;
 	}
@@ -13869,7 +13848,7 @@ int status_change_timer(int tid, unsigned int tick, int id, void *data)
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjgwvzCkMN4w/HvEVvJR5nQG-
+ * ステータス異常タイマー範囲処理
  *------------------------------------------
  */
 int status_change_timer_sub(struct block_list *bl, va_list ap)
@@ -13893,12 +13872,12 @@ int status_change_timer_sub(struct block_list *bl, va_list ap)
 	nullpo_retr(0, sc = status_get_sc(bl));
 
 	switch( type ) {
-	case SC_SIGHT:	/* +MLUwpDDI- */
-	case SC_CONCENTRATE:	/* +lsZOLVKbVBFOCg- */
-		skill_detect(bl);		// +MMcwozDGMKMwrzDIUrlnnA-
+	case SC_SIGHT:	/* サイト */
+	case SC_CONCENTRATE:	/* 集中力向上 */
+		skill_detect(bl);		// ディティクト効果
 		break;
-	case SC_RUWACH:	/* +MOswojDV- */
-		if(skill_detect(bl)) {		// +MMcwozDGMK8wyFK5Z5wwZ2a0MEQwX3b4Ykswaw-
+	case SC_RUWACH:	/* ルアフ */
+		if(skill_detect(bl)) {		// ディテクト効果で暴いた相手に
 			battle_skill_attack(BF_MAGIC,src,src,bl,AL_RUWACH,skilllv,tick,0);
 		}
 		break;
@@ -13918,7 +13897,7 @@ int status_change_timer_sub(struct block_list *bl, va_list ap)
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjhRaInjlmQ-
+ * ステータス異常全解除
  *------------------------------------------
  */
 int status_change_clear(struct block_list *bl,int type)
@@ -13938,11 +13917,11 @@ int status_change_clear(struct block_list *bl,int type)
 		return 0;
 
 	status_calc_pc_stop_begin(bl);
-	for(i = 0; i < MAX_STATUSCHANGE; i+-+-) {
+	for(i = 0; i < MAX_STATUSCHANGE; i++) {
 		if(i == SC_BABY && type == 0 && unit_isdead(bl))
 			continue;
 
-		/* +dXBeODBMMEIwizBqMIkwvzCkMN4w/DCSUkqWZDBZMIs- */
+		/* 異常があるならタイマーを削除する */
 		if(i == SC_DANCING) {
 			skill_stop_dancing(bl,0);
 		} else {
@@ -13966,7 +13945,7 @@ int status_change_clear(struct block_list *bl,int type)
 }
 
 /*==========================================
- * +cnlbmmdhTvZOCzBrMEowUTCLMLkwxjD8ML8wuXVwXjiJ45Zk-
+ * 特定条件下におけるステータス異常解除
  *------------------------------------------
  */
 int status_change_release(struct block_list *bl,int mask)
@@ -13986,8 +13965,8 @@ int status_change_release(struct block_list *bl,int mask)
 		return 0;
 
 	status_calc_pc_stop_begin(bl);
-	for(i = 0; i < MAX_STATUSCHANGE; i+-+-) {
-		// +dXBeODBMMEIwYzBmThQwZDDVMOkwsDBMMEIwizBqMIkwvzCkMN4w/DCSUkqWZA-
+	for(i = 0; i < MAX_STATUSCHANGE; i++) {
+		// 異常があって且つフラグがあるならタイマーを削除
 		if( (scdata_db[i].releasable & mask) && sc->data[i].timer != -1 ) {
 			if(i == SC_DANCING) {
 				skill_stop_dancing(bl,0);
@@ -14004,7 +13983,7 @@ int status_change_release(struct block_list *bl,int mask)
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjg-(+a2ZWaDBuXF5gJw-)+fUJOhg-
+ * ステータス異常(武器の属性)終了
  *------------------------------------------
  */
 int status_enchant_elemental_end(struct block_list *bl,int type)
@@ -14014,32 +13993,32 @@ int status_enchant_elemental_end(struct block_list *bl,int type)
 	nullpo_retr(0, bl);
 	nullpo_retr(0, sc = status_get_sc(bl));
 
-	if( type != SC_ENCPOISON && sc->data[SC_ENCPOISON].timer != -1 )	/* +MKgw8zDBMOMw8zDIMN0wpDC6MPOJ45Zk- */
+	if( type != SC_ENCPOISON && sc->data[SC_ENCPOISON].timer != -1 )	/* エンチャントポイズン解除 */
 		status_change_end(bl,SC_ENCPOISON,-1);
-	if( type != SC_ASPERSIO && sc->data[SC_ASPERSIO].timer != -1 )	/* +MKIwuTDaMOswtzCqieOWZA- */
+	if( type != SC_ASPERSIO && sc->data[SC_ASPERSIO].timer != -1 )	/* アスペルシオ解除 */
 		status_change_end(bl,SC_ASPERSIO,-1);
-	if( type != SC_FLAMELAUNCHER && sc->data[SC_FLAMELAUNCHER].timer != -1 )	/* +MNUw7DCkMOAw6TDzMMEw44njlmQ- */
+	if( type != SC_FLAMELAUNCHER && sc->data[SC_FLAMELAUNCHER].timer != -1 )	/* フレイムランチャ解除 */
 		status_change_end(bl,SC_FLAMELAUNCHER,-1);
-	if( type != SC_FROSTWEAPON && sc->data[SC_FROSTWEAPON].timer != -1 )	/* +MNUw7TC5MMgwpjCnMN0w84njlmQ- */
+	if( type != SC_FROSTWEAPON && sc->data[SC_FROSTWEAPON].timer != -1 )	/* フロストウェポン解除 */
 		status_change_end(bl,SC_FROSTWEAPON,-1);
-	if( type != SC_LIGHTNINGLOADER && sc->data[SC_LIGHTNINGLOADER].timer != -1 )	/* +MOkwpDDIMMsw8zCwMO0w/DDAMPyJ45Zk- */
+	if( type != SC_LIGHTNINGLOADER && sc->data[SC_LIGHTNINGLOADER].timer != -1 )	/* ライトニングローダー解除 */
 		status_change_end(bl,SC_LIGHTNINGLOADER,-1);
-	if( type != SC_SEISMICWEAPON && sc->data[SC_SEISMICWEAPON].timer != -1 )	/* +MLUwpDC5MN8wwzCvMKYwpzDdMPOJ45Zk- */
+	if( type != SC_SEISMICWEAPON && sc->data[SC_SEISMICWEAPON].timer != -1 )	/* サイスミックウェポン解除 */
 		status_change_end(bl,SC_SEISMICWEAPON,-1);
-	if( type != SC_DARKELEMENT && sc->data[SC_DARKELEMENT].timer != -1 )		// +lcc-
+	if( type != SC_DARKELEMENT && sc->data[SC_DARKELEMENT].timer != -1 )		// 闇
 		status_change_end(bl,SC_DARKELEMENT,-1);
-	if( type != SC_ATTENELEMENT && sc->data[SC_ATTENELEMENT].timer != -1 )	// +X/U-
+	if( type != SC_ATTENELEMENT && sc->data[SC_ATTENELEMENT].timer != -1 )	// 念
 		status_change_end(bl,SC_ATTENELEMENT,-1);
-	if( type != SC_UNDEADELEMENT && sc->data[SC_UNDEADELEMENT].timer != -1 )	// +Tg1rew-
+	if( type != SC_UNDEADELEMENT && sc->data[SC_UNDEADELEMENT].timer != -1 )	// 不死
 		status_change_end(bl,SC_UNDEADELEMENT,-1);
-	if( type != SC_SEVENWIND && sc->data[SC_SEVENWIND].timer != -1 )		/* +ZpYwSzBEmKiJ45Zk- */
+	if( type != SC_SEVENWIND && sc->data[SC_SEVENWIND].timer != -1 )		/* 暖かい風解除 */
 		status_change_end(bl,SC_SEVENWIND,-1);
 
 	return 0;
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjg-(+T1MwblxeYCc-)+fUJOhg-
+ * ステータス異常(体の属性)終了
  *------------------------------------------
  */
 int status_enchant_armor_elemental_end(struct block_list *bl,int type)
@@ -14049,32 +14028,32 @@ int status_enchant_armor_elemental_end(struct block_list *bl,int type)
 	nullpo_retr(0, bl);
 	nullpo_retr(0, sc = status_get_sc(bl));
 
-	if( type != SC_BENEDICTIO && sc->data[SC_BENEDICTIO].timer != -1 )	// +gFZPUw-
+	if( type != SC_BENEDICTIO && sc->data[SC_BENEDICTIO].timer != -1 )	// 聖体
 		status_change_end(bl,SC_BENEDICTIO,-1);
-	if( type != SC_ELEMENTWATER && sc->data[SC_ELEMENTWATER].timer != -1 )	// +bDQ-
+	if( type != SC_ELEMENTWATER && sc->data[SC_ELEMENTWATER].timer != -1 )	// 水
 		status_change_end(bl,SC_ELEMENTWATER,-1);
-	if( type != SC_ELEMENTGROUND && sc->data[SC_ELEMENTGROUND].timer != -1 )	// +VzA-
+	if( type != SC_ELEMENTGROUND && sc->data[SC_ELEMENTGROUND].timer != -1 )	// 地
 		status_change_end(bl,SC_ELEMENTGROUND,-1);
-	if( type != SC_ELEMENTWIND && sc->data[SC_ELEMENTWIND].timer != -1 )		// +mKg-
+	if( type != SC_ELEMENTWIND && sc->data[SC_ELEMENTWIND].timer != -1 )		// 風
 		status_change_end(bl,SC_ELEMENTWIND,-1);
-	if( type != SC_ELEMENTFIRE && sc->data[SC_ELEMENTFIRE].timer != -1 )		// +cGs-
+	if( type != SC_ELEMENTFIRE && sc->data[SC_ELEMENTFIRE].timer != -1 )		// 火
 		status_change_end(bl,SC_ELEMENTFIRE,-1);
-	if( type != SC_ELEMENTHOLY && sc->data[SC_ELEMENTHOLY].timer != -1 )	// +UUk-
+	if( type != SC_ELEMENTHOLY && sc->data[SC_ELEMENTHOLY].timer != -1 )	// 光
 		status_change_end(bl,SC_ELEMENTHOLY,-1);
-	if( type != SC_ELEMENTDARK && sc->data[SC_ELEMENTDARK].timer != -1 )		// +lcc-
+	if( type != SC_ELEMENTDARK && sc->data[SC_ELEMENTDARK].timer != -1 )		// 闇
 		status_change_end(bl,SC_ELEMENTDARK,-1);
-	if( type != SC_ELEMENTELEKINESIS && sc->data[SC_ELEMENTELEKINESIS].timer != -1 )	// +X/U-
+	if( type != SC_ELEMENTELEKINESIS && sc->data[SC_ELEMENTELEKINESIS].timer != -1 )	// 念
 		status_change_end(bl,SC_ELEMENTELEKINESIS,-1);
-	if( type != SC_ELEMENTPOISON && sc->data[SC_ELEMENTPOISON].timer != -1 )	// +a9I-
+	if( type != SC_ELEMENTPOISON && sc->data[SC_ELEMENTPOISON].timer != -1 )	// 毒
 		status_change_end(bl,SC_ELEMENTPOISON,-1);
-	if( type != SC_ELEMENTUNDEAD && sc->data[SC_ELEMENTUNDEAD].timer != -1 )	// +Tg1rew-
+	if( type != SC_ELEMENTUNDEAD && sc->data[SC_ELEMENTUNDEAD].timer != -1 )	// 不死
 		status_change_end(bl,SC_ELEMENTUNDEAD,-1);
 
 	return 0;
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjg-(+ei5lz1kJZvQ-)+fUJOhg-
+ * ステータス異常(種族変更)終了
  *------------------------------------------
  */
 int status_change_race_end(struct block_list *bl,int type)
@@ -14107,7 +14086,7 @@ int status_change_race_end(struct block_list *bl,int type)
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjg-(+ei5lz1kJZvQ-)+fUJOhg-
+ * ステータス異常(種族変更)終了
  *------------------------------------------
  */
 int status_change_resistclear(struct block_list *bl)
@@ -14144,7 +14123,7 @@ int status_change_resistclear(struct block_list *bl)
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjg-(+m0I-)+lYtZyw-
+ * ステータス異常(魂)開始
  *------------------------------------------
  */
 int status_change_soulstart(struct block_list *bl,int val1,int val2,int val3,int val4,int tick,int flag)
@@ -14243,7 +14222,7 @@ int status_change_soulstart(struct block_list *bl,int val1,int val2,int val3,int
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjg-(+m0I-)+fUJOhg-
+ * ステータス異常(魂)終了
  *------------------------------------------
  */
 int status_change_soulclear(struct block_list *bl)
@@ -14298,7 +14277,7 @@ int status_change_soulclear(struct block_list *bl)
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjg-(+fL6XCg-)+fUJOhg-
+ * ステータス異常(精霊)終了
  *------------------------------------------
  */
 int status_change_elemclear(struct block_list *bl)
@@ -14447,7 +14426,7 @@ int status_change_elemclear(struct block_list *bl)
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjg-(+Uc19UDD7d/NTFjD7d2F3IA-)+fUJOhg-
+ * ステータス異常(凍結・石化・睡眠)終了
  *------------------------------------------
  */
 int status_change_attacked_end(struct block_list *bl)
@@ -14482,7 +14461,7 @@ int status_change_attacked_end(struct block_list *bl)
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjg-(+MM8wpDDJ-)+fUJOhg-
+ * ステータス異常(ハイド)終了
  *------------------------------------------
  */
 int status_change_hidden_end(struct block_list *bl)
@@ -14515,7 +14494,7 @@ int status_change_hidden_end(struct block_list *bl)
 }
 
 /*==========================================
- * +MLkwxjD8ML8wuXVwXjg-(+MN4wwzDXluKBMWZC-)+fUJOhg-
+ * ステータス異常(マップ離脱時)終了
  *------------------------------------------
  */
 int status_change_removemap_end(struct block_list *bl)
@@ -14575,7 +14554,7 @@ int status_change_removemap_end(struct block_list *bl)
 }
 
 /*==========================================
- * +MKIwpDDGMOAwazCIMIswuTDGMPwwvzC5dXBeOJWLWcs-
+ * アイテムによるステータス異常開始
  *------------------------------------------
  */
 int status_change_addeff_start(struct block_list *src, struct block_list *bl, int id, int rate, int type, unsigned int tick)
@@ -14609,15 +14588,15 @@ int status_change_addeff_start(struct block_list *src, struct block_list *bl, in
 
 		if(battle_config.battle_log) {
 			if(type==1)
-				printf("PC %d skill_skilladdeff: card+MGswiDCLcrZhS3VwXjh2elLV- %d %d %d+AFw-n",sd->bl.id,sd->skill_addeff.id[id],id,rate);
+				printf("PC %d skill_skilladdeff: cardによる状態異常発動 %d %d %d\n",sd->bl.id,sd->skill_addeff.id[id],id,rate);
 			else if(type==2)
-				printf("PC %d skill_addeff: card+MGswiDCLcrZhS3VwXjh2elLV- %d %d+AFw-n",sd->bl.id,id,rate);
+				printf("PC %d skill_addeff: cardによる状態異常発動 %d %d\n",sd->bl.id,id,rate);
 			else if(type==3)
-				printf("PC %d skill_addeff2: card+MGswiDCLcrZhS3VwXjh2elLV- %d %d+AFw-n",sd->bl.id,id,rate);
+				printf("PC %d skill_addeff2: cardによる状態異常発動 %d %d\n",sd->bl.id,id,rate);
 			else if(type==4)
-				printf("PC %d magic_addeff: card+MGswiDCLcrZhS3VwXjh2elLV- %d %d+AFw-n",sd->bl.id,id,rate);
+				printf("PC %d magic_addeff: cardによる状態異常発動 %d %d\n",sd->bl.id,id,rate);
 			else
-				printf("PC %d skill_addreveff: card+MGswiDCLdXBeOHZ6UtU- %d %d+AFw-n",sd->bl.id,id,sd->addreveff[id]);
+				printf("PC %d skill_addreveff: cardによる異常発動 %d %d\n",sd->bl.id,id,sd->addreveff[id]);
 		}
 
 		switch(sc_id[id]) {
@@ -14632,33 +14611,33 @@ int status_change_addeff_start(struct block_list *src, struct block_list *bl, in
 			case SC_BLIND:
 			case SC_BLEED:
 				if(type)
-					status_change_pretimer(bl,sc_id[id],7,0,0,0,((sc_id[id] == SC_CONFUSION)? 10000+-7000: skill_get_time2(sc2[id],7)),0,tick+-status_get_amotion(src)+-500);
+					status_change_pretimer(bl,sc_id[id],7,0,0,0,((sc_id[id] == SC_CONFUSION)? 10000+7000: skill_get_time2(sc2[id],7)),0,tick+status_get_amotion(src)+500);
 				else
-					status_change_start(bl,sc_id[id],7,0,0,0,((sc_id[id] == SC_CONFUSION)? 10000+-7000: skill_get_time2(sc2[id],7)),0);
+					status_change_start(bl,sc_id[id],7,0,0,0,((sc_id[id] == SC_CONFUSION)? 10000+7000: skill_get_time2(sc2[id],7)),0);
 				break;
 			case SC_FEAR:
 				if(type)
-					status_change_pretimer(bl,sc_id[id],1,0,0,0,skill_get_time2(sc2[id],1),0,tick+-status_get_amotion(src)+-500);
+					status_change_pretimer(bl,sc_id[id],1,0,0,0,skill_get_time2(sc2[id],1),0,tick+status_get_amotion(src)+500);
 				else
 					status_change_start(bl,sc_id[id],1,0,0,0,skill_get_time2(sc2[id],1),0);
 				break;
 			case SC_FROSTMISTY:
 			case SC_HELLINFERNO:
 				if(type)
-					status_change_pretimer(bl,sc_id[id],1,0,0,0,10000+-skill_get_time2(sc2[id],1),0,tick+-status_get_amotion(src)+-500);
+					status_change_pretimer(bl,sc_id[id],1,0,0,0,10000+skill_get_time2(sc2[id],1),0,tick+status_get_amotion(src)+500);
 				else
-					status_change_start(bl,sc_id[id],1,0,0,0,10000+-skill_get_time2(sc2[id],1),0);
+					status_change_start(bl,sc_id[id],1,0,0,0,10000+skill_get_time2(sc2[id],1),0);
 				break;
 			case SC_DEEP_SLEEP:
 			case SC_DIAMONDDUST:
 				if(type)
-					status_change_pretimer(bl,sc_id[id],1,0,0,0,3000+-skill_get_time2(sc2[id],1),0,tick+-status_get_amotion(src)+-500);
+					status_change_pretimer(bl,sc_id[id],1,0,0,0,3000+skill_get_time2(sc2[id],1),0,tick+status_get_amotion(src)+500);
 				else
-					status_change_start(bl,sc_id[id],1,0,0,0,3000+-skill_get_time2(sc2[id],1),0);
+					status_change_start(bl,sc_id[id],1,0,0,0,3000+skill_get_time2(sc2[id],1),0);
 				break;
 			case SC_SIREN:
 				if(type)
-					status_change_pretimer(bl,sc_id[id],1,src->id,0,0,skill_get_time2(sc2[id],1),0,tick+-status_get_amotion(src)+-500);
+					status_change_pretimer(bl,sc_id[id],1,src->id,0,0,skill_get_time2(sc2[id],1),0,tick+status_get_amotion(src)+500);
 				else
 					status_change_start(bl,sc_id[id],1,src->id,0,0,skill_get_time2(sc2[id],1),0);
 				break;
@@ -14675,12 +14654,12 @@ static void status_split_atoi(char *str, int *num1, int *num2)
 {
 	int i, val[2];
 
-	for (i=0; i<2; i+-+-) {
+	for (i=0; i<2; i++) {
 		if(str) {
 			val[i] = atoi(str);
 			str = strchr(str,':');
 			if (str)
-				*str+-+-=0;
+				*str++=0;
 		} else {
 			val[i] = 0;
 		}
@@ -14700,12 +14679,12 @@ static int status_split_atoi2(char *str,int *val,int num)
 {
 	int i, max = 0;
 
-	for (i=0; i<num; i+-+-) {
+	for (i=0; i<num; i++) {
 		if (str) {
 			val[i] = max = atoi(str);
 			str = strchr(str,':');
 			if (str)
-				*str+-+-=0;
+				*str++=0;
 		} else {
 			val[i] = max;
 		}
@@ -14714,7 +14693,7 @@ static int status_split_atoi2(char *str,int *val,int num)
 }
 
 /*==========================================
- * +MMcw/DC/MNkw/DC5iq0wf4+8MH8-
+ * データベース読み込み
  *------------------------------------------
  */
 int status_readdb(void)
@@ -14737,30 +14716,30 @@ int status_readdb(void)
 
 	memset(&job_db, 0, sizeof(job_db));
 
-	// JOB+iNxrY2VwUCQ-1
-	for(m = 0; m < max; m+-+-) {
+	// JOB補正数値1
+	for(m = 0; m < max; m++) {
 		fp = fopen(filename[m], "r");
 		if(fp == NULL) {
 			if(m > 0)
 				continue;
-			printf("status_readdb: open [%s] failed !+AFw-n", filename[m]);
+			printf("status_readdb: open [%s] failed !\n", filename[m]);
 			return 1;
 		}
 
 		while(fgets(line,1020,fp)){
-			char *split[10+-WT_MAX];
+			char *split[10+WT_MAX];
 			int hp_coefficient, sp_coefficient;
 			int hp_coefficient2, sigma;
 
-			if(line[0] == '+AFw-0' || line[0] == '+AFw-r' || line[0] == '+AFw-n')
+			if(line[0] == '\0' || line[0] == '\r' || line[0] == '\n')
 				continue;
 			if(line[0]=='/' && line[1]=='/')
 				continue;
 			memset(split,0,sizeof(split));
-			for(j=0,p=line;j<9+-WT_MAX && p;j+-+-){
+			for(j=0,p=line;j<9+WT_MAX && p;j++){
 				split[j]=p;
 				p=strchr(p,',');
-				if(p) *p+-+-=0;
+				if(p) *p++=0;
 			}
 			if(j < 9)
 				continue;
@@ -14778,146 +14757,146 @@ int status_readdb(void)
 			if((hp_coefficient2 = atoi(split[6])) < 0)
 				hp_coefficient2 = 500;
 			sigma = 0;
-			for(j = 1; j <= MAX_LEVEL; j+-+-) {
-				// +V/pnLA-HP = 35 +- BaseLevel * Job+UA1zhw- +- Job+MNww/DDKMLk-
-				job_db[i].hp_base[j-1] = (3500 +- j * hp_coefficient2 +- sigma) / 100;
-				sigma +-= hp_coefficient * (j +- 1) +- 50;
+			for(j = 1; j <= MAX_LEVEL; j++) {
+				// 基本HP = 35 + BaseLevel * Job倍率 + Jobボーナス
+				job_db[i].hp_base[j-1] = (3500 + j * hp_coefficient2 + sigma) / 100;
+				sigma += hp_coefficient * (j + 1) + 50;
 				sigma -= sigma % 100;
 			}
 
 			if((sp_coefficient = atoi(split[7])) < 0)
 				sp_coefficient = 100;
-			for(j = 1; j <= MAX_LEVEL; j+-+-) {
-				// +V/pnLA-SP = 10 +- BaseLevel * Job+T8JlcA-
-				job_db[i].sp_base[j-1] = (1000 +- j * sp_coefficient) / 100;
+			for(j = 1; j <= MAX_LEVEL; j++) {
+				// 基本SP = 10 + BaseLevel * Job係数
+				job_db[i].sp_base[j-1] = (1000 + j * sp_coefficient) / 100;
 			}
 
 			job_db[i].max_ap = atoi(split[8]);
 
-			for(j=0; j<=WT_MAX && split[9+-j]; j+-+-) {
-				job_db[i].aspd_base[j] = atoi(split[9+-j]);
+			for(j=0; j<=WT_MAX && split[9+j]; j++) {
+				job_db[i].aspd_base[j] = atoi(split[9+j]);
 			}
 		}
 		fclose(fp);
-		printf("read %s done+AFw-n", filename[m]);
+		printf("read %s done\n", filename[m]);
 	}
 
-	// +V/pnLA-HP+UAtSJYotW5o-
+	// 基本HP個別設定
 	filename2 = "db/job_hp_db.txt";
 	fp = fopen(filename2, "r");
 	if(fp == NULL) {
-		printf("status_readdb: open [%s] failed !+AFw-n", filename2);
+		printf("status_readdb: open [%s] failed !\n", filename2);
 		return 1;
 	}
 	i=0;
 	while(fgets(line,1020,fp)){
-		if(line[0] == '+AFw-0' || line[0] == '+AFw-r' || line[0] == '+AFw-n')
+		if(line[0] == '\0' || line[0] == '\r' || line[0] == '\n')
 			continue;
 		if(line[0]=='/' && line[1]=='/')
 			continue;
-		for(j=0,p=line;j<PC_JOB_MAX && p;j+-+-){
+		for(j=0,p=line;j<PC_JOB_MAX && p;j++){
 			if(sscanf(p,"%d",&k) == 0)
 				break;
 			if(k > 0) {
 				job_db[j].hp_base[i] = k;
 			}
 			p=strchr(p,',');
-			if(p) *p+-+-=0;
+			if(p) *p++=0;
 		}
-		if(+-+-i >= MAX_LEVEL)
+		if(++i >= MAX_LEVEL)
 			break;
 	}
 	fclose(fp);
-	printf("read %s done+AFw-n", filename2);
+	printf("read %s done\n", filename2);
 
-	// +V/pnLA-SP+UAtSJYotW5o-
+	// 基本SP個別設定
 	filename2 = "db/job_sp_db.txt";
 	fp = fopen(filename2, "r");
 	if(fp == NULL) {
-		printf("status_readdb: open [%s] failed !+AFw-n", filename2);
+		printf("status_readdb: open [%s] failed !\n", filename2);
 		return 1;
 	}
 	i=0;
 	while(fgets(line,1020,fp)){
-		if(line[0] == '+AFw-0' || line[0] == '+AFw-r' || line[0] == '+AFw-n')
+		if(line[0] == '\0' || line[0] == '\r' || line[0] == '\n')
 			continue;
 		if(line[0]=='/' && line[1]=='/')
 			continue;
-		for(j=0,p=line;j<PC_JOB_MAX && p;j+-+-){
+		for(j=0,p=line;j<PC_JOB_MAX && p;j++){
 			if(sscanf(p,"%d",&k) == 0)
 				break;
 			if(k > 0) {
 				job_db[j].sp_base[i] = k;
 			}
 			p=strchr(p,',');
-			if(p) *p+-+-=0;
+			if(p) *p++=0;
 		}
-		if(+-+-i >= MAX_LEVEL)
+		if(++i >= MAX_LEVEL)
 			break;
 	}
 	fclose(fp);
-	printf("read %s done+AFw-n", filename2);
+	printf("read %s done\n", filename2);
 
-	// JOB+MNww/DDKMLk-
+	// JOBボーナス
 	filename2 = "db/job_db2.txt";
 	fp = fopen(filename2, "r");
 	if(fp == NULL) {
-		printf("status_readdb: open [%s] failed !+AFw-n", filename2);
+		printf("status_readdb: open [%s] failed !\n", filename2);
 		return 1;
 	}
 	i=0;
 	while(fgets(line,1020,fp)){
-		if(line[0] == '+AFw-0' || line[0] == '+AFw-r' || line[0] == '+AFw-n')
+		if(line[0] == '\0' || line[0] == '\r' || line[0] == '\n')
 			continue;
 		if(line[0]=='/' && line[1]=='/')
 			continue;
-		for(j=0,p=line;j<MAX_LEVEL && p;j+-+-){
+		for(j=0,p=line;j<MAX_LEVEL && p;j++){
 			if(sscanf(p,"%d",&k)==0)
 				break;
 			job_db[i].bonus[PC_UPPER_NORMAL][j] = k;
 			job_db[i].bonus[PC_UPPER_BABY][j] = k;
 			p=strchr(p,',');
-			if(p) p+-+-;
+			if(p) p++;
 		}
-		if(+-+-i >= PC_JOB_MAX)
+		if(++i >= PC_JOB_MAX)
 			break;
 	}
 	fclose(fp);
-	printf("read %s done+AFw-n", filename2);
+	printf("read %s done\n", filename2);
 
-	// JOB+MNww/DDKMLk-2 +juJ1H4B3dSg-
+	// JOBボーナス2 転生職用
 	filename2 = "db/job_db2-2.txt";
 	fp = fopen(filename2, "r");
 	if(fp == NULL) {
-		printf("status_readdb: open [%s] failed !+AFw-n", filename2);
+		printf("status_readdb: open [%s] failed !\n", filename2);
 		return 1;
 	}
 	i=0;
 	while(fgets(line,1020,fp)){
-		if(line[0] == '+AFw-0' || line[0] == '+AFw-r' || line[0] == '+AFw-n')
+		if(line[0] == '\0' || line[0] == '\r' || line[0] == '\n')
 			continue;
 		if(line[0]=='/' && line[1]=='/')
 			continue;
-		for(j=0,p=line;j<MAX_LEVEL && p;j+-+-){
+		for(j=0,p=line;j<MAX_LEVEL && p;j++){
 			if(sscanf(p,"%d",&k)==0)
 				break;
 			job_db[i].bonus[PC_UPPER_HIGH][j] = k;
 			p=strchr(p,',');
-			if(p) p+-+-;
+			if(p) p++;
 		}
-		if(+-+-i >= PC_JOB_MAX)
+		if(++i >= PC_JOB_MAX)
 			break;
 	}
 	fclose(fp);
-	printf("read %s done+AFw-n", filename2);
+	printf("read %s done\n", filename2);
 
-	// +fL6TLDDHMPwwvzDGMPww1jDr-
-	for(i=0; i<MAX_WEAPON_LEVEL+-1; i+-+-) {
-		for(j=0; j<MAX_REFINE; j+-+-)
+	// 精錬データテーブル
+	for(i=0; i<MAX_WEAPON_LEVEL+1; i++) {
+		for(j=0; j<MAX_REFINE; j++)
 			refine_db[i].safety_bonus[j] = 0;
 		refine_db[i].over_bonus   = 0;
 		refine_db[i].limit        = MAX_REFINE;
-		for(j=0; j<MAX_REFINE; j+-+-)
+		for(j=0; j<MAX_REFINE; j++)
 			refine_db[i].per[j] = 0;
 	}
 
@@ -14928,94 +14907,94 @@ int status_readdb(void)
 #endif
 	fp = fopen(filename2, "r");
 	if(fp == NULL) {
-		printf("status_readdb: open [%s] failed !+AFw-n", filename2);
+		printf("status_readdb: open [%s] failed !\n", filename2);
 		return 1;
 	}
 	i=0;
 	while(fgets(line,1020,fp)){
-		char *split[MAX_REFINE+-3];
-		if(line[0] == '+AFw-0' || line[0] == '+AFw-r' || line[0] == '+AFw-n')
+		char *split[MAX_REFINE+3];
+		if(line[0] == '\0' || line[0] == '\r' || line[0] == '\n')
 			continue;
 		if(line[0]=='/' && line[1]=='/')
 			continue;
 		if(atoi(line) <= 0)
 			continue;
 		memset(split,0,sizeof(split));
-		for(j=0,p=line;j<MAX_REFINE+-3 && p;j+-+-){
+		for(j=0,p=line;j<MAX_REFINE+3 && p;j++){
 			split[j]=p;
 			p=strchr(p,',');
-			if(p) *p+-+-=0;
+			if(p) *p++=0;
 		}
-		for(j=0; j<MAX_REFINE; j+-+-) {
-			refine_db[i].safety_bonus[j] = atoi(split[0]) * (j+-1);	// +fL6TLDDcMPwwyjC5-
+		for(j=0; j<MAX_REFINE; j++) {
+			refine_db[i].safety_bonus[j] = atoi(split[0]) * (j+1);	// 精錬ボーナス
 		}
-		refine_db[i].over_bonus   = atoi(split[1]);	// +kE5ScHy+kyww3DD8MMowuQ-
-		refine_db[i].limit        = atoi(split[2]);	// +W4lRaHy+kyyWUHVM-
-		for(j=0; j<MAX_REFINE && split[j+-3]; j+-+-) {
-			status_split_atoi(split[j+-3], &refine_db[i].per[j], &refine_db[i].safety_bonus[j]);
+		refine_db[i].over_bonus   = atoi(split[1]);	// 過剰精錬ボーナス
+		refine_db[i].limit        = atoi(split[2]);	// 安全精錬限界
+		for(j=0; j<MAX_REFINE && split[j+3]; j++) {
+			status_split_atoi(split[j+3], &refine_db[i].per[j], &refine_db[i].safety_bonus[j]);
 		}
-		if(+-+-i > MAX_WEAPON_LEVEL)
+		if(++i > MAX_WEAPON_LEVEL)
 			break;
 	}
 	fclose(fp);
-	printf("read %s done+AFw-n", filename2);
+	printf("read %s done\n", filename2);
 
-	// +MLUwpDC6iNxrYzDGMPww1jDr-
-	for(i=0; i<MAX_SIZE_FIX; i+-+-) {
-		for(j=0; j<WT_MAX; j+-+-)
+	// サイズ補正テーブル
+	for(i=0; i<MAX_SIZE_FIX; i++) {
+		for(j=0; j<WT_MAX; j++)
 			atkmods[i][j] = 100;
 	}
 
 	filename2 = "db/size_fix.txt";
 	fp = fopen(filename2, "r");
 	if(fp == NULL) {
-		printf("status_readdb: open [%s] failed !+AFw-n", filename2);
+		printf("status_readdb: open [%s] failed !\n", filename2);
 		return 1;
 	}
 	i=0;
 	while(fgets(line,1020,fp)){
 		char *split[WT_MAX];
-		if(line[0] == '+AFw-0' || line[0] == '+AFw-r' || line[0] == '+AFw-n')
+		if(line[0] == '\0' || line[0] == '\r' || line[0] == '\n')
 			continue;
 		if(line[0]=='/' && line[1]=='/')
 			continue;
 		if(atoi(line) <= 0)
 			continue;
 		memset(split,0,sizeof(split));
-		for(j=0,p=line;j<WT_MAX && p;j+-+-){
+		for(j=0,p=line;j<WT_MAX && p;j++){
 			split[j]=p;
 			p=strchr(p,',');
-			if(p) *p+-+-=0;
+			if(p) *p++=0;
 		}
-		for(j=0; j<WT_MAX && split[j]; j+-+-) {
+		for(j=0; j<WT_MAX && split[j]; j++) {
 			atkmods[i][j] = atoi(split[j]);
 		}
-		if(+-+-i > MAX_SIZE_FIX)
+		if(++i > MAX_SIZE_FIX)
 			break;
 	}
 	fclose(fp);
-	printf("read %s done+AFw-n", filename2);
+	printf("read %s done\n", filename2);
 
-	// +MLkwxjD8ML8wuXVwXjgwxjD8MNYw6w-
+	// ステータス異常テーブル
 	memset(&scdata_db, 0, sizeof(scdata_db));
 	filename2 = "db/scdata_db.txt";
 	fp = fopen(filename2, "r");
 	if(fp == NULL) {
-		printf("status_readdb: open [%s] failed !+AFw-n", filename2);
+		printf("status_readdb: open [%s] failed !\n", filename2);
 		return 1;
 	}
 	i=0;
 	while(fgets(line,1020,fp)){
 		char *split[6];
-		if(line[0] == '+AFw-0' || line[0] == '+AFw-r' || line[0] == '+AFw-n')
+		if(line[0] == '\0' || line[0] == '\r' || line[0] == '\n')
 			continue;
 		if(line[0] == '/' && line[1] == '/')
 			continue;
 		memset(split,0,sizeof(split));
-		for(j=0,p=line;j<6 && p;j+-+-){
+		for(j=0,p=line;j<6 && p;j++){
 			split[j]=p;
 			p=strchr(p,',');
-			if(p) *p+-+-=0;
+			if(p) *p++=0;
 		}
 		j = atoi(split[0]);
 		if(j < 0 || j >= MAX_STATUSCHANGE)
@@ -15024,27 +15003,27 @@ int status_readdb(void)
 		scdata_db[j].releasable = atoi(split[3]);
 		scdata_db[j].disable    = atoi(split[4]);
 		scdata_db[j].copyable   = atoi(split[5]);
-		i+-+-;
+		i++;
 	}
 	fclose(fp);
-	printf("read %s done (count=%d)+AFw-n", filename2, i);
+	printf("read %s done (count=%d)\n", filename2, i);
 
 #ifdef DYNAMIC_SC_DATA
-	for(i=0; i<MAX_STATUSCHANGE; i+-+-) {
+	for(i=0; i<MAX_STATUSCHANGE; i++) {
 		dummy_sc_data[i].timer = -1;
 		dummy_sc_data[i].val1  = 0;
 		dummy_sc_data[i].val2  = 0;
 		dummy_sc_data[i].val3  = 0;
 		dummy_sc_data[i].val4  = 0;
 	}
-	printf("status_readdb: enable dynamic sc_data.+AFw-n");
+	printf("status_readdb: enable dynamic sc_data.\n");
 #endif
 
 	return 0;
 }
 
 /*==========================================
- * +MLkwrTDrlaJPwlIdZx9TFlHmdAY-
+ * スキル関係初期化処理
  *------------------------------------------
  */
 int do_init_status(void)

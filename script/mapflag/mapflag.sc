@@ -1,4 +1,10 @@
-//mapflag.txt—Auriga 2013/11/02 02:22:54 (JST)
+
+// 
+nif_dun01.gat	mapflag	nomemo	dummy
+nif_dun01.gat	mapflag	nosave	SavePoint
+nif_dun02.gat	mapflag	nomemo	dummy
+nif_dun02.gat	mapflag	nosave	SavePoint
+
 abyss_01.gat	mapflag	nomemo	dummy
 abyss_02.gat	mapflag	nomemo	dummy
 abyss_03.gat	mapflag	nomemo	dummy

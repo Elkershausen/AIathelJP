@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _RANKING_H_
+ï»¿#ifndef _RANKING_H_
 #define _RANKING_H_
 
 #include "map.h"
@@ -43,13 +22,13 @@ int ranking_display_point(struct map_session_data * sd,int ranking_id);
 
 int ranking_set_data(int ranking_id,struct Ranking_Data *rd);
 
-//ƒ‰ƒ“ƒLƒ“ƒO
+//ãƒ©ãƒ³ã‚­ãƒ³ã‚°
 enum {
-	RK_BLACKSMITH = 0,	// ƒuƒ‰ƒbƒNƒXƒ~ƒX
-	RK_ALCHEMIST  = 1,	// ƒAƒ‹ƒPƒ~ƒXƒg
-	RK_TAEKWON    = 2,	// ƒeƒRƒ“ƒ‰ƒ“ƒJ[
-	RK_PK         = 3,	// ‹sE
-	//RK_PVP      = 4,	// PVPƒ‰ƒ“ƒLƒ“ƒO
+	RK_BLACKSMITH = 0,	// ãƒ–ãƒ©ãƒƒã‚¯ã‚¹ãƒŸã‚¹
+	RK_ALCHEMIST  = 1,	// ã‚¢ãƒ«ã‚±ãƒŸã‚¹ãƒˆ
+	RK_TAEKWON    = 2,	// ãƒ†ã‚³ãƒ³ãƒ©ãƒ³ã‚«ãƒ¼
+	RK_PK         = 3,	// è™æ®º
+	//RK_PVP      = 4,	// PVPãƒ©ãƒ³ã‚­ãƒ³ã‚°
 };
 
 int do_init_ranking(void);

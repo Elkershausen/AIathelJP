@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -51,8 +30,8 @@ static const char *ranking_reg[MAX_RANKING] = {
 
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒO‚ğ•Ô‚·
- * 0 : ƒ‰ƒ“ƒNŠO
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°ã‚’è¿”ã™
+ * 0 : ãƒ©ãƒ³ã‚¯å¤–
  *------------------------------------------
  */
 int ranking_get_pc_rank(struct map_session_data * sd,int ranking_id)
@@ -61,7 +40,7 @@ int ranking_get_pc_rank(struct map_session_data * sd,int ranking_id)
 
 	nullpo_retr(0, sd);
 
-	// ƒ‰ƒ“ƒLƒ“ƒO‘ÎÛ‚ª‚È‚¢
+	// ãƒ©ãƒ³ã‚­ãƒ³ã‚°å¯¾è±¡ãŒãªã„
 	if(ranking_id < 0 || MAX_RANKING <= ranking_id)
 		return 0;
 
@@ -74,8 +53,8 @@ int ranking_get_pc_rank(struct map_session_data * sd,int ranking_id)
 }
 
 /*==========================================
- * id‚©‚çƒ‰ƒ“ƒLƒ“ƒO‚ğ‹‚ß‚é
- * 0 : ƒ‰ƒ“ƒNŠO
+ * idã‹ã‚‰ãƒ©ãƒ³ã‚­ãƒ³ã‚°ã‚’æ±‚ã‚ã‚‹
+ * 0 : ãƒ©ãƒ³ã‚¯å¤–
  *------------------------------------------
  */
 int ranking_get_id2rank(int char_id,int ranking_id)
@@ -85,7 +64,7 @@ int ranking_get_id2rank(int char_id,int ranking_id)
 	if(char_id <= 0)
 		return 0;
 
-	// ƒ‰ƒ“ƒLƒ“ƒO‘ÎÛ‚ª‚È‚¢
+	// ãƒ©ãƒ³ã‚­ãƒ³ã‚°å¯¾è±¡ãŒãªã„
 	if(ranking_id < 0 || MAX_RANKING <= ranking_id)
 		return 0;
 
@@ -99,14 +78,14 @@ int ranking_get_id2rank(int char_id,int ranking_id)
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒOƒ|ƒCƒ“ƒg‚ğ•Ô‚·
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°ãƒã‚¤ãƒ³ãƒˆã‚’è¿”ã™
  *------------------------------------------
  */
 int ranking_get_point(struct map_session_data * sd,int ranking_id)
 {
 	nullpo_retr(0, sd);
 
-	// ƒ‰ƒ“ƒLƒ“ƒO‘ÎÛ‚ª‚È‚¢
+	// ãƒ©ãƒ³ã‚­ãƒ³ã‚°å¯¾è±¡ãŒãªã„
 	if(ranking_id < 0 || MAX_RANKING <= ranking_id)
 		return 0;
 
@@ -114,14 +93,14 @@ int ranking_get_point(struct map_session_data * sd,int ranking_id)
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒOƒ|ƒCƒ“ƒg‚ÌƒZƒbƒg
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°ãƒã‚¤ãƒ³ãƒˆã®ã‚»ãƒƒãƒˆ
  *------------------------------------------
  */
 int ranking_set_point(struct map_session_data * sd,int ranking_id,int point)
 {
 	nullpo_retr(0, sd);
 
-	// ƒ‰ƒ“ƒLƒ“ƒO‘ÎÛ‚ª‚È‚¢
+	// ãƒ©ãƒ³ã‚­ãƒ³ã‚°å¯¾è±¡ãŒãªã„
 	if(ranking_id < 0 || MAX_RANKING <= ranking_id)
 		return 0;
 
@@ -131,14 +110,14 @@ int ranking_set_point(struct map_session_data * sd,int ranking_id,int point)
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒOƒ|ƒCƒ“ƒg‚ÌŠl“¾
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°ãƒã‚¤ãƒ³ãƒˆã®ç²å¾—
  *------------------------------------------
  */
 int ranking_gain_point(struct map_session_data * sd,int ranking_id,int point)
 {
 	nullpo_retr(0, sd);
 
-	// ƒ‰ƒ“ƒLƒ“ƒO‘ÎÛ‚ª‚È‚¢
+	// ãƒ©ãƒ³ã‚­ãƒ³ã‚°å¯¾è±¡ãŒãªã„
 	if(ranking_id < 0 || MAX_RANKING <= ranking_id)
 		return 0;
 
@@ -171,14 +150,14 @@ int ranking_gain_point(struct map_session_data * sd,int ranking_id,int point)
 }
 
 /*==========================================
- * ƒLƒƒƒ‰‰i‘±•Ï”‚Ö‘‚«‚İ
+ * ã‚­ãƒ£ãƒ©æ°¸ç¶šå¤‰æ•°ã¸æ›¸ãè¾¼ã¿
  *------------------------------------------
  */
 int ranking_setglobalreg(struct map_session_data * sd,int ranking_id)
 {
 	nullpo_retr(0, sd);
 
-	// ƒ‰ƒ“ƒLƒ“ƒO‘ÎÛ‚ª‚È‚¢
+	// ãƒ©ãƒ³ã‚­ãƒ³ã‚°å¯¾è±¡ãŒãªã„
 	if(ranking_id < 0 || MAX_RANKING <= ranking_id)
 		return 0;
 
@@ -188,7 +167,7 @@ int ranking_setglobalreg(struct map_session_data * sd,int ranking_id)
 }
 
 /*==========================================
- * ƒLƒƒƒ‰‰i‘±•Ï”‚Ö‘S‚Ä‘‚«‚İ
+ * ã‚­ãƒ£ãƒ©æ°¸ç¶šå¤‰æ•°ã¸å…¨ã¦æ›¸ãè¾¼ã¿
  *------------------------------------------
  */
 int ranking_setglobalreg_all(struct map_session_data * sd)
@@ -204,7 +183,7 @@ int ranking_setglobalreg_all(struct map_session_data * sd)
 }
 
 /*==========================================
- * ƒLƒƒƒ‰‰i‘±•Ï”‚©‚ç“Ç‚İ‚İ
+ * ã‚­ãƒ£ãƒ©æ°¸ç¶šå¤‰æ•°ã‹ã‚‰èª­ã¿è¾¼ã¿
  *------------------------------------------
  */
 int ranking_readreg(struct map_session_data * sd)
@@ -220,7 +199,7 @@ int ranking_readreg(struct map_session_data * sd)
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒOXV
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°æ›´æ–°
  *------------------------------------------
  */
 int ranking_update(struct map_session_data * sd,int ranking_id)
@@ -229,23 +208,23 @@ int ranking_update(struct map_session_data * sd,int ranking_id)
 
 	nullpo_retr(0, sd);
 
-	// ƒ‰ƒ“ƒLƒ“ƒO‘ÎÛ‚ª‚È‚¢
+	// ãƒ©ãƒ³ã‚­ãƒ³ã‚°å¯¾è±¡ãŒãªã„
 	if(ranking_id < 0 || MAX_RANKING <= ranking_id)
 		return 0;
 
 	for(i=0; i<MAX_RANKER; i++) {
-		//Šù‚Éƒ‰ƒ“ƒJ[
+		//æ—¢ã«ãƒ©ãƒ³ã‚«ãƒ¼
 		if(sd->status.char_id == ranking_data[ranking_id][i].char_id) {
 			rank = i;
 			break;
 		}
 	}
 
-	// ‡ˆÊ‚É‚Í‚È‚©‚Á‚½
+	// é †ä½ã«ã¯ãªã‹ã£ãŸ
 	if(i >= MAX_RANKER) {
-		// Å‰ºˆÊ‚æ‚è‚“¾“_‚È‚çƒ‰ƒ“ƒNƒCƒ“
+		// æœ€ä¸‹ä½ã‚ˆã‚Šé«˜å¾—ç‚¹ãªã‚‰ãƒ©ãƒ³ã‚¯ã‚¤ãƒ³
 		if(ranking_data[ranking_id][MAX_RANKER-1].point < sd->ranking_point[ranking_id])
-			rank = MAX_RANKER;	// MAX_RANKER+1 ˆÊ‚Æ‚µ‚Ä‚¨‚­
+			rank = MAX_RANKER;	// MAX_RANKER+1 ä½ã¨ã—ã¦ãŠã
 	}
 
 	if(rank >= 0) {
@@ -261,7 +240,7 @@ int ranking_update(struct map_session_data * sd,int ranking_id)
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒOƒf[ƒ^óM
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°ãƒ‡ãƒ¼ã‚¿å—ä¿¡
  *------------------------------------------
  */
 int ranking_set_data(int ranking_id,struct Ranking_Data *rd)
@@ -277,7 +256,7 @@ int ranking_set_data(int ranking_id,struct Ranking_Data *rd)
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒO‚Ì•\¦iclif.c—pj
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°ã®è¡¨ç¤ºï¼ˆclif.cç”¨ï¼‰
  *------------------------------------------
  */
 int ranking_clif_display(struct map_session_data * sd,int ranking_id)
@@ -288,7 +267,7 @@ int ranking_clif_display(struct map_session_data * sd,int ranking_id)
 
 	nullpo_retr(0, sd);
 
-	// ƒ‰ƒ“ƒLƒ“ƒO‘ÎÛ‚ª‚È‚¢
+	// ãƒ©ãƒ³ã‚­ãƒ³ã‚°å¯¾è±¡ãŒãªã„
 	if(ranking_id < 0 || MAX_RANKING <= ranking_id)
 		return 0;
 	for(i=0; i<10 && i<MAX_RANKER; i++) {
@@ -302,7 +281,7 @@ int ranking_clif_display(struct map_session_data * sd,int ranking_id)
 		else
 			point[i] = ranking_data[ranking_id][i].point;
 	}
-	for( ; i<10; i++) {	// MAX_RANKER‚ª10‚æ‚è¬‚³‚¢ê‡
+	for( ; i<10; i++) {	// MAX_RANKERãŒ10ã‚ˆã‚Šå°ã•ã„å ´åˆ
 		charname[i] = "-";
 		point[i] = 0;
 	}
@@ -332,7 +311,7 @@ int ranking_clif_display(struct map_session_data * sd,int ranking_id)
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒO‚Ì’¼Ú•\¦
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°ã®ç›´æ¥è¡¨ç¤º
  *------------------------------------------
  */
 int ranking_display(struct map_session_data * sd,int ranking_id,int begin,int end)
@@ -341,7 +320,7 @@ int ranking_display(struct map_session_data * sd,int ranking_id,int begin,int en
 
 	nullpo_retr(0, sd);
 
-	// ƒ‰ƒ“ƒLƒ“ƒO‘ÎÛ‚ª‚È‚¢
+	// ãƒ©ãƒ³ã‚­ãƒ³ã‚°å¯¾è±¡ãŒãªã„
 	if(ranking_id < 0 || MAX_RANKING <= ranking_id)
 		return 0;
 
@@ -364,14 +343,14 @@ int ranking_display(struct map_session_data * sd,int ranking_id,int begin,int en
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒOƒ|ƒCƒ“ƒg‚Ì•\¦
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°ãƒã‚¤ãƒ³ãƒˆã®è¡¨ç¤º
  *------------------------------------------
  */
 int ranking_display_point(struct map_session_data * sd,int ranking_id)
 {
 	nullpo_retr(0, sd);
 
-	// ƒ‰ƒ“ƒLƒ“ƒO‘ÎÛ‚ª‚È‚¢
+	// ãƒ©ãƒ³ã‚­ãƒ³ã‚°å¯¾è±¡ãŒãªã„
 	if(ranking_id < 0 || MAX_RANKING <= ranking_id)
 		return 0;
 
@@ -381,7 +360,7 @@ int ranking_display_point(struct map_session_data * sd,int ranking_id)
 }
 
 /*==========================================
- * ‰Šú‰»
+ * åˆæœŸåŒ–
  *------------------------------------------
  */
 int do_init_ranking(void)

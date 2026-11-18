@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#define _INT_STATUS_C_
+ï»¿#define _INT_STATUS_C_
 
 #include <stdio.h>
 
@@ -29,7 +8,7 @@
 
 #include "int_status.h"
 
-// ƒ_ƒ~[ŠÖ”ŒQ
+// ãƒ€ãƒŸãƒ¼é–¢æ•°ç¾¤
 #ifdef NO_SCDATA_SAVING
 
 bool status_dummy_init(void) { return true; }
@@ -47,7 +26,7 @@ int mapif_load_scdata(int fd,int account_id,int char_id)
 	struct scdata *sc = statusdb_load(char_id);
 
 	if(sc) {
-		if(sc->account_id <= 0) {	// ƒAƒJƒEƒ“ƒgID‚ª‚È‚¢‚Ì‚Í¢‚é‚Ì‚Å•âŠ®
+		if(sc->account_id <= 0) {	// ã‚¢ã‚«ã‚¦ãƒ³ãƒˆIDãŒãªã„ã®ã¯å›°ã‚‹ã®ã§è£œå®Œ
 			sc->account_id = account_id;
 		}
 		else if(sc->account_id != account_id) {
@@ -81,7 +60,7 @@ int mapif_load_scdata(int fd,int account_id,int char_id)
 static int mapif_save_scdata_ack(int fd,int account_id,int flag)
 {
 	/*
-	// ¡‚Ì‚Æ‚±‚ëg‚¢“¹‚ª‚È‚¢‚Ì‚ÅƒRƒƒ“ƒgƒAƒEƒg
+	// ä»Šã®ã¨ã“ã‚ä½¿ã„é“ãŒãªã„ã®ã§ã‚³ãƒ¡ãƒ³ãƒˆã‚¢ã‚¦ãƒˆ
 	WFIFOW(fd,0)=0x3879;
 	WFIFOL(fd,2)=account_id;
 	WFIFOB(fd,6)=flag;
@@ -91,16 +70,16 @@ static int mapif_save_scdata_ack(int fd,int account_id,int flag)
 }
 
 //-------------------------------------------------------------------
-// map server‚©‚ç‚Ì’ÊM
+// map serverã‹ã‚‰ã®é€šä¿¡
 
-// ƒXƒe[ƒ^ƒXˆÙíƒf[ƒ^—v‹óM
+// ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ç•°å¸¸ãƒ‡ãƒ¼ã‚¿è¦æ±‚å—ä¿¡
 int mapif_parse_LoadStatusChange(int fd)
 {
 	mapif_load_scdata(fd,RFIFOL(fd,2),RFIFOL(fd,6));
 	return 0;
 }
 
-// ƒXƒe[ƒ^ƒXˆÙíƒf[ƒ^•Û‘¶
+// ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ç•°å¸¸ãƒ‡ãƒ¼ã‚¿ä¿å­˜
 int mapif_parse_SaveStatusChange(int fd)
 {
 	struct scdata sc;
@@ -127,11 +106,11 @@ int mapif_parse_SaveStatusChange(int fd)
 }
 
 //---------------------------------------------------------
-// map server ‚©‚ç‚Ì’ÊM
-// E‚PƒpƒPƒbƒg‚Ì‚İ‰ğÍ‚·‚é‚±‚Æ
-// EƒpƒPƒbƒg’·ƒf[ƒ^‚Íinter.c‚ÉƒZƒbƒg‚µ‚Ä‚¨‚­‚±‚Æ
-// EƒpƒPƒbƒg’·ƒ`ƒFƒbƒN‚âARFIFOSKIP‚ÍŒÄ‚Ño‚µŒ³‚Ås‚í‚ê‚é‚Ì‚Ås‚Á‚Ä‚Í‚È‚ç‚È‚¢
-// EƒGƒ‰[‚È‚ç0(false)A‚»‚¤‚Å‚È‚¢‚È‚ç1(true)‚ğ‚©‚¦‚³‚È‚¯‚ê‚Î‚È‚ç‚È‚¢
+// map server ã‹ã‚‰ã®é€šä¿¡
+// ãƒ»ï¼‘ãƒ‘ã‚±ãƒƒãƒˆã®ã¿è§£æã™ã‚‹ã“ã¨
+// ãƒ»ãƒ‘ã‚±ãƒƒãƒˆé•·ãƒ‡ãƒ¼ã‚¿ã¯inter.cã«ã‚»ãƒƒãƒˆã—ã¦ãŠãã“ã¨
+// ãƒ»ãƒ‘ã‚±ãƒƒãƒˆé•·ãƒã‚§ãƒƒã‚¯ã‚„ã€RFIFOSKIPã¯å‘¼ã³å‡ºã—å…ƒã§è¡Œã‚ã‚Œã‚‹ã®ã§è¡Œã£ã¦ã¯ãªã‚‰ãªã„
+// ãƒ»ã‚¨ãƒ©ãƒ¼ãªã‚‰0(false)ã€ãã†ã§ãªã„ãªã‚‰1(true)ã‚’ã‹ãˆã•ãªã‘ã‚Œã°ãªã‚‰ãªã„
 int inter_status_parse_frommap(int fd)
 {
 #ifndef NO_SCDATA_SAVING

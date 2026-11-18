@@ -1,27 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-// $Id: path.c,v 1.6 2003/06/29 05:52:56 lemit Exp $
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -39,7 +16,7 @@ struct tmp_path {
 
 #define calc_index(x,y) (((x)+(y)*MAX_WALKPATH) & (MAX_WALKPATH*MAX_WALKPATH-1))
 
-// Œü‚«ŒvZ—p
+// å‘ãè¨ˆç®—ç”¨
 const int dirx[8] = { 0,-1,-1,-1, 0, 1, 1, 1 };
 const int diry[8] = { 1, 1, 0,-1,-1,-1, 0, 1 };
 
@@ -51,7 +28,7 @@ static const unsigned char walk_choice[3][3] =
 };
 
 /*==========================================
- * Œo˜H’Tõ•â•heap push
+ * çµŒè·¯æ¢ç´¢è£œåŠ©heap push
  *------------------------------------------
  */
 static void push_heap_path(int *heap,struct tmp_path *tp,int idx)
@@ -68,8 +45,8 @@ static void push_heap_path(int *heap,struct tmp_path *tp,int idx)
 }
 
 /*==========================================
- * Œo˜H’Tõ•â•heap update
- * cost‚ªŒ¸‚Á‚½‚Ì‚Åª‚Ì•û‚ÖˆÚ“®
+ * çµŒè·¯æ¢ç´¢è£œåŠ©heap update
+ * costãŒæ¸›ã£ãŸã®ã§æ ¹ã®æ–¹ã¸ç§»å‹•
  *------------------------------------------
  */
 static void update_heap_path(int *heap,struct tmp_path *tp,int idx)
@@ -92,7 +69,7 @@ static void update_heap_path(int *heap,struct tmp_path *tp,int idx)
 }
 
 /*==========================================
- * Œo˜H’Tõ•â•heap pop
+ * çµŒè·¯æ¢ç´¢è£œåŠ©heap pop
  *------------------------------------------
  */
 static int pop_heap_path(int *heap,struct tmp_path *tp)
@@ -128,7 +105,7 @@ static int pop_heap_path(int *heap,struct tmp_path *tp)
 }
 
 /*==========================================
- * Œ»İ‚Ì“_‚ÌcostŒvZ
+ * ç¾åœ¨ã®ç‚¹ã®costè¨ˆç®—
  *------------------------------------------
  */
 static int calc_cost(struct tmp_path *p,int x1,int y1)
@@ -140,7 +117,7 @@ static int calc_cost(struct tmp_path *p,int x1,int y1)
 }
 
 /*==========================================
- * •K—v‚È‚çpath‚ğ’Ç‰Á/C³‚·‚é
+ * å¿…è¦ãªã‚‰pathã‚’è¿½åŠ /ä¿®æ­£ã™ã‚‹
  *------------------------------------------
  */
 static int add_path(int *heap,struct tmp_path *tp,int x,int y,int dist,int before,int cost)
@@ -178,14 +155,14 @@ static int add_path(int *heap,struct tmp_path *tp,int x,int y,int dist,int befor
 }
 
 /*==========================================
- * (x,y)‚ªˆÚ“®•s‰Â”\’n‘Ñ‚©‚Ç‚¤‚©
- * flag 0x10000 ‰“‹——£UŒ‚”»’è
+ * (x,y)ãŒç§»å‹•ä¸å¯èƒ½åœ°å¸¯ã‹ã©ã†ã‹
+ * flag 0x10000 é è·é›¢æ”»æ’ƒåˆ¤å®š
  *------------------------------------------
  */
 #define can_place(m,x,y,flag) ( map_getcellp(m,x,y,CELL_CHKPASS) || ((flag & 0x10000) && map_getcellp(m,x,y,CELL_CHKGROUND)) )
 
 /*==========================================
- * (x0,y0)‚©‚ç(x1,y1)‚Ö1•à‚ÅˆÚ“®‰Â”\‚©ŒvZ
+ * (x0,y0)ã‹ã‚‰(x1,y1)ã¸1æ­©ã§ç§»å‹•å¯èƒ½ã‹è¨ˆç®—
  *------------------------------------------
  */
 static int can_move(struct map_data *m,int x0,int y0,int x1,int y1,int flag)
@@ -205,9 +182,9 @@ static int can_move(struct map_data *m,int x0,int y0,int x1,int y1,int flag)
 }
 
 /*==========================================
- * (x0,y0)‚©‚ç(dx,dy)•ûŒü‚ÖcountƒZƒ‹•ª
- * ‚«”ò‚Î‚µ‚½‚ ‚Æ‚ÌÀ•W‚ğæ“¾
- *	flag = 0: •Ç•â³‚ ‚èA1: •Ç•â³‚È‚µ
+ * (x0,y0)ã‹ã‚‰(dx,dy)æ–¹å‘ã¸countã‚»ãƒ«åˆ†
+ * å¹ãé£›ã°ã—ãŸã‚ã¨ã®åº§æ¨™ã‚’å–å¾—
+ *	flag = 0: å£è£œæ­£ã‚ã‚Šã€1: å£è£œæ­£ãªã—
  *------------------------------------------
  */
 int path_blownpos(int m,int x0,int y0,int dx,int dy,int count,int flag)
@@ -250,7 +227,7 @@ int path_blownpos(int m,int x0,int y0,int dx,int dy,int count,int flag)
 }
 
 /*==========================================
- * ‰“‹——£UŒ‚‚ª‰Â”\‚©‚Ç‚¤‚©‚ğ•Ô‚·
+ * é è·é›¢æ”»æ’ƒãŒå¯èƒ½ã‹ã©ã†ã‹ã‚’è¿”ã™
  *------------------------------------------
  */
 #define swap(x,y) { int t; t = x; x = y; y = t; }
@@ -320,7 +297,7 @@ int path_search_long_real(struct shootpath_data *spd,int m,int x0,int y0,int x1,
 }
 
 /*==========================================
- * path’Tõ (x0,y0)->(x1,y1)
+ * pathæ¢ç´¢ (x0,y0)->(x1,y1)
  *------------------------------------------
  */
 int path_search_real(struct walkpath_data *wpd,int m,int x0,int y0,int x1,int y1,int easy,cell_t flag)
@@ -332,14 +309,14 @@ int path_search_real(struct walkpath_data *wpd,int m,int x0,int y0,int x1,int y1
 	if(!map[m].gat)
 		return -1;
 
-	// path_search2() ‚Ìê‡map_getcellp() ‚Ì•Ô‚è’l‚Íí‚É0
+	// path_search2() ã®å ´åˆmap_getcellp() ã®è¿”ã‚Šå€¤ã¯å¸¸ã«0
 	if(x0 < 0 || x0 >= md->xs || y0 < 0 || y0 >= md->ys || map_getcellp(md,x0,y0,flag))
 		return -1;
 	if(x1 < 0 || x1 >= md->xs || y1 < 0 || y1 >= md->ys || map_getcellp(md,x1,y1,flag))
 		return -1;
 
 	// easy
-	// ‚±‚Ì“à•”‚Å‚ÍA0 <= x+dx < sx, 0 <= y+dy < sy ‚Í•ÛØ‚³‚ê‚Ä‚¢‚é
+	// ã“ã®å†…éƒ¨ã§ã¯ã€0 <= x+dx < sx, 0 <= y+dy < sy ã¯ä¿è¨¼ã•ã‚Œã¦ã„ã‚‹
 	dx = (x1 - x0 < 0) ? -1 : 1;
 	dy = (y1 - y0 < 0) ? -1 : 1;
 
@@ -399,7 +376,7 @@ int path_search_real(struct walkpath_data *wpd,int m,int x0,int y0,int x1,int y1
 		heap[0]      = 0;
 		push_heap_path(heap,tp,calc_index(x0,y0));
 
-		// ‚ ‚ç‚©‚¶‚ß‚PŒ¸Z‚µ‚Ä‚¨‚­
+		// ã‚ã‚‰ã‹ã˜ã‚ï¼‘æ¸›ç®—ã—ã¦ãŠã
 		xs = md->xs - 1;
 		ys = md->ys - 1;
 
@@ -420,10 +397,10 @@ int path_search_real(struct walkpath_data *wpd,int m,int x0,int y0,int x1,int y1
 			dist = tp[rp].dist + 10;
 			cost = tp[rp].cost;
 
-			// dc[0] : y++ ‚Ì‚ÌƒRƒXƒg‘•ª
-			// dc[1] : x-- ‚Ì‚ÌƒRƒXƒg‘•ª
-			// dc[2] : y-- ‚Ì‚ÌƒRƒXƒg‘•ª
-			// dc[3] : x++ ‚Ì‚ÌƒRƒXƒg‘•ª
+			// dc[0] : y++ ã®æ™‚ã®ã‚³ã‚¹ãƒˆå¢—åˆ†
+			// dc[1] : x-- ã®æ™‚ã®ã‚³ã‚¹ãƒˆå¢—åˆ†
+			// dc[2] : y-- ã®æ™‚ã®ã‚³ã‚¹ãƒˆå¢—åˆ†
+			// dc[3] : x++ ã®æ™‚ã®ã‚³ã‚¹ãƒˆå¢—åˆ†
 
 			if(y < ys && !map_getcellp(md,x  ,y+1,flag)) {
 				f |= 1;
@@ -510,7 +487,7 @@ int path_check_dir(int s_dir,int t_dir)
 }
 
 /*==========================================
- * ”Ş‰ä‚Ì•ûŒü‚ğŒvZ
+ * å½¼æˆ‘ã®æ–¹å‘ã‚’è¨ˆç®—
  *------------------------------------------
  */
 int path_calc_dir(struct block_list *src,int x,int y)
@@ -524,39 +501,39 @@ int path_calc_dir(struct block_list *src,int x,int y)
 	dy = y - src->y;
 
 	if(dx == 0 && dy == 0) {
-		// ”Ş‰ä‚ÌêŠˆê’v
-		dir = 0;	// ã
+		// å½¼æˆ‘ã®å ´æ‰€ä¸€è‡´
+		dir = 0;	// ä¸Š
 	}
 	else if(dx >= 0 && dy >= 0) {
-		// •ûŒü“I‚É‰Eã
-		if(dx * 3 - 1 < dy)   dir = 0;	// ã
-		else if(dx > dy * 3)  dir = 6;	// ‰E
-		else                  dir = 7;	// ‰Eã
+		// æ–¹å‘çš„ã«å³ä¸Š
+		if(dx * 3 - 1 < dy)   dir = 0;	// ä¸Š
+		else if(dx > dy * 3)  dir = 6;	// å³
+		else                  dir = 7;	// å³ä¸Š
 	}
 	else if(dx >= 0 && dy <= 0) {
-		// •ûŒü“I‚É‰E‰º
-		if(dx * 3 - 1 < -dy)  dir = 4;	// ‰º
-		else if(dx > -dy * 3) dir = 6;	// ‰E
-		else                  dir = 5;	// ‰E‰º
+		// æ–¹å‘çš„ã«å³ä¸‹
+		if(dx * 3 - 1 < -dy)  dir = 4;	// ä¸‹
+		else if(dx > -dy * 3) dir = 6;	// å³
+		else                  dir = 5;	// å³ä¸‹
 	}
 	else if(dx <= 0 && dy <= 0) {
-		// •ûŒü“I‚É¶‰º
-		if(dx * 3 + 1 > dy)   dir = 4;	// ‰º
-		else if(dx < dy * 3)  dir = 2;	// ¶
-		else                  dir = 3;	// ¶‰º
+		// æ–¹å‘çš„ã«å·¦ä¸‹
+		if(dx * 3 + 1 > dy)   dir = 4;	// ä¸‹
+		else if(dx < dy * 3)  dir = 2;	// å·¦
+		else                  dir = 3;	// å·¦ä¸‹
 	}
 	else {
-		// •ûŒü“I‚É¶ã
-		if(-dx * 3 - 1 < dy)  dir = 0;	// ã
-		else if(-dx > dy * 3) dir = 2;	// ¶
-		else                  dir = 1;	// ¶ã
+		// æ–¹å‘çš„ã«å·¦ä¸Š
+		if(-dx * 3 - 1 < dy)  dir = 0;	// ä¸Š
+		else if(-dx > dy * 3) dir = 2;	// å·¦
+		else                  dir = 1;	// å·¦ä¸Š
 	}
 	return dir;
 }
 
 /*==========================================
- * “ñ“_ŠÔ‚Ì‹——£‚ğ•Ô‚·
- * –ß‚è‚Í®”‚Å0ˆÈã
+ * äºŒç‚¹é–“ã®è·é›¢ã‚’è¿”ã™
+ * æˆ»ã‚Šã¯æ•´æ•°ã§0ä»¥ä¸Š
  *------------------------------------------
  */
 int path_distance(int x0,int y0,int x1,int y1)
