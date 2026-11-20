@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -42,7 +21,7 @@ static char char_server_charset[32] = "";
 static int  char_server_keepalive   = 0;
 
 /*==========================================
- * İ’èƒtƒ@ƒCƒ‹“Ç
+ * è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«èª­è¾¼
  *------------------------------------------
  */
 int chardb_sql_config_read_sub(const char* w1,const char* w2)
@@ -68,7 +47,7 @@ int chardb_sql_config_read_sub(const char* w1,const char* w2)
 }
 
 /*==========================================
- * ƒAƒCƒeƒ€‚Ìƒ[ƒh‚Ì‹¤’ÊŠÖ”
+ * ã‚¢ã‚¤ãƒ†ãƒ ã®ãƒ­ãƒ¼ãƒ‰ã®å…±é€šé–¢æ•°
  *------------------------------------------
  */
 int chardb_sql_loaditem(struct item *item, int max, int id, int tableswitch)
@@ -145,7 +124,7 @@ int chardb_sql_loaditem(struct item *item, int max, int id, int tableswitch)
 }
 
 /*==========================================
- * ƒAƒCƒeƒ€‚ÌƒZ[ƒu‚Ì‹¤’ÊŠÖ”
+ * ã‚¢ã‚¤ãƒ†ãƒ ã®ã‚»ãƒ¼ãƒ–ã®å…±é€šé–¢æ•°
  *------------------------------------------
  */
 bool chardb_sql_saveitem(struct item *item, int max, int id, int tableswitch)
@@ -227,7 +206,7 @@ bool chardb_sql_saveitem(struct item *item, int max, int id, int tableswitch)
 }
 
 /*==========================================
- * “¯Šú
+ * åŒæœŸ
  *------------------------------------------
  */
 void chardb_sql_sync(void)
@@ -236,7 +215,7 @@ void chardb_sql_sync(void)
 }
 
 /*==========================================
- * —F’BƒŠƒXƒg‚Ìƒ`ƒFƒbƒN‚Æ’ù³
+ * å‹é”ãƒªã‚¹ãƒˆã®ãƒã‚§ãƒƒã‚¯ã¨è¨‚æ­£
  *------------------------------------------
  */
 static bool chardb_validate_friend(struct mmo_chardata *p)
@@ -262,9 +241,9 @@ static bool chardb_validate_friend(struct mmo_chardata *p)
 			sqldbs_free_result(&mysql_handle);
 
 			if(rows <= 0) {
-				// ‘Šè‚É‘¶İ‚µ‚È‚¢‚Ì‚ÅA—F’BƒŠƒXƒg‚©‚çíœ‚·‚é
+				// ç›¸æ‰‹ã«å­˜åœ¨ã—ãªã„ã®ã§ã€å‹é”ãƒªã‚¹ãƒˆã‹ã‚‰å‰Šé™¤ã™ã‚‹
 				if( sqldbs_query(&mysql_handle,	"DELETE FROM `" FRIEND_TABLE "` WHERE `char_id`='%d' AND `friend_id`='%d'", p->st.char_id, p->st.friend_data[i].char_id) == false ) {
-					// ‘±s
+					// ç¶šè¡Œ
 					continue;
 				}
 				p->st.friend_num--;
@@ -286,7 +265,7 @@ static bool chardb_validate_friend(struct mmo_chardata *p)
 }
 
 /*==========================================
- * ƒLƒƒƒ‰ID‚©‚çƒLƒƒƒ‰ƒf[ƒ^‚Ìƒ[ƒh
+ * ã‚­ãƒ£ãƒ©IDã‹ã‚‰ã‚­ãƒ£ãƒ©ãƒ‡ãƒ¼ã‚¿ã®ãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 const struct mmo_chardata* chardb_sql_load(int char_id)
@@ -298,7 +277,7 @@ const struct mmo_chardata* chardb_sql_load(int char_id)
 
 	p = (struct mmo_chardata*)numdb_search(char_db_, char_id);
 	if (p && p->st.char_id == char_id) {
-		// Šù‚ÉƒLƒƒƒbƒVƒ…‚ª‘¶İ‚·‚é
+		// æ—¢ã«ã‚­ãƒ£ãƒƒã‚·ãƒ¥ãŒå­˜åœ¨ã™ã‚‹
 		return p;
 	}
 
@@ -319,7 +298,7 @@ const struct mmo_chardata* chardb_sql_load(int char_id)
 
 	sql_row = sqldbs_fetch(&mysql_handle);
 	if(sql_row == NULL) {
-		// Œ©‚Â‚©‚ç‚È‚­‚Ä‚à³í
+		// è¦‹ã¤ã‹ã‚‰ãªãã¦ã‚‚æ­£å¸¸
 		sqldbs_free_result(&mysql_handle);
 		return NULL;
 	}
@@ -525,7 +504,7 @@ const struct mmo_chardata* chardb_sql_load(int char_id)
 }
 
 /*==========================================
- * ƒLƒƒƒ‰•Ï”‚ÌƒZ[ƒu
+ * ã‚­ãƒ£ãƒ©å¤‰æ•°ã®ã‚»ãƒ¼ãƒ–
  *------------------------------------------
  */
 bool chardb_sql_save_reg(int account_id, int char_id, int num, struct global_reg *reg)
@@ -611,7 +590,7 @@ bool chardb_sql_save_reg(int account_id, int char_id, int num, struct global_reg
 	}
 
 /*==========================================
- * ƒLƒƒƒ‰ƒf[ƒ^‚ÌƒZ[ƒu
+ * ã‚­ãƒ£ãƒ©ãƒ‡ãƒ¼ã‚¿ã®ã‚»ãƒ¼ãƒ–
  *------------------------------------------
  */
 bool chardb_sql_save(struct mmo_charstatus *st2)
@@ -859,7 +838,7 @@ bool chardb_sql_save(struct mmo_charstatus *st2)
 }
 
 /*==========================================
- * ƒLƒƒƒ‰ì¬
+ * ã‚­ãƒ£ãƒ©ä½œæˆ
  *------------------------------------------
  */
 const struct mmo_chardata* chardb_sql_make(int account_id, const unsigned char *name, short str, short agi, short vit, short int_, short dex, short luk, short hair_color, short hair, short job, char sex, unsigned char slot, int *flag)
@@ -870,7 +849,7 @@ const struct mmo_chardata* chardb_sql_make(int account_id, const unsigned char *
 	struct sqldbs_stmt *st;
 	bool result = false;
 
-	// “¯ˆêƒAƒJƒEƒ“ƒgIDA“¯ˆêƒLƒƒƒ‰ƒXƒƒbƒgA“¯–¼ƒ`ƒFƒbƒN
+	// åŒä¸€ã‚¢ã‚«ã‚¦ãƒ³ãƒˆIDã€åŒä¸€ã‚­ãƒ£ãƒ©ã‚¹ãƒ­ãƒƒãƒˆã€åŒåãƒã‚§ãƒƒã‚¯
 	if( sqldbs_query(&mysql_handle,
 			"SELECT 1 FROM `" CHAR_TABLE "` WHERE `account_id` = '%d' AND `char_num` = '%d' "
 			"UNION ALL "
@@ -882,7 +861,7 @@ const struct mmo_chardata* chardb_sql_make(int account_id, const unsigned char *
 	while((sql_row = sqldbs_fetch(&mysql_handle)) != NULL) {
 		int num = atoi(sql_row[0]);
 		if(num == 2) {
-			// “¯–¼d•¡
+			// åŒåé‡è¤‡
 			*flag = 0x00;
 		}
 		return NULL;
@@ -919,7 +898,7 @@ const struct mmo_chardata* chardb_sql_make(int account_id, const unsigned char *
 
 		memcpy(&start_point, &human_start_point, sizeof(human_start_point));
 
-		// ƒhƒ‰ƒ€‘°—p‰Šúİ’è
+		// ãƒ‰ãƒ©ãƒ æ—ç”¨åˆæœŸè¨­å®š
 		if(job == PC_CLASS_SUM) {
 			start_weapon       = doram_start_weapon;
 			start_armor        = doram_start_armor;
@@ -966,10 +945,10 @@ const struct mmo_chardata* chardb_sql_make(int account_id, const unsigned char *
 		if( sqldbs_stmt_execute(st) == false )
 			break;
 
-		// ƒLƒƒƒ‰ID‚Ìæ“¾
+		// ã‚­ãƒ£ãƒ©IDã®å–å¾—
 		char_id = (int)sqldbs_insert_id(&mysql_handle);
 
-		// ƒfƒtƒHƒ‹ƒg‘•”õ(•Ší)
+		// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆè£…å‚™(æ­¦å™¨)
 		if(start_weapon > 0)
 		{
 			if( sqldbs_query(&mysql_handle,
@@ -980,7 +959,7 @@ const struct mmo_chardata* chardb_sql_make(int account_id, const unsigned char *
 				break;
 		}
 
-		// ƒfƒtƒHƒ‹ƒg‘•”õ(–h‹ï)
+		// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆè£…å‚™(é˜²å…·)
 		if(start_armor > 0)
 		{
 			if( sqldbs_query(&mysql_handle,
@@ -1003,7 +982,7 @@ const struct mmo_chardata* chardb_sql_make(int account_id, const unsigned char *
 }
 
 /*==========================================
- * ƒAƒJƒEƒ“ƒgID‚Ì‘SƒLƒƒƒ‰ƒf[ƒ^‚ğƒ[ƒh
+ * ã‚¢ã‚«ã‚¦ãƒ³ãƒˆIDã®å…¨ã‚­ãƒ£ãƒ©ãƒ‡ãƒ¼ã‚¿ã‚’ãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 int chardb_sql_load_all(struct char_session_data* sd, int account_id)
@@ -1045,7 +1024,7 @@ int chardb_sql_load_all(struct char_session_data* sd, int account_id)
 }
 
 /*==========================================
- * ƒLƒƒƒ‰íœ
+ * ã‚­ãƒ£ãƒ©å‰Šé™¤
  *------------------------------------------
  */
 bool chardb_sql_delete_sub(int char_id)
@@ -1123,7 +1102,7 @@ bool chardb_sql_delete_sub(int char_id)
 }
 
 /*==========================================
- * ƒLƒƒƒ‰–¼‚©‚çƒLƒƒƒ‰ƒf[ƒ^‚ğæ“¾
+ * ã‚­ãƒ£ãƒ©åã‹ã‚‰ã‚­ãƒ£ãƒ©ãƒ‡ãƒ¼ã‚¿ã‚’å–å¾—
  *------------------------------------------
  */
 const struct mmo_chardata* chardb_sql_nick2chardata(const char *char_name)
@@ -1145,7 +1124,7 @@ const struct mmo_chardata* chardb_sql_nick2chardata(const char *char_name)
 }
 
 /*==========================================
- * ƒIƒ“ƒ‰ƒCƒ“
+ * ã‚ªãƒ³ãƒ©ã‚¤ãƒ³
  *------------------------------------------
  */
 bool chardb_sql_set_online(int char_id, bool is_online)
@@ -1162,7 +1141,7 @@ bool chardb_sql_set_online(int char_id, bool is_online)
 }
 
 /*==========================================
- * ƒ‰ƒ“ƒLƒ“ƒO‚Ì\’z
+ * ãƒ©ãƒ³ã‚­ãƒ³ã‚°ã®æ§‹ç¯‰
  *------------------------------------------
  */
 bool chardb_sql_build_ranking(void)
@@ -1208,7 +1187,7 @@ bool chardb_sql_build_ranking(void)
 }
 
 /*==========================================
- * I—¹
+ * çµ‚äº†
  *------------------------------------------
  */
 static int char_db_final(void *key, void *data, va_list ap)
@@ -1229,7 +1208,7 @@ void chardb_sql_final(void)
 }
 
 /*==========================================
- * ‰Šú‰»
+ * åˆæœŸåŒ–
  *------------------------------------------
  */
 bool chardb_sql_init(void)

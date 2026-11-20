@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef NO_SCDATA_SAVING
+Ôªø#ifndef NO_SCDATA_SAVING
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,7 +15,7 @@
 static struct dbt *scdata_db = NULL;
 
 /*==========================================
- * ê›íËÉtÉ@ÉCÉãÇÃì«Ç›çûÇ›
+ * Ë®≠ÂÆö„Éï„Ç°„Ç§„É´„ÅÆË™≠„ÅøËæº„Åø
  *------------------------------------------
  */
 int statusdb_sql_config_read_sub(const char *w1, const char *w2)
@@ -45,7 +24,7 @@ int statusdb_sql_config_read_sub(const char *w1, const char *w2)
 }
 
 /*==========================================
- * ìØä˙
+ * ÂêåÊúü
  *------------------------------------------
  */
 int statusdb_sql_sync(void)
@@ -55,7 +34,7 @@ int statusdb_sql_sync(void)
 }
 
 /*==========================================
- * ÉXÉeÅ[É^ÉXÉfÅ[É^çÌèú
+ * „Çπ„ÉÜ„Éº„Çø„Çπ„Éá„Éº„ÇøÂâäÈô§
  *------------------------------------------
  */
 bool statusdb_sql_delete(int char_id)
@@ -75,8 +54,8 @@ bool statusdb_sql_delete(int char_id)
 }
 
 /*==========================================
- * ÉLÉÉÉâIDÇ©ÇÁÉXÉeÅ[É^ÉXÉfÅ[É^ÇÉçÅ[Éh
- * ïââ◊åyå∏ÇóDêÊÇµÇƒconstÇïtÇØÇ»Ç¢
+ * „Ç≠„É£„É©ID„Åã„Çâ„Çπ„ÉÜ„Éº„Çø„Çπ„Éá„Éº„Çø„Çí„É≠„Éº„Éâ
+ * Ë≤†Ëç∑ËªΩÊ∏õ„ÇíÂÑ™ÂÖà„Åó„Å¶const„Çí‰ªò„Åë„Å™„ÅÑ
  *------------------------------------------
  */
 struct scdata *statusdb_sql_load(int char_id)
@@ -85,7 +64,7 @@ struct scdata *statusdb_sql_load(int char_id)
 	struct scdata *sc = (struct scdata *)numdb_search(scdata_db, char_id);
 
 	if(sc && sc->char_id == char_id) {
-		// ä˘Ç…ÉLÉÉÉbÉVÉÖÇ™ë∂ç›Ç∑ÇÈ
+		// Êó¢„Å´„Ç≠„É£„ÉÉ„Ç∑„É•„ÅåÂ≠òÂú®„Åô„Çã
 		return sc;
 	}
 	if(sc == NULL) {
@@ -122,7 +101,7 @@ struct scdata *statusdb_sql_load(int char_id)
 		}
 		sc->count = (i < MAX_STATUSCHANGE)? i: MAX_STATUSCHANGE;
 	} else {
-		// å©Ç¬Ç©ÇÁÇ»Ç≠ÇƒÇ‡ê≥èÌ
+		// Ë¶ã„Å§„Åã„Çâ„Å™„Åè„Å¶„ÇÇÊ≠£Â∏∏
 		sc = NULL;
 	}
 	sqldbs_free_result(&mysql_handle);
@@ -131,7 +110,7 @@ struct scdata *statusdb_sql_load(int char_id)
 }
 
 /*==========================================
- * ÉZÅ[Éu
+ * „Çª„Éº„Éñ
  *------------------------------------------
  */
 bool statusdb_sql_save(struct scdata *sc2)
@@ -144,7 +123,7 @@ bool statusdb_sql_save(struct scdata *sc2)
 	sc1 = statusdb_sql_load(sc2->char_id);
 
 	if(sc1 && sc1->count <= 0 && sc2->count <= 0) {
-		// ÉfÅ[É^Ç™ã§Ç…0å¬Ç»ÇÃÇ≈âΩÇ‡ÇµÇ»Ç¢
+		// „Éá„Éº„Çø„ÅåÂÖ±„Å´0ÂÄã„Å™„ÅÆ„Åß‰Ωï„ÇÇ„Åó„Å™„ÅÑ
 		return true;
 	}
 
@@ -156,7 +135,7 @@ bool statusdb_sql_save(struct scdata *sc2)
 		int i;
 
 		if(sc1 == NULL || sc1->count > 0) {
-			// ÉfÅ[É^ÉTÅ[Éoë§Ç…ÉfÅ[É^Ç™Ç†ÇÈÇ∆Ç´ÇæÇØçÌèúÉNÉGÉäÇî≠çs
+			// „Éá„Éº„Çø„Çµ„Éº„ÉêÂÅ¥„Å´„Éá„Éº„Çø„Åå„ÅÇ„Çã„Å®„Åç„Å†„ÅëÂâäÈô§„ÇØ„Ç®„É™„ÇíÁô∫Ë°å
 			if( sqldbs_query(&mysql_handle, "DELETE FROM `" SCDATA_TABLE "` WHERE `char_id`='%d'", sc2->char_id) == false )
 				break;
 		}
@@ -188,7 +167,7 @@ bool statusdb_sql_save(struct scdata *sc2)
 }
 
 /*==========================================
- * èIóπ
+ * ÁµÇ‰∫Ü
  *------------------------------------------
  */
 static int statusdb_sql_final_sub(void *key, void *data, va_list ap)
@@ -207,7 +186,7 @@ void statusdb_sql_final(void)
 }
 
 /*==========================================
- * èâä˙âª
+ * ÂàùÊúüÂåñ
  *------------------------------------------
  */
 bool statusdb_sql_init(void)

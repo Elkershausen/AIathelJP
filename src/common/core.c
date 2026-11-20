@@ -1,28 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-// $Id: core.c,v 1.1.1.1 2004/06/24 19:29:20 running_pinata Exp $
-// original : core.c 2003/02/26 18:03:12 Rev 1.7
-
-#include <time.h>
+ï»¿#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -188,7 +164,7 @@ static LONG WINAPI core_ExceptionRoutine(struct _EXCEPTION_POINTERS *e)
 			break;
 		case EXCEPTION_INVALID_DISPOSITION:
 		default:
-			// —áŠOƒnƒ“ƒhƒ‰‚Ìƒ~ƒX or ‰½‚à‚µ‚È‚¢—áŠO
+			// ä¾‹å¤–ãƒãƒ³ãƒ‰ãƒ©ã®ãƒŸã‚¹ or ä½•ã‚‚ã—ãªã„ä¾‹å¤–
 			return EXCEPTION_CONTINUE_SEARCH;
 	}
 
@@ -199,7 +175,7 @@ static LONG WINAPI core_ExceptionRoutine(struct _EXCEPTION_POINTERS *e)
 		OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL
 	);
 
-	// ƒƒO‚ªæ‚ê‚È‚©‚Á‚½‚Ì‚Å‰½‚à‚µ‚È‚¢B
+	// ãƒ­ã‚°ãŒå–ã‚Œãªã‹ã£ãŸã®ã§ä½•ã‚‚ã—ãªã„ã€‚
 	if( hFile == INVALID_HANDLE_VALUE )
 		return EXCEPTION_CONTINUE_SEARCH;
 
@@ -274,7 +250,7 @@ static LONG WINAPI core_ExceptionRoutine(struct _EXCEPTION_POINTERS *e)
 #endif
 	) {
 #ifdef _WIN64
-		// SymGetSymFromAddr64 ‚Íg—p‚·‚é‚×‚«‚¶‚á‚È‚¢‚ç‚µ‚¢cB
+		// SymGetSymFromAddr64 ã¯ä½¿ç”¨ã™ã‚‹ã¹ãã˜ã‚ƒãªã„ã‚‰ã—ã„â€¦ã€‚
 		if(SymGetSymFromAddr(hProcess, stack.AddrPC.Offset, &offset, symbol)) {
 			len = wsprintf(
 				buf, "\t0x%016I64x : %s + 0x%I64x",
@@ -371,11 +347,11 @@ int main(int argc, char **argv)
 
 	atexit(do_close);
 
-	// o—Í‚ğƒoƒbƒtƒ@–³‚µ‚É‚·‚é
+	// å‡ºåŠ›ã‚’ãƒãƒƒãƒ•ã‚¡ç„¡ã—ã«ã™ã‚‹
 	setvbuf(stdout, NULL, _IONBF, 0);
 	setvbuf(stderr, NULL, _IONBF, 0);
 
-	// ‹N“®ˆø”
+	// èµ·å‹•å¼•æ•°
 	for(i = 1; i < argc - 1; i += 2) {
 		if(strcmp(argv[i], "--stdout") == 0) {
 			if(stdout_fp == NULL) {
@@ -393,11 +369,11 @@ int main(int argc, char **argv)
 
 	output_log_header();
 
-	// WindowsƒT[ƒrƒX‚Ìˆ—‚ğÀs
+	// Windowsã‚µãƒ¼ãƒ“ã‚¹ã®å‡¦ç†ã‚’å®Ÿè¡Œ
 	if(winservice_init(argc, argv))
 		return 0;
 
-	// ƒƒCƒ“ˆ—‘±s
+	// ãƒ¡ã‚¤ãƒ³å‡¦ç†ç¶šè¡Œ
 	return main_sub(argc, argv);
 }
 
@@ -410,7 +386,7 @@ int main_sub(int argc, char **argv)
 	int next;
 
 	pid_create(argv[0]);
-	do_init_memmgr(argv[0]); // ˆê”ÔÅ‰‚ÉÀs‚·‚é•K—v‚ª‚ ‚é
+	do_init_memmgr(argv[0]); // ä¸€ç•ªæœ€åˆã«å®Ÿè¡Œã™ã‚‹å¿…è¦ãŒã‚ã‚‹
 	do_socket();
 	printf("PACKETVER: %d\n", PACKETVER);
 

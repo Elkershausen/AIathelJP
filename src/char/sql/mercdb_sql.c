@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 
 #include "mmo.h"
@@ -34,7 +13,7 @@
 static struct dbt *merc_db = NULL;
 
 /*==========================================
- * İ’èƒtƒ@ƒCƒ‹‚Ì“Ç
+ * è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã®èª­è¾¼
  *------------------------------------------
  */
 int mercdb_sql_config_read_sub(const char* w1,const char *w2)
@@ -43,7 +22,7 @@ int mercdb_sql_config_read_sub(const char* w1,const char *w2)
 }
 
 /*==========================================
- * “¯Šú
+ * åŒæœŸ
  *------------------------------------------
  */
 int mercdb_sql_sync(void)
@@ -53,7 +32,7 @@ int mercdb_sql_sync(void)
 }
 
 /*==========================================
- * —b•ºíœ
+ * å‚­å…µå‰Šé™¤
  *------------------------------------------
  */
 bool mercdb_sql_delete(int merc_id)
@@ -88,7 +67,7 @@ bool mercdb_sql_delete(int merc_id)
 }
 
 /*==========================================
- * —b•ºID‚©‚ç—b•ºƒf[ƒ^‚ğƒ[ƒh
+ * å‚­å…µIDã‹ã‚‰å‚­å…µãƒ‡ãƒ¼ã‚¿ã‚’ãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 const struct mmo_mercstatus* mercdb_sql_load(int merc_id)
@@ -143,7 +122,7 @@ const struct mmo_mercstatus* mercdb_sql_load(int merc_id)
 	}
 
 /*==========================================
- * ƒZ[ƒu
+ * ã‚»ãƒ¼ãƒ–
  *------------------------------------------
  */
 bool mercdb_sql_save(struct mmo_mercstatus *p2)
@@ -199,7 +178,7 @@ bool mercdb_sql_save(struct mmo_mercstatus *p2)
 }
 
 /*==========================================
- * —b•ºì¬
+ * å‚­å…µä½œæˆ
  *------------------------------------------
  */
 bool mercdb_sql_new(struct mmo_mercstatus *p)
@@ -229,7 +208,7 @@ bool mercdb_sql_new(struct mmo_mercstatus *p)
 }
 
 /*==========================================
- * I—¹
+ * çµ‚äº†
  *------------------------------------------
  */
 static int mercdb_sql_final_sub(void *key,void *data,va_list ap)
@@ -248,7 +227,7 @@ void mercdb_sql_final(void)
 }
 
 /*==========================================
- * ‰Šú‰»
+ * åˆæœŸåŒ–
  *------------------------------------------
  */
 bool mercdb_sql_init(void)

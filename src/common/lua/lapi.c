@@ -1,11 +1,4 @@
-/*
-** $Id: lapi.c,v 2.55.1.5 2008/07/04 18:41:18 roberto Exp $
-** Lua API
-** See Copyright Notice in lua.h
-*/
-
-
-#include <assert.h>
+﻿#include <assert.h>
 #include <math.h>
 #include <stdarg.h>
 #include <string.h>

@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+Ôªø#include <stdio.h>
 #include <stdlib.h>
 
 #include "mmo.h"
@@ -34,7 +13,7 @@
 static struct dbt *achieve_db = NULL;
 
 /*==========================================
- * ê›íËÉtÉ@ÉCÉãì«çû
+ * Ë®≠ÂÆö„Éï„Ç°„Ç§„É´Ë™≠Ëæº
  *------------------------------------------
  */
 int achievedb_sql_config_read_sub(const char *w1, const char *w2)
@@ -43,7 +22,7 @@ int achievedb_sql_config_read_sub(const char *w1, const char *w2)
 }
 
 /*==========================================
- * ìØä˙
+ * ÂêåÊúü
  *------------------------------------------
  */
 int achievedb_sql_sync(void)
@@ -53,7 +32,7 @@ int achievedb_sql_sync(void)
 }
 
 /*==========================================
- * é¿ê—ÉfÅ[É^çÌèú
+ * ÂÆüÁ∏æ„Éá„Éº„ÇøÂâäÈô§
  *------------------------------------------
  */
 bool achievedb_sql_delete(int char_id)
@@ -73,7 +52,7 @@ bool achievedb_sql_delete(int char_id)
 }
 
 /*==========================================
- * ÉLÉÉÉâIDÇ©ÇÁé¿ê—ÉfÅ[É^ÇéÊìæ
+ * „Ç≠„É£„É©ID„Åã„ÇâÂÆüÁ∏æ„Éá„Éº„Çø„ÇíÂèñÂæó
  *------------------------------------------
  */
 const struct achieve *achievedb_sql_load(int char_id)
@@ -82,7 +61,7 @@ const struct achieve *achievedb_sql_load(int char_id)
 	struct achieve *a = (struct achieve *)numdb_search(achieve_db, char_id);
 
 	if(a && a->char_id == char_id) {
-		// ä˘Ç…ÉLÉÉÉbÉVÉÖÇ™ë∂ç›Ç∑ÇÈ
+		// Êó¢„Å´„Ç≠„É£„ÉÉ„Ç∑„É•„ÅåÂ≠òÂú®„Åô„Çã
 		return a;
 	}
 	if(a == NULL) {
@@ -127,7 +106,7 @@ const struct achieve *achievedb_sql_load(int char_id)
 		}
 		a->count = (i < MAX_ACHIEVELIST)? i: MAX_ACHIEVELIST;
 	} else {
-		// å©Ç¬Ç©ÇÁÇ»Ç≠ÇƒÇ‡ê≥èÌ
+		// Ë¶ã„Å§„Åã„Çâ„Å™„Åè„Å¶„ÇÇÊ≠£Â∏∏
 		a = NULL;
 	}
 	sqldbs_free_result(&mysql_handle);
@@ -136,7 +115,7 @@ const struct achieve *achievedb_sql_load(int char_id)
 }
 
 /*==========================================
- * é¿ê—ÉfÅ[É^ÇÉZÅ[Éu
+ * ÂÆüÁ∏æ„Éá„Éº„Çø„Çí„Çª„Éº„Éñ
  *------------------------------------------
  */
 bool achievedb_sql_save(struct achieve *a2)
@@ -149,7 +128,7 @@ bool achievedb_sql_save(struct achieve *a2)
 	a1 = achievedb_sql_load(a2->char_id);
 
 	if(a1 && a1->count <= 0 && a2->count <= 0) {
-		// ÉfÅ[É^Ç™ã§Ç…0å¬Ç»ÇÃÇ≈âΩÇ‡ÇµÇ»Ç¢
+		// „Éá„Éº„Çø„ÅåÂÖ±„Å´0ÂÄã„Å™„ÅÆ„Åß‰Ωï„ÇÇ„Åó„Å™„ÅÑ
 		return true;
 	}
 
@@ -161,7 +140,7 @@ bool achievedb_sql_save(struct achieve *a2)
 		int i;
 
 		if(a1 == NULL || a1->count > 0) {
-			// ÉfÅ[É^ÉTÅ[Éoë§Ç…ÉfÅ[É^Ç™Ç†ÇÈÇ∆Ç´ÇæÇØçÌèúÉNÉGÉäÇî≠çs
+			// „Éá„Éº„Çø„Çµ„Éº„ÉêÂÅ¥„Å´„Éá„Éº„Çø„Åå„ÅÇ„Çã„Å®„Åç„Å†„ÅëÂâäÈô§„ÇØ„Ç®„É™„ÇíÁô∫Ë°å
 			if( sqldbs_query(&mysql_handle, "DELETE FROM `" ACHIEVE_TABLE "` WHERE `char_id`='%d'", a2->char_id) == false )
 				break;
 		}
@@ -200,7 +179,7 @@ bool achievedb_sql_save(struct achieve *a2)
 }
 
 /*==========================================
- * èIóπ
+ * ÁµÇ‰∫Ü
  *------------------------------------------
  */
 static int achievedb_sql_final_sub(void *key, void *data, va_list ap)
@@ -219,7 +198,7 @@ void achievedb_sql_final(void)
 }
 
 /*==========================================
- * èâä˙âª
+ * ÂàùÊúüÂåñ
  *------------------------------------------
  */
 bool achievedb_sql_init(void)

@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _DB_H_
+ï»¿#ifndef _DB_H_
 #define _DB_H_
 
 #include <stdarg.h>
@@ -34,7 +13,7 @@ struct dbn {
 	void *key;
 	void *data;
 	char color;
-	char deleted;	// íœÏ‚İƒtƒ‰ƒO(db_foreach)
+	char deleted;	// å‰Šé™¤æ¸ˆã¿ãƒ•ãƒ©ã‚°(db_foreach)
 };
 
 struct db_free {
@@ -47,12 +26,12 @@ struct dbt {
 	unsigned int (*hash)(struct dbt*,void*);
 	int maxlen;
 	struct dbn *ht[HASH_SIZE];
-	int item_count; // —v‘f‚Ì”
-	const char* alloc_file; // DB‚ª‰Šú‰»‚³‚ê‚½ƒtƒ@ƒCƒ‹
-	int         alloc_line; // DB‚ª‰Šú‰»‚³‚ê‚½s
+	int item_count; // è¦ç´ ã®æ•°
+	const char* alloc_file; // DBãŒåˆæœŸåŒ–ã•ã‚ŒãŸãƒ•ã‚¡ã‚¤ãƒ«
+	int         alloc_line; // DBãŒåˆæœŸåŒ–ã•ã‚ŒãŸè¡Œ
 
-	// db_foreach “à•”‚Ådb_erase ‚³‚ê‚é‘Îô‚Æ‚µ‚ÄA
-	// db_foreach ‚ªI‚í‚é‚Ü‚ÅƒƒbƒN‚·‚é‚±‚Æ‚É‚·‚é
+	// db_foreach å†…éƒ¨ã§db_erase ã•ã‚Œã‚‹å¯¾ç­–ã¨ã—ã¦ã€
+	// db_foreach ãŒçµ‚ã‚ã‚‹ã¾ã§ãƒ­ãƒƒã‚¯ã™ã‚‹ã“ã¨ã«ã™ã‚‹
 	struct db_free *free_list;
 	int free_count;
 	int free_max;
@@ -89,10 +68,10 @@ int db_clear(struct dbt*,int(*)(void*,void*,va_list),...);
 int db_final(struct dbt*,int(*)(void*,void*,va_list),...);
 void exit_dbn(void);
 
-// ƒŠƒ“ƒNƒŠƒXƒgDB -- treedb ‚æ‚è‚à‹K–Í‚ª¬‚³‚¢‚â‚ÂŒü‚¯‚Ìƒf[ƒ^ƒx[ƒX
-// @EƒL[‚Ìd•¡ƒ`ƒFƒbƒN‚Íreplace ‚Ì‚İ
-// @E•‰‰×‘Îô‚Ì‚½‚ßA–‘O‚Ì‰Šú‰»‚Íhead‚ÉNULL‚ğ‘ã“ü‚·‚é‚¾‚¯
-// @Elinkdb_node ‚ÍŠÖ”“à‚ÅŠm•Û‚·‚é‚½‚ßA—˜—p‘¤‚Íƒ|ƒCƒ“ƒ^‚P‚Â‚ğéŒ¾‚·‚é‚¾‚¯
+// ãƒªãƒ³ã‚¯ãƒªã‚¹ãƒˆDB -- treedb ã‚ˆã‚Šã‚‚è¦æ¨¡ãŒå°ã•ã„ã‚„ã¤å‘ã‘ã®ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹
+// ã€€ãƒ»ã‚­ãƒ¼ã®é‡è¤‡ãƒã‚§ãƒƒã‚¯ã¯replace ã®ã¿
+// ã€€ãƒ»è² è·å¯¾ç­–ã®ãŸã‚ã€äº‹å‰ã®åˆæœŸåŒ–ã¯headã«NULLã‚’ä»£å…¥ã™ã‚‹ã ã‘
+// ã€€ãƒ»linkdb_node ã¯é–¢æ•°å†…ã§ç¢ºä¿ã™ã‚‹ãŸã‚ã€åˆ©ç”¨å´ã¯ãƒã‚¤ãƒ³ã‚¿ï¼‘ã¤ã‚’å®£è¨€ã™ã‚‹ã ã‘
 
 struct linkdb_node {
 	struct linkdb_node *next;
@@ -101,16 +80,16 @@ struct linkdb_node {
 	void               *data;
 };
 
-void  linkdb_insert(struct linkdb_node** head, void *key, void* data); // d•¡‚ğl—¶‚µ‚È‚¢
-void* linkdb_replace(struct linkdb_node** head, void *key, void* data); // d•¡‚ğl—¶‚·‚é
+void  linkdb_insert(struct linkdb_node** head, void *key, void* data); // é‡è¤‡ã‚’è€ƒæ…®ã—ãªã„
+void* linkdb_replace(struct linkdb_node** head, void *key, void* data); // é‡è¤‡ã‚’è€ƒæ…®ã™ã‚‹
 void* linkdb_search(struct linkdb_node** head, void *key);
 int   linkdb_exists(struct linkdb_node** head, void *key);
 void* linkdb_erase(struct linkdb_node** head, void *key);
 void  linkdb_final(struct linkdb_node** head);
 
-// csvdb -- csv ƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İŠÖ”
+// csvdb -- csv ãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿é–¢æ•°
 
-// Å‘å—ñ”
+// æœ€å¤§åˆ—æ•°
 #define MAX_CSVCOL 128
 
 struct csvdb_line {

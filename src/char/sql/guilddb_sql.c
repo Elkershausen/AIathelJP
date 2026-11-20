@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -34,7 +13,7 @@
 #include "guilddb_sql.h"
 
 /*==========================================
- * İ’èƒtƒ@ƒCƒ‹“Ç
+ * è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«èª­è¾¼
  *------------------------------------------
  */
 int guilddb_sql_config_read_sub(const char *w1,const char* w2)
@@ -43,7 +22,7 @@ int guilddb_sql_config_read_sub(const char *w1,const char* w2)
 }
 
 /*==========================================
- * ƒMƒ‹ƒhéƒf[ƒ^‚Ì“Ç‚İ‚İ
+ * ã‚®ãƒ«ãƒ‰åŸãƒ‡ãƒ¼ã‚¿ã®èª­ã¿è¾¼ã¿
  *------------------------------------------
  */
 static bool guildcastle_sql_read(void)
@@ -52,7 +31,7 @@ static bool guildcastle_sql_read(void)
 	char **sql_row;
 	bool result = false;
 
-	// ƒfƒtƒHƒ‹ƒgƒf[ƒ^‚ğì¬
+	// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒ‡ãƒ¼ã‚¿ã‚’ä½œæˆ
 	memset(castle_db, 0, sizeof(castle_db));
 	for(i = 0; i < MAX_GUILDCASTLE; i++) {
 		castle_db[i].castle_id = i;
@@ -101,7 +80,7 @@ static bool guildcastle_sql_read(void)
 }
 
 /*==========================================
- * ƒMƒ‹ƒhéƒf[ƒ^‚ÌƒZ[ƒu
+ * ã‚®ãƒ«ãƒ‰åŸãƒ‡ãƒ¼ã‚¿ã®ã‚»ãƒ¼ãƒ–
  *------------------------------------------
  */
 static bool guild_guildcastle_save(void)
@@ -189,7 +168,7 @@ static bool guild_guildcastle_save(void)
 }
 
 /*==========================================
- * “¯Šú
+ * åŒæœŸ
  *------------------------------------------
  */
 int guilddb_sql_sync(void)
@@ -199,7 +178,7 @@ int guilddb_sql_sync(void)
 }
 
 /*==========================================
- * ƒMƒ‹ƒhID‚©‚çƒMƒ‹ƒhƒf[ƒ^‚ğƒ[ƒh
+ * ã‚®ãƒ«ãƒ‰IDã‹ã‚‰ã‚®ãƒ«ãƒ‰ãƒ‡ãƒ¼ã‚¿ã‚’ãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 const struct guild *guilddb_sql_load_num(int guild_id)
@@ -210,7 +189,7 @@ const struct guild *guilddb_sql_load_num(int guild_id)
 	bool result = false;
 
 	g = (struct guild *)numdb_search(guild_db, guild_id);
-	// ƒLƒƒƒbƒVƒ…‚ª‘¶İ
+	// ã‚­ãƒ£ãƒƒã‚·ãƒ¥ãŒå­˜åœ¨
 	if (g && g->guild_id == guild_id) {
 		return g;
 	}
@@ -220,7 +199,7 @@ const struct guild *guilddb_sql_load_num(int guild_id)
 	}
 	memset(g, 0, sizeof(struct guild));
 
-	// Šî–{ƒf[ƒ^
+	// åŸºæœ¬ãƒ‡ãƒ¼ã‚¿
 	result = sqldbs_query(&mysql_handle,
 		"SELECT `name`,`master`,`guild_lv`,`connect_member`,`max_member`,"
 		"`average_lv`,`exp`,`next_exp`,`skill_point`,`mes1`,`mes2`,`emblem_len`,"
@@ -267,7 +246,7 @@ const struct guild *guilddb_sql_load_num(int guild_id)
 	}
 	sqldbs_free_result(&mysql_handle);
 
-	// ƒƒ“ƒo[
+	// ãƒ¡ãƒ³ãƒãƒ¼
 	result = sqldbs_query(&mysql_handle,
 		"SELECT `account_id`,`char_id`,`hair`,`hair_color`,`gender`,`class`,`lv`,"
 		"`exp`,`exp_payper`,`online`,`position`,`name` FROM `" GUILD_MEMBER_TABLE "` "
@@ -299,7 +278,7 @@ const struct guild *guilddb_sql_load_num(int guild_id)
 	}
 	sqldbs_free_result(&mysql_handle);
 
-	// –ğE
+	// å½¹è·
 	result = sqldbs_query(&mysql_handle,
 		"SELECT `position`,`name`,`mode`,`exp_mode` FROM `" GUILD_POSITION_TABLE "` WHERE `guild_id`='%d'",
 		guild_id
@@ -319,7 +298,7 @@ const struct guild *guilddb_sql_load_num(int guild_id)
 	}
 	sqldbs_free_result(&mysql_handle);
 
-	// “¯–¿/“G‘ÎƒŠƒXƒg
+	// åŒç›Ÿ/æ•µå¯¾ãƒªã‚¹ãƒˆ
 	result = sqldbs_query(&mysql_handle,
 		"SELECT `opposition`,`alliance_id`,`name` FROM `" GUILD_ALLIANCE_TABLE "` WHERE `guild_id`='%d'",
 		guild_id
@@ -338,7 +317,7 @@ const struct guild *guilddb_sql_load_num(int guild_id)
 	}
 	sqldbs_free_result(&mysql_handle);
 
-	// ’Ç•úƒŠƒXƒg
+	// è¿½æ”¾ãƒªã‚¹ãƒˆ
 	result = sqldbs_query(&mysql_handle, "SELECT `name`,`mes`,`account_id` FROM `" GUILD_EXPULSION_TABLE "` WHERE `guild_id`='%d'", guild_id);
 	if(result == false) {
 		g->guild_id = -1;
@@ -357,7 +336,7 @@ const struct guild *guilddb_sql_load_num(int guild_id)
 	}
 	sqldbs_free_result(&mysql_handle);
 
-	// ƒMƒ‹ƒhƒXƒLƒ‹
+	// ã‚®ãƒ«ãƒ‰ã‚¹ã‚­ãƒ«
 	result = sqldbs_query(&mysql_handle, "SELECT `id`,`lv` FROM `" GUILD_SKILL_TABLE "` WHERE `guild_id`='%d'", guild_id);
 	if(result == false) {
 		g->guild_id = -1;
@@ -373,13 +352,13 @@ const struct guild *guilddb_sql_load_num(int guild_id)
 	}
 	sqldbs_free_result(&mysql_handle);
 
-	// ƒXƒLƒ‹ƒcƒŠ[î•ñ‚Í‰Šú‰»
+	// ã‚¹ã‚­ãƒ«ãƒ„ãƒªãƒ¼æƒ…å ±ã¯åˆæœŸåŒ–
 	for(i = 0; i < MAX_GUILDSKILL; i++)
 		g->skill[i].id = 0;
 
-	// ‚±‚ÌŠÖ”“à•”‚Åƒƒ‚ƒŠ“à•”‚ÌƒMƒ‹ƒhƒf[ƒ^‚ª‘‚«Š·‚¦‚ç‚ê‚é‚ªA
-	// “n‚·ƒf[ƒ^‚ª“¯‚¶‚È‚ç‹A‚Á‚Ä‚­‚éƒf[ƒ^‚à“¯‚¶‚É‚È‚é‚Ì‚ÅA
-	// •ú’u‚·‚é‚±‚Æ‚É‚·‚é
+	// ã“ã®é–¢æ•°å†…éƒ¨ã§ãƒ¡ãƒ¢ãƒªå†…éƒ¨ã®ã‚®ãƒ«ãƒ‰ãƒ‡ãƒ¼ã‚¿ãŒæ›¸ãæ›ãˆã‚‰ã‚Œã‚‹ãŒã€
+	// æ¸¡ã™ãƒ‡ãƒ¼ã‚¿ãŒåŒã˜ãªã‚‰å¸°ã£ã¦ãã‚‹ãƒ‡ãƒ¼ã‚¿ã‚‚åŒã˜ã«ãªã‚‹ã®ã§ã€
+	// æ”¾ç½®ã™ã‚‹ã“ã¨ã«ã™ã‚‹
 	guild_calc_skilltree(g);
 	guild_calcinfo(g);
 
@@ -387,7 +366,7 @@ const struct guild *guilddb_sql_load_num(int guild_id)
 }
 
 /*==========================================
- * ƒMƒ‹ƒh–¼‚©‚çƒMƒ‹ƒhƒf[ƒ^‚ğƒ[ƒh
+ * ã‚®ãƒ«ãƒ‰åã‹ã‚‰ã‚®ãƒ«ãƒ‰ãƒ‡ãƒ¼ã‚¿ã‚’ãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 const struct guild* guilddb_sql_load_str(const char *str)
@@ -420,7 +399,7 @@ const struct guild* guilddb_sql_load_str(const char *str)
 	}
 
 /*==========================================
- * ƒZ[ƒu
+ * ã‚»ãƒ¼ãƒ–
  *------------------------------------------
  */
 bool guilddb_sql_save(struct guild *g2)
@@ -438,7 +417,7 @@ bool guilddb_sql_save(struct guild *g2)
 	if(g1 == NULL)
 		return false;
 
-	// Šî–{î•ñ
+	// åŸºæœ¬æƒ…å ±
 	strcpy(p, "UPDATE `" GUILD_TABLE "` SET");
 	p += strlen(p);
 
@@ -475,7 +454,7 @@ bool guilddb_sql_save(struct guild *g2)
 				break;
 		}
 
-		// ƒƒ“ƒo[
+		// ãƒ¡ãƒ³ãƒãƒ¼
 		if(memcmp(g1->member, g2->member, sizeof(g1->member))) {
 			if( sqldbs_query(&mysql_handle, "DELETE FROM `" GUILD_MEMBER_TABLE "` WHERE `guild_id`='%d'", g2->guild_id) == false )
 				break;
@@ -497,7 +476,7 @@ bool guilddb_sql_save(struct guild *g2)
 				break;
 		}
 
-		// –ğE
+		// å½¹è·
 		if(memcmp(g1->position, g2->position, sizeof(g1->position))) {
 			if( sqldbs_query(&mysql_handle, "DELETE FROM `" GUILD_POSITION_TABLE "` WHERE `guild_id`='%d'", g2->guild_id) == false )
 				break;
@@ -515,7 +494,7 @@ bool guilddb_sql_save(struct guild *g2)
 				break;
 		}
 
-		// “¯–¿/“G‘ÎƒŠƒXƒg
+		// åŒç›Ÿ/æ•µå¯¾ãƒªã‚¹ãƒˆ
 		if(memcmp(g1->alliance, g2->alliance, sizeof(g1->alliance))) {
 			if( sqldbs_query(&mysql_handle, "DELETE FROM `" GUILD_ALLIANCE_TABLE "` WHERE `guild_id`='%d'", g2->guild_id) == false )
 				break;
@@ -535,7 +514,7 @@ bool guilddb_sql_save(struct guild *g2)
 				break;
 		}
 
-		// ’Ç•úƒŠƒXƒg
+		// è¿½æ”¾ãƒªã‚¹ãƒˆ
 		if(memcmp(g1->explusion, g2->explusion, sizeof(g1->explusion))) {
 			char buf2[256];
 
@@ -557,7 +536,7 @@ bool guilddb_sql_save(struct guild *g2)
 				break;
 		}
 
-		// ƒMƒ‹ƒhƒXƒLƒ‹
+		// ã‚®ãƒ«ãƒ‰ã‚¹ã‚­ãƒ«
 		if(memcmp(g1->skill, g2->skill, sizeof(g1->skill))) {
 			if( sqldbs_query(&mysql_handle, "DELETE FROM `" GUILD_SKILL_TABLE "` WHERE `guild_id`='%d'", g2->guild_id) == false )
 				break;
@@ -593,9 +572,9 @@ bool guilddb_sql_save(struct guild *g2)
 }
 
 /*==========================================
- * ƒMƒ‹ƒh‰ğUi“¯–¿/“G‘Î‚ğ‰ğœj
- * SQLã‚©‚çÁ‚·‚È‚çƒƒ‚ƒŠã‚ÌƒMƒ‹ƒhƒf[ƒ^‚à
- * Á‚³‚È‚¢‚Æ‚¢‚¯‚È‚¢
+ * ã‚®ãƒ«ãƒ‰è§£æ•£ï¼ˆåŒç›Ÿ/æ•µå¯¾ã‚’è§£é™¤ï¼‰
+ * SQLä¸Šã‹ã‚‰æ¶ˆã™ãªã‚‰ãƒ¡ãƒ¢ãƒªä¸Šã®ã‚®ãƒ«ãƒ‰ãƒ‡ãƒ¼ã‚¿ã‚‚
+ * æ¶ˆã•ãªã„ã¨ã„ã‘ãªã„
  *------------------------------------------
  */
 static int guilddb_sql_delete_sub(void *key, void *data, va_list ap)
@@ -676,7 +655,7 @@ bool guilddb_sql_delete(int guild_id)
 }
 
 /*==========================================
- * ƒMƒ‹ƒhì¬
+ * ã‚®ãƒ«ãƒ‰ä½œæˆ
  *------------------------------------------
  */
 bool guilddb_sql_new(struct guild *g)
@@ -698,7 +677,7 @@ bool guilddb_sql_new(struct guild *g)
 
 	sqldbs_free_result(&mysql_handle);
 
-	// DB‚É‘}“ü
+	// DBã«æŒ¿å…¥
 	result = sqldbs_query(
 		&mysql_handle,
 		"INSERT INTO `" GUILD_TABLE "` (`guild_id`,`name`,`guild_lv`,`max_member`,`emblem_data`) VALUES ('%d','%s','1','%d','')",
@@ -711,7 +690,7 @@ bool guilddb_sql_new(struct guild *g)
 }
 
 /*==========================================
- * I—¹
+ * çµ‚äº†
  *------------------------------------------
  */
 static int guild_sql_db_final(void *key, void *data, va_list ap)
@@ -730,7 +709,7 @@ void guilddb_sql_final(void)
 }
 
 /*==========================================
- * ‰Šú‰»
+ * åˆæœŸåŒ–
  *------------------------------------------
  */
 bool guilddb_sql_init(void)

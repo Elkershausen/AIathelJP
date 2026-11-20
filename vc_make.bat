@@ -123,10 +123,10 @@ rem   DEV    : 高速コンパイル＆厳格チェック（AI開発・テスト用）
 set _model_=MODERN
 
 rem 現代の Intel / AMD 64bit CPU 共通最適化（AVX2有効）
-if "%_model_%"=="MODERN" set __cpu__=/c /O2 /arch:AVX2 /MP /W3 /TC /Zi
+if "%_model_%"=="MODERN" set __cpu__=/c /O2 /arch:AVX2 /MP /W3 /TC /Zi /utf-8
 
 rem AI開発・高速ビルド用（最適化なし・警告強化）
-if "%_model_%"=="DEV" set __cpu__=/c /Od /MP /W4 /TC /Zi
+if "%_model_%"=="DEV" set __cpu__=/c /Od /MP /W4 /TC /Zi /utf-8
 
 rem ----------------------------------------------------------------
 rem 最終的なビルドオプションを生成

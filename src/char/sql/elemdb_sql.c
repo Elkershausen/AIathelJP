@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 
 #include "mmo.h"
@@ -34,7 +13,7 @@
 static struct dbt *elem_db = NULL;
 
 /*==========================================
- * İ’èƒtƒ@ƒCƒ‹“Ç
+ * è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«èª­è¾¼
  *------------------------------------------
  */
 int elemdb_sql_config_read_sub(const char* w1,const char *w2)
@@ -43,7 +22,7 @@ int elemdb_sql_config_read_sub(const char* w1,const char *w2)
 }
 
 /*==========================================
- * “¯Šú
+ * åŒæœŸ
  *------------------------------------------
  */
 int elemdb_sql_sync(void)
@@ -53,7 +32,7 @@ int elemdb_sql_sync(void)
 }
 
 /*==========================================
- * ¸—ìíœ
+ * ç²¾éœŠå‰Šé™¤
  *------------------------------------------
  */
 bool elemdb_sql_delete(int elem_id)
@@ -88,7 +67,7 @@ bool elemdb_sql_delete(int elem_id)
 }
 
 /*==========================================
- * ¸—ìID‚©‚ç¸—ìƒf[ƒ^‚ğƒ[ƒh
+ * ç²¾éœŠIDã‹ã‚‰ç²¾éœŠãƒ‡ãƒ¼ã‚¿ã‚’ãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 const struct mmo_elemstatus* elemdb_sql_load(int elem_id)
@@ -143,7 +122,7 @@ const struct mmo_elemstatus* elemdb_sql_load(int elem_id)
 	}
 
 /*==========================================
- * ƒZ[ƒu
+ * ã‚»ãƒ¼ãƒ–
  *------------------------------------------
  */
 bool elemdb_sql_save(struct mmo_elemstatus *p2)
@@ -199,7 +178,7 @@ bool elemdb_sql_save(struct mmo_elemstatus *p2)
 }
 
 /*==========================================
- * ¸—ìì¬
+ * ç²¾éœŠä½œæˆ
  *------------------------------------------
  */
 bool elemdb_sql_new(struct mmo_elemstatus *p)
@@ -229,7 +208,7 @@ bool elemdb_sql_new(struct mmo_elemstatus *p)
 }
 
 /*==========================================
- * I—¹
+ * çµ‚äº†
  *------------------------------------------
  */
 static int elemdb_sql_final_sub(void *key, void *data, va_list ap)
@@ -248,7 +227,7 @@ void elemdb_sql_final(void)
 }
 
 /*==========================================
- * ‰Šú‰»
+ * åˆæœŸåŒ–
  *------------------------------------------
  */
 bool elemdb_sql_init(void)

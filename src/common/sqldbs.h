@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _SQLDB_H_
+ï»¿#ifndef _SQLDB_H_
 #define _SQLDB_H_
 
 #ifndef TXT_ONLY
@@ -104,7 +83,7 @@ extern struct sqldbs_handle mysql_handle;
 // map
 #define MAPREG_TABLE "mapreg"
 
-// ƒvƒŠƒyƒAƒhƒXƒe[ƒgƒƒ“ƒgŒ^ƒTƒCƒY•ÏŠ·—pƒe[ƒuƒ‹
+// ãƒ—ãƒªãƒšã‚¢ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆãƒ¡ãƒ³ãƒˆå‹ã‚µã‚¤ã‚ºå¤‰æ›ç”¨ãƒ†ãƒ¼ãƒ–ãƒ«
 enum {
 	SQL_DATA_TYPE_NULL,
 	SQL_DATA_TYPE_INT8,
@@ -169,7 +148,7 @@ int sqldbs_stmt_affected_rows(struct sqldbs_stmt *st);
 void sqldbs_stmt_free_result(struct sqldbs_stmt *st);
 void sqldbs_stmt_close(struct sqldbs_stmt *st);
 
-// Ú‘±
+// æ¥ç¶š
 void sqldbs_close(struct sqldbs_handle *hd);
 bool sqldbs_connect(struct sqldbs_handle *hd, const char *host, const char *user, const char *passwd,
 	const char *db, unsigned short port, const char *charset, int keepalive, const char *tag);

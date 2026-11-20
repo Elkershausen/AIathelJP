@@ -1,41 +1,20 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <errno.h>
 
 #include "lock.h"
 #include "utils.h"
 
-// ‘‚«‚İƒtƒ@ƒCƒ‹‚Ì•ÛŒìˆ—
-// i‘‚«‚İ‚ªI‚í‚é‚Ü‚ÅA‹Œƒtƒ@ƒCƒ‹‚ğ•ÛŠÇ‚µ‚Ä‚¨‚­j
+// æ›¸ãè¾¼ã¿ãƒ•ã‚¡ã‚¤ãƒ«ã®ä¿è­·å‡¦ç†
+// ï¼ˆæ›¸ãè¾¼ã¿ãŒçµ‚ã‚ã‚‹ã¾ã§ã€æ—§ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ä¿ç®¡ã—ã¦ãŠãï¼‰
 
-// V‚µ‚¢ƒtƒ@ƒCƒ‹‚Ì‘‚«‚İŠJn
+// æ–°ã—ã„ãƒ•ã‚¡ã‚¤ãƒ«ã®æ›¸ãè¾¼ã¿é–‹å§‹
 FILE* lock_fopen(const char* filename,int *info)
 {
 	char newfile[2048];
 	FILE *fp;
 	int  no = 0;
 
-	// ˆÀ‘S‚Èƒtƒ@ƒCƒ‹–¼‚ğ“¾‚éiè”²‚«j
+	// å®‰å…¨ãªãƒ•ã‚¡ã‚¤ãƒ«åã‚’å¾—ã‚‹ï¼ˆæ‰‹æŠœãï¼‰
 	do {
 		snprintf(newfile, sizeof(newfile), "%s_%04d.tmp", filename, ++no);
 	} while( (fp = fopen(newfile,"r")) && (fclose(fp), no < 9999) );
@@ -47,7 +26,7 @@ FILE* lock_fopen(const char* filename,int *info)
 	return fopen(newfile,"w");
 }
 
-// ‹Œƒtƒ@ƒCƒ‹‚ğíœ•Vƒtƒ@ƒCƒ‹‚ğƒŠƒl[ƒ€
+// æ—§ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å‰Šé™¤ï¼†æ–°ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ãƒªãƒãƒ¼ãƒ 
 int lock_fclose(FILE *fp,const char* filename,int *info)
 {
 	int  ret = 0;
@@ -57,7 +36,7 @@ int lock_fclose(FILE *fp,const char* filename,int *info)
 		ret = fclose(fp);
 		snprintf(newfile, sizeof(newfile), "%s_%04d.tmp", filename, *info);
 		if(remove(filename) == 0 || errno == ENOENT) {
-			// ‚±‚Ìƒ^ƒCƒ~ƒ“ƒO‚Å—‚¿‚é‚ÆÅˆ«B
+			// ã“ã®ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§è½ã¡ã‚‹ã¨æœ€æ‚ªã€‚
 			rename(newfile,filename);
 		}
 		return ret;

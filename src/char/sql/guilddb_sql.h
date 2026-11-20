@@ -1,31 +1,10 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _GUILDDB_SQL_H_
+Ôªø#ifndef _GUILDDB_SQL_H_
 #define _GUILDDB_SQL_H_
 
 #include "mmo.h"
 #include "utils.h"
 
-// ÉvÉçÉgÉ^ÉCÉvêÈåæ
+// „Éó„É≠„Éà„Çø„Ç§„ÉóÂÆ£Ë®Ä
 bool guilddb_sql_new(struct guild *g);
 bool guilddb_sql_init(void);
 bool guilddb_sql_save(struct guild* g2);
@@ -36,7 +15,7 @@ const struct guild* guilddb_sql_load_str(const char *str);
 bool guilddb_sql_delete(int guild_id);
 int guilddb_sql_config_read_sub(const char* w1,const char *w2);
 
-// ÉGÉCÉäÉAÉX
+// „Ç®„Ç§„É™„Ç¢„Çπ
 #define guilddb_new      guilddb_sql_new
 #define guilddb_init     guilddb_sql_init
 #define guilddb_save     guilddb_sql_save

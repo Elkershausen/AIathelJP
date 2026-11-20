@@ -1,10 +1,4 @@
-/*
-** $Id: lgc.c,v 2.38.1.1 2007/12/27 13:02:25 roberto Exp $
-** Garbage Collector
-** See Copyright Notice in lua.h
-*/
-
-#include <string.h>
+﻿#include <string.h>
 
 #define lgc_c
 #define LUA_CORE

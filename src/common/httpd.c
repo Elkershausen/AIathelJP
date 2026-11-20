@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef WINDOWS
+ï»¿#ifndef WINDOWS
 #	include <unistd.h>
 #	include <sys/time.h>
 #	include <sys/wait.h>
@@ -46,61 +25,61 @@
 #include "utils.h"
 
 
-#define NONCE_LOG_SIZE				256		// Digest ”FØ‚Ì nonce ‚ğ•Û‘¶‚Å‚«‚éŒÂ”
-#define HTTPD_CGI_KILL_SIZE			128		// cgi ‚Ì’†’f—p‚Ìƒf[ƒ^‚ğ•Û‘¶‚Å‚«‚éŒÂ”
-#define HTTPD_CGI_KILL_INVERVAL		250		// cgi ‚Ì’†’fˆ—‚Ìƒ`ƒFƒbƒN‚ğs‚¤ŠÔŠu(ms)
+#define NONCE_LOG_SIZE				256		// Digest èªè¨¼ã® nonce ã‚’ä¿å­˜ã§ãã‚‹å€‹æ•°
+#define HTTPD_CGI_KILL_SIZE			128		// cgi ã®ä¸­æ–­ç”¨ã®ãƒ‡ãƒ¼ã‚¿ã‚’ä¿å­˜ã§ãã‚‹å€‹æ•°
+#define HTTPD_CGI_KILL_INVERVAL		250		// cgi ã®ä¸­æ–­å‡¦ç†ã®ãƒã‚§ãƒƒã‚¯ã‚’è¡Œã†é–“éš”(ms)
 
 
 typedef void (*HttpdFunc)(struct httpd_session_data*,const char*);
 
-static const char configfile[]="./conf/httpd.conf";	// ‹¤’ÊƒRƒ“ƒtƒBƒO
+static const char configfile[]="./conf/httpd.conf";	// å…±é€šã‚³ãƒ³ãƒ•ã‚£ã‚°
 
-static char logfile[1024]="./log/httpd.log";	// ƒƒOƒtƒ@ƒCƒ‹–¼
+static char logfile[1024]="./log/httpd.log";	// ãƒ­ã‚°ãƒ•ã‚¡ã‚¤ãƒ«å
 void httpd_set_logfile( const char *str ) { strncpy( logfile, str, sizeof(logfile) - 1 ); }
 
-static int log_no_flush = 0;	// ƒƒO‚ğƒtƒ‰ƒbƒVƒ…‚µ‚È‚¢‚©‚Ç‚¤‚©
+static int log_no_flush = 0;	// ãƒ­ã‚°ã‚’ãƒ•ãƒ©ãƒƒã‚·ãƒ¥ã—ãªã„ã‹ã©ã†ã‹
 
-static int tz = -1;	// ƒ^ƒCƒ€ƒ][ƒ“
+static int tz = -1;	// ã‚¿ã‚¤ãƒ ã‚¾ãƒ¼ãƒ³
 
-static int auth_digest_period = 600*1000;	// Digest ”FØ‚Å‚Ì nonce —LŒøŠúŒÀ
+static int auth_digest_period = 600*1000;	// Digest èªè¨¼ã§ã® nonce æœ‰åŠ¹æœŸé™
 void httpd_set_auth_digest_period( int i ) { auth_digest_period = i; }
 
-static int max_persist_requests = 32;	// ‘±’ÊM‚Å‚ÌÅ‘åƒŠƒNƒGƒXƒg”
+static int max_persist_requests = 32;	// æŒç¶šé€šä¿¡ã§ã®æœ€å¤§ãƒªã‚¯ã‚¨ã‚¹ãƒˆæ•°
 void httpd_set_max_persist_requests( int i ) { max_persist_requests = i; }
 
-static int request_timeout[] = { 2500, 60*1000 };	// ƒ^ƒCƒ€ƒAƒEƒg(Å‰A‘±)
+static int request_timeout[] = { 2500, 60*1000 };	// ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆ(æœ€åˆã€æŒç¶š)
 void httpd_set_request_timeout( int idx, int t ) { request_timeout[idx] = t; }
 
-static char document_root[256]="./httpd/";	// ƒhƒLƒ…ƒƒ“ƒgƒ‹[ƒg
+static char document_root[256]="./httpd/";	// ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆãƒ«ãƒ¼ãƒˆ
 void httpd_set_document_root( const char *str ) { strncpy( document_root, str, sizeof(document_root) - 1 ); }
 
-static int bigfile_threshold = 256*1024;	// ‹‘åƒtƒ@ƒCƒ‹“]‘—ƒ‚[ƒh‚É“ü‚éè‡’l
-static int bigfile_splitsize = 256*1024;	// ‹‘åƒtƒ@ƒCƒ‹“]‘—ƒ‚[ƒh‚Ì FIFO ƒTƒCƒY(128KBˆÈã)
+static int bigfile_threshold = 256*1024;	// å·¨å¤§ãƒ•ã‚¡ã‚¤ãƒ«è»¢é€ãƒ¢ãƒ¼ãƒ‰ã«å…¥ã‚‹é–¾å€¤
+static int bigfile_splitsize = 256*1024;	// å·¨å¤§ãƒ•ã‚¡ã‚¤ãƒ«è»¢é€ãƒ¢ãƒ¼ãƒ‰ã® FIFO ã‚µã‚¤ã‚º(128KBä»¥ä¸Š)
 
-static int max_uri_length = 255;	// URI ‚Ì’·‚³‚ğ§ŒÀ
+static int max_uri_length = 255;	// URI ã®é•·ã•ã‚’åˆ¶é™
 
 static const char servername[] = "Auriga httpd";
 
-static int server_max_requests_per_second = 10;		// ‘S‘Ì‚Ì•bŠÔ‚ÌƒŠƒNƒGƒXƒg”§ŒÀ
-static int server_max_requests_period = 5000;		// ‘S‘Ì‚ÌƒŠƒNƒGƒXƒg”§ŒÀ‚Ìƒ`ƒFƒbƒNŠÔŠu
+static int server_max_requests_per_second = 10;		// å…¨ä½“ã®ç§’é–“ã®ãƒªã‚¯ã‚¨ã‚¹ãƒˆæ•°åˆ¶é™
+static int server_max_requests_period = 5000;		// å…¨ä½“ã®ãƒªã‚¯ã‚¨ã‚¹ãƒˆæ•°åˆ¶é™ã®ãƒã‚§ãƒƒã‚¯é–“éš”
 static int server_max_requests_count = 0;
 static unsigned int server_max_requests_tick = 0;
 
 
-static int httpd_cgi_enable = 1;				// ŠO•” CGI ‚ğ—˜—p‚·‚é
-static char httpd_cgi_temp_dir[256] = "./log/";	// CGI ‚Ìƒeƒ“ƒ|ƒ‰ƒŠƒfƒBƒŒƒNƒgƒŠ
-static int httpd_cgi_timeout = 5000;			// CGI ƒ^ƒCƒ€ƒAƒEƒgŠÔ(ms)
-static int httpd_cgi_kill_timeout = 1000;		// CGI ’†’fƒ^ƒCƒ€ƒAƒEƒgŠÔ(ms)
-static int httpd_max_cgi_process = 3;			// CGI “¯Às‰Â”\”
-static char httpd_cgi_ext_list[256]=".cgi .exe .pl .php .rb ";	// CGI ‚Æ‚·‚éŠg’£q
-static char httpd_cgi_server_name[256]="localhost";	// CGI ‚É SERVER_NAME ‚Æ‚µ‚Ä“n‚·ƒzƒXƒg–¼
-//static char cgi_logfile[1024]="./log/httpd.log";	// CGI ƒƒOƒtƒ@ƒCƒ‹–¼
+static int httpd_cgi_enable = 1;				// å¤–éƒ¨ CGI ã‚’åˆ©ç”¨ã™ã‚‹
+static char httpd_cgi_temp_dir[256] = "./log/";	// CGI ã®ãƒ†ãƒ³ãƒãƒ©ãƒªãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒª
+static int httpd_cgi_timeout = 5000;			// CGI ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆæ™‚é–“(ms)
+static int httpd_cgi_kill_timeout = 1000;		// CGI ä¸­æ–­ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆæ™‚é–“(ms)
+static int httpd_max_cgi_process = 3;			// CGI åŒæ™‚å®Ÿè¡Œå¯èƒ½æ•°
+static char httpd_cgi_ext_list[256]=".cgi .exe .pl .php .rb ";	// CGI ã¨ã™ã‚‹æ‹¡å¼µå­
+static char httpd_cgi_server_name[256]="localhost";	// CGI ã« SERVER_NAME ã¨ã—ã¦æ¸¡ã™ãƒ›ã‚¹ãƒˆå
+//static char cgi_logfile[1024]="./log/httpd.log";	// CGI ãƒ­ã‚°ãƒ•ã‚¡ã‚¤ãƒ«å
 //static FILE* cgi_logfp = NULL;
 
-static HTTPD_AUTH_FUNC auth_func[8];	// ”FØŠÖ”‚ÌŠÖ”ƒ|ƒCƒ“ƒ^
+static HTTPD_AUTH_FUNC auth_func[8];	// èªè¨¼é–¢æ•°ã®é–¢æ•°ãƒã‚¤ãƒ³ã‚¿
 void httpd_set_auth_func( int func_id, HTTPD_AUTH_FUNC func ) { auth_func[func_id]=func; }
 
-static int httpd_log_format = 1;	// ƒƒOƒtƒH[ƒ}ƒbƒg
+static int httpd_log_format = 1;	// ãƒ­ã‚°ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆ
 static FILE *logfp=NULL;
 
 static const char *weekdaymsg[] = { "Sun","Mon","Tue","Wed","Thu","Fri","Sat" };
@@ -108,13 +87,13 @@ static const char *monthmsg[] = { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug
 
 
 enum HTTPD_STATUS {
-	HTTPD_REQUEST_WAIT = 0,		// ƒŠƒNƒGƒXƒg‘Ò‚¿
-	HTTPD_REQUEST_WAIT_POST,	// ƒŠƒNƒGƒXƒg‘Ò‚¿(post)
-	HTTPD_REQUEST_OK,			// ƒŠƒNƒGƒXƒg‰ğßŠ®—¹
-	HTTPD_SEND_HEADER,			// ƒwƒbƒ_‘—MŠ®—¹
-	HTTPD_SENDING_BIGFILE,		// ‹‘åƒtƒ@ƒCƒ‹‘—M’†
-	HTTPD_WAITING_CGI,			// cgi ˆ—Š®—¹‘Ò‚¿ó‘Ô
-	HTTPD_WAITING_SEND,			// ƒf[ƒ^‚ª‘—M‚µI‚í‚é‚Ü‚Å‘Ò‚Á‚Ä‚¢‚éó‘Ô
+	HTTPD_REQUEST_WAIT = 0,		// ãƒªã‚¯ã‚¨ã‚¹ãƒˆå¾…ã¡
+	HTTPD_REQUEST_WAIT_POST,	// ãƒªã‚¯ã‚¨ã‚¹ãƒˆå¾…ã¡(post)
+	HTTPD_REQUEST_OK,			// ãƒªã‚¯ã‚¨ã‚¹ãƒˆè§£é‡ˆå®Œäº†
+	HTTPD_SEND_HEADER,			// ãƒ˜ãƒƒãƒ€é€ä¿¡å®Œäº†
+	HTTPD_SENDING_BIGFILE,		// å·¨å¤§ãƒ•ã‚¡ã‚¤ãƒ«é€ä¿¡ä¸­
+	HTTPD_WAITING_CGI,			// cgi å‡¦ç†å®Œäº†å¾…ã¡çŠ¶æ…‹
+	HTTPD_WAITING_SEND,			// ãƒ‡ãƒ¼ã‚¿ãŒé€ä¿¡ã—çµ‚ã‚ã‚‹ã¾ã§å¾…ã£ã¦ã„ã‚‹çŠ¶æ…‹
 };
 
 
@@ -150,14 +129,14 @@ enum httpd_enum {
 	HTTPD_PRECOND_IFRANGE    = 4,
 };
 
-// ƒ†[ƒU[”FØ—p‚Ì\‘¢‘Ì
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼èªè¨¼ç”¨ã®æ§‹é€ ä½“
 struct httpd_access_user {
 	int type;
 	unsigned char name[32];
 	unsigned char passwd[36];
 };
 
-// ƒAƒNƒZƒX§Œäƒf[ƒ^‚Ì\‘¢‘Ì
+// ã‚¢ã‚¯ã‚»ã‚¹åˆ¶å¾¡ãƒ‡ãƒ¼ã‚¿ã®æ§‹é€ ä½“
 struct httpd_access {
 	unsigned char url[256];
 	int type;
@@ -176,7 +155,7 @@ struct httpd_access {
 static int htaccess_count=0, htaccess_max=0;
 static struct httpd_access ** htaccess=NULL;
 
-// Digest ”FØ‚Ì nonce-count ƒƒO—p\‘¢‘Ì
+// Digest èªè¨¼ã® nonce-count ãƒ­ã‚°ç”¨æ§‹é€ ä½“
 struct httpd_auth_nonce {
 	unsigned char nonce[48];
 	unsigned nc : 31;
@@ -185,7 +164,7 @@ struct httpd_auth_nonce {
 static struct httpd_auth_nonce nonce_log[NONCE_LOG_SIZE];
 static int nonce_log_pos = 0;
 
-// cgi ‚ÌƒvƒƒOƒ‰ƒ€‚ÌI—¹—p
+// cgi ã®ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã®çµ‚äº†ç”¨
 struct httpd_cgi_kill {
 	int state;
 	unsigned int tick;
@@ -208,11 +187,11 @@ void httpd_page_external_cgi_final(void);
 
 
 // ==========================================
-// ƒ^ƒCƒ€ƒ][ƒ“İ’è
+// ã‚¿ã‚¤ãƒ ã‚¾ãƒ¼ãƒ³è¨­å®š
 // ------------------------------------------
 void httpd_set_timezone( int tz3 )
 {
-	// ƒ^ƒCƒ€ƒ][ƒ“‚ğ‹‚ß‚é
+	// ã‚¿ã‚¤ãƒ ã‚¾ãƒ¼ãƒ³ã‚’æ±‚ã‚ã‚‹
 	int tz2;
 	time_t time_temp = time(&time_temp);
 	time_t time_local = mktime(localtime(&time_temp));
@@ -228,7 +207,7 @@ void httpd_set_timezone( int tz3 )
 }
 
 // ==========================================
-// ƒAƒNƒZƒXƒƒO‚Ì“f‚«o‚µ
+// ã‚¢ã‚¯ã‚»ã‚¹ãƒ­ã‚°ã®åãå‡ºã—
 // ------------------------------------------
 void httpd_log( struct httpd_session_data *sd, int status, int len )
 {
@@ -236,14 +215,14 @@ void httpd_log( struct httpd_session_data *sd, int status, int len )
 	unsigned char *ip;
 	static const char sign[]={'-','+'};
 
-	// ƒƒOƒtƒ@ƒCƒ‹‚ğŠJ‚­
+	// ãƒ­ã‚°ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
 	if( !logfp && (logfp = fopen(logfile, "a") ) == NULL )
 	{
 		printf("*WARNING* : can't open log file [%s]\n", logfile);
 		return;
 	}
 
-	// ŠÔ•¶š—ñ‚ğ‹‚ß‚é
+	// æ™‚é–“æ–‡å­—åˆ—ã‚’æ±‚ã‚ã‚‹
 	{
 		size_t len;
 		time_t time_;
@@ -254,7 +233,7 @@ void httpd_log( struct httpd_session_data *sd, int status, int len )
 
 	ip = (unsigned char*) &session[sd->fd]->client_addr.sin_addr;
 
-	// ƒTƒCƒY
+	// ã‚µã‚¤ã‚º
 	if( len<0 )
 	{
 		lenstr[0]='-';
@@ -265,7 +244,7 @@ void httpd_log( struct httpd_session_data *sd, int status, int len )
 		snprintf(lenstr, sizeof(lenstr), "%d", len);
 	}
 
-	// ƒƒO‚ğo—Í
+	// ãƒ­ã‚°ã‚’å‡ºåŠ›
 	if( httpd_log_format )
 	{
 		// combined log
@@ -283,21 +262,21 @@ void httpd_log( struct httpd_session_data *sd, int status, int len )
 			timestr, sd->request_line, status, lenstr );
 	}
 
-	// ƒƒO‚Ìƒtƒ‰ƒbƒVƒ…
+	// ãƒ­ã‚°ã®ãƒ•ãƒ©ãƒƒã‚·ãƒ¥
 	if( !log_no_flush )
 	{
-		// –ˆ‰ñ close ‚µ‚È‚¢‚Æ logrotate ‚Æ‚©‚ª‚¤‚Ü‚­“®‚©‚È‚¢‹C‚ª‚·‚éH
+		// æ¯å› close ã—ãªã„ã¨ logrotate ã¨ã‹ãŒã†ã¾ãå‹•ã‹ãªã„æ°—ãŒã™ã‚‹ï¼Ÿ
 		fclose( logfp );
 		logfp = NULL;
 		// fflush( logfp );
 	}
 }
 
-// httpd ‚É“ü‚Á‚Ä‚¢‚éƒy[ƒW‚ÆAŒÄ‚Ño‚·ƒR[ƒ‹ƒoƒbƒNŠÖ”‚Ìˆê——
+// httpd ã«å…¥ã£ã¦ã„ã‚‹ãƒšãƒ¼ã‚¸ã¨ã€å‘¼ã³å‡ºã™ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°ã®ä¸€è¦§
 static struct dbt* httpd_files = NULL;
 
 // ==========================================
-// httpd_files ‚ÌŠJ•úˆ—
+// httpd_files ã®é–‹æ”¾å‡¦ç†
 // ------------------------------------------
 static int httpd_db_final(void *key,void *data,va_list ap)
 {
@@ -309,7 +288,7 @@ static int httpd_db_final(void *key,void *data,va_list ap)
 }
 
 // ==========================================
-// httpd I—¹ˆ—
+// httpd çµ‚äº†å‡¦ç†
 // ------------------------------------------
 static void do_final_httpd(void)
 {
@@ -332,11 +311,11 @@ static void do_final_httpd(void)
 }
 
 // ==========================================
-// httpd ‰Šú‰»ˆ—
+// httpd åˆæœŸåŒ–å‡¦ç†
 // ------------------------------------------
 void do_init_httpd(void)
 {
-//	httpd_config_read(configfile);	// ‰Šú‰»‡˜‚ÌŠÖŒW‚ÅAsocket_config_read2() ‚©‚çŒÄ‚Î‚ê‚é
+//	httpd_config_read(configfile);	// åˆæœŸåŒ–é †åºã®é–¢ä¿‚ã§ã€socket_config_read2() ã‹ã‚‰å‘¼ã°ã‚Œã‚‹
 
 	httpd_files = strdb_init(0);
 	httpd_pages( get_socket_ctrl_panel_url(), socket_httpd_page );
@@ -351,8 +330,8 @@ void do_init_httpd(void)
 }
 
 // ==========================================
-// httpd ‚Éƒy[ƒW‚ğ’Ç‰Á
-//  for ‚È‚Ç‚Åƒy[ƒW–¼‚ğ‡¬‚Å‚«‚é‚æ‚¤‚ÉAkey ‚Ístrdup()‚µ‚½‚à‚Ì‚ğg‚¤
+// httpd ã«ãƒšãƒ¼ã‚¸ã‚’è¿½åŠ 
+//  for ãªã©ã§ãƒšãƒ¼ã‚¸åã‚’åˆæˆã§ãã‚‹ã‚ˆã†ã«ã€key ã¯strdup()ã—ãŸã‚‚ã®ã‚’ä½¿ã†
 // ------------------------------------------
 void httpd_pages(const char* url,HttpdFunc httpd_func)
 {
@@ -366,7 +345,7 @@ void httpd_pages(const char* url,HttpdFunc httpd_func)
 }
 
 // ==========================================
-// httpd ‚Ìƒy[ƒW‚ğíœ
+// httpd ã®ãƒšãƒ¼ã‚¸ã‚’å‰Šé™¤
 // ------------------------------------------
 static int httpd_erase_pages_sub(void *key,void *data,va_list ap)
 {
@@ -388,7 +367,7 @@ void httpd_erase_pages(const char* url)
 static void(*httpd_default)(struct httpd_session_data* sd,const char* url);
 
 // ==========================================
-// ƒfƒtƒHƒ‹ƒg‚Ìƒy[ƒWˆ—ŠÖ”‚ğİ’è
+// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ãƒšãƒ¼ã‚¸å‡¦ç†é–¢æ•°ã‚’è¨­å®š
 // ------------------------------------------
 void httpd_default_page(void(*httpd_func)(struct httpd_session_data* sd,const char* url))
 {
@@ -396,13 +375,13 @@ void httpd_default_page(void(*httpd_func)(struct httpd_session_data* sd,const ch
 }
 
 // ==========================================
-// ƒXƒe[ƒ^ƒXƒR[ƒh‚ğƒƒbƒZ[ƒW‚É•ÏŠ·
+// ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚³ãƒ¼ãƒ‰ã‚’ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã«å¤‰æ›
 // ------------------------------------------
 const char *httpd_get_error( struct httpd_session_data* sd, int* status )
 {
 	const char* msg;
 
-	// httpd ‚ÌƒXƒe[ƒ^ƒX‚ğŒˆ‚ß‚é
+	// httpd ã®ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’æ±ºã‚ã‚‹
 	switch(*status) {
 	case 200: msg = "OK";              break;
 	case 206: msg = "Partial Content"; break;
@@ -425,7 +404,7 @@ const char *httpd_get_error( struct httpd_session_data* sd, int* status )
 }
 
 // ==========================================
-// “ú•t‚Ì‰ğÍ—pi Date ƒwƒbƒ_‚È‚Çj
+// æ—¥ä»˜ã®è§£æç”¨ï¼ˆ Date ãƒ˜ãƒƒãƒ€ãªã©ï¼‰
 // ------------------------------------------
 int httpd_get_date( const char *str, time_t *date )
 {
@@ -470,7 +449,7 @@ int httpd_get_date( const char *str, time_t *date )
 }
 
 // ==========================================
-// ƒGƒ‰[‚Ì‘—M
+// ã‚¨ãƒ©ãƒ¼ã®é€ä¿¡
 // ------------------------------------------
 void httpd_send_error(struct httpd_session_data* sd,int status)
 {
@@ -480,7 +459,7 @@ void httpd_send_error(struct httpd_session_data* sd,int status)
 }
 
 // ==========================================
-// “ú•t‚Ì•¶š—ñì¬
+// æ—¥ä»˜ã®æ–‡å­—åˆ—ä½œæˆ
 // ------------------------------------------
 int httpd_make_date( char* dst, time_t date )
 {
@@ -493,7 +472,7 @@ int httpd_make_date( char* dst, time_t date )
 }
 
 // ==========================================
-// ƒŒƒXƒ|ƒ“ƒXƒwƒbƒ_‘—M
+// ãƒ¬ã‚¹ãƒãƒ³ã‚¹ãƒ˜ãƒƒãƒ€é€ä¿¡
 // ------------------------------------------
 void httpd_send_head(struct httpd_session_data* sd,int status,const char *content_type,int content_len)
 {
@@ -504,12 +483,12 @@ void httpd_send_head(struct httpd_session_data* sd,int status,const char *conten
 	if(sd->status != HTTPD_REQUEST_OK) return;
 	msg = httpd_get_error( sd, &status );
 
-	// ”FØŠÖ˜A‚Ìƒf[ƒ^‚ª‚È‚ñ‚©‚¨‚©‚µ‚¢
+	// èªè¨¼é–¢é€£ã®ãƒ‡ãƒ¼ã‚¿ãŒãªã‚“ã‹ãŠã‹ã—ã„
 	if( status==401 && ( !sd->access || !(sd->access->type & HTTPD_ACCESS_AUTH_MASK) ) )
 		status = 500;
 
 	if( (status != 200 && status != 304  && status != 401 && status != 412 ) || ++sd->request_count >= max_persist_requests ) {
-		// ‹­§Ø’fˆ—(status ‚ª200A304A401A412 ˆÈŠO or ƒŠƒNƒGƒXƒgŒÀŠE’´‰ß)
+		// å¼·åˆ¶åˆ‡æ–­å‡¦ç†(status ãŒ200ã€304ã€401ã€412 ä»¥å¤– or ãƒªã‚¯ã‚¨ã‚¹ãƒˆé™ç•Œè¶…é)
 		sd->persist = 0;
 	}
 
@@ -517,12 +496,12 @@ void httpd_send_head(struct httpd_session_data* sd,int status,const char *conten
 		"HTTP/1.%d %d %s\r\n"
 		"Server: %s/revision%d\r\n", sd->http_ver,status,msg, servername, AURIGA_REVISION );
 
-	if( content_type )	// ƒRƒ“ƒeƒ“ƒgƒ^ƒCƒv
+	if( content_type )	// ã‚³ãƒ³ãƒ†ãƒ³ãƒˆã‚¿ã‚¤ãƒ—
 	{
 		len += snprintf( head + len, sizeof(head) - (size_t)len, "Content-Type: %s\r\n",content_type );
 	}
 
-	if( content_len == -1 )		// ’·‚³‚ª•ª‚©‚ç‚È‚¢
+	if( content_len == -1 )		// é•·ã•ãŒåˆ†ã‹ã‚‰ãªã„
 	{
 		if( status!=304 )
 			sd->persist = 0;
@@ -530,28 +509,28 @@ void httpd_send_head(struct httpd_session_data* sd,int status,const char *conten
 		len += snprintf(head + len, sizeof(head) - (size_t)len, "Content-Length: %d\r\n",content_len);
 	}
 
-	if( status==206 )	// Content-Range ’Ê’m
+	if( status==206 )	// Content-Range é€šçŸ¥
 	{
 		len += snprintf(head + len, sizeof(head) - (size_t)len, "Content-Range: bytes %d-%d/%d\r\n", sd->range_start, sd->range_end, sd->inst_len );
 	}
 
-	if( sd->persist==0 )	// ‘±«‚©‚Ç‚¤‚©
+	if( sd->persist==0 )	// æŒç¶šæ€§ã‹ã©ã†ã‹
 	{
 		len += snprintf(head + len, sizeof(head) - (size_t)len, "Connection: close\r\n");
 	}
-	else if( sd->http_ver==0 ) // HTTP/1.0 ‚È‚ç Keep-Alive ’Ê’m
+	else if( sd->http_ver==0 ) // HTTP/1.0 ãªã‚‰ Keep-Alive é€šçŸ¥
 	{
 		len += snprintf(head + len, sizeof(head) - (size_t)len, "Connection: Keep-Alive\r\n");
 	}
 
-	if( status==401 )	// ”FØ‚ª•K—v
+	if( status==401 )	// èªè¨¼ãŒå¿…è¦
 	{
 		if( (sd->access->type & HTTPD_ACCESS_AUTH_MASK) == HTTPD_ACCESS_AUTH_DIGEST )
 		{
 			static const char *stale[]={"false","true"};
 			char nonce[128];
 
-			// nonce ì¬
+			// nonce ä½œæˆ
 			{
 				char buf[128];
 				int i;
@@ -581,24 +560,24 @@ void httpd_send_head(struct httpd_session_data* sd,int status,const char *conten
 		}
 	}
 
-	if( status==503 )	// Retry-after ’Ê’m
+	if( status==503 )	// Retry-after é€šçŸ¥
 	{
 		len += snprintf( head + len, sizeof(head) - (size_t)len, "Retry-After: %d\r\n", (server_max_requests_period+999)/1000 );
 	}
 
-	if( sd->reshead_flag & HTTPD_RESHEAD_ACCRANGE )	// Accept-Ranges ’Ê’m
+	if( sd->reshead_flag & HTTPD_RESHEAD_ACCRANGE )	// Accept-Ranges é€šçŸ¥
 	{
 		len += snprintf( head + len, sizeof(head) - (size_t)len, "Accept-Ranges: bytes\r\n" );
 	}
 
-	if( sd->date && (sd->reshead_flag & HTTPD_RESHEAD_LASTMOD))	// Last-modified ‚Ì’Ê’m
+	if( sd->date && (sd->reshead_flag & HTTPD_RESHEAD_LASTMOD))	// Last-modified ã®é€šçŸ¥
 	{
 		auriga_strlcpy( head+len, "Last-Modified: ", sizeof(head) - (size_t)len );
 		len += 15;
 		len += httpd_make_date( head+len, sd->date );
 	}
 
-	if( status!=500 )	// Date ‚Ì’Ê’m
+	if( status!=500 )	// Date ã®é€šçŸ¥
 	{
 		time_t tmp = time( &tmp );
 		auriga_strlcpy( head+len, "Date: ", sizeof(head) - (size_t)len );
@@ -606,7 +585,7 @@ void httpd_send_head(struct httpd_session_data* sd,int status,const char *conten
 		len += httpd_make_date( head+len, tmp );
 	}
 
-	httpd_log( sd, status, content_len );	// ƒƒO‚É‹L˜^
+	httpd_log( sd, status, content_len );	// ãƒ­ã‚°ã«è¨˜éŒ²
 
 	len += snprintf( head+len, sizeof(head) - (size_t)len, "\r\n" );
 	memcpy(WFIFOP(sd->fd,0),head,len);
@@ -616,21 +595,21 @@ void httpd_send_head(struct httpd_session_data* sd,int status,const char *conten
 }
 
 // ==========================================
-// ƒf[ƒ^‘—M
+// ãƒ‡ãƒ¼ã‚¿é€ä¿¡
 // ------------------------------------------
 void httpd_send_data(struct httpd_session_data* sd,int content_len,const void *data)
 {
 	const char* msg = (const char*)data;
 
 	if(sd->status == HTTPD_REQUEST_OK) {
-		// ƒwƒbƒ_‚Ì‘—M–Y‚ê‚Ä‚¢‚é‚Ì‚ÅA“K“–‚É•â‚¤
+		// ãƒ˜ãƒƒãƒ€ã®é€ä¿¡å¿˜ã‚Œã¦ã„ã‚‹ã®ã§ã€é©å½“ã«è£œã†
 		httpd_send_head(sd,200,"application/octet-stream",-1);
 	} else if(sd->status != HTTPD_SEND_HEADER && sd->status != HTTPD_WAITING_SEND) {
 		return;
 	}
 	sd->data_len -= content_len;
 
-	// ‹‘å‚ÈƒTƒCƒY‚Ìƒtƒ@ƒCƒ‹‚à‘—Mo—ˆ‚é‚æ‚¤‚É•ªŠ„‚µ‚Ä‘—‚é
+	// å·¨å¤§ãªã‚µã‚¤ã‚ºã®ãƒ•ã‚¡ã‚¤ãƒ«ã‚‚é€ä¿¡å‡ºæ¥ã‚‹ã‚ˆã†ã«åˆ†å‰²ã—ã¦é€ã‚‹
 	while(content_len > 0) {
 		int send_byte = content_len;
 		if(send_byte > 12*1024) send_byte = 12*1024;
@@ -643,7 +622,7 @@ void httpd_send_data(struct httpd_session_data* sd,int content_len,const void *d
 }
 
 // ==========================================
-// ƒwƒbƒ_‚Æƒf[ƒ^‚ÌˆêŠ‡‘—M
+// ãƒ˜ãƒƒãƒ€ã¨ãƒ‡ãƒ¼ã‚¿ã®ä¸€æ‹¬é€ä¿¡
 // ------------------------------------------
 void httpd_send(struct httpd_session_data* sd,int status,const char *content_type,int content_len,const void *data)
 {
@@ -652,13 +631,13 @@ void httpd_send(struct httpd_session_data* sd,int status,const char *content_typ
 }
 
 // ==========================================
-// Ø’f‘Ò‚¿
+// åˆ‡æ–­å¾…ã¡
 // ------------------------------------------
 int httpd_disconnect(int fd)
 {
 	struct httpd_session_data* sd = (struct httpd_session_data*)session[fd]->session_data2;
 
-	// CGI ‚Ì’†’f
+	// CGI ã®ä¸­æ–­
 	if( sd->cgi_state )
 	{
 		sd->cgi_state = 0;
@@ -674,31 +653,31 @@ void httpd_send_bigfile( struct httpd_session_data* sd );
 void httpd_page_external_cgi( struct httpd_session_data* sd );
 
 // ==========================================
-// httpd ƒZƒbƒVƒ‡ƒ“‚ÌƒŠƒZƒbƒg
+// httpd ã‚»ãƒƒã‚·ãƒ§ãƒ³ã®ãƒªã‚»ãƒƒãƒˆ
 // ------------------------------------------
 void httpd_session_reset( struct httpd_session_data* sd )
 {
-	// •Û‚·‚×‚«‚à‚Ì‚ÌƒoƒbƒNƒAƒbƒv
+	// ä¿æŒã™ã¹ãã‚‚ã®ã®ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—
 	int fd       = sd->fd;
 	int http_ver = sd->http_ver;
 	int persist  = sd->persist;
 
-	// ƒ[ƒƒNƒŠƒA
+	// ã‚¼ãƒ­ã‚¯ãƒªã‚¢
 	memset( sd, 0, sizeof(struct httpd_session_data) );
 
-	// ƒoƒbƒNƒAƒbƒv‚©‚ç‚Ì•œ‹A
+	// ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ã‹ã‚‰ã®å¾©å¸°
 	sd->fd          = fd;
 	sd->http_ver    = http_ver;
 	sd->persist     = persist;
 
-	// 0 ˆÈŠO‚Ì‰Šú’lİ’è
+	// 0 ä»¥å¤–ã®åˆæœŸå€¤è¨­å®š
 	sd->status      = HTTPD_REQUEST_WAIT;
 	sd->tick        = gettick();
 	sd->range_end   = -1;
 }
 
 // ==========================================
-// httpd ‚ÌƒpƒPƒbƒg‰ğÍ
+// httpd ã®ãƒ‘ã‚±ãƒƒãƒˆè§£æ
 // ------------------------------------------
 
 int httpd_parse(int fd)
@@ -713,7 +692,7 @@ int httpd_parse(int fd)
 		session[fd]->session_data2  = sd;
 	}
 
-	// ˆê“x‚ÌƒŠƒNƒGƒXƒg‚Å 32KB ˆÈã‘—M‚³‚ê‚é‚ÆØ’f‚·‚é
+	// ä¸€åº¦ã®ãƒªã‚¯ã‚¨ã‚¹ãƒˆã§ 32KB ä»¥ä¸Šé€ä¿¡ã•ã‚Œã‚‹ã¨åˆ‡æ–­ã™ã‚‹
 	if( RFIFOREST(fd) > 32768 )
 	{
 		session[fd]->eof = 1;
@@ -722,21 +701,21 @@ int httpd_parse(int fd)
 
 	switch(sd->status) {
 	case HTTPD_REQUEST_WAIT:
-		// ƒŠƒNƒGƒXƒg‘Ò‚¿
+		// ãƒªã‚¯ã‚¨ã‚¹ãƒˆå¾…ã¡
 		if(RFIFOREST(fd) > 1024) {
-			// ƒŠƒNƒGƒXƒg‚ª’·‚·‚¬‚é‚Ì‚ÅAƒGƒ‰[ˆµ‚¢‚·‚é
+			// ãƒªã‚¯ã‚¨ã‚¹ãƒˆãŒé•·ã™ãã‚‹ã®ã§ã€ã‚¨ãƒ©ãƒ¼æ‰±ã„ã™ã‚‹
 			sd->status = HTTPD_REQUEST_OK;
 			httpd_send_error(sd,400); // Bad Request
 		}
 		else if( (int)( gettick() - sd->tick ) > request_timeout[sd->persist] )
 		{
-			// ƒŠƒNƒGƒXƒg‚ÉŠÔ‚ª‚©‚©‚è‚·‚¬‚Ä‚¢‚é‚Ì‚ÅAƒGƒ‰[ˆµ‚¢‚·‚é
+			// ãƒªã‚¯ã‚¨ã‚¹ãƒˆã«æ™‚é–“ãŒã‹ã‹ã‚Šã™ãã¦ã„ã‚‹ã®ã§ã€ã‚¨ãƒ©ãƒ¼æ‰±ã„ã™ã‚‹
 			sd->status = HTTPD_REQUEST_OK;
 			httpd_send_error(sd,408); // Request Timeout
 		}
 		else if(sd->header_len == RFIFOREST(fd))
 		{
-			// ó‘Ô‚ªˆÈ‘O‚Æ“¯‚¶‚È‚Ì‚ÅAƒŠƒNƒGƒXƒg‚ğÄ‰ğÍ‚·‚é•K—v‚Í–³‚¢
+			// çŠ¶æ…‹ãŒä»¥å‰ã¨åŒã˜ãªã®ã§ã€ãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚’å†è§£æã™ã‚‹å¿…è¦ã¯ç„¡ã„
 			break;
 		}
 		else
@@ -744,7 +723,7 @@ int httpd_parse(int fd)
 			int limit = (int)RFIFOREST(fd);
 			unsigned char *req = RFIFOP(fd,0);
 
-			// •bŠÔˆ—”§ŒÀ‚Ìƒ`ƒFƒbƒN
+			// ç§’é–“å‡¦ç†æ•°åˆ¶é™ã®ãƒã‚§ãƒƒã‚¯
 			if( server_max_requests_count >= server_max_requests_per_second*server_max_requests_period/1000 )
 			{
 				unsigned int tick = gettick();
@@ -755,14 +734,14 @@ int httpd_parse(int fd)
 				}
 				else
 				{
-					// ƒT[ƒo[‚Ìˆ—§ŒÀ‚ğ‰z‚¦‚Ä‚¢‚é
+					// ã‚µãƒ¼ãƒãƒ¼ã®å‡¦ç†åˆ¶é™ã‚’è¶Šãˆã¦ã„ã‚‹
 					sd->status = HTTPD_REQUEST_OK;
 					httpd_send_error(sd,503); // Service Unavailable
 					break;
 				}
 			}
 
-			// ƒŠƒNƒGƒXƒg‚Ì‰ğÍ
+			// ãƒªã‚¯ã‚¨ã‚¹ãƒˆã®è§£æ
 			sd->header_len = (int)RFIFOREST(fd);
 			do {
 				if(*req == '\n' && limit > 0) {
@@ -770,7 +749,7 @@ int httpd_parse(int fd)
 					if(*req == '\r' && limit > 0) { limit--; req++; }
 					if(*req == '\n') {
 						int status;
-						// HTTPƒwƒbƒ_‚ÌI“_‚ğŒ©‚Â‚¯‚½
+						// HTTPãƒ˜ãƒƒãƒ€ã®çµ‚ç‚¹ã‚’è¦‹ã¤ã‘ãŸ
 						*req   = 0;
 						sd->header_len = (int)(req - RFIFOP(fd,0) + 1);
 						status = httpd_parse_header(sd);
@@ -787,9 +766,9 @@ int httpd_parse(int fd)
 		break;
 
 	case HTTPD_REQUEST_WAIT_POST:
-		// POST ƒƒ\ƒbƒh‚Å‚ÌƒGƒ“ƒeƒBƒeƒBóM‘Ò‚¿
+		// POST ãƒ¡ã‚½ãƒƒãƒ‰ã§ã®ã‚¨ãƒ³ãƒ†ã‚£ãƒ†ã‚£å—ä¿¡å¾…ã¡
 		if( (int)( gettick() - sd->tick ) > request_timeout[sd->persist] ) {
-			// ƒŠƒNƒGƒXƒg‚ÉŠÔ‚ª‚©‚©‚è‚·‚¬‚Ä‚¢‚é‚Ì‚ÅAƒGƒ‰[ˆµ‚¢‚·‚é
+			// ãƒªã‚¯ã‚¨ã‚¹ãƒˆã«æ™‚é–“ãŒã‹ã‹ã‚Šã™ãã¦ã„ã‚‹ã®ã§ã€ã‚¨ãƒ©ãƒ¼æ‰±ã„ã™ã‚‹
 		} else
 		if(RFIFOREST(sd->fd) >= sd->header_len) {
 			unsigned char temp = RFIFOB(sd->fd,sd->header_len);
@@ -801,30 +780,30 @@ int httpd_parse(int fd)
 
 	case HTTPD_REQUEST_OK:
 	case HTTPD_SEND_HEADER:
-		// ƒŠƒNƒGƒXƒg‚ªI‚í‚Á‚½‚Ü‚Ü‰½‚à‘—M‚³‚ê‚Ä‚¢‚È‚¢ó‘Ô‚È‚Ì‚ÅA
-		// ‹­§Ø’f
+		// ãƒªã‚¯ã‚¨ã‚¹ãƒˆãŒçµ‚ã‚ã£ãŸã¾ã¾ä½•ã‚‚é€ä¿¡ã•ã‚Œã¦ã„ãªã„çŠ¶æ…‹ãªã®ã§ã€
+		// å¼·åˆ¶åˆ‡æ–­
 		session[fd]->eof = 1;
 		break;
 
 	case HTTPD_SENDING_BIGFILE:
-		// ‹‘åƒtƒ@ƒCƒ‹‘—M’†
+		// å·¨å¤§ãƒ•ã‚¡ã‚¤ãƒ«é€ä¿¡ä¸­
 		httpd_send_bigfile(sd);
 		break;
 
 	case HTTPD_WAITING_CGI:
-		// cgi ˆ—I—¹‘Ò‚¿
+		// cgi å‡¦ç†çµ‚äº†å¾…ã¡
 		httpd_page_external_cgi(sd);
 		break;
 
 	case HTTPD_WAITING_SEND:
-		// ƒf[ƒ^‚Ì‘—M‚ªI‚í‚é‚Ü‚Å‘Ò‹@
+		// ãƒ‡ãƒ¼ã‚¿ã®é€ä¿¡ãŒçµ‚ã‚ã‚‹ã¾ã§å¾…æ©Ÿ
 		if(session[fd]->wdata_size == session[fd]->wdata_pos) {
-			// HTTP/1.0‚Íè“®Ø’f
+			// HTTP/1.0ã¯æ‰‹å‹•åˆ‡æ–­
 //			if(sd->http_ver == 0) {
 			if(sd->persist == 0) {
 				session[fd]->eof = 1;
 			}
-			// RFIFO ‚©‚çƒŠƒNƒGƒXƒgƒf[ƒ^‚ÌÁ‹‚Æ\‘¢‘Ì‚Ì‰Šú‰»
+			// RFIFO ã‹ã‚‰ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ‡ãƒ¼ã‚¿ã®æ¶ˆå»ã¨æ§‹é€ ä½“ã®åˆæœŸåŒ–
 			RFIFOSKIP(fd,sd->header_len);
 			httpd_session_reset(sd);
 			// printf("httpd_parse: [% 3d] request sended RFIFOREST:%d\n",fd,RFIFOREST(fd));
@@ -835,13 +814,13 @@ int httpd_parse(int fd)
 }
 
 // ==========================================
-// URL ‚ÌƒfƒR[ƒh
+// URL ã®ãƒ‡ã‚³ãƒ¼ãƒ‰
 // ------------------------------------------
 int httpd_decode_url( char *url )
 {
 	int s=0, d=0;
 
-	// url ƒfƒR[ƒh
+	// url ãƒ‡ã‚³ãƒ¼ãƒ‰
 	while( url[s]!='\0' && url[s]!='?' )
 	{
 		if( url[s]=='%' )
@@ -854,7 +833,7 @@ int httpd_decode_url( char *url )
 				s+=3;
 				url[ d++ ] = (a1<<4) + a2;
 			}
-			else if( a1>=0 && a1<2 )	// url ‚É§Œä•¶š‚ğ“ü‚ê‚æ‚¤‚Æ‚µ‚½
+			else if( a1>=0 && a1<2 )	// url ã«åˆ¶å¾¡æ–‡å­—ã‚’å…¥ã‚Œã‚ˆã†ã¨ã—ãŸ
 			{
 				return 0;
 			}
@@ -870,36 +849,36 @@ int httpd_decode_url( char *url )
 	}
 	url[d] = '\0';
 
-	// sjis ‚¾‚Æ³í‚É‚Í‚¢‚©‚È‚¢‚±‚Æ‚à‚ ‚é
+	// sjis ã ã¨æ­£å¸¸ã«ã¯ã„ã‹ãªã„ã“ã¨ã‚‚ã‚ã‚‹
 	s=d=0;
 	while( url[s]!='\0' && url[s]!='?' )
 	{
 		int c0 = url[s], c1 = url[s+1], c2 = url[s+2], c3 = url[s+3];
 
 		/*
-		if( url[s]=='\\' )	// ƒoƒbƒNƒNƒH[ƒg‚ªŠÜ‚Ü‚ê‚Ä‚¢‚é‚Æ’¼‚¿‚ÉƒGƒ‰[
+		if( url[s]=='\\' )	// ãƒãƒƒã‚¯ã‚¯ã‚©ãƒ¼ãƒˆãŒå«ã¾ã‚Œã¦ã„ã‚‹ã¨ç›´ã¡ã«ã‚¨ãƒ©ãƒ¼
 		{
 			return 0;
 		}
 		*/
 
-		// ‹Ö~•¶šƒ`ƒFƒbƒN
+		// ç¦æ­¢æ–‡å­—ãƒã‚§ãƒƒã‚¯
 		if( url[s]=='|' || url[s]=='<' || url[s]=='>' || url[s]=='?'  || url[s]=='*' )
 			return 0;
 
-		if( c0=='/' && (c1=='/' || c1=='\\') )	// ˜A‘±‚µ‚½ƒXƒ‰ƒbƒVƒ…FˆÓ–¡‚ª–³‚¢‚Ì‚Åíœ
+		if( c0=='/' && (c1=='/' || c1=='\\') )	// é€£ç¶šã—ãŸã‚¹ãƒ©ãƒƒã‚·ãƒ¥ï¼šæ„å‘³ãŒç„¡ã„ã®ã§å‰Šé™¤
 		{
 			s++;
 			url[s]='/';
 			continue;
 		}
-		else if( (c0=='/' || c0=='\\') && c1=='.' && (c2=='/' || c2=='\\') )	// ƒJƒŒƒ“ƒgƒfƒBƒŒƒNƒgƒŠFˆÓ–¡‚ª‚È‚¢‚Ì‚Åíœ
+		else if( (c0=='/' || c0=='\\') && c1=='.' && (c2=='/' || c2=='\\') )	// ã‚«ãƒ¬ãƒ³ãƒˆãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªï¼šæ„å‘³ãŒãªã„ã®ã§å‰Šé™¤
 		{
 			s+=2;
 			url[s]='/';
 			continue;
 		}
-		else if( (c0=='/' || c0=='\\') && c1=='.' && c2=='.' && (c3=='/' || c3=='\\') )	// eƒfƒBƒŒƒNƒgƒŠF“WŠJ‚Ü‚½‚ÍƒGƒ‰[
+		else if( (c0=='/' || c0=='\\') && c1=='.' && c2=='.' && (c3=='/' || c3=='\\') )	// è¦ªãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªï¼šå±•é–‹ã¾ãŸã¯ã‚¨ãƒ©ãƒ¼
 		{
 			int r;
 			if( d<=0 )
@@ -920,7 +899,7 @@ int httpd_decode_url( char *url )
 }
 
 // ==========================================
-// IP ƒ`ƒFƒbƒN
+// IP ãƒã‚§ãƒƒã‚¯
 // ------------------------------------------
 static int httpd_check_access_ip( struct httpd_access *a, struct httpd_session_data *sd )
 {
@@ -946,7 +925,7 @@ static int httpd_check_access_ip( struct httpd_access *a, struct httpd_session_d
 }
 
 // ==========================================
-// ƒ†[ƒU[”FØ(ƒ_ƒCƒWƒFƒXƒg”FØ)
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼èªè¨¼(ãƒ€ã‚¤ã‚¸ã‚§ã‚¹ãƒˆèªè¨¼)
 // ------------------------------------------
 int httpd_check_access_user_digest( struct httpd_access *a, struct httpd_session_data *sd )
 {
@@ -961,10 +940,10 @@ int httpd_check_access_user_digest( struct httpd_access *a, struct httpd_session
 	if( !sd->auth || strncasecmp( sd->auth, "Digest ", 7 )!=0 )
 		return 0;
 
-	// ƒwƒbƒ_‚Ì‰ğÍ
+	// ãƒ˜ãƒƒãƒ€ã®è§£æ
 	while( sd->auth[i] )
 	{
-		if( strncasecmp( sd->auth+i, "username=\"", 10 )==0 )		// ƒ†[ƒU[–¼
+		if( strncasecmp( sd->auth+i, "username=\"", 10 )==0 )		// ãƒ¦ãƒ¼ã‚¶ãƒ¼å
 		{
 			if( sscanf(sd->auth+i+10,"%1023[^\"]%n", buf, &n )==1 )
 			{
@@ -976,7 +955,7 @@ int httpd_check_access_user_digest( struct httpd_access *a, struct httpd_session
 			else
 				return 0;
 		}
-		if( strncasecmp( sd->auth+i, "realm=\"", 7 )==0 )		// —Ìˆæ–¼
+		if( strncasecmp( sd->auth+i, "realm=\"", 7 )==0 )		// é ˜åŸŸå
 		{
 			if( sscanf(sd->auth+i+7,"%1023[^\"]%n", buf, &n )==1 )
 			{
@@ -1009,20 +988,20 @@ int httpd_check_access_user_digest( struct httpd_access *a, struct httpd_session
 			else
 				return 0;
 		}
-		if( strncasecmp( sd->auth+i, "algorithm=", 10) ==0 )	// ƒAƒ‹ƒSƒŠƒYƒ€iMD5ŒÅ’èj
+		if( strncasecmp( sd->auth+i, "algorithm=", 10) ==0 )	// ã‚¢ãƒ«ã‚´ãƒªã‚ºãƒ ï¼ˆMD5å›ºå®šï¼‰
 		{
 			if( strncasecmp(sd->auth+i+10, "MD5", 3)==0 )
 				i += 14;
-			else if( strncasecmp(sd->auth+i+10, "\"MD5\"", 5)==0 )	// ie ‚ÌƒoƒO‚ğ‹zû
+			else if( strncasecmp(sd->auth+i+10, "\"MD5\"", 5)==0 )	// ie ã®ãƒã‚°ã‚’å¸å
 				i += 16;
 			else
 				return 0;
 		}
-		if( strncasecmp( sd->auth+i, "qop=", 4) ==0 )			// qopiauthŒÅ’èj
+		if( strncasecmp( sd->auth+i, "qop=", 4) ==0 )			// qopï¼ˆauthå›ºå®šï¼‰
 		{
 			if( strncasecmp(sd->auth+i+4, "auth", 4)==0 )
 				i += 8;
-			else if( strncasecmp(sd->auth+i+4, "\"auth\"", 6)==0 )	// ie ‚ÌƒoƒO‚ğ‹zû
+			else if( strncasecmp(sd->auth+i+4, "\"auth\"", 6)==0 )	// ie ã®ãƒã‚°ã‚’å¸å
 				i +=10;
 			else
 				return 0;
@@ -1085,13 +1064,13 @@ int httpd_check_access_user_digest( struct httpd_access *a, struct httpd_session
 //	printf("response=[%s]\nnonce=[%s]\nusername=[%s]\nrealm=[%s]\ncnonce=[%s]\nnc=[%s]\nuri=[%s]\n",
 //		response,nonce,username,realm,cnonce,nc,uri);
 
-	// ƒ†[ƒU[–¼‚ÌŠm”F‚ÆƒpƒXƒ[ƒh‚Ìæ“¾i“o˜^‚³‚ê‚½”FØŠÖ”‚ğg‚¤j
+	// ãƒ¦ãƒ¼ã‚¶ãƒ¼åã®ç¢ºèªã¨ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ã®å–å¾—ï¼ˆç™»éŒ²ã•ã‚ŒãŸèªè¨¼é–¢æ•°ã‚’ä½¿ã†ï¼‰
 	if( !auth_func[a->auth_func_id] || !auth_func[a->auth_func_id]( a, sd, username, passwd ) )
 	{
 		passwd[0]=0;
 	}
 
-	// ƒ†[ƒU[–¼‚ÌŠm”Fiauthuser ‚Å“o˜^‚³‚ê‚½‚à‚Ìj
+	// ãƒ¦ãƒ¼ã‚¶ãƒ¼åã®ç¢ºèªï¼ˆauthuser ã§ç™»éŒ²ã•ã‚ŒãŸã‚‚ã®ï¼‰
 	for( i=0; i<a->user_count; i++ )
 	{
 		if( a->user[i].type != HTTPD_USER_PASSWD_MD5 &&
@@ -1101,10 +1080,10 @@ int httpd_check_access_user_digest( struct httpd_access *a, struct httpd_session
 			break;
 		}
 	}
-	if( i==a->user_count && !passwd[0] )	// “o˜^ƒ†[ƒU[‚¶‚á‚È‚¢‚Ì‚Å‚±‚±‚Åˆ—‘Å‚¿Ø‚è
+	if( i==a->user_count && !passwd[0] )	// ç™»éŒ²ãƒ¦ãƒ¼ã‚¶ãƒ¼ã˜ã‚ƒãªã„ã®ã§ã“ã“ã§å‡¦ç†æ‰“ã¡åˆ‡ã‚Š
 		return 0;
 
-	// uri ‚Ì‘Ã“–«ŒŸ¸
+	// uri ã®å¦¥å½“æ€§æ¤œæŸ»
 	{
 		char req_uri[1024];
 		const char *line = sd->request_line;
@@ -1117,40 +1096,40 @@ int httpd_check_access_user_digest( struct httpd_access *a, struct httpd_session
 
 		if( strcmpi( req_uri, uri )!=0 )
 		{
-			// ie ‚ÌƒoƒO‹zû
+			// ie ã®ãƒã‚°å¸å
 			for( i=0; req_uri[i] && req_uri[i]!='?'; i++ );
 			if( req_uri[i]!='?' )
 				return 0;
 			req_uri[i]='\0';
-			if( strcmpi( req_uri, uri )!=0 )	// uri ‚ª‚ ‚í‚È‚¢
+			if( strcmpi( req_uri, uri )!=0 )	// uri ãŒã‚ã‚ãªã„
 				return 0;
 		}
 	}
 
-	// nonce ‚Ì‘Ã“–«ŒŸ¸
+	// nonce ã®å¦¥å½“æ€§æ¤œæŸ»
 	{
 		char buf2[33];
 		unsigned int tick;
-		if( sscanf(nonce,"%08x",&tick)!=1 )	// tick ‚ª‚È‚¢
+		if( sscanf(nonce,"%08x",&tick)!=1 )	// tick ãŒãªã„
 			return 0;
 
 		sprintf( buf, "%08x:%s", tick, a->privkey );
 		MD5_String( buf, buf2 );
-		if( strcmpi( nonce+8, buf2 )!=0 )	// ŒvZ•û–@‚ªˆá‚¤
+		if( strcmpi( nonce+8, buf2 )!=0 )	// è¨ˆç®—æ–¹æ³•ãŒé•ã†
 			return 0;
 
-		if( DIFF_TICK( gettick(), tick ) > auth_digest_period )	// —LŒøŠúŒÀ‚ªØ‚ê‚½‚Ì‚Å stale ƒtƒ‰ƒOİ’è
+		if( DIFF_TICK( gettick(), tick ) > auth_digest_period )	// æœ‰åŠ¹æœŸé™ãŒåˆ‡ã‚ŒãŸã®ã§ stale ãƒ•ãƒ©ã‚°è¨­å®š
 		{
 			sd->auth_digest_stale = 1;
 			return 0;
 		}
 	}
 
-	// nc ‚Ì‘Ã“–«ŒŸ¸
+	// nc ã®å¦¥å½“æ€§æ¤œæŸ»
 	{
 		unsigned int nci;
 
-		if( sscanf(nc,"%08x",&nci )!=1 )	// nc ‚ª‚È‚¢
+		if( sscanf(nc,"%08x",&nci )!=1 )	// nc ãŒãªã„
 			return 0;
 
 		if( nci == 0 )
@@ -1160,12 +1139,12 @@ int httpd_check_access_user_digest( struct httpd_access *a, struct httpd_session
 		{
 			if( strcmpi( nonce_log[i].nonce, nonce )==0 )
 			{
-				if( nonce_log[i].nc != nci )		// nc ‚ª‚ ‚í‚È‚¢
+				if( nonce_log[i].nc != nci )		// nc ãŒã‚ã‚ãªã„
 					return 0;
 				break;
 			}
 		}
-		if( i==NONCE_LOG_SIZE )	// nonce ƒƒO‚É–³‚¢‚Ì‚Å stale ƒtƒ‰ƒOİ’è
+		if( i==NONCE_LOG_SIZE )	// nonce ãƒ­ã‚°ã«ç„¡ã„ã®ã§ stale ãƒ•ãƒ©ã‚°è¨­å®š
 		{
 			sd->auth_digest_stale = 1;
 			return 0;
@@ -1173,34 +1152,34 @@ int httpd_check_access_user_digest( struct httpd_access *a, struct httpd_session
 		nonce_log[i].nc++;
 		nonce_log[i].access_flag = 1;
 	}
-	// rensponse ‚Ì‘Ã“–«ŒŸ¸
+	// rensponse ã®å¦¥å½“æ€§æ¤œæŸ»
 	{
 		const char *method[]={"","GET","POST"};
 		char a1[33],a2[33],res[33];
 
-		// A1 ŒvZ
-		if( passwd[0] )								// ”FØŠÖ”‚É‚æ‚é
+		// A1 è¨ˆç®—
+		if( passwd[0] )								// èªè¨¼é–¢æ•°ã«ã‚ˆã‚‹
 		{
 			snprintf( buf, sizeof(buf), "%s:%s:%s", username, realm, passwd );
 			MD5_String( buf, a1 );
 		}
-		else if( au->type == HTTPD_USER_PASSWD_PLAIN )	// ƒvƒŒ[ƒ“ƒpƒXƒ[ƒh
+		else if( au->type == HTTPD_USER_PASSWD_PLAIN )	// ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰
 		{
 			snprintf( buf, sizeof(buf), "%s:%s:%s", username, realm, au->passwd );
 			MD5_String( buf, a1 );
 		}
-		else if( au->type == HTTPD_USER_PASSWD_DIGEST )	// ŒvZÏ‚İ
+		else if( au->type == HTTPD_USER_PASSWD_DIGEST )	// è¨ˆç®—æ¸ˆã¿
 		{
 			strcpy( a1, au->passwd );
 		}
 		else
 			return 0;
 
-		// A2 ŒvZ
+		// A2 è¨ˆç®—
 		snprintf( buf, sizeof(buf), "%s:%s", method[sd->method], uri );
 		MD5_String( buf, a2 );
 
-		// response ŒvZ
+		// response è¨ˆç®—
 		snprintf( buf, sizeof(buf), "%s:%s:%s:%s:%s:%s", a1, nonce, nc, cnonce, "auth", a2 );
 		MD5_String( buf, res );
 
@@ -1214,11 +1193,11 @@ int httpd_check_access_user_digest( struct httpd_access *a, struct httpd_session
 }
 
 // ==========================================
-// ƒ†[ƒU[”FØ(ƒx[ƒVƒbƒN”FØ)
+// ãƒ¦ãƒ¼ã‚¶ãƒ¼èªè¨¼(ãƒ™ãƒ¼ã‚·ãƒƒã‚¯èªè¨¼)
 // ------------------------------------------
 int httpd_check_access_user_basic( struct httpd_access *a, struct httpd_session_data *sd )
 {
-	// ƒ†[ƒU[ƒ`ƒFƒbƒN
+	// ãƒ¦ãƒ¼ã‚¶ãƒ¼ãƒã‚§ãƒƒã‚¯
 	char buf[1024], name[1024], passwd[1024];
 
 	if( !sd->auth || strncasecmp( sd->auth, "Basic ", 6 )!=0 )
@@ -1230,7 +1209,7 @@ int httpd_check_access_user_basic( struct httpd_access *a, struct httpd_session_
 		char passwd2[33];
 		int i;
 
-		// “o˜^‚³‚ê‚½”FØŠÖ”‚ª‚ ‚ê‚Î‚»‚ê‚ğg‚Á‚Ä”äŠr‚·‚é
+		// ç™»éŒ²ã•ã‚ŒãŸèªè¨¼é–¢æ•°ãŒã‚ã‚Œã°ãã‚Œã‚’ä½¿ã£ã¦æ¯”è¼ƒã™ã‚‹
 		if( auth_func[a->auth_func_id] && auth_func[a->auth_func_id]( a, sd, name, passwd2 ) && strcmp(passwd, passwd2)==0 )
 		{
 			auriga_strlcpy( sd->user, name, sizeof(sd->user) );
@@ -1247,7 +1226,7 @@ int httpd_check_access_user_basic( struct httpd_access *a, struct httpd_session_
 		sprintf( buf+128, "%s:%s:%s", name, a->realm, passwd );
 		MD5_String( buf+128, buf+64 );
 
-		// authuser ‚Åİ’è‚³‚ê‚½ƒAƒJƒEƒ“ƒg‚ğ’²‚×‚é
+		// authuser ã§è¨­å®šã•ã‚ŒãŸã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’èª¿ã¹ã‚‹
 		for( i=0; i<a->user_count; i++ )
 		{
 			if( strcmp( a->user[i].name, name ) == 0 &&
@@ -1262,7 +1241,7 @@ int httpd_check_access_user_basic( struct httpd_access *a, struct httpd_session_
 }
 
 // ==========================================
-// ƒAƒNƒZƒX§ŒÀ‚Ìƒ`ƒFƒbƒN
+// ã‚¢ã‚¯ã‚»ã‚¹åˆ¶é™ã®ãƒã‚§ãƒƒã‚¯
 // ------------------------------------------
 int httpd_check_access( struct httpd_session_data *sd, int *st )
 {
@@ -1271,7 +1250,7 @@ int httpd_check_access( struct httpd_session_data *sd, int *st )
 	size_t len=0;
 	struct httpd_access *a;
 
-	// ˆê”Ô’·‚­ƒ}ƒbƒ`‚·‚éğŒ‚ğ’T‚·
+	// ä¸€ç•ªé•·ããƒãƒƒãƒã™ã‚‹æ¡ä»¶ã‚’æ¢ã™
 	for( i=0; i<htaccess_count; i++ )
 	{
 		a = htaccess[i];
@@ -1284,7 +1263,7 @@ int httpd_check_access( struct httpd_session_data *sd, int *st )
 
 	sd->access = a = htaccess[n];
 
-	// IP ƒ`ƒFƒbƒN
+	// IP ãƒã‚§ãƒƒã‚¯
 	if( a->type & HTTPD_ACCESS_IP_MASK )
 	{
 		int f = httpd_check_access_ip( a, sd );
@@ -1298,7 +1277,7 @@ int httpd_check_access( struct httpd_session_data *sd, int *st )
 		}
 	}
 
-	// ƒ†[ƒU[”FØ
+	// ãƒ¦ãƒ¼ã‚¶ãƒ¼èªè¨¼
 	if( a->type & HTTPD_ACCESS_AUTH_MASK )
 	{
 		int f = ( (a->type & HTTPD_ACCESS_AUTH_MASK) == HTTPD_ACCESS_AUTH_BASIC )?
@@ -1317,7 +1296,7 @@ int httpd_check_access( struct httpd_session_data *sd, int *st )
 }
 
 // ==========================================
-// ƒŠƒNƒGƒXƒgƒwƒbƒ_‚Ì‰ğÍ
+// ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ˜ãƒƒãƒ€ã®è§£æ
 // ------------------------------------------
 int httpd_parse_header(struct httpd_session_data* sd)
 {
@@ -1331,7 +1310,7 @@ int httpd_parse_header(struct httpd_session_data* sd)
 
 	memset( sd->req_head, 0, sizeof(sd->req_head) );
 
-	// ‚Ü‚¸ƒwƒbƒ_‚Ì‰üs•¶š‚ğnull•¶š‚É’u‚«Š·‚¦Aæ“ªsˆÈŠO‚Ì‰ğÍ‚ğ‚·‚é
+	// ã¾ãšãƒ˜ãƒƒãƒ€ã®æ”¹è¡Œæ–‡å­—ã‚’nullæ–‡å­—ã«ç½®ãæ›ãˆã€å…ˆé ­è¡Œä»¥å¤–ã®è§£æã‚’ã™ã‚‹
 	while(*req) {
 		if(*req == '\r' || *req == '\n') {
 			*req = 0;
@@ -1339,33 +1318,33 @@ int httpd_parse_header(struct httpd_session_data* sd)
 			if( req[1] == '\n' )
 				req++;
 
-			// sæ“ª‚Ì•Û‘¶
+			// è¡Œå…ˆé ­ã®ä¿å­˜
 			if( ri<sizeof(sd->req_head)/sizeof(sd->req_head[0]) )
 				sd->req_head[ri++] = req+1;
 
-			// Content-Length: ‚Ì’²¸
+			// Content-Length: ã®èª¿æŸ»
 			if(!strncasecmp(req+1,"Content-Length: ",16)) {
 				content_len = atoi(req + 17);
 			}
-			// Connection: ‚Ì’²¸
+			// Connection: ã®èª¿æŸ»
 			if(!strncasecmp(req+1,"Connection: ",12)) {
 				if( strncasecmp(req+13,"close",5)==0)
 					persist = 0;
 				if( strncasecmp(req+13,"Keep-Alive",10)==0)
 					persist = 1;
 			}
-			// Authorization: ‚Ì’²¸
+			// Authorization: ã®èª¿æŸ»
 			if(!strncasecmp(req+1,"Authorization: ",15)) {
 				sd->auth = req+16;
 			}
-			// Range: ‚Ì’²¸
+			// Range: ã®èª¿æŸ»
 			if(!strncasecmp(req+1,"Range: ", 7)){
-				if( strncasecmp(req+8,"bytes=",6 ))	// ƒoƒCƒgƒŒƒ“ƒW‚¶‚á‚È‚¢
+				if( strncasecmp(req+8,"bytes=",6 ))	// ãƒã‚¤ãƒˆãƒ¬ãƒ³ã‚¸ã˜ã‚ƒãªã„
 					return 416;
 				sd->range_start = atoi( req+14 );
 				req += 15;
 				while( *req>='0' && *req<='9' ) req++;
-				if( *req!='-' && sd->range_start>=0 )	// ŠJnˆÊ’u‚ª•‰‚¶‚á‚È‚¢‚Ì‚ÉƒnƒCƒtƒ“‚ª–³‚¢
+				if( *req!='-' && sd->range_start>=0 )	// é–‹å§‹ä½ç½®ãŒè² ã˜ã‚ƒãªã„ã®ã«ãƒã‚¤ãƒ•ãƒ³ãŒç„¡ã„
 					return 400;
 
 				if( *req=='-' )
@@ -1374,46 +1353,46 @@ int httpd_parse_header(struct httpd_session_data* sd)
 					if( *req>='0' && *req<='9' )
 					{
 						sd->range_end = atoi( req );
-						if( sd->range_end < sd->range_start )	// ƒTƒCƒY‚ªƒ}ƒCƒiƒX‚É‚È‚é
+						if( sd->range_end < sd->range_start )	// ã‚µã‚¤ã‚ºãŒãƒã‚¤ãƒŠã‚¹ã«ãªã‚‹
 							return 416;
 						while( *req>='0' && *req<='9' ) req++;
 					}
 				}
-				if( *req!='\r' && *req!='\n' )	// range-set ‚ª•¡”‚ ‚é‚©•s³
+				if( *req!='\r' && *req!='\n' )	// range-set ãŒè¤‡æ•°ã‚ã‚‹ã‹ä¸æ­£
 					return 400;
 				req--;
 			}
-			// If-Modified-Since ‚Ì’²¸
+			// If-Modified-Since ã®èª¿æŸ»
 			if( !strncasecmp(req+1,"If-Modified-Since: ",19) && httpd_get_date( req+20, &sd->date ) ) {
 				if( sd->precond )
 					return 400;
 				sd->precond |= HTTPD_PRECOND_IFMOD;
 			}
-			// If-Unmodified-Since ‚Ì’²¸
+			// If-Unmodified-Since ã®èª¿æŸ»
 			if( !strncasecmp(req+1,"If-Unmodified-Since: ",21) && httpd_get_date( req+22, &sd->date ) ) {
 				if( sd->precond )
 					return 400;
 				sd->precond |= HTTPD_PRECOND_IFUNMOD;
 			}
-			// If-Range ‚Ì’²¸
+			// If-Range ã®èª¿æŸ»
 			if(!strncasecmp(req+1,"If-Range: ",10) ) {
 				if( sd->precond || !httpd_get_date( req+11, &sd->date ) )
 					return 400;
 				sd->precond |= HTTPD_PRECOND_IFRANGE;
 			}
-			// Content-type ‚Ì’²¸
+			// Content-type ã®èª¿æŸ»
 			if(!strncasecmp(req+1,"Content-Type: ",14)) {
 				sd->content_type = req + 15;
 			}
-			// Referer ‚Ì’²¸
+			// Referer ã®èª¿æŸ»
 			if(!strncasecmp(req+1,"Referer: ",9)) {
 				sd->referer = req + 10;
 			}
-			// User-Agent ‚Ì’²¸
+			// User-Agent ã®èª¿æŸ»
 			if(!strncasecmp(req+1,"User-Agent: ",12)) {
 				sd->user_agent = req + 13;
 			}
-			// Cookie ‚Ì’²¸
+			// Cookie ã®èª¿æŸ»
 			if(!strncasecmp(req+1,"Cookie: ",8)) {
 				sd->cookie = req + 9;
 			}
@@ -1423,7 +1402,7 @@ int httpd_parse_header(struct httpd_session_data* sd)
 	req = RFIFOP(sd->fd,0);
 	strncpy( sd->request_line, req, sizeof(sd->request_line) );
 
-	if(!strncmp(req,"GET /",5)) {		// GET ƒŠƒNƒGƒXƒg
+	if(!strncmp(req,"GET /",5)) {		// GET ãƒªã‚¯ã‚¨ã‚¹ãƒˆ
 		req += 5;
 		for(i = 0;req[i]; i++) {
 			c = req[i];
@@ -1451,14 +1430,14 @@ int httpd_parse_header(struct httpd_session_data* sd)
 			return 400; // Bad Request
 		}
 
-		// URI ‚ª’·‚·‚¬‚é
+		// URI ãŒé•·ã™ãã‚‹
 		if( i > max_uri_length )
 		{
 			sd->request_line[ max_uri_length+5 ]='\0';
 			return 414;		// Request-URI Too Long
 		}
 
-		// ƒwƒbƒ_‰ğÍ
+		// ãƒ˜ãƒƒãƒ€è§£æ
 		if(!strncmp(&req[i+1] ,"HTTP/1.1",8)) {
 			sd->http_ver = 1;
 			sd->persist  = (persist == -1 ? 1 : persist);
@@ -1468,16 +1447,16 @@ int httpd_parse_header(struct httpd_session_data* sd)
 		}
 		sd->method = HTTPD_METHOD_GET;
 
-		// URL ƒfƒR[ƒh
+		// URL ãƒ‡ã‚³ãƒ¼ãƒ‰
 		if( !httpd_decode_url( req - 1 ) ) return 400; // Bad Request
 
-		// ƒAƒNƒZƒX§Œä‚Ìƒ`ƒFƒbƒN
+		// ã‚¢ã‚¯ã‚»ã‚¹åˆ¶å¾¡ã®ãƒã‚§ãƒƒã‚¯
 		if( !httpd_check_access( sd, &status ) )
 			return status;
 
 		// printf("httpd: request %s %s\n",sd->url,sd->query);
 		httpd_parse_request_ok(sd);
-	} else if(!strncmp(req,"POST /",6)) {	// POST ƒŠƒNƒGƒXƒg
+	} else if(!strncmp(req,"POST /",6)) {	// POST ãƒªã‚¯ã‚¨ã‚¹ãƒˆ
 		req += 6;
 		for(i = 0;req[i]; i++) {
 			c = req[i];
@@ -1488,14 +1467,14 @@ int httpd_parse_header(struct httpd_session_data* sd)
 		req[i]     = 0;
 		sd->url    = req;
 
-		// URI ‚ª’·‚·‚¬‚é
+		// URI ãŒé•·ã™ãã‚‹
 		if( i > max_uri_length )
 		{
 			sd->request_line[ max_uri_length+6 ]='\0';
 			return 414;		// Request-URI Too Long
 		}
 
-		// ƒwƒbƒ_‰ğÍ
+		// ãƒ˜ãƒƒãƒ€è§£æ
 		if(!strncmp(&req[i+1] ,"HTTP/1.1",8)) {
 			sd->http_ver = 1;
 			if(sd->persist == -1) sd->persist  = 1;
@@ -1505,14 +1484,14 @@ int httpd_parse_header(struct httpd_session_data* sd)
 		}
 		sd->method = HTTPD_METHOD_POST;
 
-		// URL ƒfƒR[ƒh
+		// URL ãƒ‡ã‚³ãƒ¼ãƒ‰
 		if( !httpd_decode_url( req - 1 ) ) return 400; // Bad Request
 
 		if(content_len <= 0 || content_len >= 32*1024) {
-			// ‚Æ‚è‚ ‚¦‚¸32KBˆÈã‚ÌƒŠƒNƒGƒXƒg‚Í•s³ˆµ‚¢
+			// ã¨ã‚Šã‚ãˆãš32KBä»¥ä¸Šã®ãƒªã‚¯ã‚¨ã‚¹ãƒˆã¯ä¸æ­£æ‰±ã„
 			return ( content_len==0 )? 411 : ( content_len >= 32*1024 )? 413 : 400;
 		}
-		// ƒAƒNƒZƒX§Œä‚Ìƒ`ƒFƒbƒN
+		// ã‚¢ã‚¯ã‚»ã‚¹åˆ¶å¾¡ã®ãƒã‚§ãƒƒã‚¯
 		if( !httpd_check_access( sd, &status ) )
 			return status;
 
@@ -1525,7 +1504,7 @@ int httpd_parse_header(struct httpd_session_data* sd)
 			httpd_parse_request_ok(sd);
 			RFIFOB(sd->fd,sd->header_len) = temp;
 		} else {
-			// POST‚Ìƒf[ƒ^‚ª‘—‚ç‚ê‚Ä‚­‚é‚Ì‚ğ‘Ò‚Â
+			// POSTã®ãƒ‡ãƒ¼ã‚¿ãŒé€ã‚‰ã‚Œã¦ãã‚‹ã®ã‚’å¾…ã¤
 			sd->status = HTTPD_REQUEST_WAIT_POST;
 		}
 	} else {
@@ -1535,7 +1514,7 @@ int httpd_parse_header(struct httpd_session_data* sd)
 }
 
 // ==========================================
-// ƒŠƒNƒGƒXƒg‚Ì‰ğÍŠ®—¹•ƒy[ƒW‚ğˆ—‚·‚é
+// ãƒªã‚¯ã‚¨ã‚¹ãƒˆã®è§£æå®Œäº†ï¼†ãƒšãƒ¼ã‚¸ã‚’å‡¦ç†ã™ã‚‹
 // ------------------------------------------
 void httpd_parse_request_ok(struct httpd_session_data *sd)
 {
@@ -1543,7 +1522,7 @@ void httpd_parse_request_ok(struct httpd_session_data *sd)
 
 	sd->status = HTTPD_REQUEST_OK;
 
-	// ƒtƒ@ƒCƒ‹–¼‚ª‹‚Ü‚Á‚½‚Ì‚ÅAƒy[ƒW‚ª–³‚¢‚©ŒŸõ‚·‚é
+	// ãƒ•ã‚¡ã‚¤ãƒ«åãŒæ±‚ã¾ã£ãŸã®ã§ã€ãƒšãƒ¼ã‚¸ãŒç„¡ã„ã‹æ¤œç´¢ã™ã‚‹
 	// printf("httpd_parse: [% 3d] request /%s\n",fd,req);
 	httpd_parse_func = (HttpdFunc)strdb_search(httpd_files,sd->url);
 	if(httpd_parse_func == NULL) {
@@ -1558,7 +1537,7 @@ void httpd_parse_request_ok(struct httpd_session_data *sd)
 		}
 	}
 	if(sd->persist == 1 && sd->data_len && sd->status!=HTTPD_SENDING_BIGFILE && sd->status!=HTTPD_WAITING_CGI ) {
-		// ’·‚³‚ª•Ï‚Èƒf[ƒ^(‚±‚ñ‚È‚Ì‘—‚é‚È‚æc)
+		// é•·ã•ãŒå¤‰ãªãƒ‡ãƒ¼ã‚¿(ã“ã‚“ãªã®é€ã‚‹ãªã‚ˆâ€¦)
 		printf("httpd_parse: send size mismatch when parsing /%s\n",sd->url);
 		session[sd->fd]->eof = 1;
 	}
@@ -1568,7 +1547,7 @@ void httpd_parse_request_ok(struct httpd_session_data *sd)
 }
 
 // ==========================================
-// CGI ƒNƒGƒŠ‚Ì’læ“¾
+// CGI ã‚¯ã‚¨ãƒªã®å€¤å–å¾—
 // ------------------------------------------
 char* httpd_get_value(struct httpd_session_data* sd,const char* val)
 {
@@ -1586,7 +1565,7 @@ char* httpd_get_value(struct httpd_session_data* sd,const char* val)
 	} while(src_p);
 
 	if(src_p != NULL) {
-		// –Ú“I‚Ì•¶š—ñ‚ğŒ©‚Â‚¯‚½
+		// ç›®çš„ã®æ–‡å­—åˆ—ã‚’è¦‹ã¤ã‘ãŸ
 		const unsigned char* p2;
 		int   dest_len;
 		char* dest_p;
@@ -1624,7 +1603,7 @@ char* httpd_get_value(struct httpd_session_data* sd,const char* val)
 }
 
 // ==========================================
-// ƒƒ\ƒbƒh‚ğ•Ô‚·
+// ãƒ¡ã‚½ãƒƒãƒ‰ã‚’è¿”ã™
 // ------------------------------------------
 int httpd_get_method(struct httpd_session_data* sd)
 {
@@ -1632,7 +1611,7 @@ int httpd_get_method(struct httpd_session_data* sd)
 }
 
 // ==========================================
-// IP ƒAƒhƒŒƒX‚ğ•Ô‚·
+// IP ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’è¿”ã™
 // ------------------------------------------
 unsigned long httpd_get_ip(struct httpd_session_data *sd)
 {
@@ -1640,8 +1619,8 @@ unsigned long httpd_get_ip(struct httpd_session_data *sd)
 }
 
 // ==========================================
-// MIMEƒ^ƒCƒv”»’è
-//  å—v‚È‚à‚Ì‚¾‚¯”»’è‚µ‚ÄAc‚è‚Íapplication/octet-stream
+// MIMEã‚¿ã‚¤ãƒ—åˆ¤å®š
+//  ä¸»è¦ãªã‚‚ã®ã ã‘åˆ¤å®šã—ã¦ã€æ®‹ã‚Šã¯application/octet-stream
 // ------------------------------------------
 static const char* httpd_mimetype(const char* url)
 {
@@ -1664,28 +1643,28 @@ static const char* httpd_mimetype(const char* url)
 }
 
 // ==========================================
-// URL ‚Ì ƒtƒ@ƒCƒ‹–¼•âŠ®
+// URL ã® ãƒ•ã‚¡ã‚¤ãƒ«åè£œå®Œ
 // ------------------------------------------
 const char* httpd_complement_file( const char* url, char* buf )
 {
 	char file_buf[2048];
-	const char* cfile = "index.html";	// ƒfƒtƒHƒ‹ƒg
+	const char* cfile = "index.html";	// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆ
 
-	// URL ‚È‚µ‚È‚çƒfƒtƒHƒ‹ƒg
+	// URL ãªã—ãªã‚‰ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆ
 	if( url[0] == '\0' )
 		return cfile;
 
-	// ƒXƒ‰ƒbƒVƒ…‚ÅI‚í‚Á‚Ä‚¢‚½‚çƒfƒtƒHƒ‹ƒg‚ğ’Ç‰Á
+	// ã‚¹ãƒ©ãƒƒã‚·ãƒ¥ã§çµ‚ã‚ã£ã¦ã„ãŸã‚‰ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚’è¿½åŠ 
 	if( url[strlen(url)-1] == '/' )
 	{
 		sprintf( buf, "%s%s", url, cfile );
 		return buf;
 	}
 
-	// url ‚ÌÅ‘å’·‚Í–ñ 1010 ƒoƒCƒgˆÈ“à‚È‚Ì‚ÅƒI[ƒo[ƒtƒ[‚µ‚È‚¢
+	// url ã®æœ€å¤§é•·ã¯ç´„ 1010 ãƒã‚¤ãƒˆä»¥å†…ãªã®ã§ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼ã—ãªã„
 	sprintf(file_buf,"%s%s",document_root,url);
 
-	// ƒfƒBƒŒƒNƒgƒŠ‚¾‚Á‚½‚çƒfƒtƒHƒ‹ƒg‚ğ’Ç‰Á
+	// ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã ã£ãŸã‚‰ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã‚’è¿½åŠ 
 	{
 		struct stat st;
 		if( stat( file_buf, &st ) == 0 )
@@ -1698,12 +1677,12 @@ const char* httpd_complement_file( const char* url, char* buf )
 		}
 	}
 
-	// ‚¢‚¸‚ê‚É‚àŠY“–‚µ‚È‚¢‚Ì‚Å‚»‚Ì‚Ü‚Ü
+	// ã„ãšã‚Œã«ã‚‚è©²å½“ã—ãªã„ã®ã§ãã®ã¾ã¾
 	return url;
 }
 
 // ==========================================
-// ƒy[ƒWˆ— - ’Êí‚Ìƒtƒ@ƒCƒ‹‘—M
+// ãƒšãƒ¼ã‚¸å‡¦ç† - é€šå¸¸ã®ãƒ•ã‚¡ã‚¤ãƒ«é€ä¿¡
 // ------------------------------------------
 void httpd_send_file(struct httpd_session_data* sd,const char* url)
 {
@@ -1714,16 +1693,16 @@ void httpd_send_file(struct httpd_session_data* sd,const char* url)
 
 	if(sd->status != HTTPD_REQUEST_OK) return;
 
-	// URL ‚Ì•âŠ®
+	// URL ã®è£œå®Œ
 	url = httpd_complement_file( url, url_buf );
 
-	// url ‚ÌÅ‘å’·‚Í•âŠ®‚³‚ê‚Ä‚à 1536 ƒoƒCƒgˆÈ“à‚È‚Ì‚ÅƒI[ƒo[ƒtƒ[‚µ‚È‚¢
+	// url ã®æœ€å¤§é•·ã¯è£œå®Œã•ã‚Œã¦ã‚‚ 1536 ãƒã‚¤ãƒˆä»¥å†…ãªã®ã§ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼ã—ãªã„
 	sprintf(file_buf,"%s%s",document_root,url);
 
 #ifndef NO_HTTPD_CGI
 	if( httpd_cgi_enable )
 	{
-		// ŠO•” CGI ‚ÌŠg’£q‚©‚Ç‚¤‚©”»’è
+		// å¤–éƒ¨ CGI ã®æ‹¡å¼µå­ã‹ã©ã†ã‹åˆ¤å®š
 		const char* ext_list = sd->access ? sd->access->cgi_ext_list : httpd_cgi_ext_list;
 		const char* p = strrchr( url, '.' ), *p2;
 		if( p && (p2 = strstr( ext_list, p ) ) != NULL && p2[strlen(p)]==' ' )
@@ -1741,10 +1720,10 @@ void httpd_send_file(struct httpd_session_data* sd,const char* url)
 	}
 #endif
 
-	// ƒŒƒWƒ…[ƒ€‰Â”\(Accept-Ranges ‚Ì’Ê’m)
+	// ãƒ¬ã‚¸ãƒ¥ãƒ¼ãƒ å¯èƒ½(Accept-Ranges ã®é€šçŸ¥)
 	sd->reshead_flag |= HTTPD_RESHEAD_ACCRANGE;
 
-	// “ú•tEƒtƒ@ƒCƒ‹ƒTƒCƒYŠm”F
+	// æ—¥ä»˜ãƒ»ãƒ•ã‚¡ã‚¤ãƒ«ã‚µã‚¤ã‚ºç¢ºèª
 	{
 		time_t date = 0;
 		struct stat st;
@@ -1754,21 +1733,21 @@ void httpd_send_file(struct httpd_session_data* sd,const char* url)
 			file_size = st.st_size;
 		}
 
-		if( date!=0 && sd->precond == HTTPD_PRECOND_IFMOD   && date == sd->date )	// If-Modified-Since ‚Ìˆ—
+		if( date!=0 && sd->precond == HTTPD_PRECOND_IFMOD   && date == sd->date )	// If-Modified-Since ã®å‡¦ç†
 		{
-			httpd_send_head( sd, 304, NULL, -1);	// 304 ‚ÍƒGƒ“ƒeƒBƒeƒB‚ğ‚½‚È‚¢
+			httpd_send_head( sd, 304, NULL, -1);	// 304 ã¯ã‚¨ãƒ³ãƒ†ã‚£ãƒ†ã‚£ã‚’æŒãŸãªã„
 			sd->data_len = 0;
 			sd->status = HTTPD_WAITING_SEND;
 			return;
 		}
 
-		if( sd->precond == HTTPD_PRECOND_IFUNMOD && (date != sd->date || date==0) )	// If-Unmodified-Since ‚Ìˆ—
+		if( sd->precond == HTTPD_PRECOND_IFUNMOD && (date != sd->date || date==0) )	// If-Unmodified-Since ã®å‡¦ç†
 		{
 			httpd_send_error( sd, 412 );
 			return;
 		}
 
-		if( sd->precond == HTTPD_PRECOND_IFRANGE && (date != sd->date || date==0) )	// If-Range ‚Ìˆ—
+		if( sd->precond == HTTPD_PRECOND_IFRANGE && (date != sd->date || date==0) )	// If-Range ã®å‡¦ç†
 		{
 			sd->range_start = 0;
 			sd->range_end   = -1;
@@ -1777,18 +1756,18 @@ void httpd_send_file(struct httpd_session_data* sd,const char* url)
 		sd->reshead_flag |= HTTPD_RESHEAD_LASTMOD;
 		sd->date = date;
 
-	} // end “ú•tŠm”F
+	} // end æ—¥ä»˜ç¢ºèª
 
-	// ƒtƒ@ƒCƒ‹‚Ì‘—M
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã®é€ä¿¡
 	fp = fopen(file_buf,"rb");
 	if(fp == NULL) {
 		httpd_send_error(sd, sd->date ? 403 : 404 );
 	} else {
 		int status = 200;
-		if( sd->range_start!=0 )	// Range ‚ÌŠJnˆÊ’uƒ`ƒFƒbƒN
+		if( sd->range_start!=0 )	// Range ã®é–‹å§‹ä½ç½®ãƒã‚§ãƒƒã‚¯
 		{
 			if( sd->range_start<0 ) sd->range_start += file_size;
-			if( sd->range_start<0 )	// ŠJn’n“_‚ª•‰
+			if( sd->range_start<0 )	// é–‹å§‹åœ°ç‚¹ãŒè² 
 			{
 				httpd_send_error( sd,416 );
 				fclose(fp);
@@ -1796,7 +1775,7 @@ void httpd_send_file(struct httpd_session_data* sd,const char* url)
 			}
 			status = 206;
 		}
-		if( sd->range_end==-1 )		// Range ‚ÌI—¹ˆÊ’uC³
+		if( sd->range_end==-1 )		// Range ã®çµ‚äº†ä½ç½®ä¿®æ­£
 			sd->range_end += file_size;
 		else
 		{
@@ -1806,9 +1785,9 @@ void httpd_send_file(struct httpd_session_data* sd,const char* url)
 		}
 
 		sd->inst_len = file_size;
-		file_size = sd->range_end - sd->range_start + 1;	// content-lenth ŒvZ
+		file_size = sd->range_end - sd->range_start + 1;	// content-lenth è¨ˆç®—
 
-		if( file_size<0 )	// ƒTƒCƒY‚ª•‰
+		if( file_size<0 )	// ã‚µã‚¤ã‚ºãŒè² 
 		{
 			httpd_send_error( sd,416 );
 			fclose(fp);
@@ -1816,7 +1795,7 @@ void httpd_send_file(struct httpd_session_data* sd,const char* url)
 		}
 
 
-		if( file_size > bigfile_threshold )		// ‘å‚«‚Èƒtƒ@ƒCƒ‹‚Í•ªŠ„“]‘—
+		if( file_size > bigfile_threshold )		// å¤§ããªãƒ•ã‚¡ã‚¤ãƒ«ã¯åˆ†å‰²è»¢é€
 		{
 			fclose( fp );
 			realloc_fifo( sd->fd, 0, bigfile_splitsize );
@@ -1825,7 +1804,7 @@ void httpd_send_file(struct httpd_session_data* sd,const char* url)
 			sd->file_pos = sd->range_start;
 			httpd_send_bigfile( sd );
 		}
-		else		// ¬‚³‚Èƒtƒ@ƒCƒ‹‚Í FIFO ‚Éˆê‹C‚É‘—‚é
+		else		// å°ã•ãªãƒ•ã‚¡ã‚¤ãƒ«ã¯ FIFO ã«ä¸€æ°—ã«é€ã‚‹
 		{
 			realloc_fifo( sd->fd, 0, file_size + 32768 );
 			httpd_send_head(sd,status,httpd_mimetype(url),file_size);
@@ -1835,7 +1814,7 @@ void httpd_send_file(struct httpd_session_data* sd,const char* url)
 				if(file_size > 8192) read_byte = 8192;
 				if( fread(file_buf,1,read_byte,fp) != read_byte )
 				{
-					session[sd->fd]->eof = 1;	// “Ç‚İ‚İƒGƒ‰[‚ª‹N‚«‚½‚Ì‚ÅØ’f
+					session[sd->fd]->eof = 1;	// èª­ã¿è¾¼ã¿ã‚¨ãƒ©ãƒ¼ãŒèµ·ããŸã®ã§åˆ‡æ–­
 					return;
 				}
 				httpd_send_data(sd,read_byte,file_buf);
@@ -1847,7 +1826,7 @@ void httpd_send_file(struct httpd_session_data* sd,const char* url)
 }
 
 // ==========================================
-// ƒy[ƒWˆ— - ‹‘åƒtƒ@ƒCƒ‹‘—M
+// ãƒšãƒ¼ã‚¸å‡¦ç† - å·¨å¤§ãƒ•ã‚¡ã‚¤ãƒ«é€ä¿¡
 // ------------------------------------------
 void httpd_send_bigfile( struct httpd_session_data* sd )
 {
@@ -1856,16 +1835,16 @@ void httpd_send_bigfile( struct httpd_session_data* sd )
 	const char* url = sd->url;
 	FILE *fp;
 
-	if( WFIFOSPACE( sd->fd ) < 64*1024 )	// ƒoƒbƒtƒ@‚Ì‹ó‚«‚ª­‚È‚¢‚Ì‚Å‹A‚é
+	if( WFIFOSPACE( sd->fd ) < 64*1024 )	// ãƒãƒƒãƒ•ã‚¡ã®ç©ºããŒå°‘ãªã„ã®ã§å¸°ã‚‹
 		return;
 
-	// URL ‚Ì•âŠ®
+	// URL ã®è£œå®Œ
 	url = httpd_complement_file( url, url_buf );
 
-	// url ‚ÌÅ‘å’·‚Í•âŠ®‚³‚ê‚Ä‚à 1536 ƒoƒCƒgˆÈ“à‚È‚Ì‚ÅƒI[ƒo[ƒtƒ[‚µ‚È‚¢
+	// url ã®æœ€å¤§é•·ã¯è£œå®Œã•ã‚Œã¦ã‚‚ 1536 ãƒã‚¤ãƒˆä»¥å†…ãªã®ã§ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼ã—ãªã„
 	sprintf(file_buf,"%s%s",document_root,url);
 
-	// “ú•tŠm”F
+	// æ—¥ä»˜ç¢ºèª
 	if( sd->date )
 	{
 		time_t date = 0;
@@ -1873,14 +1852,14 @@ void httpd_send_bigfile( struct httpd_session_data* sd )
 		if( stat( file_buf, &st ) == 0 )
 			date = st.st_mtime;
 
-		if( date != sd->date )	// “]‘—’†‚Éƒtƒ@ƒCƒ‹‚ªXV‚³‚ê‚½‚Ì‚ÅØ’f
+		if( date != sd->date )	// è»¢é€ä¸­ã«ãƒ•ã‚¡ã‚¤ãƒ«ãŒæ›´æ–°ã•ã‚ŒãŸã®ã§åˆ‡æ–­
 		{
 			session[sd->fd]->eof = 1;
 			return;
 		}
 	}
 
-	// ƒtƒ@ƒCƒ‹‚Ì‘—M
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã®é€ä¿¡
 	fp = fopen(file_buf,"rb");
 	if(fp == NULL) {
 		session[sd->fd]->eof = 1;
@@ -1893,7 +1872,7 @@ void httpd_send_bigfile( struct httpd_session_data* sd )
 		fseek( fp, sd->file_pos, SEEK_SET );
 		if( fread( WFIFOP(sd->fd,0), 1, send_size, fp)!= send_size )
 		{
-			session[sd->fd]->eof = 1;	// ƒtƒ@ƒCƒ‹“Ç‚İ‚İ‚ÅƒGƒ‰[‚ª”­¶‚µ‚½‚Ì‚ÅØ’f
+			session[sd->fd]->eof = 1;	// ãƒ•ã‚¡ã‚¤ãƒ«èª­ã¿è¾¼ã¿ã§ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ãŸã®ã§åˆ‡æ–­
 			return;
 		}
 		WFIFOSET( sd->fd, send_size );
@@ -1907,7 +1886,7 @@ void httpd_send_bigfile( struct httpd_session_data* sd )
 
 
 // ******************************************
-// ŠO•” cgi ˆ— ‚±‚±‚©‚ç
+// å¤–éƒ¨ cgi å‡¦ç† ã“ã“ã‹ã‚‰
 // ******************************************
 
 
@@ -1925,7 +1904,7 @@ void httpd_cgi_log( struct httpd_session_data *sd, const char* str );
 
 #ifdef WINDOWS
 
-// ƒwƒ‹ƒpƒ}ƒNƒ’è‹`
+// ãƒ˜ãƒ«ãƒ‘ãƒã‚¯ãƒ­å®šç¾©
 #	define SAFE_CLOSEHANDLE(h)	if( h != INVALID_HANDLE_VALUE ) { CloseHandle(h); h = INVALID_HANDLE_VALUE; }
 #	define CLOSEHANDLES()	{ \
 			SAFE_CLOSEHANDLE( sd->cgi_hProcess );	\
@@ -1936,7 +1915,7 @@ void httpd_cgi_log( struct httpd_session_data *sd, const char* str );
 		}
 
 // ==========================================
-// VC/BCC : ŠO•” cgi ˆ— / qƒvƒƒZƒX‹N“®
+// VC/BCC : å¤–éƒ¨ cgi å‡¦ç† / å­ãƒ—ãƒ­ã‚»ã‚¹èµ·å‹•
 // ------------------------------------------
 void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 {
@@ -1950,7 +1929,7 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 	BOOL bPost = (httpd_get_method(sd) == HTTPD_METHOD_POST);
 
 	// ------------
-	// ƒnƒ“ƒhƒ‹“™‚Ì‰Šú‰»
+	// ãƒãƒ³ãƒ‰ãƒ«ç­‰ã®åˆæœŸåŒ–
 	// ------------
 	sd->cgi_hCIn = INVALID_HANDLE_VALUE;	sd->cgi_hPIn = INVALID_HANDLE_VALUE;
 	sd->cgi_hOut = INVALID_HANDLE_VALUE;	sd->cgi_hErr = INVALID_HANDLE_VALUE;
@@ -1958,7 +1937,7 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 	sd->cgi_state = 1;
 
 	// ------------
-	// ƒnƒ“ƒhƒ‹‚ğ‹¤—L‚·‚é‚½‚ß‚Ì\‘¢‘Ì‚ğİ’è
+	// ãƒãƒ³ãƒ‰ãƒ«ã‚’å…±æœ‰ã™ã‚‹ãŸã‚ã®æ§‹é€ ä½“ã‚’è¨­å®š
 	// ------------
 	ZeroMemory( &sa, sizeof(sa) );
 	sa.nLength = sizeof(sa);
@@ -1966,16 +1945,16 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 	sa.bInheritHandle = TRUE;
 
 	// ------------
-	// POST ‚È‚çƒNƒGƒŠ‚ğ‘—‚é
+	// POST ãªã‚‰ã‚¯ã‚¨ãƒªã‚’é€ã‚‹
 	// ------------
 	if( bPost )
 	{
 		DWORD dwWritten;
 
-		// POST ‚Ìê‡AŠO•” cgi ‚Æ’ÊM‚·‚é‚½‚ß‚ÌƒpƒCƒv‚ğŠJ‚­
+		// POST ã®å ´åˆã€å¤–éƒ¨ cgi ã¨é€šä¿¡ã™ã‚‹ãŸã‚ã®ãƒ‘ã‚¤ãƒ—ã‚’é–‹ã
 		if( !CreatePipe( &sd->cgi_hCIn , &sd->cgi_hPIn , &sa, sd->query_len+16 ) )
 		{
-			// ƒpƒCƒv‚ªì‚ê‚È‚¢
+			// ãƒ‘ã‚¤ãƒ—ãŒä½œã‚Œãªã„
 			CLOSEHANDLES();
 			printf("httpd_page_external_cgi: CreatePipe: failed.\n");
 			httpd_send_error(sd,500);
@@ -1984,7 +1963,7 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 
 		if( !WriteFile( sd->cgi_hPIn, sd->query, sd->query_len, &dwWritten, NULL ) || dwWritten < (DWORD)sd->query_len )
 		{
-			// POST ‚Ì‘—M‚ÅƒGƒ‰[‚ª‹N‚«‚½
+			// POST ã®é€ä¿¡ã§ã‚¨ãƒ©ãƒ¼ãŒèµ·ããŸ
 			CLOSEHANDLES();
 			printf("httpd_page_external_cgi: CreatePipe: failed.\n");
 			httpd_send_error(sd,500);
@@ -1994,8 +1973,8 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// –¼‘O‚È‚µƒpƒCƒv‚ª”ñ“¯Šúƒ‚[ƒh‚ğƒTƒ|[ƒg‚µ‚Ä‚È‚¢•‚»‚Ì‘¼‚Ì§–ñ‚ª‚ ‚é‚Ì‚Åd•û‚È‚­c
-	// o—Í—p‚Ìƒeƒ“ƒ|ƒ‰ƒŠƒtƒ@ƒCƒ‹‚ğŠJ‚­
+	// åå‰ãªã—ãƒ‘ã‚¤ãƒ—ãŒéåŒæœŸãƒ¢ãƒ¼ãƒ‰ã‚’ã‚µãƒãƒ¼ãƒˆã—ã¦ãªã„ï¼†ãã®ä»–ã®åˆ¶ç´„ãŒã‚ã‚‹ã®ã§ä»•æ–¹ãªãâ€¦
+	// å‡ºåŠ›ç”¨ã®ãƒ†ãƒ³ãƒãƒ©ãƒªãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
 	// ------------
 	{
 		int i = atn_rand() ^ gettick();
@@ -2009,7 +1988,7 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 
 		if( sd->cgi_hOut == INVALID_HANDLE_VALUE || sd->cgi_hErr == INVALID_HANDLE_VALUE )
 		{
-			// ƒeƒ“ƒ|ƒ‰ƒŠƒtƒ@ƒCƒ‹‚ªì¬‚Å‚«‚È‚©‚Á‚½
+			// ãƒ†ãƒ³ãƒãƒ©ãƒªãƒ•ã‚¡ã‚¤ãƒ«ãŒä½œæˆã§ããªã‹ã£ãŸ
 			CLOSEHANDLES();
 			printf("httpd_page_external_cgi: CreateFile: failed.\n");
 			httpd_send_error(sd,500);
@@ -2018,7 +1997,7 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// qƒvƒƒZƒXŒÄ‚Ño‚µ‚Ì‚½‚ß‚Ìİ’è
+	// å­ãƒ—ãƒ­ã‚»ã‚¹å‘¼ã³å‡ºã—ã®ãŸã‚ã®è¨­å®š
 	// ------------
 	ZeroMemory( &si, sizeof(si) );
 	si.cb = sizeof(si);
@@ -2028,17 +2007,17 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 	si.dwFlags = STARTF_USESTDHANDLES;
 
 	// ------------
-	// ƒhƒLƒ…ƒƒ“ƒgƒ‹[ƒg‚ÌŒvZ
+	// ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆãƒ«ãƒ¼ãƒˆã®è¨ˆç®—
 	// ------------
 	httpd_page_cgi_calc_document_root( sd, szPath, sizeof(szPath), '\\', '/' );
 
 	// ------------
-	// ŠÂ‹«•Ï”‚Ìİ’è
+	// ç’°å¢ƒå¤‰æ•°ã®è¨­å®š
 	// ------------
 	httpd_page_cgi_setenv( sd, szEnv, sizeof(szEnv), NULL, 0, szPath );
 
 	// ------------
-	// ƒJƒŒƒ“ƒgƒfƒBƒŒƒNƒgƒŠ‚ÆƒRƒ}ƒ“ƒh’Šo
+	// ã‚«ãƒ¬ãƒ³ãƒˆãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã¨ã‚³ãƒãƒ³ãƒ‰æŠ½å‡º
 	// ------------
 	{
 		size_t i, x;
@@ -2058,7 +2037,7 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// ƒRƒ}ƒ“ƒhƒ‰ƒCƒ“‚Ì¶¬
+	// ã‚³ãƒãƒ³ãƒ‰ãƒ©ã‚¤ãƒ³ã®ç”Ÿæˆ
 	// ------------
 	{
 		FILE *fp;
@@ -2066,7 +2045,7 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 		snprintf( cmd2, sizeof(cmd2), "%s%s", document_root, sd->url );
 		if( (fp = fopen( cmd2, "rb" )) ==NULL )
 		{
-			// ¸”s
+			// å¤±æ•—
 			CLOSEHANDLES();
 			printf("httpd_page_external_cgi: no such script [%s]\n", sd->url);
 			httpd_send_error(sd,404);
@@ -2077,7 +2056,7 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 
 		if( buf[0]=='#' && buf[1]=='!' )
 		{
-			// æ“ªs‚ª #! ‚Ån‚Ü‚Á‚Ä‚é‚Ì‚ÅƒXƒNƒŠƒvƒg‚Á‚Û‚¢
+			// å…ˆé ­è¡ŒãŒ #! ã§å§‹ã¾ã£ã¦ã‚‹ã®ã§ã‚¹ã‚¯ãƒªãƒ—ãƒˆã£ã½ã„
 			int i, k=2;
 			for( i=2; buf[i]==' ' || buf[i]=='\t'; i++ )
 				;
@@ -2094,13 +2073,13 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// qƒvƒƒZƒXŒÄ‚Ño‚µ
+	// å­ãƒ—ãƒ­ã‚»ã‚¹å‘¼ã³å‡ºã—
 	// ------------
 	if( !CreateProcess( NULL, szCmd, NULL, NULL, TRUE,
 						CREATE_NEW_PROCESS_GROUP | BELOW_NORMAL_PRIORITY_CLASS,
 						szEnv, szCwd, &si, &pi ) )
 	{
-		// ¸”s
+		// å¤±æ•—
 		CLOSEHANDLES();
 		printf("httpd_page_external_cgi: CreateProcess: failed.\n");
 		httpd_send_error(sd,500);
@@ -2108,13 +2087,13 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// ‚¢‚ç‚È‚¢ƒnƒ“ƒhƒ‹‚ğ•Â‚¶‚é
+	// ã„ã‚‰ãªã„ãƒãƒ³ãƒ‰ãƒ«ã‚’é–‰ã˜ã‚‹
 	// ------------
 	CloseHandle( pi.hThread );
 	SAFE_CLOSEHANDLE( sd->cgi_hCIn  );
 
 	// ------------
-	// •Ï”‚Ìİ’è
+	// å¤‰æ•°ã®è¨­å®š
 	// ------------
 	sd->tick = gettick();
 	sd->status = HTTPD_WAITING_CGI;
@@ -2124,7 +2103,7 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 }
 
 // ==========================================
-// VC/BCC : ŠO•” cgi ˆ— / ®Œ`‚Æ‘—M
+// VC/BCC : å¤–éƒ¨ cgi å‡¦ç† / æ•´å½¢ã¨é€ä¿¡
 // ------------------------------------------
 void httpd_page_external_cgi_send( struct httpd_session_data* sd )
 {
@@ -2134,29 +2113,29 @@ void httpd_page_external_cgi_send( struct httpd_session_data* sd )
 	int status;
 
 	// ------------
-	// •W€ƒGƒ‰[o—Í‚ğ’²‚×‚é
+	// æ¨™æº–ã‚¨ãƒ©ãƒ¼å‡ºåŠ›ã‚’èª¿ã¹ã‚‹
 	// ------------
 	if( GetFileSize( sd->cgi_hErr, NULL ) != 0 )
 	{
-		// cgi ‚ÅƒGƒ‰[‚ª‚ ‚Á‚½‚ç‚µ‚¢
+		// cgi ã§ã‚¨ãƒ©ãƒ¼ãŒã‚ã£ãŸã‚‰ã—ã„
 		ReadFile( sd->cgi_hErr, szBuf, sizeof(szBuf)-16, &dwRead, NULL );
 		szBuf[dwRead] = '\0';
 		printf("error --\n%s\n---\n", szBuf );
 
-		// todo: ƒGƒ‰[ƒƒO‚Éo—Í
+		// todo: ã‚¨ãƒ©ãƒ¼ãƒ­ã‚°ã«å‡ºåŠ›
 		printf("httpd_page_external_cgi: cgi error ?\n");
 	}
 	SAFE_CLOSEHANDLE( sd->cgi_hErr );
 
 
 	// ------------
-	// ƒwƒbƒ_‚Ì“Ç‚İ‚İ
+	// ãƒ˜ãƒƒãƒ€ã®èª­ã¿è¾¼ã¿
 	// ------------
 	SetFilePointer( sd->cgi_hOut, 0, NULL, FILE_BEGIN );
 	ZeroMemory( szBuf, sizeof(szBuf) );
 	if( !ReadFile( sd->cgi_hOut, szBuf, sizeof(szBuf)-64, &dwRead, NULL ) || dwRead == 0 )
 	{
-		// ‰½‚ç‚©‚ÌƒGƒ‰[‚©Aƒf[ƒ^‚ª‹ó
+		// ä½•ã‚‰ã‹ã®ã‚¨ãƒ©ãƒ¼ã‹ã€ãƒ‡ãƒ¼ã‚¿ãŒç©º
 		CLOSEHANDLES();
 		printf("httpd_page_external_cgi: ReadFile : failed.\n");
 		sd->status = HTTPD_REQUEST_OK;
@@ -2165,11 +2144,11 @@ void httpd_page_external_cgi_send( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// ƒwƒbƒ_‚Ìˆ—•ƒf[ƒ^‚ÌÅ‰‘—M
+	// ãƒ˜ãƒƒãƒ€ã®å‡¦ç†ï¼†ãƒ‡ãƒ¼ã‚¿ã®æœ€åˆé€ä¿¡
 	// ------------
 	if( ( i = httpd_page_cgi_process_header( sd, szBuf, dwRead, &status ) ) == 0 )
 	{
-		// ƒwƒbƒ_“à‚É Content-type ‚© Location ‚ª‚È‚¢
+		// ãƒ˜ãƒƒãƒ€å†…ã« Content-type ã‹ Location ãŒãªã„
 		CLOSEHANDLES();
 		printf("httpd_page_external_cgi: Content-type or Location not found.\n");
 		sd->status = HTTPD_REQUEST_OK;
@@ -2178,12 +2157,12 @@ void httpd_page_external_cgi_send( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// ƒƒO‚Ìo—Í
+	// ãƒ­ã‚°ã®å‡ºåŠ›
 	// ------------
 	httpd_log( sd, status, GetFileSize( sd->cgi_hOut, NULL ) - i );
 
 	// ------------
-	// ƒf[ƒ^‚Ìo—Í(c‚è)
+	// ãƒ‡ãƒ¼ã‚¿ã®å‡ºåŠ›(æ®‹ã‚Š)
 	// ------------
 	while( ReadFile( sd->cgi_hOut, szBuf, sizeof(szBuf), &dwRead, NULL ) && dwRead > 0 )
 	{
@@ -2196,19 +2175,19 @@ void httpd_page_external_cgi_send( struct httpd_session_data* sd )
 	sd->data_len = 0;
 	sd->cgi_state= 0;
 
-	// ƒnƒ“ƒhƒ‹‚ÌƒNƒ[ƒY
+	// ãƒãƒ³ãƒ‰ãƒ«ã®ã‚¯ãƒ­ãƒ¼ã‚º
 	CLOSEHANDLES();
 }
 
 // ==========================================
-// VC/BCC : ŠO•” cgi ˆ— / ƒƒCƒ“
+// VC/BCC : å¤–éƒ¨ cgi å‡¦ç† / ãƒ¡ã‚¤ãƒ³
 // ------------------------------------------
 void httpd_page_external_cgi( struct httpd_session_data* sd )
 {
 	BOOL bRunning;
 
 	// ------------
-	// ‰‰ñ‚È‚ç CGI ‹N“®
+	// åˆå›ãªã‚‰ CGI èµ·å‹•
 	// ------------
 	if( sd->status != HTTPD_WAITING_CGI )
 	{
@@ -2217,16 +2196,16 @@ void httpd_page_external_cgi( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// cgi ƒvƒƒZƒX‚Ìƒ`ƒFƒbƒN
+	// cgi ãƒ—ãƒ­ã‚»ã‚¹ã®ãƒã‚§ãƒƒã‚¯
 	// ------------
 	bRunning = ( WaitForSingleObject( sd->cgi_hProcess, 0 ) != WAIT_OBJECT_0 );
 
 	if( bRunning )
 	{
-		// cgi ‚Ìˆ—‚ªI‚í‚Á‚Ä‚È‚¢
+		// cgi ã®å‡¦ç†ãŒçµ‚ã‚ã£ã¦ãªã„
 		if( DIFF_TICK( gettick(), sd->tick ) > httpd_cgi_timeout )
 		{
-			// ƒ^ƒCƒ€ƒAƒEƒg‚µ‚Ä‚¢‚é‚Ì‚Å CGI ‚ğ’†’f‚·‚é
+			// ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆã—ã¦ã„ã‚‹ã®ã§ CGI ã‚’ä¸­æ–­ã™ã‚‹
 			printf("httpd_page_external_cgi: cgi timed out\n");
 			httpd_page_external_cgi_disconnect( sd );
 			sd->status = HTTPD_REQUEST_OK;
@@ -2236,14 +2215,14 @@ void httpd_page_external_cgi( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// cgi ‚ÍI—¹‚µ‚Ä‚¢‚é‚Ì‚Åo—Íˆ—‚ğ‚·‚é
+	// cgi ã¯çµ‚äº†ã—ã¦ã„ã‚‹ã®ã§å‡ºåŠ›å‡¦ç†ã‚’ã™ã‚‹
 	// ------------
 	httpd_page_external_cgi_send(sd);
 	return;
 }
 
 // ==========================================
-// VC/BCC : ŠO•” cgi ˆ— / ’†’fˆ—
+// VC/BCC : å¤–éƒ¨ cgi å‡¦ç† / ä¸­æ–­å‡¦ç†
 // ------------------------------------------
 int httpd_page_external_cgi_abort( struct httpd_cgi_kill* p )
 {
@@ -2252,16 +2231,16 @@ int httpd_page_external_cgi_abort( struct httpd_cgi_kill* p )
 	switch( p->state )
 	{
 	// ------------
-	// CGI ‚Ì’†’f
+	// CGI ã®ä¸­æ–­
 	// ------------
 	case 1:
-		GenerateConsoleCtrlEvent( CTRL_BREAK_EVENT, p->dwProcessID ); // CGI ƒvƒƒZƒX‚É BREAK ƒCƒxƒ“ƒg‚ğ‘—‚é
+		GenerateConsoleCtrlEvent( CTRL_BREAK_EVENT, p->dwProcessID ); // CGI ãƒ—ãƒ­ã‚»ã‚¹ã« BREAK ã‚¤ãƒ™ãƒ³ãƒˆã‚’é€ã‚‹
 		printf("httpd_page_external_cgi: break process.\n");
 		p->state = 2;
 		return 0;
 
 	// ------------
-	// CGI ‚Ì’†’f‘Ò‚¿
+	// CGI ã®ä¸­æ–­å¾…ã¡
 	// ------------
 	case 2:
 		bRunning = ( WaitForSingleObject( p->hProcess, 0 ) != WAIT_OBJECT_0 );
@@ -2269,7 +2248,7 @@ int httpd_page_external_cgi_abort( struct httpd_cgi_kill* p )
 		{
 			if( DIFF_TICK( gettick(), p->tick ) > httpd_cgi_kill_timeout )
 			{
-				// ’†’f‚àƒ^ƒCƒ€ƒAƒEƒg‚µ‚½‚Ì‚Å‹­§I—¹
+				// ä¸­æ–­ã‚‚ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆã—ãŸã®ã§å¼·åˆ¶çµ‚äº†
 				TerminateProcess( p->hProcess, 255 );
 				printf("httpd_page_external_cgi: break fail / kill process.\n");
 			}
@@ -2287,11 +2266,11 @@ int httpd_page_external_cgi_abort( struct httpd_cgi_kill* p )
 }
 
 // ==========================================
-// VC/BCC : ŠO•” cgi ˆ— / ƒfƒXƒgƒ‰ƒNƒ^
+// VC/BCC : å¤–éƒ¨ cgi å‡¦ç† / ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 // ------------------------------------------
 void httpd_page_external_cgi_disconnect( struct httpd_session_data* sd )
 {
-	// CGI Às’†‚È‚ç’†’fˆ—‚ª•K—v
+	// CGI å®Ÿè¡Œä¸­ãªã‚‰ä¸­æ–­å‡¦ç†ãŒå¿…è¦
 	if( sd->cgi_hProcess != INVALID_HANDLE_VALUE )
 	{
 		struct httpd_cgi_kill* p = httpd_page_external_cgi_abort_insert( sd );
@@ -2299,7 +2278,7 @@ void httpd_page_external_cgi_disconnect( struct httpd_session_data* sd )
 		{
 			p->hProcess    = sd->cgi_hProcess;
 			p->dwProcessID = sd->cgi_dwProcessID;
-			sd->cgi_hProcess = INVALID_HANDLE_VALUE;	// ŠJ•ú‚µ‚È‚­‚Ä—Ç‚¢
+			sd->cgi_hProcess = INVALID_HANDLE_VALUE;	// é–‹æ”¾ã—ãªãã¦è‰¯ã„
 			httpd_page_external_cgi_abort( p );
 		}
 		else
@@ -2308,25 +2287,25 @@ void httpd_page_external_cgi_disconnect( struct httpd_session_data* sd )
 		}
 	}
 
-	// ƒnƒ“ƒhƒ‹‚ğ‘S‚Ä•Â‚¶‚é
+	// ãƒãƒ³ãƒ‰ãƒ«ã‚’å…¨ã¦é–‰ã˜ã‚‹
 	CLOSEHANDLES();
 }
 
 // ==========================================
-// VC/BCC : ŠO•” cgi ˆ— / I—¹ˆ—
+// VC/BCC : å¤–éƒ¨ cgi å‡¦ç† / çµ‚äº†å‡¦ç†
 // ------------------------------------------
 void httpd_page_external_cgi_final_sub( struct httpd_cgi_kill *p )
 {
 	CloseHandle( p->hProcess );
 }
 
-// ƒwƒ‹ƒpƒ}ƒNƒ‚Í‚à‚¤‚¢‚ç‚È‚¢
+// ãƒ˜ãƒ«ãƒ‘ãƒã‚¯ãƒ­ã¯ã‚‚ã†ã„ã‚‰ãªã„
 #	undef	CLOSEHANDLES
 #	undef	SAFE_CLOSEHANDLE
 
 #else
 // ==========================================
-// gcc : ŠO•” cgi ˆ—
+// gcc : å¤–éƒ¨ cgi å‡¦ç†
 // ------------------------------------------
 
 #	define	DEF_CLOSEFD(fd)		(close)(fd);
@@ -2338,7 +2317,7 @@ void httpd_page_external_cgi_final_sub( struct httpd_cgi_kill *p )
 				}
 
 // ==========================================
-// gcc : ŠO•” cgi ˆ— / qƒvƒƒZƒX‹N“®
+// gcc : å¤–éƒ¨ cgi å‡¦ç† / å­ãƒ—ãƒ­ã‚»ã‚¹èµ·å‹•
 // ------------------------------------------
 void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 {
@@ -2350,36 +2329,36 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 	int cpid;
 
 	// ------------
-	// ƒfƒBƒXƒNƒŠƒvƒ^“™‚Ì‰Šú‰»
+	// ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ç­‰ã®åˆæœŸåŒ–
 	// ------------
 	sd->cgi_in = sd->cgi_out = sd->cgi_err = -1;
 	sd->cgi_state = 1;
 
 	// ------------
-	// Cygwin ‚Å‚Í”ñ“¯ŠúƒpƒCƒv‚ğƒTƒ|[ƒg‚µ‚Ä‚È‚¢(‚æ‚¤‚Év‚¦‚é?)‚Ì‚Åd•û‚È‚­c
-	// ƒeƒ“ƒ|ƒ‰ƒŠƒtƒ@ƒCƒ‹‚ğŠJ‚­
+	// Cygwin ã§ã¯éåŒæœŸãƒ‘ã‚¤ãƒ—ã‚’ã‚µãƒãƒ¼ãƒˆã—ã¦ãªã„(ã‚ˆã†ã«æ€ãˆã‚‹?)ã®ã§ä»•æ–¹ãªãâ€¦
+	// ãƒ†ãƒ³ãƒãƒ©ãƒªãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
 	// ------------
 	{
 		int i = atn_rand() ^ gettick();
 		char tmp_in[256], tmp_out[256], tmp_err[256];
-		// –¼‘O‚ğì‚é
+		// åå‰ã‚’ä½œã‚‹
 		sprintf( tmp_in,  "%sauriga_httpd_in%04x%08x.tmp",  httpd_cgi_temp_dir, sd->fd, i );
 		sprintf( tmp_out, "%sauriga_httpd_out%04x%08x.tmp", httpd_cgi_temp_dir, sd->fd, i );
 		sprintf( tmp_err, "%sauriga_httpd_err%04x%08x.tmp", httpd_cgi_temp_dir, sd->fd, i );
 
-		// ŠJ‚­
+		// é–‹ã
 		sd->cgi_in  = open( tmp_in , O_RDWR | O_CREAT | O_TRUNC, 0644 );
 		sd->cgi_out = open( tmp_out, O_RDWR | O_CREAT | O_TRUNC, 0644 );
 		sd->cgi_err = open( tmp_err, O_RDWR | O_CREAT | O_TRUNC, 0644 );
 
-		// ƒtƒ@ƒCƒ‹‚ğ•Â‚¶‚½‚çíœ‚·‚é‚æ‚¤‚Éw¦‚µ‚Ä‚¨‚­
+		// ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‰ã˜ãŸã‚‰å‰Šé™¤ã™ã‚‹ã‚ˆã†ã«æŒ‡ç¤ºã—ã¦ãŠã
 		unlink( tmp_in );
 		unlink( tmp_out );
 		unlink( tmp_err );
 
 		if( sd->cgi_in == -1 || sd->cgi_out == -1 || sd->cgi_err == -1 )
 		{
-			// ƒeƒ“ƒ|ƒ‰ƒŠƒtƒ@ƒCƒ‹‚ªì¬‚Å‚«‚È‚©‚Á‚½
+			// ãƒ†ãƒ³ãƒãƒ©ãƒªãƒ•ã‚¡ã‚¤ãƒ«ãŒä½œæˆã§ããªã‹ã£ãŸ
 			CLOSEFDS();
 			printf("httpd_page_external_cgi: open: failed.\n");
 			httpd_send_error(sd,500);
@@ -2389,13 +2368,13 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// POST ‚È‚çƒNƒGƒŠ‚ğo—Í‚·‚é
+	// POST ãªã‚‰ã‚¯ã‚¨ãƒªã‚’å‡ºåŠ›ã™ã‚‹
 	// ------------
 	if( httpd_get_method(sd) == HTTPD_METHOD_POST )
 	{
 		if( write( sd->cgi_in, sd->query, sd->query_len ) < sd->query_len )
 		{
-			// POST ‚Ì‘—M‚ÅƒGƒ‰[‚ª‹N‚«‚½
+			// POST ã®é€ä¿¡ã§ã‚¨ãƒ©ãƒ¼ãŒèµ·ããŸ
 			CLOSEFDS();
 			printf("httpd_page_external_cgi: write POST query: failed.\n");
 			httpd_send_error(sd,500);
@@ -2404,17 +2383,17 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// ƒhƒLƒ…ƒƒ“ƒgƒ‹[ƒg‚ÌŒvZ
+	// ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆãƒ«ãƒ¼ãƒˆã®è¨ˆç®—
 	// ------------
 	httpd_page_cgi_calc_document_root( sd, path, sizeof(path), '/', '\\' );
 
 	// ------------
-	// ŠÂ‹«•Ï”‚Ìİ’è
+	// ç’°å¢ƒå¤‰æ•°ã®è¨­å®š
 	// ------------
 	httpd_page_cgi_setenv( sd, env, sizeof(env), envp, sizeof(envp), path );
 
 	// ------------
-	// ƒJƒŒƒ“ƒgƒfƒBƒŒƒNƒgƒŠ‚ÆƒRƒ}ƒ“ƒh’Šo
+	// ã‚«ãƒ¬ãƒ³ãƒˆãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã¨ã‚³ãƒãƒ³ãƒ‰æŠ½å‡º
 	// ------------
 	{
 		int j, i, x, y;
@@ -2433,7 +2412,7 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// qƒvƒƒZƒX‚ğ fork ‚·‚é
+	// å­ãƒ—ãƒ­ã‚»ã‚¹ã‚’ fork ã™ã‚‹
 	// ------------
 	if( ( cpid = fork() )==-1 )
 	{
@@ -2445,30 +2424,30 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// qƒvƒƒZƒX‚È‚çƒvƒƒOƒ‰ƒ€‹N“®
+	// å­ãƒ—ãƒ­ã‚»ã‚¹ãªã‚‰ãƒ—ãƒ­ã‚°ãƒ©ãƒ èµ·å‹•
 	// ------------
 	if( cpid==0 )
 	{
-		// ƒJƒŒƒ“ƒgƒfƒBƒŒƒNƒgƒŠ•ÏX
+		// ã‚«ãƒ¬ãƒ³ãƒˆãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªå¤‰æ›´
 		chdir( cwd );
 
-		// •W€“üo—Í‚ÌƒŠƒ_ƒCƒŒƒNƒg
+		// æ¨™æº–å…¥å‡ºåŠ›ã®ãƒªãƒ€ã‚¤ãƒ¬ã‚¯ãƒˆ
 		dup2( sd->cgi_in , 0 ); DEF_CLOSEFD( sd->cgi_in  );
 		dup2( sd->cgi_out, 1 ); DEF_CLOSEFD( sd->cgi_out );
 		dup2( sd->cgi_err, 2 ); DEF_CLOSEFD( sd->cgi_err  );
 
-		// CGI ƒvƒƒOƒ‰ƒ€‚Ì‹N“®
+		// CGI ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã®èµ·å‹•
 		execle( cmd, cmd, NULL, envp );
 
-		// ‚È‚ñ‚ç‚©‚ÌƒGƒ‰[”­¶
+		// ãªã‚“ã‚‰ã‹ã®ã‚¨ãƒ©ãƒ¼ç™ºç”Ÿ
 		printf("http_page_external_cgi: execle failed.\n");
 
-		// do_final Œn‚ğˆ—‚³‚¹‚¸‚ÉI—¹
+		// do_final ç³»ã‚’å‡¦ç†ã•ã›ãšã«çµ‚äº†
 		abort();
 	}
 
 	// ------------
-	// eƒvƒƒZƒX‚È‚ç•Ï”‚ğİ’è‚·‚é
+	// è¦ªãƒ—ãƒ­ã‚»ã‚¹ãªã‚‰å¤‰æ•°ã‚’è¨­å®šã™ã‚‹
 	// ------------
 	sd->tick = gettick();
 	sd->status = HTTPD_WAITING_CGI;
@@ -2479,7 +2458,7 @@ void httpd_page_external_cgi_fork( struct httpd_session_data* sd )
 }
 
 // ==========================================
-// gcc : ŠO•” cgi ˆ— / ®Œ`‚Æ‘—M
+// gcc : å¤–éƒ¨ cgi å‡¦ç† / æ•´å½¢ã¨é€ä¿¡
 // ------------------------------------------
 void httpd_page_external_cgi_send( struct httpd_session_data* sd )
 {
@@ -2487,24 +2466,24 @@ void httpd_page_external_cgi_send( struct httpd_session_data* sd )
 	int i, bytes, status;
 
 	// ------------
-	// •W€ƒGƒ‰[o—Í‚ğ’²‚×‚é
+	// æ¨™æº–ã‚¨ãƒ©ãƒ¼å‡ºåŠ›ã‚’èª¿ã¹ã‚‹
 	// ------------
 	if( lseek( sd->cgi_err, 0, SEEK_END ) != 0 )
 	{
-		// cgi ‚ÅƒGƒ‰[‚ª‚ ‚Á‚½‚ç‚µ‚¢
-		// todo: ƒGƒ‰[ƒƒO‚Éo—Í
+		// cgi ã§ã‚¨ãƒ©ãƒ¼ãŒã‚ã£ãŸã‚‰ã—ã„
+		// todo: ã‚¨ãƒ©ãƒ¼ãƒ­ã‚°ã«å‡ºåŠ›
 		printf("httpd_page_external_cgi: cgi error ?\n");
 	}
 	SAFE_CLOSEFD( sd->cgi_err );
 
 	// ------------
-	// ƒwƒbƒ_‚Ì“Ç‚İ‚İ
+	// ãƒ˜ãƒƒãƒ€ã®èª­ã¿è¾¼ã¿
 	// ------------
 	lseek( sd->cgi_out, 0, SEEK_SET );
 	memset( buf, 0, sizeof(buf) );
 	if( ( bytes = read( sd->cgi_out, buf, sizeof(buf) ) ) <=0 )
 	{
-		// ‰½‚ç‚©‚ÌƒGƒ‰[‚©Aƒf[ƒ^‚ª‹ó
+		// ä½•ã‚‰ã‹ã®ã‚¨ãƒ©ãƒ¼ã‹ã€ãƒ‡ãƒ¼ã‚¿ãŒç©º
 		CLOSEFDS();
 		printf("httpd_page_external_cgi: read : failed.\n");
 		sd->status = HTTPD_REQUEST_OK;
@@ -2513,7 +2492,7 @@ void httpd_page_external_cgi_send( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// ƒwƒbƒ_‚Ìˆ—•ƒf[ƒ^‚ÌÅ‰‘—M
+	// ãƒ˜ãƒƒãƒ€ã®å‡¦ç†ï¼†ãƒ‡ãƒ¼ã‚¿ã®æœ€åˆé€ä¿¡
 	// ------------
 	if( ( i = httpd_page_cgi_process_header( sd, buf, bytes, &status ) ) == 0 )
 	{
@@ -2525,12 +2504,12 @@ void httpd_page_external_cgi_send( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// ƒƒO‚Ìo—Í
+	// ãƒ­ã‚°ã®å‡ºåŠ›
 	// ------------
 	httpd_log( sd, status, lseek( sd->cgi_out, 0, SEEK_CUR ) - i );
 
 	// ------------
-	// ƒf[ƒ^‚Ìo—Í(c‚è)
+	// ãƒ‡ãƒ¼ã‚¿ã®å‡ºåŠ›(æ®‹ã‚Š)
 	// ------------
 	while( (bytes = read( sd->cgi_out, buf, sizeof(buf) ) ) > 0 )
 	{
@@ -2542,20 +2521,20 @@ void httpd_page_external_cgi_send( struct httpd_session_data* sd )
 	sd->data_len = 0;
 	sd->cgi_state= 0;
 
-	// ƒnƒ“ƒhƒ‹‚ÌƒNƒ[ƒY
+	// ãƒãƒ³ãƒ‰ãƒ«ã®ã‚¯ãƒ­ãƒ¼ã‚º
 	CLOSEFDS();
 	return;
 }
 
 // ==========================================
-// gcc : ŠO•” cgi ˆ— / ƒƒCƒ“
+// gcc : å¤–éƒ¨ cgi å‡¦ç† / ãƒ¡ã‚¤ãƒ³
 // ------------------------------------------
 void httpd_page_external_cgi( struct httpd_session_data* sd )
 {
 	int status=0, running;
 
 	// ------------
-	// ‰‰ñ‚È‚ç CGI ‹N“®
+	// åˆå›ãªã‚‰ CGI èµ·å‹•
 	// ------------
 	if( sd->status != HTTPD_WAITING_CGI )
 	{
@@ -2564,16 +2543,16 @@ void httpd_page_external_cgi( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// cgi ƒvƒƒZƒX‚Ìƒ`ƒFƒbƒN
+	// cgi ãƒ—ãƒ­ã‚»ã‚¹ã®ãƒã‚§ãƒƒã‚¯
 	// ------------
 	running = (waitpid( sd->cgi_cpid, &status, WNOHANG ) ==0 || (!WIFEXITED(status) && !WIFSIGNALED(status)) );
 
 	if( running )
 	{
-		// cgi ‚Ìˆ—‚ªI‚í‚Á‚Ä‚È‚¢‚Ì‚Åƒ^ƒCƒ€ƒAƒEƒg‚µ‚Ä‚È‚¢‚©’²‚×‚é
+		// cgi ã®å‡¦ç†ãŒçµ‚ã‚ã£ã¦ãªã„ã®ã§ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆã—ã¦ãªã„ã‹èª¿ã¹ã‚‹
 		if( DIFF_TICK( gettick(), sd->tick ) > httpd_cgi_timeout )
 		{
-			// ƒ^ƒCƒ€ƒAƒEƒg‚µ‚Ä‚¢‚é‚Ì‚Å CGI ‚ğI—¹‚µ‚ÄƒGƒ‰[‚ğ’Ê’m
+			// ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆã—ã¦ã„ã‚‹ã®ã§ CGI ã‚’çµ‚äº†ã—ã¦ã‚¨ãƒ©ãƒ¼ã‚’é€šçŸ¥
 			printf("httpd_page_external_cgi: cgi timed out.\n");
 			httpd_page_external_cgi_disconnect( sd );
 			sd->status = HTTPD_REQUEST_OK;
@@ -2583,14 +2562,14 @@ void httpd_page_external_cgi( struct httpd_session_data* sd )
 	}
 
 	// ------------
-	// cgi ‚ÍI—¹‚µ‚Ä‚¢‚é‚Ì‚Åo—Íˆ—‚ğ‚·‚é
+	// cgi ã¯çµ‚äº†ã—ã¦ã„ã‚‹ã®ã§å‡ºåŠ›å‡¦ç†ã‚’ã™ã‚‹
 	// ------------
 	httpd_page_external_cgi_send(sd);
 	return;
 }
 
 // ==========================================
-// gcc : ŠO•” cgi ˆ— / ’†’fˆ—
+// gcc : å¤–éƒ¨ cgi å‡¦ç† / ä¸­æ–­å‡¦ç†
 // ------------------------------------------
 int httpd_page_external_cgi_abort( struct httpd_cgi_kill* p )
 {
@@ -2602,37 +2581,37 @@ int httpd_page_external_cgi_abort( struct httpd_cgi_kill* p )
 	switch( p->state )
 	{
 	// ------------
-	// CGI ‚ÌI—¹
+	// CGI ã®çµ‚äº†
 	// ------------
 	case 1:
-		kill( p->pid, SIGTERM );	// CGI ‚É TERM ƒVƒOƒiƒ‹‚ğ‘—‚é
+		kill( p->pid, SIGTERM );	// CGI ã« TERM ã‚·ã‚°ãƒŠãƒ«ã‚’é€ã‚‹
 		printf("httpd_page_external_cgi: break process.\n");
 		p->state=2;
 		p->tick = gettick();
 		return 0;
 
 	// ------------
-	// CGI ‚Ì’†’f‘Ò‚¿
+	// CGI ã®ä¸­æ–­å¾…ã¡
 	// ------------
 	case 2:
 		if( running )
 		{
 			if( DIFF_TICK( tick, p->tick ) > httpd_cgi_kill_timeout )
 			{
-				// ’†’f‚àƒ^ƒCƒ€ƒAƒEƒg‚µ‚½‚Ì‚Å‹­§I—¹
-				kill( p->pid, SIGKILL );	// CGI ‚É KILL ƒVƒOƒiƒ‹‚ğ‘—‚é
+				// ä¸­æ–­ã‚‚ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆã—ãŸã®ã§å¼·åˆ¶çµ‚äº†
+				kill( p->pid, SIGKILL );	// CGI ã« KILL ã‚·ã‚°ãƒŠãƒ«ã‚’é€ã‚‹
 				printf("httpd_page_external_cgi: break failed / kill process.\n");
 				p->state=3;
 			}
 			return 0;
 		}
-		return 1;	// ’†’f¬Œ÷
+		return 1;	// ä¸­æ–­æˆåŠŸ
 
 	// ------------
-	// CGI ‚Ì‹­§I—¹‘Ò‚¿
+	// CGI ã®å¼·åˆ¶çµ‚äº†å¾…ã¡
 	// ------------
 	case 3:
-		if( running )	// KILL ‚µ‚½‚ªI—¹‚µ‚Ä‚È‚¢ : ƒ]ƒ“ƒr‰»‚·‚é‚©‚à‚µ‚ê‚È‚¢‚ª‚±‚êˆÈã–Ê“|Œ©Ø‚ê‚È‚¢
+		if( running )	// KILL ã—ãŸãŒçµ‚äº†ã—ã¦ãªã„ : ã‚¾ãƒ³ãƒ“åŒ–ã™ã‚‹ã‹ã‚‚ã—ã‚Œãªã„ãŒã“ã‚Œä»¥ä¸Šé¢å€’è¦‹åˆ‡ã‚Œãªã„
 		{
 			printf("httpd_page_external_cgi: kill failed.\n");
 		}
@@ -2644,13 +2623,13 @@ int httpd_page_external_cgi_abort( struct httpd_cgi_kill* p )
 }
 
 // ==========================================
-// gcc : ŠO•” cgi ˆ— / ƒfƒXƒgƒ‰ƒNƒ^
+// gcc : å¤–éƒ¨ cgi å‡¦ç† / ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 // ------------------------------------------
 void httpd_page_external_cgi_disconnect( struct httpd_session_data* sd )
 {
 	CLOSEFDS();
 
-	// CGI Às’†‚È‚ç’†’fˆ—‚ª•K—v
+	// CGI å®Ÿè¡Œä¸­ãªã‚‰ä¸­æ–­å‡¦ç†ãŒå¿…è¦
 	if( sd->cgi_cpid > 0 )
 	{
 		struct httpd_cgi_kill* p;
@@ -2668,7 +2647,7 @@ void httpd_page_external_cgi_disconnect( struct httpd_session_data* sd )
 }
 
 // ==========================================
-// gcc : ŠO•” cgi ˆ— / I—¹ˆ—
+// gcc : å¤–éƒ¨ cgi å‡¦ç† / çµ‚äº†å‡¦ç†
 // ------------------------------------------
 void httpd_page_external_cgi_final_sub( struct httpd_cgi_kill *p )
 {
@@ -2682,7 +2661,7 @@ void httpd_page_external_cgi_final_sub( struct httpd_cgi_kill *p )
 #endif
 
 // ==========================================
-// ‹¤’Ê : ŠO•” cgi ˆ— / ’†’fƒŠƒXƒg’Ç‰Á
+// å…±é€š : å¤–éƒ¨ cgi å‡¦ç† / ä¸­æ–­ãƒªã‚¹ãƒˆè¿½åŠ 
 // ------------------------------------------
 struct httpd_cgi_kill* httpd_page_external_cgi_abort_insert( struct httpd_session_data *sd )
 {
@@ -2708,7 +2687,7 @@ struct httpd_cgi_kill* httpd_page_external_cgi_abort_insert( struct httpd_sessio
 }
 
 // ==========================================
-// ‹¤’Ê : ŠO•” cgi ˆ— / ’†’fƒŠƒXƒgƒ^ƒCƒ}ˆ—
+// å…±é€š : å¤–éƒ¨ cgi å‡¦ç† / ä¸­æ–­ãƒªã‚¹ãƒˆã‚¿ã‚¤ãƒå‡¦ç†
 // ------------------------------------------
 int httpd_page_external_cgi_abort_timer( int tid, unsigned int tick, int id, void *data)
 {
@@ -2732,7 +2711,7 @@ int httpd_page_external_cgi_abort_timer( int tid, unsigned int tick, int id, voi
 }
 
 // ==========================================
-// ‹¤’Ê : ŠO•” cgi ˆ— / I—¹ˆ—
+// å…±é€š : å¤–éƒ¨ cgi å‡¦ç† / çµ‚äº†å‡¦ç†
 // ------------------------------------------
 void httpd_page_external_cgi_final(void)
 {
@@ -2750,7 +2729,7 @@ void httpd_page_external_cgi_final(void)
 
 
 // ==========================================
-// ‹¤’ÊF cgi ‚ÌƒvƒƒZƒX”‚ğ•Ô‚·
+// å…±é€šï¼š cgi ã®ãƒ—ãƒ­ã‚»ã‚¹æ•°ã‚’è¿”ã™
 // ------------------------------------------
 int httpd_get_external_cgi_process_count(void)
 {
@@ -2770,14 +2749,14 @@ int httpd_get_external_cgi_process_count(void)
 }
 
 // ==========================================
-// ‹¤’ÊF cgi ƒhƒLƒ…ƒƒ“ƒgƒ‹[ƒgŒvZ
+// å…±é€šï¼š cgi ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆãƒ«ãƒ¼ãƒˆè¨ˆç®—
 // ------------------------------------------
 void httpd_page_cgi_calc_document_root( struct httpd_session_data *sd, char* path, size_t pathsize, int c1, int c2 )
 {
 	int i,j;
 
 	i=j=0;
-	if( document_root[0]!='/' && document_root[1]!=':' )	// •K—v‚È‚çƒJƒŒƒ“ƒgƒfƒBƒŒƒNƒgƒŠ‚ÆŒ‹‡
+	if( document_root[0]!='/' && document_root[1]!=':' )	// å¿…è¦ãªã‚‰ã‚«ãƒ¬ãƒ³ãƒˆãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã¨çµåˆ
 	{
 #ifdef WINDOWS
 		i = GetCurrentDirectory( (DWORD)pathsize, path );
@@ -2791,11 +2770,11 @@ void httpd_page_cgi_calc_document_root( struct httpd_session_data *sd, char* pat
 
 		while( document_root[j]=='.' )
 		{
-			if( document_root[j+1]==c1 || document_root[j+1]==c2 )	// ƒJƒŒƒ“ƒg
+			if( document_root[j+1]==c1 || document_root[j+1]==c2 )	// ã‚«ãƒ¬ãƒ³ãƒˆ
 			{
 				j+=2;
 			}
-			if( document_root[j+1]=='.' && (document_root[j+2]==c1 || document_root[j+2]==c2) )	// e
+			if( document_root[j+1]=='.' && (document_root[j+2]==c1 || document_root[j+2]==c2) )	// è¦ª
 			{
 				j+=3;
 				i--;
@@ -2818,7 +2797,7 @@ void httpd_page_cgi_calc_document_root( struct httpd_session_data *sd, char* pat
 }
 
 // ==========================================
-// ‹¤’ÊF cgi ŠÂ‹«•Ï”‚Ìİ’è
+// å…±é€šï¼š cgi ç’°å¢ƒå¤‰æ•°ã®è¨­å®š
 // ------------------------------------------
 void httpd_page_cgi_setenv( struct httpd_session_data *sd, char* env, size_t envsize, char** envp2, size_t envpsize, const char* path )
 {
@@ -2837,7 +2816,7 @@ void httpd_page_cgi_setenv( struct httpd_session_data *sd, char* env, size_t env
 	}
 	envsize /= sizeof(char*);
 
-	// •K‚¸İ’è‚·‚é‚à‚Ì
+	// å¿…ãšè¨­å®šã™ã‚‹ã‚‚ã®
 	i  = snprintf( envp[ j++ ] = env    , envsize - i, "REMOTE_ADDR=%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3] ) + 1;
 	i += snprintf( envp[ j++ ] = env + i, envsize - i, "REMOTE_PORT=%d", port ) + 1;
 	i += snprintf( envp[ j++ ] = env + i, envsize - i, "DOCUMENT_ROOT=%s", path ) + 1;
@@ -2849,25 +2828,25 @@ void httpd_page_cgi_setenv( struct httpd_session_data *sd, char* env, size_t env
 	i += snprintf( envp[ j++ ] = env + i, envsize - i, "REQUEST_METHOD=%s", method[ httpd_get_method(sd) ] ) + 1;
 	i += snprintf( envp[ j++ ] = env + i, envsize - i, "GATEWAY_INTERFACE=CGI/1.1" ) + 1;
 
-	if( httpd_get_method(sd) == HTTPD_METHOD_POST )		// POST ‚È‚çƒNƒGƒŠ‚Ì’·‚³‚Æ Content-type
+	if( httpd_get_method(sd) == HTTPD_METHOD_POST )		// POST ãªã‚‰ã‚¯ã‚¨ãƒªã®é•·ã•ã¨ Content-type
 	{
 		i += snprintf( envp[ j++ ] = env + i, envsize - i, "CONTENT_LENGTH=%d", sd->query_len ) + 1;
 		i += snprintf( envp[ j++ ] = env + i, envsize - i, "CONTENT_TYPE=%s",
 						sd->content_type ? (char*)sd->content_type : "application/x-www-form-urlencoded" ) + 1;
 	}
-	else if( httpd_get_method(sd) == HTTPD_METHOD_GET )	// GET ‚È‚çƒNƒGƒŠ‚ğ’¼Ú–„‚ß‚İ
+	else if( httpd_get_method(sd) == HTTPD_METHOD_GET )	// GET ãªã‚‰ã‚¯ã‚¨ãƒªã‚’ç›´æ¥åŸ‹ã‚è¾¼ã¿
 	{
 		i += snprintf( envp[ j++ ] = env + i, envsize - i, "QUERY_STRING=%s", sd->query ? (char*)sd->query : "" ) + 1;
 	}
 
-	if( sd->user[0] )	// ”FØ‚µ‚Ä‚é‚È‚çƒ†[ƒU[–¼‚Æ”FØ•û–@
+	if( sd->user[0] )	// èªè¨¼ã—ã¦ã‚‹ãªã‚‰ãƒ¦ãƒ¼ã‚¶ãƒ¼åã¨èªè¨¼æ–¹æ³•
 	{
 		static const char *type[] = { "None", "Basic", "Digest", "Unknown" };
 		i += sprintf( envp[ j++ ] = env + i, "REMOTE_USER=%s", sd->user ) + 1;
 		i += sprintf( envp[ j++ ] = env + i, "AUTH_TYPE=%s", type[ sd->access->type & HTTPD_ACCESS_AUTH_MASK ] ) + 1;
 	}
 
-	// ƒŠƒNƒGƒXƒgƒwƒbƒ_‚©‚çİ’è
+	// ãƒªã‚¯ã‚¨ã‚¹ãƒˆãƒ˜ãƒƒãƒ€ã‹ã‚‰è¨­å®š
 	for( x=0;	j<envpsize-1 &&
 				x<sizeof(sd->req_head)/sizeof(sd->req_head[0]) &&
 				sd->req_head[x] && *sd->req_head[x]
@@ -2886,7 +2865,7 @@ void httpd_page_cgi_setenv( struct httpd_session_data *sd, char* env, size_t env
 					else				w1[z] = toupper( w1[z] );
 				}
 
-				if( i + z + strlen(w2) + 16 > envsize )	// ƒoƒbƒtƒ@ƒI[ƒo[ƒtƒ[‘Îô
+				if( i + z + strlen(w2) + 16 > envsize )	// ãƒãƒƒãƒ•ã‚¡ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼å¯¾ç­–
 					break;
 
 				i += sprintf( envp[ j++ ] = env + i, "HTTP_%s=%s", w1, w2 ) + 1;
@@ -2899,7 +2878,7 @@ void httpd_page_cgi_setenv( struct httpd_session_data *sd, char* env, size_t env
 }
 
 // ==========================================
-// ‹¤’ÊF cgi ƒwƒbƒ_ˆ—
+// å…±é€šï¼š cgi ãƒ˜ãƒƒãƒ€å‡¦ç†
 // ------------------------------------------
 unsigned int httpd_page_cgi_process_header( struct httpd_session_data *sd, char* buf, size_t bytes, int* pstatus )
 {
@@ -2908,7 +2887,7 @@ unsigned int httpd_page_cgi_process_header( struct httpd_session_data *sd, char*
 
 	if( strncasecmp( buf, "HTTP/1.", 7 )==0 && (buf[7]=='0' || buf[7]=='1') && buf[8]==' ')
 	{
-		// nph ˆ—
+		// nph å‡¦ç†
 		memcpy( WFIFOP( sd->fd, 0 ), buf, bytes );
 		WFIFOSET( sd->fd, (int)bytes );
 	}
@@ -2920,8 +2899,8 @@ unsigned int httpd_page_cgi_process_header( struct httpd_session_data *sd, char*
 		int status_flag = 0;
 		unsigned int y = 0;
 
-		// nph ‚Å‚Í‚È‚¢
-		while( buf[x] && buf[x]!='\r' && buf[x]!='\n' && bytes > x + 2 )	// ƒwƒbƒ_‚ªI‚í‚é‚Ü‚ÅŒJ‚è•Ô‚·
+		// nph ã§ã¯ãªã„
+		while( buf[x] && buf[x]!='\r' && buf[x]!='\n' && bytes > x + 2 )	// ãƒ˜ãƒƒãƒ€ãŒçµ‚ã‚ã‚‹ã¾ã§ç¹°ã‚Šè¿”ã™
 		{
 			if( strncasecmp( buf+x, "Status: ", 8 )==0 )	// Status
 			{
@@ -2957,7 +2936,7 @@ unsigned int httpd_page_cgi_process_header( struct httpd_session_data *sd, char*
 				}
 			}
 
-			while( buf[x] && buf[x]!='\r' && buf[x]!='\n' && bytes > x + 2 )	// ƒwƒbƒ_ƒRƒs[
+			while( buf[x] && buf[x]!='\r' && buf[x]!='\n' && bytes > x + 2 )	// ãƒ˜ãƒƒãƒ€ã‚³ãƒ”ãƒ¼
 			{
 				out[y++] = buf[x++];
 			}
@@ -2970,11 +2949,11 @@ unsigned int httpd_page_cgi_process_header( struct httpd_session_data *sd, char*
 			{
 				out[y++] = buf[x++];	// '\n'
 			}
-		}// end of ƒwƒbƒ_‰ğÍƒ‹[ƒv
+		}// end of ãƒ˜ãƒƒãƒ€è§£æãƒ«ãƒ¼ãƒ—
 
 		if( buf[x] && bytes > x + 2 )
 		{
-			// ÅŒã‚Ì‹ós“Ç‚İ”ò‚Î‚µ
+			// æœ€å¾Œã®ç©ºè¡Œèª­ã¿é£›ã°ã—
 			if( ( out[y++] = buf[x++] ) == '\n' )
 			{
 				out[y-1] = '\r';
@@ -2988,7 +2967,7 @@ unsigned int httpd_page_cgi_process_header( struct httpd_session_data *sd, char*
 
 		if( !ctype_flag )
 		{
-			// ƒwƒbƒ_“à‚É Content-type ‚© Location ‚ª‚È‚¢
+			// ãƒ˜ãƒƒãƒ€å†…ã« Content-type ã‹ Location ãŒãªã„
 			return 0;
 		}
 
@@ -3009,11 +2988,11 @@ unsigned int httpd_page_cgi_process_header( struct httpd_session_data *sd, char*
 }
 
 /*
-// ì‚è‚©‚¯cc
-// access_log ‚É”ä‚×‚½‚çA–³—‚É apache ŒİŠ·‚É‚·‚é•K—v‚È‚¢‚©‚È‚Ÿ
+// ä½œã‚Šã‹ã‘â€¦â€¦
+// access_log ã«æ¯”ã¹ãŸã‚‰ã€ç„¡ç†ã« apache äº’æ›ã«ã™ã‚‹å¿…è¦ãªã„ã‹ãªã
 
 // ==========================================
-// ‹¤’ÊF cgi ‚ÌƒƒO
+// å…±é€šï¼š cgi ã®ãƒ­ã‚°
 // ------------------------------------------
 void httpd_cgi_log( struct httpd_session_data *sd, const char* str )
 {
@@ -3022,23 +3001,23 @@ void httpd_cgi_log( struct httpd_session_data *sd, const char* str )
 	unsigned char *ip;
 	static const char sign[]={'-','+'};
 
-	// ‰‰ñŒÄ‚Ño‚µ‚Í‚¢‚ë‚¢‚ë‚Æ‚â‚é‚±‚Æ‚ª‚ ‚é
+	// åˆå›å‘¼ã³å‡ºã—æ™‚ã¯ã„ã‚ã„ã‚ã¨ã‚„ã‚‹ã“ã¨ãŒã‚ã‚‹
 	if( first )
 	{
 		first = 0;
 
-		// ƒƒOƒtƒ@ƒCƒ‹‚ğŠJ‚­
+		// ãƒ­ã‚°ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
 		if( (cgi_logfp = fopen(cgi_logfile, "a") ) == 0 )
 		{
 			printf("*WARNING* : can't open cgi log file [%s]\n", logfile);
 		}
 	}
 
-	// ƒƒOƒtƒ@ƒCƒ‹‚ªŠJ‚¯‚Ä‚È‚¢
+	// ãƒ­ã‚°ãƒ•ã‚¡ã‚¤ãƒ«ãŒé–‹ã‘ã¦ãªã„
 	if( !cgi_logfp )
 		return;
 
-	// ŠÔ•¶š—ñ‚ğ‹‚ß‚é
+	// æ™‚é–“æ–‡å­—åˆ—ã‚’æ±‚ã‚ã‚‹
 	{
 		size_t len;
 		time_t time_;
@@ -3057,7 +3036,7 @@ void httpd_cgi_log( struct httpd_session_data *sd, const char* str )
 #else	// ifndef NO_HTTPD_CGI
 
 // ==========================================
-// cgi ‚ğ—˜—p‚µ‚È‚¢
+// cgi ã‚’åˆ©ç”¨ã—ãªã„
 // ------------------------------------------
 void httpd_page_external_cgi( struct httpd_session_data* sd ) { return; }
 void httpd_page_external_cgi_disconnect( struct httpd_session_data* sd ) { return; }
@@ -3066,12 +3045,12 @@ void httpd_page_external_cgi_final(void) { return; }
 #endif
 
 // ******************************************
-// ŠO•” cgi ˆ— ‚±‚±‚Ü‚Å
+// å¤–éƒ¨ cgi å‡¦ç† ã“ã“ã¾ã§
 // ******************************************
 
 
 // ==========================================
-// URL ƒGƒ“ƒR[ƒh
+// URL ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰
 // ------------------------------------------
 char* httpd_binary_encode(const char* val)
 {
@@ -3095,7 +3074,7 @@ char* httpd_binary_encode(const char* val)
 }
 
 // ==========================================
-// http ‚Ìƒƒ^•¶š‚ÌƒNƒH[ƒg
+// http ã®ãƒ¡ã‚¿æ–‡å­—ã®ã‚¯ã‚©ãƒ¼ãƒˆ
 // ------------------------------------------
 char* httpd_quote_meta(const char* p1)
 {
@@ -3116,7 +3095,7 @@ char* httpd_quote_meta(const char* p1)
 }
 
 // ==========================================
-// ƒRƒ“ƒtƒBƒO - ”FØƒ†[ƒU[‚Ì’Ç‰Á
+// ã‚³ãƒ³ãƒ•ã‚£ã‚° - èªè¨¼ãƒ¦ãƒ¼ã‚¶ãƒ¼ã®è¿½åŠ 
 // ------------------------------------------
 void httpd_config_read_add_authuser( struct httpd_access *a, const char *name, const char *passwd )
 {
@@ -3129,17 +3108,17 @@ void httpd_config_read_add_authuser( struct httpd_access *a, const char *name, c
 		return;
 	}
 
-	if( memcmp( passwd, "$MD5$", 5 )==0 && strlen( passwd )==32+5 )		// MD5 ƒpƒXƒ[ƒh
+	if( memcmp( passwd, "$MD5$", 5 )==0 && strlen( passwd )==32+5 )		// MD5 ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰
 	{
 		type = HTTPD_USER_PASSWD_MD5;
 		passwd += 5;
 	}
-	else if( memcmp( passwd, "$Digest$", 8 )==0 && strlen( passwd )==32+8 )	// Digest ”FØ‚Ì A1
+	else if( memcmp( passwd, "$Digest$", 8 )==0 && strlen( passwd )==32+8 )	// Digest èªè¨¼ã® A1
 	{
 		type = HTTPD_USER_PASSWD_DIGEST;
 		passwd += 8;
 	}
-	else	// ƒvƒŒ[ƒ“
+	else	// ãƒ—ãƒ¬ãƒ¼ãƒ³
 	{
 		if( strlen( passwd ) >= sizeof( au->passwd ) )
 		{
@@ -3150,20 +3129,20 @@ void httpd_config_read_add_authuser( struct httpd_access *a, const char *name, c
 		type = HTTPD_USER_PASSWD_PLAIN;
 	}
 
-	// •K—v‚È‚çƒƒ‚ƒŠ‚ğŠg’£
+	// å¿…è¦ãªã‚‰ãƒ¡ãƒ¢ãƒªã‚’æ‹¡å¼µ
 	if( a->user_count == a->user_max )
 	{
 		a->user_max += 16;
 		a->user = (struct httpd_access_user *)aRealloc( a->user, sizeof(struct httpd_access_user) * a->user_max );
 	}
 
-	// ƒ†[ƒU[’Ç‰Á
+	// ãƒ¦ãƒ¼ã‚¶ãƒ¼è¿½åŠ 
 	au = a->user + (a->user_count++);
 	auriga_strlcpy( au->name, name, sizeof(au->name) );
 	auriga_strlcpy( au->passwd, passwd, sizeof(au->passwd) );
 	au->type = type;
 
-	// Digest ”FØƒ‚[ƒh‚ÅAƒvƒŒ[ƒ“ƒpƒXƒ[ƒh‚¾‚Á‚½ê‡A‚ ‚ç‚©‚¶‚ß A1 ‚ğŒvZ‚µ‚Ä‚¨‚­
+	// Digest èªè¨¼ãƒ¢ãƒ¼ãƒ‰ã§ã€ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ã ã£ãŸå ´åˆã€ã‚ã‚‰ã‹ã˜ã‚ A1 ã‚’è¨ˆç®—ã—ã¦ãŠã
 	if( (a->type & HTTPD_ACCESS_AUTH_MASK) == HTTPD_ACCESS_AUTH_DIGEST && au->type == HTTPD_USER_PASSWD_PLAIN )
 	{
 		char buf[512];
@@ -3174,7 +3153,7 @@ void httpd_config_read_add_authuser( struct httpd_access *a, const char *name, c
 }
 
 // ==========================================
-// ƒRƒ“ƒtƒBƒO - ‹–‰Â/‹Ö~ IP ‚Ì’Ç‰Á
+// ã‚³ãƒ³ãƒ•ã‚£ã‚° - è¨±å¯/ç¦æ­¢ IP ã®è¿½åŠ 
 // ------------------------------------------
 static void httpd_config_read_add_ip( unsigned long **list, int *count, int *max, const char *w2 )
 {
@@ -3192,40 +3171,40 @@ static void httpd_config_read_add_ip( unsigned long **list, int *count, int *max
 	{
 		ip = mask = 0;
 	}
-	else if( sscanf( w2, "%d.%d.%d.%d/%d.%d.%d.%d", &i1, &i2, &i3, &i4, &m1, &m2, &m3, &m4 )==8 )	// 192.168.0.0/255.255.255.0 Œ`®
+	else if( sscanf( w2, "%d.%d.%d.%d/%d.%d.%d.%d", &i1, &i2, &i3, &i4, &m1, &m2, &m3, &m4 )==8 )	// 192.168.0.0/255.255.255.0 å½¢å¼
 	{
 		pip[0] = i1;		pip[1] = i2;		pip[2] = i3;		pip[3] = i4;
 		pmask[0] = m1;		pmask[1] = m2;		pmask[2] = m3;		pmask[3] = m4;
 	}
-	else if( sscanf( w2,"%d.%d.%d.%d/%d", &i1, &i2, &i3, &i4, &m1 )==5 )	// 192.168.0.0/24 Œ`®
+	else if( sscanf( w2,"%d.%d.%d.%d/%d", &i1, &i2, &i3, &i4, &m1 )==5 )	// 192.168.0.0/24 å½¢å¼
 	{
 		int bit = 0xffffffff << (32-m1);
 		pip[0] = i1;		pip[1] = i2;		pip[2] = i3;		pip[3] = i4;
 		pmask[0] = (bit>>24);		pmask[1] = (bit>>16);
 		pmask[2] = (bit>>8);		pmask[3] = bit;
 	}
-	else if( sscanf( w2,"%d.%d.%d.%d", &i1, &i2, &i3, &i4 )==4 )	// 192.168.0.1 Œ`® (ƒTƒuƒlƒbƒgƒ}ƒXƒN 255.255.255.255 )
+	else if( sscanf( w2,"%d.%d.%d.%d", &i1, &i2, &i3, &i4 )==4 )	// 192.168.0.1 å½¢å¼ (ã‚µãƒ–ãƒãƒƒãƒˆãƒã‚¹ã‚¯ 255.255.255.255 )
 	{
 		pip[0] = i1;		pip[1] = i2;		pip[2] = i3;		pip[3] = i4;
 		pmask[0] = 0xff;	pmask[1] = 0xff;	pmask[2] = 0xff;	pmask[3] = 0xff;
 	}
-	else if( sscanf( w2,"%d.%d.%d", &i1, &i2, &i3 )==3 )	// 192.168.0 Œ`®iƒTƒuƒlƒbƒgƒ}ƒXƒN 255.255.255.0j
+	else if( sscanf( w2,"%d.%d.%d", &i1, &i2, &i3 )==3 )	// 192.168.0 å½¢å¼ï¼ˆã‚µãƒ–ãƒãƒƒãƒˆãƒã‚¹ã‚¯ 255.255.255.0ï¼‰
 	{
 		pip[0] = i1;		pip[1] = i2;		pip[2] = i3;		pip[3] = 0;
 		pmask[0] = 0xff;	pmask[1] = 0xff;	pmask[2] = 0xff;	pmask[3] = 0;
 	}
-	else if( sscanf( w2,"%d.%d", &i1, &i2 )==2 )	// 192.168 Œ`®iƒTƒuƒlƒbƒgƒ}ƒXƒN 255.255.0.0j
+	else if( sscanf( w2,"%d.%d", &i1, &i2 )==2 )	// 192.168 å½¢å¼ï¼ˆã‚µãƒ–ãƒãƒƒãƒˆãƒã‚¹ã‚¯ 255.255.0.0ï¼‰
 	{
 		pip[0] = i1;		pip[1] = i2;		pip[2] = 0;			pip[3] = 0;
 		pmask[0] = 0xff;	pmask[1] = 0xff;	pmask[2] = 0;		pmask[3] = 0;
 	}
-	else	// 192 Œ`®iƒTƒuƒlƒbƒgƒ}ƒXƒN 255.0.0.0 j
+	else	// 192 å½¢å¼ï¼ˆã‚µãƒ–ãƒãƒƒãƒˆãƒã‚¹ã‚¯ 255.0.0.0 ï¼‰
 	{
 		pip[0] = i1;		pip[1] = 0;			pip[2] = 0;			pip[3] = 0;
 		pmask[0] = 0xff;	pmask[1] = 0;		pmask[2] = 0;		pmask[3] = 0;
 	}
 
-	// •K—v‚È‚çƒƒ‚ƒŠ‚ğŠg’£
+	// å¿…è¦ãªã‚‰ãƒ¡ãƒ¢ãƒªã‚’æ‹¡å¼µ
 	if( *count == *max )
 	{
 		unsigned long *iplist = (unsigned long *)aMalloc( sizeof(unsigned long) * (*max + 16) );
@@ -3238,7 +3217,7 @@ static void httpd_config_read_add_ip( unsigned long **list, int *count, int *max
 		*max += 16;
 	}
 
-	// IP ‚Æƒ}ƒXƒN’Ç‰Á
+	// IP ã¨ãƒã‚¹ã‚¯è¿½åŠ 
 	(*list)[ (*count)++ ] = ip&mask;
 	(*list)[ (*count)++ ] = mask;
 }
@@ -3246,7 +3225,7 @@ static void httpd_config_read_add_ip( unsigned long **list, int *count, int *max
 #define CHECK_ACCES_TARGET(msg)	if( !a ) { printf( msg ": no target url.\n" ); continue; }
 
 // ==========================================
-// İ’èƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
+// è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€
 // ------------------------------------------
 int httpd_config_read(const char *cfgName)
 {
@@ -3367,13 +3346,13 @@ int httpd_config_read(const char *cfgName)
 			{
 				a = NULL;
 			}
-			else if( *w2!='/' )		// '/' ‚©‚çn‚Ü‚Á‚Ä‚¢‚È‚¢
+			else if( *w2!='/' )		// '/' ã‹ã‚‰å§‹ã¾ã£ã¦ã„ãªã„
 			{
 				printf("httpd_config_read: target url must start root (/).\n");
 			}
 			else
 			{
-				// Šù‘¶‚Ìƒf[ƒ^‚Ì•ÏX‚©‚Ç‚¤‚©‚ğŒŸõ
+				// æ—¢å­˜ã®ãƒ‡ãƒ¼ã‚¿ã®å¤‰æ›´ã‹ã©ã†ã‹ã‚’æ¤œç´¢
 				int i;
 				for( i=0; i<htaccess_count; i++ )
 				{
@@ -3384,16 +3363,16 @@ int httpd_config_read(const char *cfgName)
 					}
 				}
 
-				if( i==htaccess_count )				// V‹Kì¬
+				if( i==htaccess_count )				// æ–°è¦ä½œæˆ
 				{
-					// •K—v‚È‚çƒƒ‚ƒŠ‚ğŠg’£
+					// å¿…è¦ãªã‚‰ãƒ¡ãƒ¢ãƒªã‚’æ‹¡å¼µ
 					int j;
 					if( htaccess_count==htaccess_max )
 					{
 						htaccess_max += 16;
 						htaccess = (struct httpd_access **)aRealloc( htaccess, sizeof(struct httpd_access*) * htaccess_max );
 					}
-					// ƒf[ƒ^‚Ì’Ç‰Á•‰Šú‰»
+					// ãƒ‡ãƒ¼ã‚¿ã®è¿½åŠ ï¼†åˆæœŸåŒ–
 					a = htaccess[ htaccess_count++ ] = (struct httpd_access *)aMalloc( sizeof( struct httpd_access ) );
 					a->type = HTTPD_ACCESS_ALWAYS;
 					a->aip_count = a->aip_max = 0;
@@ -3413,7 +3392,7 @@ int httpd_config_read(const char *cfgName)
 						a->urllen = strlen(a->url);
 					}
 
-					// digest ”FØ—p‚Ìƒvƒ‰ƒCƒx[ƒgƒL[ì¬
+					// digest èªè¨¼ç”¨ã®ãƒ—ãƒ©ã‚¤ãƒ™ãƒ¼ãƒˆã‚­ãƒ¼ä½œæˆ
 					for( j=0; j<atn_rand()%10+20; j++ )
 					{
 						a->privkey[j] = (atn_rand()%250)+1;
@@ -3472,7 +3451,7 @@ int httpd_config_read(const char *cfgName)
 				aFree( a->user );
 				a->user_count = a->user_max = 0;
 			}
-			else	// ŠO•”ƒtƒ@ƒCƒ‹“Ç‚İ‚ß‚½‚è‚·‚é‚Æ‚¢‚¢Š´‚¶‚©‚à
+			else	// å¤–éƒ¨ãƒ•ã‚¡ã‚¤ãƒ«èª­ã¿è¾¼ã‚ãŸã‚Šã™ã‚‹ã¨ã„ã„æ„Ÿã˜ã‹ã‚‚
 			{
 				printf("httpd_config_read: authuser: [user:pass] needed\n");
 			}
@@ -3530,7 +3509,7 @@ int httpd_config_read(const char *cfgName)
 }
 
 // ==========================================
-// Base64 ƒfƒR[ƒh—pƒwƒ‹ƒp
+// Base64 ãƒ‡ã‚³ãƒ¼ãƒ‰ç”¨ãƒ˜ãƒ«ãƒ‘
 // ------------------------------------------
 static int httpd_decode_base64_code2value(unsigned char c)
 {
@@ -3558,7 +3537,7 @@ static int httpd_decode_base64_code2value(unsigned char c)
 }
 
 // ==========================================
-// Base64 ƒfƒR[ƒh
+// Base64 ãƒ‡ã‚³ãƒ¼ãƒ‰
 // ------------------------------------------
 int httpd_decode_base64( char *dest, const char *src)
 {

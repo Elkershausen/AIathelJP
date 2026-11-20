@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _ACCOUNT_TXT_H_
+Ôªø#ifndef _ACCOUNT_TXT_H_
 #define _ACCOUNT_TXT_H_
 
 #include "mmo.h"
@@ -27,7 +6,7 @@
 
 #include "../login.h"
 
-// ÉvÉçÉgÉ^ÉCÉvêÈåæ
+// „Éó„É≠„Éà„Çø„Ç§„ÉóÂÆ£Ë®Ä
 bool account_txt_init(void);
 void account_txt_sync(void);
 const struct mmo_account* account_txt_account_load_num(int account_id);
@@ -41,7 +20,7 @@ void account_txt_set_default_configvalue(void);
 int account_txt_config_read_sub(const char *w1,const char *w2);
 void display_conf_warnings_txt(void);
 
-// ÉGÉCÉäÉAÉX
+// „Ç®„Ç§„É™„Ç¢„Çπ
 #define login_init             account_txt_init
 #define login_sync             account_txt_sync
 #define login_final            account_txt_final

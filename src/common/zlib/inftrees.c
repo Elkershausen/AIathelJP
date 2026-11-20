@@ -1,9 +1,4 @@
-/* inftrees.c -- generate Huffman trees for efficient decoding
- * Copyright (C) 1995-2010 Mark Adler
- * For conditions of distribution and use, see copyright notice in zlib.h
- */
-
-#include "zutil.h"
+﻿#include "zutil.h"
 #include "inftrees.h"
 
 #define MAXBITS 15

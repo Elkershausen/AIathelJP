@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifdef WINDOWS
+ï»¿#ifdef WINDOWS
 
 #pragma comment(lib, "advapi32.lib")
 
@@ -43,7 +22,7 @@ static char *cache_argv[128];
 static void winservice_final(void);
 
 /*==========================================
- * ƒJƒŒƒ“ƒgƒfƒBƒŒƒNƒgƒŠ‚ğexe‚ÌˆÊ’u‚É•ÏX
+ * ã‚«ãƒ¬ãƒ³ãƒˆãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’exeã®ä½ç½®ã«å¤‰æ›´
  *------------------------------------------
  */
 bool winservice_change_current_dir(void)
@@ -66,7 +45,7 @@ bool winservice_change_current_dir(void)
 }
 
 /*==========================================
- * ƒT[ƒrƒX‚Ìó‘Ô•ÏX
+ * ã‚µãƒ¼ãƒ“ã‚¹ã®çŠ¶æ…‹å¤‰æ›´
  *------------------------------------------
  */
 static bool winservice_change_status(void)
@@ -75,16 +54,16 @@ static bool winservice_change_status(void)
 }
 
 /*==========================================
- * ƒT[ƒrƒX‚Ìƒnƒ“ƒhƒ‰
+ * ã‚µãƒ¼ãƒ“ã‚¹ã®ãƒãƒ³ãƒ‰ãƒ©
  *------------------------------------------
  */
 static DWORD WINAPI winservice_ctrl_handler(DWORD ctrl, DWORD event_type, LPVOID event_data, LPVOID context)
 {
 	switch(ctrl) {
-		case SERVICE_CONTROL_INTERROGATE:	// î•ñ
+		case SERVICE_CONTROL_INTERROGATE:	// æƒ…å ±
 			break;
-		case SERVICE_CONTROL_STOP:			// ’â~
-		case SERVICE_CONTROL_SHUTDOWN:		// ƒVƒƒƒbƒgƒ_ƒEƒ“
+		case SERVICE_CONTROL_STOP:			// åœæ­¢
+		case SERVICE_CONTROL_SHUTDOWN:		// ã‚·ãƒ£ãƒƒãƒˆãƒ€ã‚¦ãƒ³
 			do_stop();
 			break;
 		default:
@@ -95,12 +74,12 @@ static DWORD WINAPI winservice_ctrl_handler(DWORD ctrl, DWORD event_type, LPVOID
 }
 
 /*==========================================
- * ƒT[ƒrƒX‚ÌƒƒCƒ“ƒ‹[ƒ`ƒ“
+ * ã‚µãƒ¼ãƒ“ã‚¹ã®ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒãƒ³
  *------------------------------------------
  */
 static void WINAPI winservice_main(DWORD argc, LPSTR *argv)
 {
-	// ƒnƒ“ƒhƒ‰“o˜^
+	// ãƒãƒ³ãƒ‰ãƒ©ç™»éŒ²
 	service_handle = RegisterServiceCtrlHandlerEx(service_name, winservice_ctrl_handler, NULL);
 
 	if(service_handle == 0)
@@ -110,7 +89,7 @@ static void WINAPI winservice_main(DWORD argc, LPSTR *argv)
 
 	printf("--> Windows Service Startup ...\n");
 
-	// ó‘Ô\‘¢‘Ì‚Ì‰Šú‰»
+	// çŠ¶æ…‹æ§‹é€ ä½“ã®åˆæœŸåŒ–
 	checkpoint = 0;
 	service_status.dwServiceType             = SERVICE_WIN32_OWN_PROCESS;
 	service_status.dwCurrentState            = SERVICE_START_PENDING;
@@ -120,17 +99,17 @@ static void WINAPI winservice_main(DWORD argc, LPSTR *argv)
 	service_status.dwWaitHint                = 0;
 	service_status.dwControlsAccepted =      SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN;
 
-	// €”õŠJn‚ğ’Ê’m
+	// æº–å‚™é–‹å§‹ã‚’é€šçŸ¥
 	winservice_change_status();
 
-	// ƒT[ƒrƒX‚ÌŠJnƒpƒ‰ƒ[ƒ^‚Í–³‹‚µ‚Ä‹N“®‚Ìƒpƒ‰ƒ[ƒ^‚ğg‚Á‚ÄƒƒCƒ“Às
+	// ã‚µãƒ¼ãƒ“ã‚¹ã®é–‹å§‹ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã¯ç„¡è¦–ã—ã¦èµ·å‹•æ™‚ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’ä½¿ã£ã¦ãƒ¡ã‚¤ãƒ³å®Ÿè¡Œ
 	main_sub(cache_argc, cache_argv);
 
 	return;
 }
 
 /*==========================================
- * ƒT[ƒrƒX‚ÌŠJn’†’Ê’m
+ * ã‚µãƒ¼ãƒ“ã‚¹ã®é–‹å§‹ä¸­é€šçŸ¥
  *------------------------------------------
  */
 bool winservice_notify_start()
@@ -146,7 +125,7 @@ bool winservice_notify_start()
 }
 
 /*==========================================
- * ƒT[ƒrƒX‚Ì€”õŠ®—¹’Ê’m
+ * ã‚µãƒ¼ãƒ“ã‚¹ã®æº–å‚™å®Œäº†é€šçŸ¥
  *------------------------------------------
  */
 bool winservice_notify_ready(void)
@@ -163,7 +142,7 @@ bool winservice_notify_ready(void)
 }
 
 /*==========================================
- * ƒT[ƒrƒX‚Ì’â~’†’Ê’m
+ * ã‚µãƒ¼ãƒ“ã‚¹ã®åœæ­¢ä¸­é€šçŸ¥
  *------------------------------------------
  */
 bool winservice_notify_stop(void)
@@ -179,7 +158,7 @@ bool winservice_notify_stop(void)
 }
 
 /*==========================================
- * ƒT[ƒrƒX‚Ì’â~Š®—¹’Ê’m
+ * ã‚µãƒ¼ãƒ“ã‚¹ã®åœæ­¢å®Œäº†é€šçŸ¥
  *------------------------------------------
  */
 bool winservice_notify_finish(void)
@@ -197,7 +176,7 @@ bool winservice_notify_finish(void)
 }
 
 /*==========================================
- * ƒT[ƒrƒX‚ÌI—¹ˆ—
+ * ã‚µãƒ¼ãƒ“ã‚¹ã®çµ‚äº†å‡¦ç†
  *------------------------------------------
  */
 static void winservice_final(void)
@@ -210,7 +189,7 @@ static void winservice_final(void)
 }
 
 /*==========================================
- * ƒT[ƒrƒX‚Ì‰Šú‰»
+ * ã‚µãƒ¼ãƒ“ã‚¹ã®åˆæœŸåŒ–
  *------------------------------------------
  */
 bool winservice_init(int argc, char **argv)
@@ -219,7 +198,7 @@ bool winservice_init(int argc, char **argv)
 	bool result;
 	SERVICE_TABLE_ENTRY table[2];
 
-	// ‹N“®ˆø”
+	// èµ·å‹•å¼•æ•°
 	for(i = 1; i < argc - 1; i += 2) {
 		if(strcmp(argv[i], "--service-name") == 0) {
 			strncpy(service_name, argv[i+1], sizeof(service_name));
@@ -228,11 +207,11 @@ bool winservice_init(int argc, char **argv)
 	}
 
 	if(!service_name[0]) {
-		// ƒT[ƒrƒX‚©‚ç‚Ì‹N“®‚Å‚Í‚È‚¢
+		// ã‚µãƒ¼ãƒ“ã‚¹ã‹ã‚‰ã®èµ·å‹•ã§ã¯ãªã„
 		return false;
 	}
 
-	// ƒpƒ‰ƒ[ƒ^‚Ì•Û‘¶
+	// ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®ä¿å­˜
 	cache_argc = argc;
 	for(i = 0; i < argc && i < sizeof(cache_argv)/sizeof(cache_argv[0]); i++) {
 		cache_argv[i] = argv[i];
@@ -243,7 +222,7 @@ bool winservice_init(int argc, char **argv)
 	table[0].lpServiceName = service_name;
 	table[0].lpServiceProc = winservice_main;
 
-	// ƒT[ƒrƒXƒRƒ“ƒgƒ[ƒ‹ƒfƒBƒXƒpƒbƒ`ƒƒ‹N“®
+	// ã‚µãƒ¼ãƒ“ã‚¹ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ãƒ‡ã‚£ã‚¹ãƒ‘ãƒƒãƒãƒ£èµ·å‹•
 	result = StartServiceCtrlDispatcher(table);
 	if(result == false)
 		printf("StartServiceCtrlDispatcher failed (%u)\n", GetLastError());

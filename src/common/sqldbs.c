@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef TXT_ONLY
+Ôªø#ifndef TXT_ONLY
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,7 +15,7 @@ struct sqldbs_handle mysql_handle;
 static struct sqldbs_handle *default_handle = &mysql_handle;
 
 /*==========================================
- * ÉfÉtÉHÉãÉgÇÃÉnÉìÉhÉâÇê›íË
+ * „Éá„Éï„Ç©„É´„Éà„ÅÆ„Éè„É≥„Éâ„É©„ÇíË®≠ÂÆö
  *------------------------------------------
  */
 void sqldbs_set_default_handle(struct sqldbs_handle *hd)
@@ -45,7 +24,7 @@ void sqldbs_set_default_handle(struct sqldbs_handle *hd)
 }
 
 /*==========================================
- * ì¡éÍï∂éöÇÃÉGÉXÉPÅ[Év
+ * ÁâπÊÆäÊñáÂ≠ó„ÅÆ„Ç®„Çπ„Ç±„Éº„Éó
  *------------------------------------------
  */
 char* strecpy(char* pt, const char* spt)
@@ -65,7 +44,7 @@ char* strecpy_(struct sqldbs_handle *hd, char* pt, const char* spt)
 }
 
 /*==========================================
- * ÉNÉGÉäî≠çs
+ * „ÇØ„Ç®„É™Áô∫Ë°å
  *------------------------------------------
  */
 bool sqldbs_query(struct sqldbs_handle *hd, const char *query, ...)
@@ -89,7 +68,7 @@ bool sqldbs_query(struct sqldbs_handle *hd, const char *query, ...)
 }
 
 /*==========================================
- * íPèÉÇ»ÉNÉGÉäî≠çs
+ * ÂçòÁ¥î„Å™„ÇØ„Ç®„É™Áô∫Ë°å
  *------------------------------------------
  */
 bool sqldbs_simplequery(struct sqldbs_handle *hd, const char *query)
@@ -115,7 +94,7 @@ bool sqldbs_simplequery(struct sqldbs_handle *hd, const char *query)
 }
 
 /*==========================================
- * ÉgÉâÉìÉUÉNÉVÉáÉìÇÃäJén
+ * „Éà„É©„É≥„Ç∂„ÇØ„Ç∑„Éß„É≥„ÅÆÈñãÂßã
  *------------------------------------------
  */
 bool sqldbs_transaction_start(struct sqldbs_handle *hd)
@@ -134,7 +113,7 @@ bool sqldbs_transaction_start(struct sqldbs_handle *hd)
 }
 
 /*==========================================
- * ÉRÉ~ÉbÉg
+ * „Ç≥„Éü„ÉÉ„Éà
  *------------------------------------------
  */
 bool sqldbs_commit(struct sqldbs_handle *hd)
@@ -153,7 +132,7 @@ bool sqldbs_commit(struct sqldbs_handle *hd)
 }
 
 /*==========================================
- * ÉçÅ[ÉãÉoÉbÉN
+ * „É≠„Éº„É´„Éê„ÉÉ„ÇØ
  *------------------------------------------
  */
 bool sqldbs_rollback(struct sqldbs_handle *hd)
@@ -172,7 +151,7 @@ bool sqldbs_rollback(struct sqldbs_handle *hd)
 }
 
 /*==========================================
- * ÉgÉâÉìÉUÉNÉVÉáÉìÇÃèIóπ
+ * „Éà„É©„É≥„Ç∂„ÇØ„Ç∑„Éß„É≥„ÅÆÁµÇ‰∫Ü
  * COMMIT or ROLLBACK
  *------------------------------------------
  */
@@ -185,7 +164,7 @@ bool sqldbs_transaction_end(struct sqldbs_handle *hd, bool result)
 }
 
 /*==========================================
- * åãâ ÉZÉbÉgÇ™Ç†ÇÈÇ©Ç«Ç§Ç©
+ * ÁµêÊûú„Çª„ÉÉ„Éà„Åå„ÅÇ„Çã„Åã„Å©„ÅÜ„Åã
  *------------------------------------------
  */
 bool sqldbs_has_result(struct sqldbs_handle *hd)
@@ -196,7 +175,7 @@ bool sqldbs_has_result(struct sqldbs_handle *hd)
 }
 
 /*==========================================
- * åãâ ÉZÉbÉgÇÃéüÉåÉRÅ[ÉhÇéÊìæ
+ * ÁµêÊûú„Çª„ÉÉ„Éà„ÅÆÊ¨°„É¨„Ç≥„Éº„Éâ„ÇíÂèñÂæó
  *------------------------------------------
  */
 char** sqldbs_fetch(struct sqldbs_handle *hd)
@@ -208,7 +187,7 @@ char** sqldbs_fetch(struct sqldbs_handle *hd)
 }
 
 /*==========================================
- * åãâ ÉZÉbÉgÇÃçsêîÇï‘Ç∑
+ * ÁµêÊûú„Çª„ÉÉ„Éà„ÅÆË°åÊï∞„ÇíËøî„Åô
  *------------------------------------------
  */
 int sqldbs_num_rows(struct sqldbs_handle *hd)
@@ -219,7 +198,7 @@ int sqldbs_num_rows(struct sqldbs_handle *hd)
 }
 
 /*==========================================
- * åãâ ÉZÉbÉgÇÃóÒêîÇï‘Ç∑
+ * ÁµêÊûú„Çª„ÉÉ„Éà„ÅÆÂàóÊï∞„ÇíËøî„Åô
  *------------------------------------------
  */
 int sqldbs_num_fields(struct sqldbs_handle *hd)
@@ -230,7 +209,7 @@ int sqldbs_num_fields(struct sqldbs_handle *hd)
 }
 
 /*==========================================
- * AUTO_INCREMENTÇÃê∂ê¨ílÇï‘Ç∑
+ * AUTO_INCREMENT„ÅÆÁîüÊàêÂÄ§„ÇíËøî„Åô
  *------------------------------------------
  */
 int sqldbs_insert_id(struct sqldbs_handle *hd)
@@ -241,7 +220,7 @@ int sqldbs_insert_id(struct sqldbs_handle *hd)
 }
 
 /*==========================================
- * ïœçXÇ≥ÇÍÇΩçsêîÇï‘Ç∑
+ * Â§âÊõ¥„Åï„Çå„ÅüË°åÊï∞„ÇíËøî„Åô
  *------------------------------------------
  */
 int sqldbs_affected_rows(struct sqldbs_handle *hd)
@@ -252,7 +231,7 @@ int sqldbs_affected_rows(struct sqldbs_handle *hd)
 }
 
 /*==========================================
- * åãâ ÉZÉbÉgâï˙
+ * ÁµêÊûú„Çª„ÉÉ„ÉàËß£Êîæ
  *------------------------------------------
  */
 void sqldbs_free_result(struct sqldbs_handle *hd)
@@ -266,7 +245,7 @@ void sqldbs_free_result(struct sqldbs_handle *hd)
 }
 
 /*==========================================
- * MYSQL_STMTÇÃinit
+ * MYSQL_STMT„ÅÆinit
  *------------------------------------------
  */
 struct sqldbs_stmt* sqldbs_stmt_init(struct sqldbs_handle *hd)
@@ -287,14 +266,14 @@ struct sqldbs_stmt* sqldbs_stmt_init(struct sqldbs_handle *hd)
 	st->bind_params  = false;
 	st->bind_columns = false;
 
-	// stmtÇÉäÉXÉgÇ∆ÇµÇƒï€ë∂ÇµÇƒÇ®Ç≠
+	// stmt„Çí„É™„Çπ„Éà„Å®„Åó„Å¶‰øùÂ≠ò„Åó„Å¶„Åä„Åè
 	linkdb_insert(&hd->stmt_list, st, st);
 
 	return st;
 }
 
 /*==========================================
- * ÉvÉäÉyÉAÉhÉXÉeÅ[ÉgÉÅÉìÉgÇÃÉNÉGÉäèÄîı
+ * „Éó„É™„Éö„Ç¢„Éâ„Çπ„ÉÜ„Éº„Éà„É°„É≥„Éà„ÅÆ„ÇØ„Ç®„É™Ê∫ñÂÇô
  *------------------------------------------
  */
 bool sqldbs_stmt_prepare(struct sqldbs_stmt *st, const char *query, ...)
@@ -318,14 +297,14 @@ bool sqldbs_stmt_prepare(struct sqldbs_stmt *st, const char *query, ...)
 }
 
 /*==========================================
- * íPèÉÇ»ÉvÉäÉyÉAÉhÉXÉeÅ[ÉgÉÅÉìÉgÇÃÉNÉGÉäèÄîı
+ * ÂçòÁ¥î„Å™„Éó„É™„Éö„Ç¢„Éâ„Çπ„ÉÜ„Éº„Éà„É°„É≥„Éà„ÅÆ„ÇØ„Ç®„É™Ê∫ñÂÇô
  *------------------------------------------
  */
 bool sqldbs_stmt_simpleprepare(struct sqldbs_stmt *st, const char *query)
 {
 	nullpo_retr(false, st);
 
-	// èâä˙âª
+	// ÂàùÊúüÂåñ
 	st->bind_params  = false;
 	st->bind_columns = false;
 
@@ -344,7 +323,7 @@ bool sqldbs_stmt_simpleprepare(struct sqldbs_stmt *st, const char *query)
 }
 
 /*==========================================
- * ÉNÉGÉäÇ©ÇÁçÏê¨çœÇ›ÇÃstmtÇåüçıÇ∑ÇÈ
+ * „ÇØ„Ç®„É™„Åã„Çâ‰ΩúÊàêÊ∏à„Åø„ÅÆstmt„ÇíÊ§úÁ¥¢„Åô„Çã
  *------------------------------------------
  */
 struct sqldbs_stmt* sqldbs_stmt_search(struct sqldbs_handle *hd, const char *query)
@@ -367,7 +346,7 @@ struct sqldbs_stmt* sqldbs_stmt_search(struct sqldbs_handle *hd, const char *que
 }
 
 /*==========================================
- * êîílå^ÇÃÉTÉCÉYÇ©ÇÁMYSQL_TYPEÇï‘Ç∑
+ * Êï∞ÂÄ§Âûã„ÅÆ„Çµ„Ç§„Ç∫„Åã„ÇâMYSQL_TYPE„ÇíËøî„Åô
  *------------------------------------------
  */
 static enum enum_field_types sqldbs_num2datatype(size_t size)
@@ -385,7 +364,7 @@ static enum enum_field_types sqldbs_num2datatype(size_t size)
 }
 
 /*==========================================
- * MYSQL_BINDÇ…ÉpÉâÉÅÅ[É^ÇÉZÉbÉg
+ * MYSQL_BIND„Å´„Éë„É©„É°„Éº„Çø„Çí„Çª„ÉÉ„Éà
  *------------------------------------------
  */
 static void sqldbs_stmt_bind_datatype(MYSQL_BIND *bind, int buffer_type, void *buffer, size_t buffer_length, unsigned long *length, char *is_null)
@@ -472,7 +451,7 @@ static void sqldbs_stmt_bind_datatype(MYSQL_BIND *bind, int buffer_type, void *b
 }
 
 /*==========================================
- * ÉXÉeÅ[ÉgÉÅÉìÉgÇÃÉpÉâÉÅÅ[É^êîÇéÊìæ
+ * „Çπ„ÉÜ„Éº„Éà„É°„É≥„Éà„ÅÆ„Éë„É©„É°„Éº„ÇøÊï∞„ÇíÂèñÂæó
  *------------------------------------------
  */
 size_t sqldbs_stmt_param_count(struct sqldbs_stmt *st)
@@ -483,7 +462,7 @@ size_t sqldbs_stmt_param_count(struct sqldbs_stmt *st)
 }
 
 /*==========================================
- * MYSQL_BINDÇ…ÉpÉâÉÅÅ[É^ÇÉZÉbÉg
+ * MYSQL_BIND„Å´„Éë„É©„É°„Éº„Çø„Çí„Çª„ÉÉ„Éà
  *------------------------------------------
  */
 bool sqldbs_stmt_bind_param(struct sqldbs_stmt *st, size_t idx, int buffer_type, void *buffer, size_t buffer_length)
@@ -493,7 +472,7 @@ bool sqldbs_stmt_bind_param(struct sqldbs_stmt *st, size_t idx, int buffer_type,
 	if(st->bind_params == false) {
 		size_t i, count;
 
-		// MYSQL_BINDÇÃópà”
+		// MYSQL_BIND„ÅÆÁî®ÊÑè
 		count = sqldbs_stmt_param_count(st);
 		if(st->max_params < count) {
 			st->max_params = count;
@@ -515,7 +494,7 @@ bool sqldbs_stmt_bind_param(struct sqldbs_stmt *st, size_t idx, int buffer_type,
 }
 
 /*==========================================
- * ÉvÉäÉyÉAÉhÉXÉeÅ[ÉgÉÅÉìÉgÇÃé¿çs
+ * „Éó„É™„Éö„Ç¢„Éâ„Çπ„ÉÜ„Éº„Éà„É°„É≥„Éà„ÅÆÂÆüË°å
  *------------------------------------------
  */
 bool sqldbs_stmt_execute(struct sqldbs_stmt *st)
@@ -538,7 +517,7 @@ bool sqldbs_stmt_execute(struct sqldbs_stmt *st)
 }
 
 /*==========================================
- * MYSQL_BINDÇ…ÉXÉeÅ[ÉgÉÅÉìÉgåãâ ÇÉZÉbÉg
+ * MYSQL_BIND„Å´„Çπ„ÉÜ„Éº„Éà„É°„É≥„ÉàÁµêÊûú„Çí„Çª„ÉÉ„Éà
  *------------------------------------------
  */
 bool sqldbs_stmt_bind_column(struct sqldbs_stmt *st, size_t idx, int buffer_type, void *buffer, size_t buffer_length)
@@ -548,7 +527,7 @@ bool sqldbs_stmt_bind_column(struct sqldbs_stmt *st, size_t idx, int buffer_type
 	if(st->bind_columns == false) {
 		size_t i, cols;
 
-		// MYSQL_BINDÇÃópà”
+		// MYSQL_BIND„ÅÆÁî®ÊÑè
 		cols = sqldbs_stmt_field_count(st);
 		if(st->max_columns < cols) {
 			st->max_columns = cols;
@@ -570,7 +549,7 @@ bool sqldbs_stmt_bind_column(struct sqldbs_stmt *st, size_t idx, int buffer_type
 }
 
 /*==========================================
- * ÉXÉeÅ[ÉgÉÅÉìÉgåãâ ÉZÉbÉgÇÃÉoÉCÉìÉh
+ * „Çπ„ÉÜ„Éº„Éà„É°„É≥„ÉàÁµêÊûú„Çª„ÉÉ„Éà„ÅÆ„Éê„Ç§„É≥„Éâ
  *------------------------------------------
  */
 bool sqldbs_stmt_bind_result(struct sqldbs_stmt *st)
@@ -587,7 +566,7 @@ bool sqldbs_stmt_bind_result(struct sqldbs_stmt *st)
 }
 
 /*==========================================
- * ÉXÉeÅ[ÉgÉÅÉìÉgåãâ ÉZÉbÉgÇÃéüÉåÉRÅ[ÉhÇéÊìæ
+ * „Çπ„ÉÜ„Éº„Éà„É°„É≥„ÉàÁµêÊûú„Çª„ÉÉ„Éà„ÅÆÊ¨°„É¨„Ç≥„Éº„Éâ„ÇíÂèñÂæó
  *------------------------------------------
  */
 bool sqldbs_stmt_fetch(struct sqldbs_stmt *st)
@@ -619,7 +598,7 @@ bool sqldbs_stmt_fetch(struct sqldbs_stmt *st)
 }
 
 /*==========================================
- * ÉXÉeÅ[ÉgÉÅÉìÉgåãâ ÉZÉbÉgÇÃçsêîÇï‘Ç∑
+ * „Çπ„ÉÜ„Éº„Éà„É°„É≥„ÉàÁµêÊûú„Çª„ÉÉ„Éà„ÅÆË°åÊï∞„ÇíËøî„Åô
  *------------------------------------------
  */
 int sqldbs_stmt_num_rows(struct sqldbs_stmt *st)
@@ -630,7 +609,7 @@ int sqldbs_stmt_num_rows(struct sqldbs_stmt *st)
 }
 
 /*==========================================
- * ÉXÉeÅ[ÉgÉÅÉìÉgåãâ ÇÃóÒêîÇï‘Ç∑
+ * „Çπ„ÉÜ„Éº„Éà„É°„É≥„ÉàÁµêÊûú„ÅÆÂàóÊï∞„ÇíËøî„Åô
  *------------------------------------------
  */
 int sqldbs_stmt_field_count(struct sqldbs_stmt *st)
@@ -641,7 +620,7 @@ int sqldbs_stmt_field_count(struct sqldbs_stmt *st)
 }
 
 /*==========================================
- * ÉXÉeÅ[ÉgÉÅÉìÉgÇÃAUTO_INCREMENTÇÃê∂ê¨ílÇï‘Ç∑
+ * „Çπ„ÉÜ„Éº„Éà„É°„É≥„Éà„ÅÆAUTO_INCREMENT„ÅÆÁîüÊàêÂÄ§„ÇíËøî„Åô
  *------------------------------------------
  */
 int sqldbs_stmt_insert_id(struct sqldbs_stmt *st)
@@ -652,7 +631,7 @@ int sqldbs_stmt_insert_id(struct sqldbs_stmt *st)
 }
 
 /*==========================================
- * ÉXÉeÅ[ÉgÉÅÉìÉgïœçXÇ≥ÇÍÇΩçsêîÇï‘Ç∑
+ * „Çπ„ÉÜ„Éº„Éà„É°„É≥„ÉàÂ§âÊõ¥„Åï„Çå„ÅüË°åÊï∞„ÇíËøî„Åô
  *------------------------------------------
  */
 int sqldbs_stmt_affected_rows(struct sqldbs_stmt *st)
@@ -663,7 +642,7 @@ int sqldbs_stmt_affected_rows(struct sqldbs_stmt *st)
 }
 
 /*==========================================
- * ÉXÉeÅ[ÉgÉÅÉìÉgåãâ ÉZÉbÉgâï˙
+ * „Çπ„ÉÜ„Éº„Éà„É°„É≥„ÉàÁµêÊûú„Çª„ÉÉ„ÉàËß£Êîæ
  *------------------------------------------
  */
 void sqldbs_stmt_free_result(struct sqldbs_stmt *st)
@@ -674,7 +653,7 @@ void sqldbs_stmt_free_result(struct sqldbs_stmt *st)
 }
 
 /*==========================================
- * ÉXÉeÅ[ÉgÉÅÉìÉgÇÃclose
+ * „Çπ„ÉÜ„Éº„Éà„É°„É≥„Éà„ÅÆclose
  *------------------------------------------
  */
 void sqldbs_stmt_close(struct sqldbs_stmt *st)
@@ -702,8 +681,8 @@ void sqldbs_stmt_close(struct sqldbs_stmt *st)
 }
 
 /*==========================================
- * KeepaliveÉ^ÉCÉ}Å[
- * íËä˙ìIÇ…pingÇî≠çsÇµÇƒÉ^ÉCÉÄÉAÉEÉgÇó}êß
+ * Keepalive„Çø„Ç§„Éû„Éº
+ * ÂÆöÊúüÁöÑ„Å´ping„ÇíÁô∫Ë°å„Åó„Å¶„Çø„Ç§„É†„Ç¢„Ç¶„Éà„ÇíÊäëÂà∂
  *------------------------------------------
  */
 static int sqldbs_keepalive_timer(int tid, unsigned int tick, int id, void *data)
@@ -717,7 +696,7 @@ static int sqldbs_keepalive_timer(int tid, unsigned int tick, int id, void *data
 }
 
 /*==========================================
- * êÿíf
+ * ÂàáÊñ≠
  *------------------------------------------
  */
 void sqldbs_close(struct sqldbs_handle *hd)
@@ -736,7 +715,7 @@ void sqldbs_close(struct sqldbs_handle *hd)
 		while(node) {
 			struct sqldbs_stmt *st = (struct sqldbs_stmt *)node->key;
 
-			// sqldbs_stmt_close() ì‡Ç≈ linkdb_erase() Ç≥ÇÍÇ»Ç¢ÇΩÇﬂÇ…NULLÇ…ÇµÇƒÇ®Ç≠
+			// sqldbs_stmt_close() ÂÜÖ„Åß linkdb_erase() „Åï„Çå„Å™„ÅÑ„Åü„ÇÅ„Å´NULL„Å´„Åó„Å¶„Åä„Åè
 			st->handle = NULL;
 
 			sqldbs_stmt_close(st);
@@ -755,7 +734,7 @@ void sqldbs_close(struct sqldbs_handle *hd)
 }
 
 /*==========================================
- * ê⁄ë±
+ * Êé•Á∂ö
  *------------------------------------------
  */
 bool sqldbs_connect(struct sqldbs_handle *hd, const char *host, const char *user, const char *passwd,

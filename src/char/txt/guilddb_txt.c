@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -54,7 +33,7 @@ static int guildcastle_journal_cache = 1000;
 #endif
 
 /*==========================================
- * İ’èƒtƒ@ƒCƒ‹“Ç
+ * è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«èª­è¾¼
  *------------------------------------------
  */
 int guilddb_txt_config_read_sub(const char* w1,const char *w2)
@@ -93,7 +72,7 @@ int guilddb_txt_config_read_sub(const char* w1,const char *w2)
 }
 
 /*==========================================
- * ƒMƒ‹ƒhƒf[ƒ^‚ğ•¶š—ñ‚Ö•ÏŠ·
+ * ã‚®ãƒ«ãƒ‰ãƒ‡ãƒ¼ã‚¿ã‚’æ–‡å­—åˆ—ã¸å¤‰æ›
  *------------------------------------------
  */
 static int guild_tostr(char *str, struct guild *g)
@@ -102,12 +81,12 @@ static int guild_tostr(char *str, struct guild *g)
 
 	nullpo_retr(1, g);
 
-	// Šî–{ƒf[ƒ^
+	// åŸºæœ¬ãƒ‡ãƒ¼ã‚¿
 	len = snprintf(str, 16384, "%d\t%s\t%s\t%d,%d,%d,%d\t%s#\t%s#\t",
 		g->guild_id, g->name, g->master,
 		g->guild_lv, g->max_member, g->exp, g->skill_point, g->mes1, g->mes2);
 
-	// ƒƒ“ƒo[
+	// ãƒ¡ãƒ³ãƒãƒ¼
 	for(i = 0; i < g->max_member; i++) {
 		struct guild_member *m = &g->member[i];
 		len += snprintf(str + len, 16384 - (size_t)len, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\t%s\t",
@@ -117,20 +96,20 @@ static int guild_tostr(char *str, struct guild *g)
 			((m->account_id > 0)? m->name: "-"));
 	}
 
-	// –ğE
+	// å½¹è·
 	for(i = 0; i < MAX_GUILDPOSITION; i++) {
 		struct guild_position *p = &g->position[i];
 		len += snprintf(str + len, 16384 - (size_t)len, "%d,%d\t%s#\t", p->mode, p->exp_mode, p->name);
 	}
 
-	// ƒGƒ“ƒuƒŒƒ€
+	// ã‚¨ãƒ³ãƒ–ãƒ¬ãƒ 
 	len += snprintf(str + len, 16384 - (size_t)len, "%d,%d,", g->emblem_len, g->emblem_id);
 	for(i = 0; i < g->emblem_len; i++) {
 		len += snprintf(str + len, 16384 - (size_t)len, "%02x", (unsigned char)(g->emblem_data[i]));
 	}
 	len += snprintf(str + len, 16384 - (size_t)len, "$\t");
 
-	// “¯–¿/“G‘ÎƒŠƒXƒg
+	// åŒç›Ÿ/æ•µå¯¾ãƒªã‚¹ãƒˆ
 	for(i = 0, c = 0; i < MAX_GUILDALLIANCE; i++) {
 		if(g->alliance[i].guild_id > 0)
 			c++;
@@ -142,7 +121,7 @@ static int guild_tostr(char *str, struct guild *g)
 			len += snprintf(str + len, 16384 - (size_t)len, "%d,%d\t%s\t", a->guild_id, a->opposition, a->name);
 	}
 
-	// ’Ç•úƒŠƒXƒg
+	// è¿½æ”¾ãƒªã‚¹ãƒˆ
 	for(i = 0, c = 0; i < MAX_GUILDEXPLUSION; i++) {
 		if(g->explusion[i].account_id > 0)
 			c++;
@@ -154,7 +133,7 @@ static int guild_tostr(char *str, struct guild *g)
 			len += snprintf(str + len, 16384 - (size_t)len, "%d\t%s\t%s#\t", e->account_id, e->name, e->mes);
 	}
 
-	// ƒMƒ‹ƒhƒXƒLƒ‹
+	// ã‚®ãƒ«ãƒ‰ã‚¹ã‚­ãƒ«
 	for(i = 0; i < MAX_GUILDSKILL; i++) {
 		len += snprintf(str + len, 16384 - (size_t)len, "%d,%d ", g->skill[i].id, g->skill[i].lv);
 	}
@@ -164,7 +143,7 @@ static int guild_tostr(char *str, struct guild *g)
 }
 
 /*==========================================
- * ƒMƒ‹ƒhƒf[ƒ^‚ğ•¶š—ñ‚©‚ç•ÏŠ·
+ * ã‚®ãƒ«ãƒ‰ãƒ‡ãƒ¼ã‚¿ã‚’æ–‡å­—åˆ—ã‹ã‚‰å¤‰æ›
  *------------------------------------------
  */
 static int guild_fromstr(char *str, struct guild *g)
@@ -176,7 +155,7 @@ static int guild_fromstr(char *str, struct guild *g)
 
 	nullpo_retr(1, g);
 
-	// Šî–{ƒf[ƒ^
+	// åŸºæœ¬ãƒ‡ãƒ¼ã‚¿
 	memset(g, 0, sizeof(struct guild));
 
 	if( sscanf(str, "%d\t%255[^\t]\t%255[^\t]\t%d,%d,%d,%d,%d\t%255[^\t]\t%255[^\t]\t",
@@ -184,7 +163,7 @@ static int guild_fromstr(char *str, struct guild *g)
 		&tmp_int[1],&tmp_int[2],&tmp_int[3],&tmp_int[4],&tmp_int[5],
 		tmp_str[2],tmp_str[3]) != 10)
 	{
-		// Auriga-0177ˆÈ~‚ÌŒ`®
+		// Auriga-0177ä»¥é™ã®å½¢å¼
 		if( sscanf(str, "%d\t%255[^\t]\t%255[^\t]\t%d,%d,%d,%d\t%255[^\t]\t%255[^\t]\t",
 			&tmp_int[0],tmp_str[0],tmp_str[1],
 			&tmp_int[1],&tmp_int[2],&tmp_int[3],&tmp_int[4],
@@ -210,11 +189,11 @@ static int guild_fromstr(char *str, struct guild *g)
 	g->mes1[59]   = '\0';
 	g->mes2[119]  = '\0';
 
-	for(j = 0; j < 6 && str != NULL; j++)	// ˆÊ’uƒXƒLƒbƒv
+	for(j = 0; j < 6 && str != NULL; j++)	// ä½ç½®ã‚¹ã‚­ãƒƒãƒ—
 		str = strchr(str + 1, '\t');
 	//printf("GuildBaseInfo OK\n");
 
-	// ƒƒ“ƒo[
+	// ãƒ¡ãƒ³ãƒãƒ¼
 	for(i = 0; i < g->max_member && i < MAX_GUILD; i++) {
 		struct guild_member *m = &g->member[i];
 		if( sscanf(str+1, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\t%255[^\t]\t",
@@ -236,7 +215,7 @@ static int guild_fromstr(char *str, struct guild *g)
 		auriga_strlcpy(m->name, tmp_str[0], sizeof(m->name));
 		m->name[23] = '\0';	// force \0 terminal
 
-		for(j = 0; j < 2 && str != NULL; j++)	// ˆÊ’uƒXƒLƒbƒv
+		for(j = 0; j < 2 && str != NULL; j++)	// ä½ç½®ã‚¹ã‚­ãƒƒãƒ—
 			str = strchr(str + 1, '\t');
 	}
 	if(g->max_member != i) {
@@ -244,7 +223,7 @@ static int guild_fromstr(char *str, struct guild *g)
 		g->max_member = i;
 	}
 
-	// –ğE
+	// å½¹è·
 	for(i = 0; i < MAX_GUILDPOSITION; i++) {
 		struct guild_position *p = &g->position[i];
 		if( sscanf(str + 1, "%d,%d\t%255[^\t]\t",
@@ -257,11 +236,11 @@ static int guild_fromstr(char *str, struct guild *g)
 		auriga_strlcpy(p->name, tmp_str[0], sizeof(p->name));
 		p->name[23] = '\0';	// force \0 terminal
 
-		for(j = 0; j < 2 && str != NULL; j++)	// ˆÊ’uƒXƒLƒbƒv
+		for(j = 0; j < 2 && str != NULL; j++)	// ä½ç½®ã‚¹ã‚­ãƒƒãƒ—
 			str = strchr(str + 1, '\t');
 	}
 
-	// ƒGƒ“ƒuƒŒƒ€
+	// ã‚¨ãƒ³ãƒ–ãƒ¬ãƒ 
 	tmp_int[1] = 0;
 	if( sscanf(str + 1, "%d,%d,%4096[^\t]\t", &tmp_int[0], &tmp_int[1], tmp_str2) < 3 )
 		return 1;
@@ -269,19 +248,19 @@ static int guild_fromstr(char *str, struct guild *g)
 	g->emblem_len = tmp_int[0];
 	g->emblem_id  = tmp_int[1];
 	if(g->emblem_len > sizeof(tmp_str2) / 2) {
-		// ƒGƒ“ƒuƒŒƒ€‚Ìƒf[ƒ^’·‚ª‘å‚«‚·‚¬‚é
+		// ã‚¨ãƒ³ãƒ–ãƒ¬ãƒ ã®ãƒ‡ãƒ¼ã‚¿é•·ãŒå¤§ãã™ãã‚‹
 		return 1;
 	}
 	guild_decode_emblem(g->emblem_data, tmp_str2, g->emblem_len);
 
 	//printf("GuildEmblemInfo OK\n");
-	str = strchr(str + 1, '\t');	// ˆÊ’uƒXƒLƒbƒv
+	str = strchr(str + 1, '\t');	// ä½ç½®ã‚¹ã‚­ãƒƒãƒ—
 
-	// “¯–¿/“G‘ÎƒŠƒXƒg
+	// åŒç›Ÿ/æ•µå¯¾ãƒªã‚¹ãƒˆ
 	if( sscanf(str + 1, "%d\t", &c)< 1)
 		return 1;
 
-	str = strchr(str + 1, '\t');	// ˆÊ’uƒXƒLƒbƒv
+	str = strchr(str + 1, '\t');	// ä½ç½®ã‚¹ã‚­ãƒƒãƒ—
 	for(i = 0; i < c && i < MAX_GUILDALLIANCE; i++) {
 		struct guild_alliance *a = &g->alliance[i];
 		if( sscanf(str + 1, "%d,%d\t%255[^\t]\t",
@@ -293,16 +272,16 @@ static int guild_fromstr(char *str, struct guild *g)
 		auriga_strlcpy(a->name, tmp_str[0], sizeof(a->name));
 		a->name[23] = '\0';	// force \0 terminal
 
-		for(j = 0; j < 2 && str != NULL; j++)	// ˆÊ’uƒXƒLƒbƒv
+		for(j = 0; j < 2 && str != NULL; j++)	// ä½ç½®ã‚¹ã‚­ãƒƒãƒ—
 			str = strchr(str + 1, '\t');
 	}
 	//printf("GuildAllianceInfo OK\n");
 
-	// ’Ç•úƒŠƒXƒg
+	// è¿½æ”¾ãƒªã‚¹ãƒˆ
 	if( sscanf(str + 1, "%d\t", &c) < 1)
 		return 1;
 
-	str = strchr(str + 1, '\t');	// ˆÊ’uƒXƒLƒbƒv
+	str = strchr(str + 1, '\t');	// ä½ç½®ã‚¹ã‚­ãƒƒãƒ—
 	for(i = 0; i < c && i < MAX_GUILDEXPLUSION; i++) {
 		struct guild_explusion *e = &g->explusion[i];
 		int ret, step;
@@ -311,7 +290,7 @@ static int guild_fromstr(char *str, struct guild *g)
 			&tmp_int[0],&tmp_int[1],&tmp_int[2],&tmp_int[3],
 			tmp_str[0],tmp_str[2],tmp_str[1]);
 		if(ret != 7) {
-			// Auriga-0142ˆÈ~‚ÌŒ`®
+			// Auriga-0142ä»¥é™ã®å½¢å¼
 			ret = sscanf(str + 1, "%d\t%255[^\t]\t%255[^\t]\t",
 				&tmp_int[0],tmp_str[0],tmp_str[1]);
 			if(ret != 3)
@@ -329,12 +308,12 @@ static int guild_fromstr(char *str, struct guild *g)
 		e->name[23] = '\0';
 		e->mes[39]  = '\0';
 
-		for(j = 0; j < step && str != NULL; j++)	// ˆÊ’uƒXƒLƒbƒv
+		for(j = 0; j < step && str != NULL; j++)	// ä½ç½®ã‚¹ã‚­ãƒƒãƒ—
 			str = strchr(str + 1, '\t');
 	}
 	//printf("GuildExplusionInfo OK\n");
 
-	// ƒMƒ‹ƒhƒXƒLƒ‹
+	// ã‚®ãƒ«ãƒ‰ã‚¹ã‚­ãƒ«
 	for(i = 0; i < MAX_GUILDSKILL; i++) {
 		int n;
 		if( sscanf(str+1, "%d,%d ", &tmp_int[0], &tmp_int[1]) < 2)
@@ -347,7 +326,7 @@ static int guild_fromstr(char *str, struct guild *g)
 		str = strchr(str + 1, ' ');
 	}
 
-	// ƒXƒLƒ‹ƒcƒŠ[î•ñ‚Í‰Šú‰»
+	// ã‚¹ã‚­ãƒ«ãƒ„ãƒªãƒ¼æƒ…å ±ã¯åˆæœŸåŒ–
 	for(i = 0; i < MAX_GUILDSKILL; i++)
 		g->skill[i].id = 0;
 
@@ -359,20 +338,20 @@ static int guild_fromstr(char *str, struct guild *g)
 
 #ifdef TXT_JOURNAL
 // ==========================================
-// ƒMƒ‹ƒhƒf[ƒ^‚ÌƒWƒƒ[ƒiƒ‹‚Ìƒ[ƒ‹ƒtƒHƒ[ƒh—pƒR[ƒ‹ƒoƒbƒNŠÖ”
+// ã‚®ãƒ«ãƒ‰ãƒ‡ãƒ¼ã‚¿ã®ã‚¸ãƒ£ãƒ¼ãƒŠãƒ«ã®ãƒ­ãƒ¼ãƒ«ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‰ç”¨ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°
 // ------------------------------------------
 int guild_journal_rollforward( int key, void* buf, int flag )
 {
 	struct guild* g = (struct guild *)numdb_search( guild_db, key );
 
-	// ”O‚Ì‚½‚ßƒ`ƒFƒbƒN
+	// å¿µã®ãŸã‚ãƒã‚§ãƒƒã‚¯
 	if( flag == JOURNAL_FLAG_WRITE && key != ((struct guild*)buf)->guild_id )
 	{
 		printf("int_guild: journal: key != guild_id !\n");
 		return 0;
 	}
 
-	// ƒf[ƒ^‚Ì’u‚«Š·‚¦
+	// ãƒ‡ãƒ¼ã‚¿ã®ç½®ãæ›ãˆ
 	if( g )
 	{
 		if(flag == JOURNAL_FLAG_DELETE) {
@@ -384,7 +363,7 @@ int guild_journal_rollforward( int key, void* buf, int flag )
 		return 1;
 	}
 
-	// ’Ç‰Á
+	// è¿½åŠ 
 	if( flag != JOURNAL_FLAG_DELETE )
 	{
 		g = (struct guild*) aCalloc( 1, sizeof( struct guild ) );
@@ -400,7 +379,7 @@ int guild_journal_rollforward( int key, void* buf, int flag )
 #endif
 
 /*==========================================
- * ƒMƒ‹ƒhƒf[ƒ^ƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ
+ * ã‚®ãƒ«ãƒ‰ãƒ‡ãƒ¼ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿
  *------------------------------------------
  */
 static bool guilddb_txt_read(void)
@@ -440,19 +419,19 @@ static bool guilddb_txt_read(void)
 #ifdef TXT_JOURNAL
 	if( guild_journal_enable )
 	{
-		// ƒWƒƒ[ƒiƒ‹ƒf[ƒ^‚Ìƒ[ƒ‹ƒtƒHƒ[ƒh
+		// ã‚¸ãƒ£ãƒ¼ãƒŠãƒ«ãƒ‡ãƒ¼ã‚¿ã®ãƒ­ãƒ¼ãƒ«ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‰
 		if( journal_load( &guild_journal, sizeof(struct guild), guild_journal_file ) )
 		{
 			int c = journal_rollforward( &guild_journal, guild_journal_rollforward );
 
 			printf("int_guild: guild_journal: roll-forward (%d)\n", c );
 
-			// ƒ[ƒ‹ƒtƒHƒ[ƒh‚µ‚½‚Ì‚ÅAtxt ƒf[ƒ^‚ğ•Û‘¶‚·‚é ( journal ‚àV‹Kì¬‚³‚ê‚é)
+			// ãƒ­ãƒ¼ãƒ«ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‰ã—ãŸã®ã§ã€txt ãƒ‡ãƒ¼ã‚¿ã‚’ä¿å­˜ã™ã‚‹ ( journal ã‚‚æ–°è¦ä½œæˆã•ã‚Œã‚‹)
 			guilddb_txt_sync();
 		}
 		else
 		{
-			// ƒWƒƒ[ƒiƒ‹‚ğV‹Kì¬‚·‚é
+			// ã‚¸ãƒ£ãƒ¼ãƒŠãƒ«ã‚’æ–°è¦ä½œæˆã™ã‚‹
 			journal_final( &guild_journal );
 			journal_create( &guild_journal, sizeof(struct guild), guild_journal_cache, guild_journal_file );
 		}
@@ -463,7 +442,7 @@ static bool guilddb_txt_read(void)
 }
 
 /*==========================================
- * ƒMƒ‹ƒhID‚©‚çƒMƒ‹ƒhî•ñ‚ğƒ[ƒh
+ * ã‚®ãƒ«ãƒ‰IDã‹ã‚‰ã‚®ãƒ«ãƒ‰æƒ…å ±ã‚’ãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 const struct guild *guilddb_txt_load_num(int guild_id)
@@ -477,7 +456,7 @@ const struct guild *guilddb_txt_load_num(int guild_id)
 }
 
 /*==========================================
- * ƒMƒ‹ƒhƒf[ƒ^‚Ì“¯Šú
+ * ã‚®ãƒ«ãƒ‰ãƒ‡ãƒ¼ã‚¿ã®åŒæœŸ
  *------------------------------------------
  */
 static int guilddb_txt_sync_sub(void *key, void *data, va_list ap)
@@ -509,7 +488,7 @@ int guilddb_txt_sync(void)
 #ifdef TXT_JOURNAL
 	if( guild_journal_enable )
 	{
-		// ƒRƒ~ƒbƒg‚µ‚½‚Ì‚ÅƒWƒƒ[ƒiƒ‹‚ğV‹Kì¬‚·‚é
+		// ã‚³ãƒŸãƒƒãƒˆã—ãŸã®ã§ã‚¸ãƒ£ãƒ¼ãƒŠãƒ«ã‚’æ–°è¦ä½œæˆã™ã‚‹
 		journal_final( &guild_journal );
 		journal_create( &guild_journal, sizeof(struct guild), guild_journal_cache, guild_journal_file );
 	}
@@ -520,7 +499,7 @@ int guilddb_txt_sync(void)
 }
 
 /*==========================================
- * ƒMƒ‹ƒh–¼‚©‚çƒMƒ‹ƒhî•ñ‚ğƒ[ƒh
+ * ã‚®ãƒ«ãƒ‰åã‹ã‚‰ã‚®ãƒ«ãƒ‰æƒ…å ±ã‚’ãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 static int guilddb_txt_load_str_sub(void *key, void *data, va_list ap)
@@ -548,7 +527,7 @@ const struct guild* guilddb_txt_load_str(const char *str)
 }
 
 /*==========================================
- * ƒMƒ‹ƒh‰ğUi“¯–¿/“G‘Î‚ğ‰ğœj
+ * ã‚®ãƒ«ãƒ‰è§£æ•£ï¼ˆåŒç›Ÿ/æ•µå¯¾ã‚’è§£é™¤ï¼‰
  *------------------------------------------
  */
 static int guilddb_txt_delete_sub(void *key, void *data, va_list ap)
@@ -590,7 +569,7 @@ bool guilddb_txt_delete(int guild_id)
 }
 
 /*==========================================
- * ƒMƒ‹ƒhì¬
+ * ã‚®ãƒ«ãƒ‰ä½œæˆ
  *------------------------------------------
  */
 bool guilddb_txt_new(struct guild *g2)
@@ -613,7 +592,7 @@ bool guilddb_txt_new(struct guild *g2)
 }
 
 /*==========================================
- * ƒZ[ƒu
+ * ã‚»ãƒ¼ãƒ–
  *------------------------------------------
  */
 bool guilddb_txt_save(struct guild* g2)
@@ -636,7 +615,7 @@ bool guilddb_txt_save(struct guild* g2)
 }
 
 /*==========================================
- * ƒMƒ‹ƒhéƒf[ƒ^‚ğ•¶š—ñ‚Ö•ÏŠ·
+ * ã‚®ãƒ«ãƒ‰åŸãƒ‡ãƒ¼ã‚¿ã‚’æ–‡å­—åˆ—ã¸å¤‰æ›
  *------------------------------------------
  */
 static int guildcastle_tostr(char *str, struct guild_castle *gc)
@@ -653,7 +632,7 @@ static int guildcastle_tostr(char *str, struct guild_castle *gc)
 }
 
 /*==========================================
- * ƒMƒ‹ƒhéƒf[ƒ^‚ğ•¶š—ñ‚©‚ç•ÏŠ·
+ * ã‚®ãƒ«ãƒ‰åŸãƒ‡ãƒ¼ã‚¿ã‚’æ–‡å­—åˆ—ã‹ã‚‰å¤‰æ›
  *------------------------------------------
  */
 static int guildcastle_fromstr(char *str, struct guild_castle *gc)
@@ -693,18 +672,18 @@ static int guildcastle_fromstr(char *str, struct guild_castle *gc)
 
 #ifdef TXT_JOURNAL
 // ==========================================
-// ƒMƒ‹ƒhéƒf[ƒ^‚ÌƒWƒƒ[ƒiƒ‹‚Ìƒ[ƒ‹ƒtƒHƒ[ƒh—pƒR[ƒ‹ƒoƒbƒNŠÖ”
+// ã‚®ãƒ«ãƒ‰åŸãƒ‡ãƒ¼ã‚¿ã®ã‚¸ãƒ£ãƒ¼ãƒŠãƒ«ã®ãƒ­ãƒ¼ãƒ«ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‰ç”¨ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°
 // ------------------------------------------
 int guildcastle_journal_rollforward( int key, void* buf, int flag )
 {
-	// ”O‚Ì‚½‚ßƒ`ƒFƒbƒN
+	// å¿µã®ãŸã‚ãƒã‚§ãƒƒã‚¯
 	if( flag == JOURNAL_FLAG_WRITE && key != ((struct guild_castle*)buf)->castle_id )
 	{
 		printf("int_guild: castle_journal: key != castle_id !\n");
 		return 0;
 	}
 
-	// ƒf[ƒ^‚Ì’u‚«Š·‚¦
+	// ãƒ‡ãƒ¼ã‚¿ã®ç½®ãæ›ãˆ
 	if( key >= 0 && key < MAX_GUILDCASTLE )
 	{
 		if( flag == JOURNAL_FLAG_DELETE ) {
@@ -716,7 +695,7 @@ int guildcastle_journal_rollforward( int key, void* buf, int flag )
 		return 1;
 	}
 
-	// ’Ç‰Á
+	// è¿½åŠ 
 	if( flag != JOURNAL_FLAG_DELETE )
 	{
 		memcpy( &castle_db[key], buf, sizeof(castle_db[0]) );
@@ -728,7 +707,7 @@ int guildcastle_journal_rollforward( int key, void* buf, int flag )
 #endif
 
 /*==========================================
- * ƒMƒ‹ƒhéƒf[ƒ^ƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ
+ * ã‚®ãƒ«ãƒ‰åŸãƒ‡ãƒ¼ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿
  *------------------------------------------
  */
 static bool guildcastle_txt_read(void)
@@ -737,7 +716,7 @@ static bool guildcastle_txt_read(void)
 	int i;
 	bool ret = true;
 
-	// ƒfƒtƒHƒ‹ƒgƒf[ƒ^‚ğì¬
+	// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒ‡ãƒ¼ã‚¿ã‚’ä½œæˆ
 	memset(castle_db, 0, sizeof(castle_db));
 	for(i = 0; i < MAX_GUILDCASTLE; i++) {
 		castle_db[i].castle_id = i;
@@ -767,19 +746,19 @@ static bool guildcastle_txt_read(void)
 #ifdef TXT_JOURNAL
 	if( guildcastle_journal_enable )
 	{
-		// ƒWƒƒ[ƒiƒ‹ƒf[ƒ^‚Ìƒ[ƒ‹ƒtƒHƒ[ƒh
+		// ã‚¸ãƒ£ãƒ¼ãƒŠãƒ«ãƒ‡ãƒ¼ã‚¿ã®ãƒ­ãƒ¼ãƒ«ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‰
 		if( journal_load( &guildcastle_journal, sizeof(struct guild_castle), guildcastle_journal_file ) )
 		{
 			int c = journal_rollforward( &guildcastle_journal, guildcastle_journal_rollforward );
 
 			printf("int_guild: castle_journal: roll-forward (%d)\n", c );
 
-			// ƒ[ƒ‹ƒtƒHƒ[ƒh‚µ‚½‚Ì‚ÅAtxt ƒf[ƒ^‚ğ•Û‘¶‚·‚é ( journal ‚àV‹Kì¬‚³‚ê‚é)
+			// ãƒ­ãƒ¼ãƒ«ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‰ã—ãŸã®ã§ã€txt ãƒ‡ãƒ¼ã‚¿ã‚’ä¿å­˜ã™ã‚‹ ( journal ã‚‚æ–°è¦ä½œæˆã•ã‚Œã‚‹)
 			guildcastle_txt_sync();
 		}
 		else
 		{
-			// ƒWƒƒ[ƒiƒ‹‚ğV‹Kì¬‚·‚é
+			// ã‚¸ãƒ£ãƒ¼ãƒŠãƒ«ã‚’æ–°è¦ä½œæˆã™ã‚‹
 			journal_final( &guildcastle_journal );
 			journal_create( &guildcastle_journal, sizeof(struct guild_castle), guildcastle_journal_cache, guildcastle_journal_file );
 		}
@@ -789,7 +768,7 @@ static bool guildcastle_txt_read(void)
 }
 
 /*==========================================
- * ƒMƒ‹ƒhéƒf[ƒ^‚Ì“¯Šú
+ * ã‚®ãƒ«ãƒ‰åŸãƒ‡ãƒ¼ã‚¿ã®åŒæœŸ
  *------------------------------------------
  */
 static int guildcastle_txt_sync(void)
@@ -812,7 +791,7 @@ static int guildcastle_txt_sync(void)
 #ifdef TXT_JOURNAL
 	if( guildcastle_journal_enable )
 	{
-		// ƒRƒ~ƒbƒg‚µ‚½‚Ì‚ÅƒWƒƒ[ƒiƒ‹‚ğV‹Kì¬‚·‚é
+		// ã‚³ãƒŸãƒƒãƒˆã—ãŸã®ã§ã‚¸ãƒ£ãƒ¼ãƒŠãƒ«ã‚’æ–°è¦ä½œæˆã™ã‚‹
 		journal_final( &guildcastle_journal );
 		journal_create( &guildcastle_journal, sizeof(struct guild_castle), guildcastle_journal_cache, guildcastle_journal_file );
 	}
@@ -822,7 +801,7 @@ static int guildcastle_txt_sync(void)
 }
 
 /*==========================================
- * I—¹
+ * çµ‚äº†
  *------------------------------------------
  */
 static int guild_txt_db_final(void *key, void *data, va_list ap)
@@ -852,7 +831,7 @@ void guilddb_txt_final(void)
 }
 
 /*==========================================
- * ‰Šú‰»
+ * åˆæœŸåŒ–
  *------------------------------------------
  */
 bool guilddb_txt_init(void)

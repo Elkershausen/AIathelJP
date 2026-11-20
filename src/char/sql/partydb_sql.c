@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -35,7 +14,7 @@
 static struct dbt *party_db = NULL;
 
 /*==========================================
- * İ’èƒtƒ@ƒCƒ‹‚Ì“Ç
+ * è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã®èª­è¾¼
  *------------------------------------------
  */
 int partydb_sql_config_read_sub(const char *w1,const char *w2)
@@ -44,7 +23,7 @@ int partydb_sql_config_read_sub(const char *w1,const char *w2)
 }
 
 /*==========================================
- * “¯Šú
+ * åŒæœŸ
  *------------------------------------------
  */
 int partydb_sql_sync(void)
@@ -54,7 +33,7 @@ int partydb_sql_sync(void)
 }
 
 /*==========================================
- * ƒp[ƒeƒB–¼‚©‚çƒp[ƒeƒBƒf[ƒ^‚ğƒ[ƒh
+ * ãƒ‘ãƒ¼ãƒ†ã‚£åã‹ã‚‰ãƒ‘ãƒ¼ãƒ†ã‚£ãƒ‡ãƒ¼ã‚¿ã‚’ãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 const struct party* partydb_sql_load_str(const char *str)
@@ -78,7 +57,7 @@ const struct party* partydb_sql_load_str(const char *str)
 }
 
 /*==========================================
- * ƒp[ƒeƒBID‚©‚çƒp[ƒeƒBƒf[ƒ^‚ğƒ[ƒh
+ * ãƒ‘ãƒ¼ãƒ†ã‚£IDã‹ã‚‰ãƒ‘ãƒ¼ãƒ†ã‚£ãƒ‡ãƒ¼ã‚¿ã‚’ãƒ­ãƒ¼ãƒ‰
  *------------------------------------------
  */
 const struct party* partydb_sql_load_num(int party_id)
@@ -138,7 +117,7 @@ const struct party* partydb_sql_load_num(int party_id)
 }
 
 /*==========================================
- * ƒZ[ƒu
+ * ã‚»ãƒ¼ãƒ–
  *------------------------------------------
  */
 bool partydb_sql_save(struct party *p2)
@@ -173,7 +152,7 @@ bool partydb_sql_save(struct party *p2)
 }
 
 /*==========================================
- * ƒp[ƒeƒBíœ
+ * ãƒ‘ãƒ¼ãƒ†ã‚£å‰Šé™¤
  *------------------------------------------
  */
 bool partydb_sql_delete(int party_id)
@@ -191,7 +170,7 @@ bool partydb_sql_delete(int party_id)
 }
 
 /*==========================================
- * ƒp[ƒeƒBì¬
+ * ãƒ‘ãƒ¼ãƒ†ã‚£ä½œæˆ
  *------------------------------------------
  */
 bool partydb_sql_new(struct party *p)
@@ -222,7 +201,7 @@ bool partydb_sql_new(struct party *p)
 	}
 	sqldbs_free_result(&mysql_handle);
 
-	// DB‚É‘}“ü
+	// DBã«æŒ¿å…¥
 	result = sqldbs_query(&mysql_handle,
 		"INSERT INTO `" PARTY_TABLE "` (`party_id`, `name`, `exp`, `item`, `leader_id`) "
 		"VALUES ('%d','%s', '%d', '%d', '%d')",
@@ -236,7 +215,7 @@ bool partydb_sql_new(struct party *p)
 }
 
 /*==========================================
- * I—¹
+ * çµ‚äº†
  *------------------------------------------
  */
 static int partydb_sql_final_sub(void *key, void *data, va_list ap)
@@ -254,7 +233,7 @@ void partydb_sql_final(void)
 }
 
 /*==========================================
- * ‰Šú‰»
+ * åˆæœŸåŒ–
  *------------------------------------------
  */
 bool partydb_sql_init(void)

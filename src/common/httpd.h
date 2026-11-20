@@ -1,32 +1,11 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _HTTPD_H_
+ï»¿#ifndef _HTTPD_H_
 #define _HTTPD_H_
 
-// ’ˆÓ
-//   1.Auriga“à‘ ‚Ìhttpd ‚Å‘å‚«‚Èƒtƒ@ƒCƒ‹‚ğ‘—M‚·‚é‚±‚Æ‚Í‚¨Š©‚ß‚µ‚Ü‚¹‚ñB
-//     200KB ‚ğ’´‚¦‚é‚æ‚¤‚Èƒtƒ@ƒCƒ‹‚ÍA•Ê‚Ìƒ\ƒtƒg‚ğ—˜—p‚·‚é‚±‚Æ‚ğŠ©‚ß‚Ü‚·B
-//   2.ƒtƒ@ƒCƒ‹–¼‚Ég‚¦‚é•¶š‚ÍA[A-Za-z0-9-_\.] ‚Å‚·B‘¼‚Ì•¶š‚ğg‚¤‚ÆA
-//     BAD REQUEST ‚Å’e‚©‚ê‚Ü‚·B
+// æ³¨æ„
+//   1.å†…è”µã®httpd ã§å¤§ããªãƒ•ã‚¡ã‚¤ãƒ«ã‚’é€ä¿¡ã™ã‚‹ã“ã¨ã¯ãŠå‹§ã‚ã—ã¾ã›ã‚“ã€‚
+//     200KB ã‚’è¶…ãˆã‚‹ã‚ˆã†ãªãƒ•ã‚¡ã‚¤ãƒ«ã¯ã€åˆ¥ã®ã‚½ãƒ•ãƒˆã‚’åˆ©ç”¨ã™ã‚‹ã“ã¨ã‚’å‹§ã‚ã¾ã™ã€‚
+//   2.ãƒ•ã‚¡ã‚¤ãƒ«åã«ä½¿ãˆã‚‹æ–‡å­—ã¯ã€[A-Za-z0-9-_\.] ã§ã™ã€‚ä»–ã®æ–‡å­—ã‚’ä½¿ã†ã¨ã€
+//     BAD REQUEST ã§å¼¾ã‹ã‚Œã¾ã™ã€‚
 
 #include <time.h>
 
@@ -70,7 +49,7 @@ struct httpd_session_data {
 	time_t date;
 	int file_pos;
 	unsigned char* filename;
-	int range_start, range_end, inst_len;	// ”ÍˆÍŠJnˆÊ’uAI—¹ˆÊ’uAƒGƒ“ƒeƒBƒeƒB‘S‘Ì‚ÌƒTƒCƒY
+	int range_start, range_end, inst_len;	// ç¯„å›²é–‹å§‹ä½ç½®ã€çµ‚äº†ä½ç½®ã€ã‚¨ãƒ³ãƒ†ã‚£ãƒ†ã‚£å…¨ä½“ã®ã‚µã‚¤ã‚º
 
 	int cgi_state;
 #ifdef WINDOWS
@@ -84,149 +63,149 @@ struct httpd_session_data {
 
 void httpd_pages(const char* url,void(*httpd_func)(struct httpd_session_data* sd,const char* url));
 
-// w’è‚³‚ê‚½URL ‚É‘Î‚·‚éƒR[ƒ‹ƒoƒbƒNŠÖ”‚ğİ’è‚·‚éB‚±‚ÌŠÖ”‚ÍAˆÈ‰º‚Ì‚æ‚¤‚É
-// À‘•‚·‚é•K—v‚ª‚ ‚éB
+// æŒ‡å®šã•ã‚ŒãŸURL ã«å¯¾ã™ã‚‹ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°ã‚’è¨­å®šã™ã‚‹ã€‚ã“ã®é–¢æ•°ã¯ã€ä»¥ä¸‹ã®ã‚ˆã†ã«
+// å®Ÿè£…ã™ã‚‹å¿…è¦ãŒã‚ã‚‹ã€‚
 //
-// 1. URL ‚ÍAæ“ª‚ÌƒXƒ‰ƒbƒVƒ…‚ªÈ‚©‚ê‚½ƒtƒ@ƒCƒ‹–¼‚Å‚·B—á‚¦‚ÎA"GET / HTTP/1.0"
-//    ‚Æ‚¢‚¤•—‚ÉƒŠƒNƒGƒXƒg‚³‚ê‚½AURL ‚É‚Í""(‹ó•¶š)‚ª“ü‚èA"GET /hoge HTTP/1.0"
-//    ‚Ì‚É‚ÍA"hoge"‚ª“ü‚è‚Ü‚·B
-// 2. ƒŠƒNƒGƒXƒg‚³‚ê‚½ƒy[ƒW‚ªŒ©‚Â‚©‚Á‚½‚çAhttpd_send() ‚Ü‚½‚ÍAhttpd_send_head()
-//    ‚Æhttpd_send_data() ‚Ì‘g‚ğŒÄ‚Ño‚µAƒf[ƒ^‚ğo—Í‚·‚éB
-// 3. httpd_send_file ‚ğw’è‚·‚é‚ÆAhttpd/ ˆÈ‰º‚É‚ ‚éƒtƒ@ƒCƒ‹‚ğo—Í‚·‚éBƒtƒ@ƒCƒ‹‚É
-//    ‹ó•¶š‚ªw’è‚³‚ê‚½‚ÍAindex.html‚ªw’è‚³‚ê‚½‚à‚Ì‚Æ‚İ‚È‚³‚ê‚éB
+// 1. URL ã¯ã€å…ˆé ­ã®ã‚¹ãƒ©ãƒƒã‚·ãƒ¥ãŒçœã‹ã‚ŒãŸãƒ•ã‚¡ã‚¤ãƒ«åã§ã™ã€‚ä¾‹ãˆã°ã€"GET / HTTP/1.0"
+//    ã¨ã„ã†é¢¨ã«ãƒªã‚¯ã‚¨ã‚¹ãƒˆã•ã‚ŒãŸæ™‚ã€URL ã«ã¯""(ç©ºæ–‡å­—)ãŒå…¥ã‚Šã€"GET /hoge HTTP/1.0"
+//    ã®æ™‚ã«ã¯ã€"hoge"ãŒå…¥ã‚Šã¾ã™ã€‚
+// 2. ãƒªã‚¯ã‚¨ã‚¹ãƒˆã•ã‚ŒãŸãƒšãƒ¼ã‚¸ãŒè¦‹ã¤ã‹ã£ãŸã‚‰ã€httpd_send() ã¾ãŸã¯ã€httpd_send_head()
+//    ã¨httpd_send_data() ã®çµ„ã‚’å‘¼ã³å‡ºã—ã€ãƒ‡ãƒ¼ã‚¿ã‚’å‡ºåŠ›ã™ã‚‹ã€‚
+// 3. httpd_send_file ã‚’æŒ‡å®šã™ã‚‹ã¨ã€httpd/ ä»¥ä¸‹ã«ã‚ã‚‹ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å‡ºåŠ›ã™ã‚‹ã€‚ãƒ•ã‚¡ã‚¤ãƒ«ã«
+//    ç©ºæ–‡å­—ãŒæŒ‡å®šã•ã‚ŒãŸæ™‚ã¯ã€index.htmlãŒæŒ‡å®šã•ã‚ŒãŸã‚‚ã®ã¨ã¿ãªã•ã‚Œã‚‹ã€‚
 
 void httpd_erase_pages(const char* url);
-// w’è‚³‚ê‚½URL ‚É‘Î‚·‚éƒR[ƒ‹ƒoƒbƒNŠÖ”‚ğíœ‚·‚é
+// æŒ‡å®šã•ã‚ŒãŸURL ã«å¯¾ã™ã‚‹ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯é–¢æ•°ã‚’å‰Šé™¤ã™ã‚‹
 
 char* httpd_get_value(struct httpd_session_data* sd,const char* val);
 
-// ƒŠƒNƒGƒXƒg‚³‚ê‚½ƒAƒhƒŒƒX‚É“n‚³‚ê‚½ƒtƒH[ƒ€ƒf[ƒ^‚Ì‚¤‚¿AŠY“–‚·‚é•¶š—ñ‚ğ•Ô‚·B
-// —á‚¦‚ÎA"GET /status/graph?image=users HTTP/1.0"‚Æ‚¢‚¤ƒŠƒNƒGƒXƒg‚Ìê‡A
-// httpd_get_value(sd,"image"); ‚ÍA "users"‚ğ•Ô‚·B‚±‚ÌŠÖ”‚Ì–ß‚è’l‚ÍAŒÄ‚Ño‚µŒ³‚ª
-// ‰ğ•ú‚µ‚È‚¯‚ê‚Î‚È‚ç‚È‚¢B‚Ü‚½AŠY“–‚·‚é•¶š—ñ‚ª–³‚¢‚ÍA‹ó‚Ì•¶š—ñ‚ğ•Ô‚·B
+// ãƒªã‚¯ã‚¨ã‚¹ãƒˆã•ã‚ŒãŸã‚¢ãƒ‰ãƒ¬ã‚¹ã«æ¸¡ã•ã‚ŒãŸãƒ•ã‚©ãƒ¼ãƒ ãƒ‡ãƒ¼ã‚¿ã®ã†ã¡ã€è©²å½“ã™ã‚‹æ–‡å­—åˆ—ã‚’è¿”ã™ã€‚
+// ä¾‹ãˆã°ã€"GET /status/graph?image=users HTTP/1.0"ã¨ã„ã†ãƒªã‚¯ã‚¨ã‚¹ãƒˆã®å ´åˆã€
+// httpd_get_value(sd,"image"); ã¯ã€ "users"ã‚’è¿”ã™ã€‚ã“ã®é–¢æ•°ã®æˆ»ã‚Šå€¤ã¯ã€å‘¼ã³å‡ºã—å…ƒãŒ
+// è§£æ”¾ã—ãªã‘ã‚Œã°ãªã‚‰ãªã„ã€‚ã¾ãŸã€è©²å½“ã™ã‚‹æ–‡å­—åˆ—ãŒç„¡ã„æ™‚ã¯ã€ç©ºã®æ–‡å­—åˆ—ã‚’è¿”ã™ã€‚
 
 int httpd_get_method(struct httpd_session_data* sd);
 
-// ƒŠƒNƒGƒXƒgŒ`®‚ğ•Ô‚·B
+// ãƒªã‚¯ã‚¨ã‚¹ãƒˆå½¢å¼ã‚’è¿”ã™ã€‚
 //
 //     GET  : HTTPD_METHOD_GET
 //     POST : HTTPD_METHOD_POST
 
 unsigned long httpd_get_ip(struct httpd_session_data *sd);
 
-// ƒNƒ‰ƒCƒAƒ“ƒg‚ÌIP‚ğ•Ô‚·B
+// ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã®IPã‚’è¿”ã™ã€‚
 
 
 void httpd_default_page(void(*httpd_func)(struct httpd_session_data* sd,const char* url));
 
-// w’è‚³‚ê‚½URL ‚ª“o˜^‚³‚ê‚Ä‚¢‚È‚¢‚ÉŒÄ‚Ño‚·ŠÖ”‚ğİ’è‚·‚éB‚±‚ÌŠÖ”‚ğŒÄ‚Ño‚³‚È‚¢‚©A
-// ŠÖ”‚Ìˆø”‚ÉNULL‚ğw’è‚·‚é‚ÆA404 Not Found ‚ğ•Ô‚·B
+// æŒ‡å®šã•ã‚ŒãŸURL ãŒç™»éŒ²ã•ã‚Œã¦ã„ãªã„æ™‚ã«å‘¼ã³å‡ºã™é–¢æ•°ã‚’è¨­å®šã™ã‚‹ã€‚ã“ã®é–¢æ•°ã‚’å‘¼ã³å‡ºã•ãªã„ã‹ã€
+// é–¢æ•°ã®å¼•æ•°ã«NULLã‚’æŒ‡å®šã™ã‚‹ã¨ã€404 Not Found ã‚’è¿”ã™ã€‚
 
 
 
 
 void httpd_send(struct httpd_session_data* sd,int status,const char *content_type,int content_len,const void *data);
 
-//	HTTPƒwƒbƒ_Aƒf[ƒ^‚ğ‘g‚É‚µ‚Ä‘—M‚·‚éB‚±‚ÌŠÖ”‚ğŒÄ‚Ño‚µ‚½Œã‚ÉAhttpd_send_data ‚ğ
-//  ŒÄ‚Ño‚µ‚Ä‚Í‚È‚ç‚È‚¢B
+//	HTTPãƒ˜ãƒƒãƒ€ã€ãƒ‡ãƒ¼ã‚¿ã‚’çµ„ã«ã—ã¦é€ä¿¡ã™ã‚‹ã€‚ã“ã®é–¢æ•°ã‚’å‘¼ã³å‡ºã—ãŸå¾Œã«ã€httpd_send_data ã‚’
+//  å‘¼ã³å‡ºã—ã¦ã¯ãªã‚‰ãªã„ã€‚
 //
-//		sd           : httpd_set_parse_func() ‚É“n‚³‚ê‚½‚à‚Ì‚ğ‚»‚Ì‚Ü‚Ü“n‚·‚±‚ÆB
-//		status       : HTTPƒwƒbƒ_‚É‰Á‚¦‚éstatusB’Êí‚Í200B
-//		content_type : ‘—M‚·‚éƒf[ƒ^‚Ìƒ^ƒCƒvBtext/html , image/jpeg ‚È‚ÇB
-//		content_len  : ‘—M‚·‚éƒf[ƒ^‚Ì’·‚³B
-//		data         : ‘—M‚·‚éƒf[ƒ^‚Ö‚Ìƒ|ƒCƒ“ƒ^
+//		sd           : httpd_set_parse_func() ã«æ¸¡ã•ã‚ŒãŸã‚‚ã®ã‚’ãã®ã¾ã¾æ¸¡ã™ã“ã¨ã€‚
+//		status       : HTTPãƒ˜ãƒƒãƒ€ã«åŠ ãˆã‚‹statusã€‚é€šå¸¸ã¯200ã€‚
+//		content_type : é€ä¿¡ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ã®ã‚¿ã‚¤ãƒ—ã€‚text/html , image/jpeg ãªã©ã€‚
+//		content_len  : é€ä¿¡ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ã®é•·ã•ã€‚
+//		data         : é€ä¿¡ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ã¸ã®ãƒã‚¤ãƒ³ã‚¿
 
 
 
 void httpd_send_head(struct httpd_session_data* sd,int status,const char *content_type,int content_len);
 
-//	HTTPƒwƒbƒ_‚ğ‘—M‚·‚éB
+//	HTTPãƒ˜ãƒƒãƒ€ã‚’é€ä¿¡ã™ã‚‹ã€‚
 //
-//		sd           : “¯ã
-//		status       : “¯ã
-//		content_type : “¯ã
-//      content_len  : content_len‚ğ-1‚Éw’è‚·‚é‚±‚Æ‚ÅA‚±‚ÌŠÖ”‚ªŒÄ‚Î‚ê‚½“_‚Å
-//                     ’·‚³‚ª•ª‚©‚ç‚È‚¢ƒf[ƒ^‚ğ‘—M‚·‚é‚±‚Æ‚ª‚Å‚«‚éB‚±‚Ìê‡‚Í
-//                     ‹­§“I‚ÉHTTP/1.0 Ú‘±‚Æ‚È‚èAƒI[ƒo[ƒwƒbƒh‚ª‘å‚«‚­‚È‚é‚Ì‚ÅA
-//                     ‚ ‚Ü‚è‚¨Š©‚ß‚Í‚µ‚È‚¢B
+//		sd           : åŒä¸Š
+//		status       : åŒä¸Š
+//		content_type : åŒä¸Š
+//      content_len  : content_lenã‚’-1ã«æŒ‡å®šã™ã‚‹ã“ã¨ã§ã€ã“ã®é–¢æ•°ãŒå‘¼ã°ã‚ŒãŸæ™‚ç‚¹ã§
+//                     é•·ã•ãŒåˆ†ã‹ã‚‰ãªã„ãƒ‡ãƒ¼ã‚¿ã‚’é€ä¿¡ã™ã‚‹ã“ã¨ãŒã§ãã‚‹ã€‚ã“ã®å ´åˆã¯
+//                     å¼·åˆ¶çš„ã«HTTP/1.0 æ¥ç¶šã¨ãªã‚Šã€ã‚ªãƒ¼ãƒãƒ¼ãƒ˜ãƒƒãƒ‰ãŒå¤§ãããªã‚‹ã®ã§ã€
+//                     ã‚ã¾ã‚ŠãŠå‹§ã‚ã¯ã—ãªã„ã€‚
 
 
 
 
 void httpd_send_data(struct httpd_session_data* sd,int content_len,const void *data);
 
-// ƒf[ƒ^‚ğ‘—M‚·‚éB‚±‚ÌŠÖ”‚ğAhttpd_send_head() ‚ğŒÄ‚Ño‚·‘O‚ÉŒÄ‚Ño‚³‚ê‚½ê‡A
-// content_type = application/octet-stream, content_len = -1 ‚Æ‚µ‚Äƒwƒbƒ_‚ª‘—M‚³‚ê‚éB
-//		sd           : “¯ã
-//      content_len  : ‘—M‚·‚éƒf[ƒ^‚Ìdata’·‚³‚ğw’è‚·‚éB
-//      data         : ‘—M‚·‚éƒf[ƒ^
+// ãƒ‡ãƒ¼ã‚¿ã‚’é€ä¿¡ã™ã‚‹ã€‚ã“ã®é–¢æ•°ã‚’ã€httpd_send_head() ã‚’å‘¼ã³å‡ºã™å‰ã«å‘¼ã³å‡ºã•ã‚ŒãŸå ´åˆã€
+// content_type = application/octet-stream, content_len = -1 ã¨ã—ã¦ãƒ˜ãƒƒãƒ€ãŒé€ä¿¡ã•ã‚Œã‚‹ã€‚
+//		sd           : åŒä¸Š
+//      content_len  : é€ä¿¡ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ã®dataé•·ã•ã‚’æŒ‡å®šã™ã‚‹ã€‚
+//      data         : é€ä¿¡ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
 
 
 
 void httpd_send_file(struct httpd_session_data* sd,const char* url);
 
-// ƒtƒ@ƒCƒ‹‚ğ‘—M‚·‚éB‚±‚ÌŠÖ”‚ÍAhttpd_send_head() ‚ğŒÄ‚Ño‚·‘O‚ÉŒÄ‚Ño‚³‚È‚¯‚ê‚Î
-// ‚È‚ç‚È‚¢Bƒtƒ@ƒCƒ‹‚É‹ó•¶š‚ªw’è‚³‚ê‚½‚Æ‚«‚ÍAindex.html‚ªw’è‚³‚ê‚½‚ÆŒ©‚È‚³‚ê‚éB
+// ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é€ä¿¡ã™ã‚‹ã€‚ã“ã®é–¢æ•°ã¯ã€httpd_send_head() ã‚’å‘¼ã³å‡ºã™å‰ã«å‘¼ã³å‡ºã•ãªã‘ã‚Œã°
+// ãªã‚‰ãªã„ã€‚ãƒ•ã‚¡ã‚¤ãƒ«ã«ç©ºæ–‡å­—ãŒæŒ‡å®šã•ã‚ŒãŸã¨ãã¯ã€index.htmlãŒæŒ‡å®šã•ã‚ŒãŸã¨è¦‹ãªã•ã‚Œã‚‹ã€‚
 
 
 
 void httpd_send_error(struct httpd_session_data* sd,int status);
 
-// HTTPƒGƒ‰[ƒƒbƒZ[ƒW‚ğ‘—M‚·‚éBstatus ‚ÍHTTP‚ÌƒGƒ‰[ƒR[ƒh‚Æ“¯‚¶B
-// 	400 Bad Request, 404 Not Found, 500 Internal Server Error ‚È‚ÇB
+// HTTPã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’é€ä¿¡ã™ã‚‹ã€‚status ã¯HTTPã®ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰ã¨åŒã˜ã€‚
+// 	400 Bad Request, 404 Not Found, 500 Internal Server Error ãªã©ã€‚
 
 int  httpd_parse(int fd);
 
 
-// ”FØŠÖ”‚ÌŠÖ”ƒ|ƒCƒ“ƒ^‚Ì typedef
+// èªè¨¼é–¢æ•°ã®é–¢æ•°ãƒã‚¤ãƒ³ã‚¿ã® typedef
 struct httpd_access;
 typedef int(*HTTPD_AUTH_FUNC)( struct httpd_access* a, struct httpd_session_data* sd, const char *userid, char *passwd );
-// * ‚±‚ÌŠÖ”ƒ|ƒCƒ“ƒ^‚Ìæ‚ÌŠÖ”‚ªs‚¤‚×‚«‚±‚Æ *
-// userid ‚É‘Î‰‚·‚éƒvƒŒ[ƒ“ƒpƒXƒ[ƒh‚ğ passwd (33ƒoƒCƒg‚Ü‚Å) ‚Éİ’è‚µ‚Ä•Ô‚·
-//  –ß‚è’l: 0 ‚ÅƒGƒ‰[, 1 ‚Å¬Œ÷
-//  sd     = httpd ‚ÌƒZƒbƒVƒ‡ƒ“ƒf[ƒ^‚Ö‚Ìƒ|ƒCƒ“ƒ^
-//  a      = ”FØî•ñ‚Ö‚Ìƒ|ƒCƒ“ƒ^
-//  userid = ”FØ‚Ìƒ†[ƒU[ID‚Ö‚Ìƒ|ƒCƒ“ƒ^
-//  passwd = ƒpƒXƒ[ƒh‚ğ•Ô‚·‚½‚ß‚Ìƒ|ƒCƒ“ƒ^i‚±‚±‚É strcpy ‚·‚éj
+// * ã“ã®é–¢æ•°ãƒã‚¤ãƒ³ã‚¿ã®å…ˆã®é–¢æ•°ãŒè¡Œã†ã¹ãã“ã¨ *
+// userid ã«å¯¾å¿œã™ã‚‹ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ã‚’ passwd (33ãƒã‚¤ãƒˆã¾ã§) ã«è¨­å®šã—ã¦è¿”ã™
+//  æˆ»ã‚Šå€¤: 0 ã§ã‚¨ãƒ©ãƒ¼, 1 ã§æˆåŠŸ
+//  sd     = httpd ã®ã‚»ãƒƒã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿ã¸ã®ãƒã‚¤ãƒ³ã‚¿
+//  a      = èªè¨¼æƒ…å ±ã¸ã®ãƒã‚¤ãƒ³ã‚¿
+//  userid = èªè¨¼ã®ãƒ¦ãƒ¼ã‚¶ãƒ¼IDã¸ã®ãƒã‚¤ãƒ³ã‚¿
+//  passwd = ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ã‚’è¿”ã™ãŸã‚ã®ãƒã‚¤ãƒ³ã‚¿ï¼ˆã“ã“ã« strcpy ã™ã‚‹ï¼‰
 
 
-// ”FØŠÖ”‚Ìİ’èifunc_id ‚Í httpd.conf ‚Ì authfunc ‚Ì”Ô†j
+// èªè¨¼é–¢æ•°ã®è¨­å®šï¼ˆfunc_id ã¯ httpd.conf ã® authfunc ã®ç•ªå·ï¼‰
 void httpd_set_auth_func( int func_id, HTTPD_AUTH_FUNC func );
 
-// ‰Šú‰»ˆ—
+// åˆæœŸåŒ–å‡¦ç†
 void do_init_httpd(void);
 
-// ƒhƒLƒ…ƒƒ“ƒgƒ‹[ƒgİ’è
+// ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆãƒ«ãƒ¼ãƒˆè¨­å®š
 void httpd_set_document_root( const char *str );
 
-// ƒ^ƒCƒ€ƒAƒEƒgŠÔİ’è
+// ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆæ™‚é–“è¨­å®š
 void httpd_set_request_timeout( int idx, int time );
 
-// ‘±’ÊM‚Å‚ÌƒŠƒNƒGƒXƒgÅ‘å”İ’è
+// æŒç¶šé€šä¿¡ã§ã®ãƒªã‚¯ã‚¨ã‚¹ãƒˆæœ€å¤§æ•°è¨­å®š
 void httpd_set_max_persist_requests( int count );
 
-// ƒƒOƒtƒ@ƒCƒ‹–¼İ’è
+// ãƒ­ã‚°ãƒ•ã‚¡ã‚¤ãƒ«åè¨­å®š
 void httpd_set_logfile( const char *str );
 
-// İ’èƒtƒ@ƒCƒ‹“Ç‚İ‚İ
+// è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«èª­ã¿è¾¼ã¿
 int httpd_config_read(const char *cfgName);
 
 
-// ƒƒ^•¶š( < , > , & , " ) ‚ğƒGƒXƒP[ƒv‚µ‚½•¶š—ñ‚ğ•Ô‚·B
-// XSS (ƒNƒƒXƒTƒCƒgƒXƒNƒŠƒvƒeƒBƒ“ƒO)‚É‘Îˆ‚·‚é‚½‚ßAƒ†[ƒU[‚ª“ü—Í‚µ‚½
-// •¶š‚ğ‚»‚Ì‚Ü‚Üo—Í‚·‚é‚ÍA‚±‚ÌŠÖ”‚ğ’Ê‚¶‚ÄƒGƒXƒP[ƒv‚µ‚½•¶š‚ğo—Í
-// ‚·‚é‚×‚«‚Å‚·B‚±‚ÌŠÖ”‚Ì–ß‚è’l‚ÍAŒÄ‚Ño‚µ‘¤‚ª‰ğ•ú‚µ‚È‚¯‚ê‚Î‚È‚ç‚È‚¢B
+// ãƒ¡ã‚¿æ–‡å­—( < , > , & , " ) ã‚’ã‚¨ã‚¹ã‚±ãƒ¼ãƒ—ã—ãŸæ–‡å­—åˆ—ã‚’è¿”ã™ã€‚
+// XSS (ã‚¯ãƒ­ã‚¹ã‚µã‚¤ãƒˆã‚¹ã‚¯ãƒªãƒ—ãƒ†ã‚£ãƒ³ã‚°)ã«å¯¾å‡¦ã™ã‚‹ãŸã‚ã€ãƒ¦ãƒ¼ã‚¶ãƒ¼ãŒå…¥åŠ›ã—ãŸ
+// æ–‡å­—ã‚’ãã®ã¾ã¾å‡ºåŠ›ã™ã‚‹æ™‚ã¯ã€ã“ã®é–¢æ•°ã‚’é€šã˜ã¦ã‚¨ã‚¹ã‚±ãƒ¼ãƒ—ã—ãŸæ–‡å­—ã‚’å‡ºåŠ›
+// ã™ã‚‹ã¹ãã§ã™ã€‚ã“ã®é–¢æ•°ã®æˆ»ã‚Šå€¤ã¯ã€å‘¼ã³å‡ºã—å´ãŒè§£æ”¾ã—ãªã‘ã‚Œã°ãªã‚‰ãªã„ã€‚
 char* httpd_quote_meta(const char* p1);
 
-// —^‚¦‚ç‚ê‚½•¶š—ñ‚ğ %xx ‚ÌŒ`‚ÉƒGƒ“ƒR[ƒh‚µ‚½•¶š—ñ‚ğ•Ô‚·B
-// URL ‚Ì’†‚É“ú–{Œê‚ª¬‚¶‚é‚ÆUFT-8‰»‚µ‚Ä‘—M‚·‚éƒuƒ‰ƒEƒU‚ª‚ ‚é‚Ì‚ÅA
-// ƒ}ƒ‹ƒ`ƒoƒCƒg•¶š‚ğ <a href=""> ‚Ì’†‚É“ü‚ê‚é‚Ég—p‚µ‚Ä‚­‚¾‚³‚¢B
-// ‚±‚ÌŠÖ”‚Ì–ß‚è’l‚ÍAŒÄ‚Ño‚µ‘¤‚ª‰ğ•ú‚µ‚È‚¯‚ê‚Î‚È‚ç‚È‚¢B
+// ä¸ãˆã‚‰ã‚ŒãŸæ–‡å­—åˆ—ã‚’ %xx ã®å½¢ã«ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰ã—ãŸæ–‡å­—åˆ—ã‚’è¿”ã™ã€‚
+// URL ã®ä¸­ã«æ—¥æœ¬èªãŒæ··ã˜ã‚‹ã¨UFT-8åŒ–ã—ã¦é€ä¿¡ã™ã‚‹ãƒ–ãƒ©ã‚¦ã‚¶ãŒã‚ã‚‹ã®ã§ã€
+// ãƒãƒ«ãƒãƒã‚¤ãƒˆæ–‡å­—ã‚’ <a href=""> ã®ä¸­ã«å…¥ã‚Œã‚‹æ™‚ã«ä½¿ç”¨ã—ã¦ãã ã•ã„ã€‚
+// ã“ã®é–¢æ•°ã®æˆ»ã‚Šå€¤ã¯ã€å‘¼ã³å‡ºã—å´ãŒè§£æ”¾ã—ãªã‘ã‚Œã°ãªã‚‰ãªã„ã€‚
 char* httpd_binary_encode(const char* val);
 
-// base64 ‚ğƒfƒR[ƒh‚·‚éB
-// dest ‚É‚Í\•ª‚ÈƒTƒCƒY( [src ‚Ì’·‚³] / 4 * 3 )‚ÌAƒƒ‚ƒŠŠm•Û‚µ‚Ä
-// ‚¨‚­•K—v‚ª‚ ‚éB ¬Œ÷‚·‚é‚Æ 1, ¸”s‚·‚é‚Æ 0 ‚ª•Ô‚é
+// base64 ã‚’ãƒ‡ã‚³ãƒ¼ãƒ‰ã™ã‚‹ã€‚
+// dest ã«ã¯ååˆ†ãªã‚µã‚¤ã‚º( [src ã®é•·ã•] / 4 * 3 )ã®ã€ãƒ¡ãƒ¢ãƒªç¢ºä¿ã—ã¦
+// ãŠãå¿…è¦ãŒã‚ã‚‹ã€‚ æˆåŠŸã™ã‚‹ã¨ 1, å¤±æ•—ã™ã‚‹ã¨ 0 ãŒè¿”ã‚‹
 int httpd_decode_base64( char *dest, const char *src);
 
 #endif

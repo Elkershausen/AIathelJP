@@ -1,32 +1,11 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _UTILS_H_
+ï»¿#ifndef _UTILS_H_
 #define _UTILS_H_
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdbool.h>
 
-// C11 ŒÅ’è•®”‚Æ‘®ƒ}ƒNƒ
+// C11 å›ºå®šå¹…æ•´æ•°ã¨æ›¸å¼ãƒã‚¯ãƒ­
 #if defined(_MSC_VER)
 #  include <stdint.h>
 #  if _MSC_VER >= 1800
@@ -61,8 +40,8 @@
 
 
 // =====================
-// ŒÅ’è•®”Œ^iC11 •W€j
-// Šù‘¶ƒR[ƒh‚ÌƒGƒCƒŠƒAƒX‚ÍˆÛ‚µ‚Â‚ÂAŠî”Õ‚Í <stdint.h> ‚É“ˆê
+// å›ºå®šå¹…æ•´æ•°å‹ï¼ˆC11 æ¨™æº–ï¼‰
+// æ—¢å­˜ã‚³ãƒ¼ãƒ‰ã®ã‚¨ã‚¤ãƒªã‚¢ã‚¹ã¯ç¶­æŒã—ã¤ã¤ã€åŸºç›¤ã¯ <stdint.h> ã«çµ±ä¸€
 // ---------------------
 typedef int8_t   int8;
 typedef int16_t  int16;
@@ -88,7 +67,7 @@ typedef uint32_t  uintptr;
 typedef int32_t   intptr;
 #endif
 
-// Œ^ƒTƒCƒY‚Ì‘Ã“–«Šm”Fiƒrƒ‹ƒhƒ`ƒFƒbƒNj
+// å‹ã‚µã‚¤ã‚ºã®å¦¥å½“æ€§ç¢ºèªï¼ˆãƒ“ãƒ«ãƒ‰æ™‚ãƒã‚§ãƒƒã‚¯ï¼‰
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
 #  define AURIGA_STATIC_ASSERT(cond, msg) _Static_assert(cond, msg)
 #else
@@ -106,7 +85,7 @@ AURIGA_STATIC_ASSERT(sizeof(uint64) == 8,  "uint64 size must be 8 bytes");
 
 
 // =====================
-// ŠÖ”–¼ƒ}ƒNƒ
+// é–¢æ•°åãƒã‚¯ãƒ­
 // ---------------------
 #if __STDC_VERSION < 199901L
 #	if __GNUC__ >= 2 || _MSC_VER >= 1300
@@ -118,17 +97,17 @@ AURIGA_STATIC_ASSERT(sizeof(uint64) == 8,  "uint64 size must be 8 bytes");
 
 
 // =====================
-// ‰üsƒR[ƒh
+// æ”¹è¡Œã‚³ãƒ¼ãƒ‰
 // ---------------------
 #ifdef CYGWIN
-#	define NEWLINE "\r\n"	// (CR/LFFWindowsŒn)
+#	define NEWLINE "\r\n"	// (CR/LFï¼šWindowsç³»)
 #else
-#	define NEWLINE "\n"	// (LFFUnixŒnj
+#	define NEWLINE "\n"	// (LFï¼šUnixç³»ï¼‰
 #endif
 
 
 // =====================
-// ‘å‚«‚È”š—p‚ÌŒ^
+// å¤§ããªæ•°å­—ç”¨ã®å‹
 // ---------------------
 #if defined(BIGNUMBER_DOUBLE)
 	typedef double atn_bignumber;
@@ -137,7 +116,7 @@ AURIGA_STATIC_ASSERT(sizeof(uint64) == 8,  "uint64 size must be 8 bytes");
 #endif
 
 // =====================
-// ‘å‚«‚È”š—p‚Ì•ÏŠ·w’èq
+// å¤§ããªæ•°å­—ç”¨ã®å¤‰æ›æŒ‡å®šå­
 // ---------------------
 #if defined(BIGNUMBER_DOUBLE)
 #	define BIGNUMCODE ".0f"
@@ -146,7 +125,7 @@ AURIGA_STATIC_ASSERT(sizeof(uint64) == 8,  "uint64 size must be 8 bytes");
 #endif
 
 // =====================
-// ‘å‚«‚È”š—p‚Ì•ÏŠ·w’èq
+// å¤§ããªæ•°å­—ç”¨ã®å¤‰æ›æŒ‡å®šå­
 // ---------------------
 #if defined(BIGNUMBER_DOUBLE)
 #	define BIGNUMSCANCODE "lf"
@@ -156,7 +135,7 @@ AURIGA_STATIC_ASSERT(sizeof(uint64) == 8,  "uint64 size must be 8 bytes");
 
 
 // =====================
-// strcmp Œn‚ÌƒGƒCƒŠƒAƒX
+// strcmp ç³»ã®ã‚¨ã‚¤ãƒªã‚¢ã‚¹
 // ---------------------
 #include <string.h>
 
@@ -200,7 +179,7 @@ AURIGA_STATIC_ASSERT(sizeof(uint64) == 8,  "uint64 size must be 8 bytes");
 
 
 // =====================
-// VC ‚Å‚Ì’Ç‰Áˆ—
+// VC ã§ã®è¿½åŠ å‡¦ç†
 // ---------------------
 #if defined(WINDOWS) && defined(_MSC_VER)
 
@@ -223,14 +202,14 @@ AURIGA_STATIC_ASSERT(sizeof(uint64) == 8,  "uint64 size must be 8 bytes");
 
 
 // =====================
-// atn_rand() ’è‹`
+// atn_rand() å®šç¾©
 // ---------------------
 #ifndef WINDOWS
 #	define RANDOMSTD2X
 
 
 #elif defined(_MSC_VER)
-	// random ‚Ì¸“x‚Æƒrƒbƒg”‚ğã‚°‚é
+	// random ã®ç²¾åº¦ã¨ãƒ“ãƒƒãƒˆæ•°ã‚’ä¸Šã’ã‚‹
 #	define RANDOM64
 
 #else
@@ -240,60 +219,60 @@ AURIGA_STATIC_ASSERT(sizeof(uint64) == 8,  "uint64 size must be 8 bytes");
 
 
 // =====================
-// atn_rand() ‚ÌƒGƒCƒŠƒAƒX
+// atn_rand() ã®ã‚¨ã‚¤ãƒªã‚¢ã‚¹
 // ---------------------
 
-#ifdef RANDOM32				// 32ƒrƒbƒg¸“xüŒ`‡“¯–@
+#ifdef RANDOM32				// 32ãƒ“ãƒƒãƒˆç²¾åº¦ç·šå½¢åˆåŒæ³•
 	void atn_int24_srandom32( int seed );
 	int atn_int24_random32(void);
 #	define atn_rand()	atn_int24_random32()
 #	define atn_srand(x)	atn_int24_srandom32(x)
 #	define ATN_RAND_MAX	0x00ffffff
 
-#elif defined(RANDOM64)		// 64ƒrƒbƒg¸“xüŒ`‡“¯–@
+#elif defined(RANDOM64)		// 64ãƒ“ãƒƒãƒˆç²¾åº¦ç·šå½¢åˆåŒæ³•
 	void atn_int31_srandom64( int seed );
 	int atn_int31_random64(void);
 #	define atn_rand()	atn_int31_random64()
 #	define atn_srand(x)	atn_int31_srandom64(x)
 #	define ATN_RAND_MAX	0x7fffffff
 
-#elif defined(RANDOM32X)	// 32ƒrƒbƒg¸“xüŒ`‡“¯–@(‰ºˆÊƒrƒbƒg‚Ì¿‚ğã‚°‚é)
+#elif defined(RANDOM32X)	// 32ãƒ“ãƒƒãƒˆç²¾åº¦ç·šå½¢åˆåŒæ³•(ä¸‹ä½ãƒ“ãƒƒãƒˆã®è³ªã‚’ä¸Šã’ã‚‹)
 	void atn_int24_srandom32( int seed );
 	int atn_int24_random32(void);
 #	define atn_rand()	( atn_int24_random32() ^ (atn_int24_random32()>>12) )
 #	define atn_srand(x)	atn_int24_srandom32(x)
 #	define ATN_RAND_MAX	0x00ffffff
 
-#elif defined(RANDOM64X)	// 64ƒrƒbƒg¸“xüŒ`‡“¯–@(‰ºˆÊƒrƒbƒg‚Ì¿‚ğã‚°‚é)
+#elif defined(RANDOM64X)	// 64ãƒ“ãƒƒãƒˆç²¾åº¦ç·šå½¢åˆåŒæ³•(ä¸‹ä½ãƒ“ãƒƒãƒˆã®è³ªã‚’ä¸Šã’ã‚‹)
 	void atn_int31_srandom64( int seed );
 	int atn_int31_random64(void);
 #	define atn_rand()	( atn_int31_random64() ^ (atn_int31_random64()>>16) )
 #	define atn_srand(x)	atn_int31_srandom64(x)
 #	define ATN_RAND_MAX	0x7fffffff
 
-#elif defined(RANDOMMT)		// ƒƒ‹ƒZƒ“ƒkƒcƒCƒXƒ^[
+#elif defined(RANDOMMT)		// ãƒ¡ãƒ«ã‚»ãƒ³ãƒŒãƒ„ã‚¤ã‚¹ã‚¿ãƒ¼
 	void atn_srandommt( unsigned long seed );
 	int atn_int31_randommt(void);
 #	define atn_rand()	atn_int31_randommt()
 #	define atn_srand(x)	atn_srandommt(x)
 #	define ATN_RAND_MAX	0x7fffffff
 
-#elif defined(RANDOMSTD2)	// rand() 2‰ñ(BCC/VC ‚Å—LŒøƒrƒbƒg”‚ğã‚°‚é)
+#elif defined(RANDOMSTD2)	// rand() 2å›(BCC/VC ã§æœ‰åŠ¹ãƒ“ãƒƒãƒˆæ•°ã‚’ä¸Šã’ã‚‹)
 #	define atn_rand()	( ( (rand()<<15) + rand() ) & 0x3fffffff )
 #	define atn_srand(x)	srand(x)
 #	define ATN_RAND_MAX	0x3fffffff
 
-#elif defined(RANDOMSTD2X)	// rand() 2‰ñ(gcc ‚Å‰ºˆÊƒrƒbƒg‚Ì¿‚ğã‚°‚é)
+#elif defined(RANDOMSTD2X)	// rand() 2å›(gcc ã§ä¸‹ä½ãƒ“ãƒƒãƒˆã®è³ªã‚’ä¸Šã’ã‚‹)
 #	define atn_rand()	(  rand() ^ (rand()>>8) )
 #	define atn_srand(x)	srand(x)
 #	define ATN_RAND_MAX RAND_MAX
 
-#elif defined(RANDOMSTD3X)	// rand() 3‰ñ(BCC/VC ‚Å—LŒøƒrƒbƒg”‚ğã‚°‚é•‰ºˆÊƒrƒbƒg‚Ì¿‚ğã‚°‚é)
+#elif defined(RANDOMSTD3X)	// rand() 3å›(BCC/VC ã§æœ‰åŠ¹ãƒ“ãƒƒãƒˆæ•°ã‚’ä¸Šã’ã‚‹ï¼†ä¸‹ä½ãƒ“ãƒƒãƒˆã®è³ªã‚’ä¸Šã’ã‚‹)
 #	define atn_rand()	( ( (rand()<<15) + rand() ^ (rand()>>8) ) & 0x3fffffff )
 #	define atn_srand(x)	srand(x)
 #	define ATN_RAND_MAX	0x3fffffff
 
-#else						// ’Êí‚Ìƒ‰ƒ“ƒ_ƒ€
+#else						// é€šå¸¸ã®ãƒ©ãƒ³ãƒ€ãƒ 
 #	define atn_rand()	rand()
 #	define atn_srand(x)	srand(x)
 #	define ATN_RAND_MAX	RAND_MAX
@@ -301,10 +280,10 @@ AURIGA_STATIC_ASSERT(sizeof(uint64) == 8,  "uint64 size must be 8 bytes");
 
 
 // =====================
-// ƒ|ƒCƒ“ƒ^E”’lƒLƒƒƒXƒg
+// ãƒã‚¤ãƒ³ã‚¿ãƒ»æ•°å€¤ã‚­ãƒ£ã‚¹ãƒˆ
 // ---------------------
 
-// x64 gcc ‚ÌŒx "warning: cast to/from pointer from/to integer of different size" ‚Ì—}§‚Ì‚½‚ß
+// x64 gcc ã®è­¦å‘Š "warning: cast to/from pointer from/to integer of different size" ã®æŠ‘åˆ¶ã®ãŸã‚
 #define INT2PTR(x)  ((void *)(intptr)(x))
 #define UINT2PTR(x) ((void *)(uintptr)(x))
 #define PTR2INT(x)  ((int)(intptr)(x))
@@ -320,7 +299,7 @@ unsigned long strtobxul(const char *s, char **endptr, int base);
 void hex_dump(FILE *fp, const unsigned char *buf, size_t len);
 
 // =====================
-// ˆÀ‘S‚È•¶š—ñƒ†[ƒeƒBƒŠƒeƒB
+// å®‰å…¨ãªæ–‡å­—åˆ—ãƒ¦ãƒ¼ãƒ†ã‚£ãƒªãƒ†ã‚£
 // ---------------------
 size_t auriga_strlcpy(char *dst, const char *src, size_t siz);
 size_t auriga_strlcat(char *dst, const char *src, size_t siz);

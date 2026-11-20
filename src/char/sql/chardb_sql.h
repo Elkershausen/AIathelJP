@@ -1,32 +1,11 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _CHARDB_SQL_H_
+Ôªø#ifndef _CHARDB_SQL_H_
 #define _CHARDB_SQL_H_
 
 #include "mmo.h"
 #include "utils.h"
 #include "../char.h"
 
-// çXêVíËã`
+// Êõ¥Êñ∞ÂÆöÁæ©
 enum {
 	TABLE_NUM_INVENTORY,
 	TABLE_NUM_CART,
@@ -34,7 +13,7 @@ enum {
 	TABLE_NUM_GUILD_STORAGE,
 };
 
-// ÉvÉçÉgÉ^ÉCÉvêÈåæ
+// „Éó„É≠„Éà„Çø„Ç§„ÉóÂÆ£Ë®Ä
 int chardb_sql_loaditem(struct item *item, int max, int id, int tableswitch);
 bool chardb_sql_saveitem(struct item *item, int max, int id, int tableswitch);
 const struct mmo_chardata* chardb_sql_make(int account_id, const unsigned char *name, short str, short agi, short vit, short int_, short dex, short luk, short hair_color, short hair, short job, char sex, unsigned char slot, int *flag);
@@ -51,7 +30,7 @@ const struct mmo_chardata* chardb_sql_nick2chardata(const char *char_name);
 int chardb_sql_config_read_sub(const char* w1,const char* w2);
 bool chardb_sql_set_online(int char_id, bool is_online);
 
-// ÉGÉCÉäÉAÉX
+// „Ç®„Ç§„É™„Ç¢„Çπ
 #define chardb_make            chardb_sql_make
 #define chardb_init            chardb_sql_init
 #define chardb_sync            chardb_sql_sync

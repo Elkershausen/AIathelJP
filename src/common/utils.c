@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 
@@ -28,7 +7,7 @@
 
 
 /*==========================================
- * 0b -> 2i”•ÏŠ·‘Î‰Œ^strtoul
+ * 0b -> 2é€²æ•°å¤‰æ›å¯¾å¿œå‹strtoul
  *------------------------------------------
  */
 unsigned long strtobxul(const char *s, char **endptr, int base)
@@ -44,9 +23,9 @@ unsigned long strtobxul(const char *s, char **endptr, int base)
 		i++;
 	}
 	if(s[i] == '0' && (s[i+1] == 'b' || s[i+1] == 'B')) {
-		// 2i”ˆ—
+		// 2é€²æ•°å‡¦ç†
 		char *buf = (char *)aStrdup(s);
-		buf[i+1] = '0';	// 0b ‚ğ 00 ‚É‚·‚é
+		buf[i+1] = '0';	// 0b ã‚’ 00 ã«ã™ã‚‹
 		ret = strtoul(buf, endptr, 2);
 		if(endptr) {
 			*endptr = (char *)&s[*endptr - buf];
@@ -61,8 +40,8 @@ unsigned long strtobxul(const char *s, char **endptr, int base)
 
 /*==========================================
  * Hex Dump
- *  •W€o—Í‚Ì•\¦‚ğƒXƒ€[ƒY‚É‚·‚é‚½‚ß
- *  ©‘O‚ÅŠ®‘Sƒoƒbƒtƒ@ƒŠƒ“ƒO‚·‚é
+ *  æ¨™æº–å‡ºåŠ›ã®è¡¨ç¤ºã‚’ã‚¹ãƒ ãƒ¼ã‚ºã«ã™ã‚‹ãŸã‚
+ *  è‡ªå‰ã§å®Œå…¨ãƒãƒƒãƒ•ã‚¡ãƒªãƒ³ã‚°ã™ã‚‹
  *------------------------------------------
  */
 void hex_dump(FILE *fp, const unsigned char *buf, size_t len)
@@ -72,7 +51,7 @@ void hex_dump(FILE *fp, const unsigned char *buf, size_t len)
 
 	{
 		const size_t output_size = (3 + (len ? ((len - 1) / 16) : 0)) * 96;
-		output = (char *)aCalloc(output_size, sizeof(char));	// 1s‚ ‚½‚è96•¶š‚Æ‚µ‚ÄŒvZ
+		output = (char *)aCalloc(output_size, sizeof(char));	// 1è¡Œã‚ãŸã‚Š96æ–‡å­—ã¨ã—ã¦è¨ˆç®—
 
 		auriga_strlcpy(output, "      00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F   0123456789ABCDEF" NEWLINE, output_size);
 		auriga_strlcat(output, "----  -----------------------------------------------   ----------------", output_size);
@@ -107,7 +86,7 @@ void hex_dump(FILE *fp, const unsigned char *buf, size_t len)
 }
 
 /*==========================================
- * ˆÀ‘S‚È•¶š—ñƒ†[ƒeƒBƒŠƒeƒB
+ * å®‰å…¨ãªæ–‡å­—åˆ—ãƒ¦ãƒ¼ãƒ†ã‚£ãƒªãƒ†ã‚£
  *------------------------------------------
  */
 size_t auriga_strlcpy(char *dst, const char *src, size_t siz)
@@ -141,7 +120,7 @@ size_t auriga_strlcat(char *dst, const char *src, size_t siz)
 }
 
 /*==========================================
- * 32bitüŒ`‡“¯–@(–ß‚è’l‚Í24ƒrƒbƒg—LŒø)
+ * 32bitç·šå½¢åˆåŒæ³•(æˆ»ã‚Šå€¤ã¯24ãƒ“ãƒƒãƒˆæœ‰åŠ¹)
  *------------------------------------------
  */
 #ifdef RANDOM32
@@ -159,7 +138,7 @@ int atn_int24_random32(void)
 #endif	// ifdef RANDOM32
 
 /*==========================================
- * 64bitüŒ`‡“¯–@(–ß‚è’l‚Í31ƒrƒbƒg—LŒø)
+ * 64bitç·šå½¢åˆåŒæ³•(æˆ»ã‚Šå€¤ã¯31ãƒ“ãƒƒãƒˆæœ‰åŠ¹)
  *------------------------------------------
  */
 #ifdef RANDOM64
@@ -178,7 +157,7 @@ int atn_int31_random64(void)
 #endif	// ifdef RANDOM64
 
 /*==========================================
- * ƒƒ‹ƒZƒ“ƒkƒcƒCƒXƒ^[
+ * ãƒ¡ãƒ«ã‚»ãƒ³ãƒŒãƒ„ã‚¤ã‚¹ã‚¿ãƒ¼
  *------------------------------------------
  */
 // http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/mt.html

@@ -1,33 +1,12 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _GRAPH_H_
+ï»¿#ifndef _GRAPH_H_
 #define _GRAPH_H_
 
 void do_init_graph(void);
 
-// auriga‚Ìó‘Ô‚ğ’²¸‚·‚éƒZƒ“ƒT[‚ğ’Ç‰Á‚·‚éB
-// string        : ƒZƒ“ƒT[‚Ì–¼Ì(Login Users ‚È‚Ç)
-// inetrval      : ƒZƒ“ƒT[‚Ì’l‚ğæ“¾‚·‚éŠÔŠu(msec)
-// callback_func : ƒZƒ“ƒT[‚Ì’l‚ğ•Ô‚·ŠÖ”( unsigned int login_users(void); ‚È‚Ç)
+// aurigaã®çŠ¶æ…‹ã‚’èª¿æŸ»ã™ã‚‹ã‚»ãƒ³ã‚µãƒ¼ã‚’è¿½åŠ ã™ã‚‹ã€‚
+// string        : ã‚»ãƒ³ã‚µãƒ¼ã®åç§°(Login Users ãªã©)
+// inetrval      : ã‚»ãƒ³ã‚µãƒ¼ã®å€¤ã‚’å–å¾—ã™ã‚‹é–“éš”(msec)
+// callback_func : ã‚»ãƒ³ã‚µãƒ¼ã®å€¤ã‚’è¿”ã™é–¢æ•°( unsigned int login_users(void); ãªã©)
 
 void graph_add_sensor(const char* string, int interval, double (*callback_func)(void));
 

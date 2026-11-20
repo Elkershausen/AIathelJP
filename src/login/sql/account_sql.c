@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+Ôªø#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -47,7 +26,7 @@ static struct sql_config config;
 static struct dbt *account_db = NULL;
 
 /*==========================================
- * ê›íËÉtÉ@ÉCÉãÇÃÉfÉtÉHÉãÉgê›íË
+ * Ë®≠ÂÆö„Éï„Ç°„Ç§„É´„ÅÆ„Éá„Éï„Ç©„É´„ÉàË®≠ÂÆö
  *------------------------------------------
  */
 void account_sql_set_default_configvalue(void)
@@ -64,7 +43,7 @@ void account_sql_set_default_configvalue(void)
 }
 
 /*==========================================
- * ê›íËÉtÉ@ÉCÉãì«çû
+ * Ë®≠ÂÆö„Éï„Ç°„Ç§„É´Ë™≠Ëæº
  *------------------------------------------
  */
 int account_sql_config_read_sub(const char *w1, const char *w2)
@@ -101,7 +80,7 @@ int account_sql_config_read_sub(const char *w1, const char *w2)
 }
 
 /*==========================================
- * ê›íËÉtÉ@ÉCÉãÇÃåxçê
+ * Ë®≠ÂÆö„Éï„Ç°„Ç§„É´„ÅÆË≠¶Âëä
  *------------------------------------------
  */
 void display_conf_warnings_sql(void)
@@ -115,7 +94,7 @@ void display_conf_warnings_sql(void)
 }
 
 /*==========================================
- * ìØä˙
+ * ÂêåÊúü
  *------------------------------------------
  */
 void account_sql_sync(void)
@@ -124,7 +103,7 @@ void account_sql_sync(void)
 }
 
 /*==========================================
- * ÉAÉJÉEÉìÉgçÌèú
+ * „Ç¢„Ç´„Ç¶„É≥„ÉàÂâäÈô§
  *------------------------------------------
  */
 bool account_sql_account_delete(int account_id)
@@ -163,7 +142,7 @@ bool account_sql_account_delete(int account_id)
 }
 
 /*==========================================
- * ÉAÉJÉEÉìÉgIDÇ©ÇÁÉAÉJÉEÉìÉgèÓïÒÇÉçÅ[Éh
+ * „Ç¢„Ç´„Ç¶„É≥„ÉàID„Åã„Çâ„Ç¢„Ç´„Ç¶„É≥„ÉàÊÉÖÂ†±„Çí„É≠„Éº„Éâ
  *------------------------------------------
  */
 const struct mmo_account* account_sql_account_load_num(int account_id)
@@ -178,7 +157,7 @@ const struct mmo_account* account_sql_account_load_num(int account_id)
 	}
 
 	ac = (struct mmo_account *)numdb_search(account_db, account_id);
-	if( ac && ac->account_id == account_id )	// ä˘Ç…ÉLÉÉÉbÉVÉÖÇ™ë∂ç›Ç∑ÇÈ
+	if( ac && ac->account_id == account_id )	// Êó¢„Å´„Ç≠„É£„ÉÉ„Ç∑„É•„ÅåÂ≠òÂú®„Åô„Çã
 		return ac;
 
 	// basic information
@@ -188,7 +167,7 @@ const struct mmo_account* account_sql_account_load_num(int account_id)
 	sql_row = sqldbs_fetch(&mysql_handle);
 	if( !sql_row )
 	{
-		// ñ¢ìoò^
+		// Êú™ÁôªÈå≤
 		sqldbs_free_result(&mysql_handle);
 		return NULL;
 	}
@@ -229,7 +208,7 @@ const struct mmo_account* account_sql_account_load_num(int account_id)
 }
 
 /*==========================================
- * ÉAÉJÉEÉìÉgñºÇ©ÇÁÉAÉJÉEÉìÉgèÓïÒÇÉçÅ[Éh
+ * „Ç¢„Ç´„Ç¶„É≥„ÉàÂêç„Åã„Çâ„Ç¢„Ç´„Ç¶„É≥„ÉàÊÉÖÂ†±„Çí„É≠„Éº„Éâ
  *------------------------------------------
  */
 const struct mmo_account* account_sql_account_load_str(const char *account_id)
@@ -256,7 +235,7 @@ const struct mmo_account* account_sql_account_load_str(const char *account_id)
 }
 
 /*==========================================
- * IndexÇ©ÇÁÉAÉJÉEÉìÉgèÓïÒÇÉçÅ[Éh
+ * Index„Åã„Çâ„Ç¢„Ç´„Ç¶„É≥„ÉàÊÉÖÂ†±„Çí„É≠„Éº„Éâ
  *------------------------------------------
  */
 const struct mmo_account* account_sql_account_load_idx(int idx)
@@ -281,7 +260,7 @@ const struct mmo_account* account_sql_account_load_idx(int idx)
 }
 
 /*==========================================
- * ÉZÅ[Éu
+ * „Çª„Éº„Éñ
  *------------------------------------------
  */
 bool account_sql_account_save(struct mmo_account *ac2)
@@ -292,7 +271,7 @@ bool account_sql_account_save(struct mmo_account *ac2)
 
 	nullpo_retr(false, ac2);
 
-	// ÉAÉJÉEÉìÉgÇÃë∂ç›ämîF
+	// „Ç¢„Ç´„Ç¶„É≥„Éà„ÅÆÂ≠òÂú®Á¢∫Ë™ç
 	if( (ac1 = account_sql_account_load_num(ac2->account_id)) == NULL )
 		return false;
 
@@ -365,7 +344,7 @@ bool account_sql_account_save(struct mmo_account *ac2)
 }
 
 /*==========================================
- * ÉAÉJÉEÉìÉgçÏê¨
+ * „Ç¢„Ç´„Ç¶„É≥„Éà‰ΩúÊàê
  *------------------------------------------
  */
 bool account_sql_account_new(struct mmo_account *account, const char *tmpstr)
@@ -383,7 +362,7 @@ bool account_sql_account_new(struct mmo_account *account, const char *tmpstr)
 	account->mail[39]   = '\0';
 	account->birth[6]   = '\0';
 
-	if( account_sql_account_load_str(account->userid) )	// ìØÇ∂ÉAÉJÉEÉìÉgÇ™ä˘Ç…ë∂ç›
+	if( account_sql_account_load_str(account->userid) )	// Âêå„Åò„Ç¢„Ç´„Ç¶„É≥„Éà„ÅåÊó¢„Å´Â≠òÂú®
 		return false;
 
 	// init
@@ -395,18 +374,18 @@ bool account_sql_account_new(struct mmo_account *account, const char *tmpstr)
 		return false;
 
 	do {
-		// ÉXÉeÅ[ÉgÉÅÉìÉgÇÃèÄîı
+		// „Çπ„ÉÜ„Éº„Éà„É°„É≥„Éà„ÅÆÊ∫ñÂÇô
 		if( sqldbs_stmt_simpleprepare(st, "INSERT INTO `" LOGIN_TABLE "` (`userid`,`user_pass`,`lastlogin`,`sex`,`logincount`,`level`,`state`,`email`,`birthdate`) VALUES(?,?,NOW(),?,'0','0','0',?,?)") == false )
 			return false;
 
-		// ÉpÉâÉÅÅ[É^Çbind
+		// „Éë„É©„É°„Éº„Çø„Çíbind
 		sqldbs_stmt_bind_param(st, 0, SQL_DATA_TYPE_VAR_STRING, account->userid, strlen(account->userid));
 		sqldbs_stmt_bind_param(st, 1, SQL_DATA_TYPE_VAR_STRING, account->pass,   strlen(account->pass)  );
 		sqldbs_stmt_bind_param(st, 2, SQL_DATA_TYPE_STRING,     &account->sex,   1                      );
 		sqldbs_stmt_bind_param(st, 3, SQL_DATA_TYPE_VAR_STRING, account->mail,   strlen(account->mail)  );
 		sqldbs_stmt_bind_param(st, 4, SQL_DATA_TYPE_STRING,     account->birth,  strlen(account->birth) );
 
-		// é¿çs
+		// ÂÆüË°å
 		if( sqldbs_stmt_execute(st) == false )
 			break;
 
@@ -421,7 +400,7 @@ bool account_sql_account_new(struct mmo_account *account, const char *tmpstr)
 }
 
 /*==========================================
- * ÉçÉOï€ë∂
+ * „É≠„Ç∞‰øùÂ≠ò
  *------------------------------------------
  */
 static bool account_sql_log(bool is_start)
@@ -453,7 +432,7 @@ static bool account_sql_log(bool is_start)
 }
 
 /*==========================================
- * èIóπ
+ * ÁµÇ‰∫Ü
  *------------------------------------------
  */
 static int account_db_final(void *key, void *data, va_list ap)
@@ -478,7 +457,7 @@ void account_sql_final(void)
 }
 
 /*==========================================
- * èâä˙âª
+ * ÂàùÊúüÂåñ
  *------------------------------------------
  */
 bool account_sql_init(void)

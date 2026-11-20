@@ -1,32 +1,11 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _NULLPO_H_
+ï»¿#ifndef _NULLPO_H_
 #define _NULLPO_H_
 
 #include "utils.h"
 
 #define NULLPO_CHECK 1
-		// ‘S‘Ì‚ÌƒXƒCƒbƒ`‚ðéŒ¾‚µ‚Ä‚¢‚éƒwƒbƒ_‚ª‚ ‚ê‚Î
-		// ‚»‚±‚ÉˆÚ“®‚µ‚Ä‚¢‚½‚¾‚¯‚é‚Æ
+		// å…¨ä½“ã®ã‚¹ã‚¤ãƒƒãƒã‚’å®£è¨€ã—ã¦ã„ã‚‹ãƒ˜ãƒƒãƒ€ãŒã‚ã‚Œã°
+		// ãã“ã«ç§»å‹•ã—ã¦ã„ãŸã ã‘ã‚‹ã¨
 
 #define NLP_MARK __FILE__, __LINE__, __func__
 
@@ -35,52 +14,52 @@
  *----------------------------------------------------------------------------
  */
 /*======================================
- * Nullƒ`ƒFƒbƒN ‹y‚Ñ î•ño—ÍŒã return
- *E“WŠJ‚·‚é‚Æif‚Æ‚©return“™‚ªo‚é‚Ì‚Å
- *  ˆês’P‘Ì‚ÅŽg‚Á‚Ä‚­‚¾‚³‚¢B
- *Enullpo_ret(x = func());
- *  ‚Ì‚æ‚¤‚ÈŽg—p–@‚à‘z’è‚µ‚Ä‚¢‚Ü‚·B
+ * Nullãƒã‚§ãƒƒã‚¯ åŠã³ æƒ…å ±å‡ºåŠ›å¾Œ return
+ *ãƒ»å±•é–‹ã™ã‚‹ã¨ifã¨ã‹returnç­‰ãŒå‡ºã‚‹ã®ã§
+ *  ä¸€è¡Œå˜ä½“ã§ä½¿ã£ã¦ãã ã•ã„ã€‚
+ *ãƒ»nullpo_ret(x = func());
+ *  ã®ã‚ˆã†ãªä½¿ç”¨æ³•ã‚‚æƒ³å®šã—ã¦ã„ã¾ã™ã€‚
  *--------------------------------------
  * nullpo_ret(t)
- *   –ß‚è’l 0ŒÅ’è
- * [ˆø”]
- *  t       ƒ`ƒFƒbƒN‘ÎÛ
+ *   æˆ»ã‚Šå€¤ 0å›ºå®š
+ * [å¼•æ•°]
+ *  t       ãƒã‚§ãƒƒã‚¯å¯¾è±¡
  *--------------------------------------
  * nullpo_retv(t)
- *   –ß‚è’l ‚È‚µ
- * [ˆø”]
- *  t       ƒ`ƒFƒbƒN‘ÎÛ
+ *   æˆ»ã‚Šå€¤ ãªã—
+ * [å¼•æ•°]
+ *  t       ãƒã‚§ãƒƒã‚¯å¯¾è±¡
  *--------------------------------------
  * nullpo_retr(ret, t)
- *   –ß‚è’l Žw’è
- * [ˆø”]
+ *   æˆ»ã‚Šå€¤ æŒ‡å®š
+ * [å¼•æ•°]
  *  ret     return(ret);
- *  t       ƒ`ƒFƒbƒN‘ÎÛ
+ *  t       ãƒã‚§ãƒƒã‚¯å¯¾è±¡
  *--------------------------------------
  * nullpo_ret_f(t, fmt, ...)
- *   Ú×î•ño—Í—p
- *   –ß‚è’l 0
- * [ˆø”]
- *  t       ƒ`ƒFƒbƒN‘ÎÛ
- *  fmt ... vprintf‚É“n‚³‚ê‚é
- *    ”õl‚âŠÖŒW•Ï”‚Ì‘‚«o‚µ‚È‚Ç‚É
+ *   è©³ç´°æƒ…å ±å‡ºåŠ›ç”¨
+ *   æˆ»ã‚Šå€¤ 0
+ * [å¼•æ•°]
+ *  t       ãƒã‚§ãƒƒã‚¯å¯¾è±¡
+ *  fmt ... vprintfã«æ¸¡ã•ã‚Œã‚‹
+ *    å‚™è€ƒã‚„é–¢ä¿‚å¤‰æ•°ã®æ›¸ãå‡ºã—ãªã©ã«
  *--------------------------------------
  * nullpo_retv_f(t, fmt, ...)
- *   Ú×î•ño—Í—p
- *   –ß‚è’l ‚È‚µ
- * [ˆø”]
- *  t       ƒ`ƒFƒbƒN‘ÎÛ
- *  fmt ... vprintf‚É“n‚³‚ê‚é
- *    ”õl‚âŠÖŒW•Ï”‚Ì‘‚«o‚µ‚È‚Ç‚É
+ *   è©³ç´°æƒ…å ±å‡ºåŠ›ç”¨
+ *   æˆ»ã‚Šå€¤ ãªã—
+ * [å¼•æ•°]
+ *  t       ãƒã‚§ãƒƒã‚¯å¯¾è±¡
+ *  fmt ... vprintfã«æ¸¡ã•ã‚Œã‚‹
+ *    å‚™è€ƒã‚„é–¢ä¿‚å¤‰æ•°ã®æ›¸ãå‡ºã—ãªã©ã«
  *--------------------------------------
  * nullpo_retr_f(ret, t, fmt, ...)
- *   Ú×î•ño—Í—p
- *   –ß‚è’l Žw’è
- * [ˆø”]
+ *   è©³ç´°æƒ…å ±å‡ºåŠ›ç”¨
+ *   æˆ»ã‚Šå€¤ æŒ‡å®š
+ * [å¼•æ•°]
  *  ret     return(ret);
- *  t       ƒ`ƒFƒbƒN‘ÎÛ
- *  fmt ... vprintf‚É“n‚³‚ê‚é
- *    ”õl‚âŠÖŒW•Ï”‚Ì‘‚«o‚µ‚È‚Ç‚É
+ *  t       ãƒã‚§ãƒƒã‚¯å¯¾è±¡
+ *  fmt ... vprintfã«æ¸¡ã•ã‚Œã‚‹
+ *    å‚™è€ƒã‚„é–¢ä¿‚å¤‰æ•°ã®æ›¸ãå‡ºã—ãªã©ã«
  *--------------------------------------
  */
 
@@ -93,9 +72,9 @@
 #define nullpo_retr(ret, t) if (nullpo_chk(NLP_MARK, (void *)(t))) {return(ret);}
 
 
-// ‰Â•Ïˆø”ƒ}ƒNƒ‚ÉŠÖ‚·‚éðŒƒRƒ“ƒpƒCƒ‹
+// å¯å¤‰å¼•æ•°ãƒžã‚¯ãƒ­ã«é–¢ã™ã‚‹æ¡ä»¶ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«
 #if __STDC_VERSION__ >= 199901L
-/* C99‚É‘Î‰ž */
+/* C99ã«å¯¾å¿œ */
 #define nullpo_ret_f(t, fmt, ...) if (nullpo_chk_f(NLP_MARK, (void *)(t), (fmt), __VA_ARGS__)) {return(0);}
 
 #define nullpo_retv_f(t, fmt, ...) if (nullpo_chk_f(NLP_MARK, (void *)(t), (fmt), __VA_ARGS__)) {return;}
@@ -103,7 +82,7 @@
 #define nullpo_retr_f(ret, t, fmt, ...) if (nullpo_chk_f(NLP_MARK, (void *)(t), (fmt), __VA_ARGS__)) {return(ret);}
 
 #elif __GNUC__ >= 2
-/* GCC—p */
+/* GCCç”¨ */
 #define nullpo_ret_f(t, fmt, args...) if (nullpo_chk_f(NLP_MARK, (void *)(t), (fmt), ## args)) {return(0);}
 
 #define nullpo_retv_f(t, fmt, args...) if (nullpo_chk_f(NLP_MARK, (void *)(t), (fmt), ## args)) {return;}
@@ -112,7 +91,7 @@
 
 #else
 
-/* ‚»‚Ì‘¼‚Ìê‡EEE orz */
+/* ãã®ä»–ã®å ´åˆãƒ»ãƒ»ãƒ» orz */
 
 #endif
 
@@ -120,28 +99,28 @@
 /* No Nullpo check */
 
 // if((t)){;}
-// —Ç‚¢•û–@‚ªŽv‚¢‚Â‚©‚È‚©‚Á‚½‚Ì‚ÅEEE‹ê“÷‚Ìô‚Å‚·B
-// ˆê‰žƒ[ƒjƒ“ƒO‚Ío‚È‚¢‚Í‚¸
+// è‰¯ã„æ–¹æ³•ãŒæ€ã„ã¤ã‹ãªã‹ã£ãŸã®ã§ãƒ»ãƒ»ãƒ»è‹¦è‚‰ã®ç­–ã§ã™ã€‚
+// ä¸€å¿œãƒ¯ãƒ¼ãƒ‹ãƒ³ã‚°ã¯å‡ºãªã„ã¯ãš
 
 #define nullpo_ret(t) if((t)){;}
 #define nullpo_retv(t) if((t)){;}
 #define nullpo_retr(ret, t) if((t)){;}
 
-// ‰Â•Ïˆø”ƒ}ƒNƒ‚ÉŠÖ‚·‚éðŒƒRƒ“ƒpƒCƒ‹
+// å¯å¤‰å¼•æ•°ãƒžã‚¯ãƒ­ã«é–¢ã™ã‚‹æ¡ä»¶ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«
 #if __STDC_VERSION__ >= 199901L
-/* C99‚É‘Î‰ž */
+/* C99ã«å¯¾å¿œ */
 #define nullpo_ret_f(t, fmt, ...) if((t)){;}
 #define nullpo_retv_f(t, fmt, ...) if((t)){;}
 #define nullpo_retr_f(ret, t, fmt, ...) if((t)){;}
 
 #elif __GNUC__ >= 2
-/* GCC—p */
+/* GCCç”¨ */
 #define nullpo_ret_f(t, fmt, args...) if((t)){;}
 #define nullpo_retv_f(t, fmt, args...) if((t)){;}
 #define nullpo_retr_f(ret, t, fmt, args...) if((t)){;}
 
 #else
-/* ‚»‚Ì‘¼‚Ìê‡EEE orz */
+/* ãã®ä»–ã®å ´åˆãƒ»ãƒ»ãƒ» orz */
 #endif
 
 #endif /* NULLPO_CHECK */
@@ -152,14 +131,14 @@
  */
 /*======================================
  * nullpo_chk
- *   Nullƒ`ƒFƒbƒN ‹y‚Ñ î•ño—Í
- * [ˆø”]
+ *   Nullãƒã‚§ãƒƒã‚¯ åŠã³ æƒ…å ±å‡ºåŠ›
+ * [å¼•æ•°]
  *  file    __FILE__
  *  line    __LINE__
- *  func    __func__ (ŠÖ”–¼)
- *    ‚±‚ê‚ç‚É‚Í NLP_MARK ‚ðŽg‚¤‚Æ‚æ‚¢
- *  target  ƒ`ƒFƒbƒN‘ÎÛ
- * [•Ô‚è’l]
+ *  func    __func__ (é–¢æ•°å)
+ *    ã“ã‚Œã‚‰ã«ã¯ NLP_MARK ã‚’ä½¿ã†ã¨ã‚ˆã„
+ *  target  ãƒã‚§ãƒƒã‚¯å¯¾è±¡
+ * [è¿”ã‚Šå€¤]
  *  0 OK
  *  1 NULL
  *--------------------------------------
@@ -169,16 +148,16 @@ int nullpo_chk(const char *file, int line, const char *func, const void *target)
 
 /*======================================
  * nullpo_chk_f
- *   Nullƒ`ƒFƒbƒN ‹y‚Ñ Ú×‚Èî•ño—Í
- * [ˆø”]
+ *   Nullãƒã‚§ãƒƒã‚¯ åŠã³ è©³ç´°ãªæƒ…å ±å‡ºåŠ›
+ * [å¼•æ•°]
  *  file    __FILE__
  *  line    __LINE__
- *  func    __func__ (ŠÖ”–¼)
- *    ‚±‚ê‚ç‚É‚Í NLP_MARK ‚ðŽg‚¤‚Æ‚æ‚¢
- *  target  ƒ`ƒFƒbƒN‘ÎÛ
- *  fmt ... vprintf‚É“n‚³‚ê‚é
- *    ”õl‚âŠÖŒW•Ï”‚Ì‘‚«o‚µ‚È‚Ç‚É
- * [•Ô‚è’l]
+ *  func    __func__ (é–¢æ•°å)
+ *    ã“ã‚Œã‚‰ã«ã¯ NLP_MARK ã‚’ä½¿ã†ã¨ã‚ˆã„
+ *  target  ãƒã‚§ãƒƒã‚¯å¯¾è±¡
+ *  fmt ... vprintfã«æ¸¡ã•ã‚Œã‚‹
+ *    å‚™è€ƒã‚„é–¢ä¿‚å¤‰æ•°ã®æ›¸ãå‡ºã—ãªã©ã«
+ * [è¿”ã‚Šå€¤]
  *  0 OK
  *  1 NULL
  *--------------------------------------
@@ -191,12 +170,12 @@ int nullpo_chk_f(const char *file, int line, const char *func, const void *targe
 
 /*======================================
  * nullpo_info
- *   nullpoî•ño—Í
- * [ˆø”]
+ *   nullpoæƒ…å ±å‡ºåŠ›
+ * [å¼•æ•°]
  *  file    __FILE__
  *  line    __LINE__
- *  func    __func__ (ŠÖ”–¼)
- *    ‚±‚ê‚ç‚É‚Í NLP_MARK ‚ðŽg‚¤‚Æ‚æ‚¢
+ *  func    __func__ (é–¢æ•°å)
+ *    ã“ã‚Œã‚‰ã«ã¯ NLP_MARK ã‚’ä½¿ã†ã¨ã‚ˆã„
  *--------------------------------------
  */
 void nullpo_info(const char *file, int line, const char *func);
@@ -204,14 +183,14 @@ void nullpo_info(const char *file, int line, const char *func);
 
 /*======================================
  * nullpo_info_f
- *   nullpoÚ×î•ño—Í
- * [ˆø”]
+ *   nullpoè©³ç´°æƒ…å ±å‡ºåŠ›
+ * [å¼•æ•°]
  *  file    __FILE__
  *  line    __LINE__
- *  func    __func__ (ŠÖ”–¼)
- *    ‚±‚ê‚ç‚É‚Í NLP_MARK ‚ðŽg‚¤‚Æ‚æ‚¢
- *  fmt ... vprintf‚É“n‚³‚ê‚é
- *    ”õl‚âŠÖŒW•Ï”‚Ì‘‚«o‚µ‚È‚Ç‚É
+ *  func    __func__ (é–¢æ•°å)
+ *    ã“ã‚Œã‚‰ã«ã¯ NLP_MARK ã‚’ä½¿ã†ã¨ã‚ˆã„
+ *  fmt ... vprintfã«æ¸¡ã•ã‚Œã‚‹
+ *    å‚™è€ƒã‚„é–¢ä¿‚å¤‰æ•°ã®æ›¸ãå‡ºã—ãªã©ã«
  *--------------------------------------
  */
 #if __STDC_VERSION__ >= 199901L

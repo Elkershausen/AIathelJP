@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+Ôªø#include <stdio.h>
 #include <stdlib.h>
 
 #include "mmo.h"
@@ -34,7 +13,7 @@
 static struct dbt *quest_db = NULL;
 
 /*==========================================
- * ê›íËÉtÉ@ÉCÉãì«çû
+ * Ë®≠ÂÆö„Éï„Ç°„Ç§„É´Ë™≠Ëæº
  *------------------------------------------
  */
 int questdb_sql_config_read_sub(const char *w1, const char *w2)
@@ -43,7 +22,7 @@ int questdb_sql_config_read_sub(const char *w1, const char *w2)
 }
 
 /*==========================================
- * ìØä˙
+ * ÂêåÊúü
  *------------------------------------------
  */
 int questdb_sql_sync(void)
@@ -53,7 +32,7 @@ int questdb_sql_sync(void)
 }
 
 /*==========================================
- * ÉNÉGÉXÉgÉfÅ[É^çÌèú
+ * „ÇØ„Ç®„Çπ„Éà„Éá„Éº„ÇøÂâäÈô§
  *------------------------------------------
  */
 bool questdb_sql_delete(int char_id)
@@ -73,7 +52,7 @@ bool questdb_sql_delete(int char_id)
 }
 
 /*==========================================
- * ÉLÉÉÉâIDÇ©ÇÁÉNÉGÉXÉgÉfÅ[É^ÇéÊìæ
+ * „Ç≠„É£„É©ID„Åã„Çâ„ÇØ„Ç®„Çπ„Éà„Éá„Éº„Çø„ÇíÂèñÂæó
  *------------------------------------------
  */
 const struct quest *questdb_sql_load(int char_id)
@@ -82,7 +61,7 @@ const struct quest *questdb_sql_load(int char_id)
 	struct quest *q = (struct quest *)numdb_search(quest_db, char_id);
 
 	if(q && q->char_id == char_id) {
-		// ä˘Ç…ÉLÉÉÉbÉVÉÖÇ™ë∂ç›Ç∑ÇÈ
+		// Êó¢„Å´„Ç≠„É£„ÉÉ„Ç∑„É•„ÅåÂ≠òÂú®„Åô„Çã
 		return q;
 	}
 	if(q == NULL) {
@@ -125,7 +104,7 @@ const struct quest *questdb_sql_load(int char_id)
 		}
 		q->count = (i < MAX_QUESTLIST)? i: MAX_QUESTLIST;
 	} else {
-		// å©Ç¬Ç©ÇÁÇ»Ç≠ÇƒÇ‡ê≥èÌ
+		// Ë¶ã„Å§„Åã„Çâ„Å™„Åè„Å¶„ÇÇÊ≠£Â∏∏
 		q = NULL;
 	}
 	sqldbs_free_result(&mysql_handle);
@@ -134,7 +113,7 @@ const struct quest *questdb_sql_load(int char_id)
 }
 
 /*==========================================
- * ÉZÅ[Éu
+ * „Çª„Éº„Éñ
  *------------------------------------------
  */
 bool questdb_sql_save(struct quest *q2)
@@ -147,7 +126,7 @@ bool questdb_sql_save(struct quest *q2)
 	q1 = questdb_sql_load(q2->char_id);
 
 	if(q1 && q1->count <= 0 && q2->count <= 0) {
-		// ÉfÅ[É^Ç™ã§Ç…0å¬Ç»ÇÃÇ≈âΩÇ‡ÇµÇ»Ç¢
+		// „Éá„Éº„Çø„ÅåÂÖ±„Å´0ÂÄã„Å™„ÅÆ„Åß‰Ωï„ÇÇ„Åó„Å™„ÅÑ
 		return true;
 	}
 
@@ -159,7 +138,7 @@ bool questdb_sql_save(struct quest *q2)
 		int i;
 
 		if(q1 == NULL || q1->count > 0) {
-			// ÉfÅ[É^ÉTÅ[Éoë§Ç…ÉfÅ[É^Ç™Ç†ÇÈÇ∆Ç´ÇæÇØçÌèúÉNÉGÉäÇî≠çs
+			// „Éá„Éº„Çø„Çµ„Éº„ÉêÂÅ¥„Å´„Éá„Éº„Çø„Åå„ÅÇ„Çã„Å®„Åç„Å†„ÅëÂâäÈô§„ÇØ„Ç®„É™„ÇíÁô∫Ë°å
 			if( sqldbs_query(&mysql_handle, "DELETE FROM `" QUEST_TABLE "` WHERE `char_id`='%d'", q2->char_id) == false )
 				break;
 		}
@@ -196,7 +175,7 @@ bool questdb_sql_save(struct quest *q2)
 }
 
 /*==========================================
- * èIóπ
+ * ÁµÇ‰∫Ü
  *------------------------------------------
  */
 static int questdb_sql_final_sub(void *key, void *data, va_list ap)
@@ -215,7 +194,7 @@ void questdb_sql_final(void)
 }
 
 /*==========================================
- * èâä˙âª
+ * ÂàùÊúüÂåñ
  *------------------------------------------
  */
 bool questdb_sql_init(void)

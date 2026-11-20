@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 
@@ -28,7 +7,7 @@
 static void nullpo_info_core(const char *file, int line, const char *func, const char *fmt, va_list ap);
 
 /*======================================
- * Nullƒ`ƒFƒbƒN ‹y‚Ñ î•ño—Í
+ * Nullãƒã‚§ãƒƒã‚¯ åŠã³ æƒ…å ±å‡ºåŠ›
  *--------------------------------------
  */
 int nullpo_chk_f(const char *file, int line, const char *func, const void *target, const char *fmt, ...)
@@ -54,7 +33,7 @@ int nullpo_chk(const char *file, int line, const char *func, const void *target)
 }
 
 /*======================================
- * nullpoî•ño—Í(ŠO•”ŒÄo‚µŒü‚¯ƒ‰ƒbƒp)
+ * nullpoæƒ…å ±å‡ºåŠ›(å¤–éƒ¨å‘¼å‡ºã—å‘ã‘ãƒ©ãƒƒãƒ‘)
  *--------------------------------------
  */
 void nullpo_info_f(const char *file, int line, const char *func, const char *fmt, ...)
@@ -72,7 +51,7 @@ void nullpo_info(const char *file, int line, const char *func)
 }
 
 /*======================================
- * nullpoî•ño—Í(Main)
+ * nullpoæƒ…å ±å‡ºåŠ›(Main)
  *--------------------------------------
  */
 static void nullpo_info_core(const char *file, int line, const char *func, const char *fmt, va_list ap)
@@ -93,13 +72,13 @@ static void nullpo_info_core(const char *file, int line, const char *func, const
 		{
 			vprintf(fmt, ap);
 
-			// ÅŒã‚É‰üs‚µ‚½‚©Šm”F
+			// æœ€å¾Œã«æ”¹è¡Œã—ãŸã‹ç¢ºèª
 			if (fmt[strlen(fmt)-1] != '\n')
 				printf("\n");
 		}
 	}
 	printf("--- end nullpo info ----------------------------------------\n");
 
-	// ‚±‚±‚ç‚ÅnullpoƒƒO‚ğƒtƒ@ƒCƒ‹‚É‘‚«o‚¹‚½‚ç
-	// ‚Ü‚Æ‚ß‚Ä’ño‚Å‚«‚é‚È‚Æv‚Á‚Ä‚¢‚½‚èB
+	// ã“ã“ã‚‰ã§nullpoãƒ­ã‚°ã‚’ãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãå‡ºã›ãŸã‚‰
+	// ã¾ã¨ã‚ã¦æå‡ºã§ãã‚‹ãªã¨æ€ã£ã¦ã„ãŸã‚Šã€‚
 }

@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _ACCOUNT_SQL_H_
+Ôªø#ifndef _ACCOUNT_SQL_H_
 #define _ACCOUNT_SQL_H_
 
 #include "mmo.h"
@@ -27,7 +6,7 @@
 
 #include "../login.h"
 
-// ÉvÉçÉgÉ^ÉCÉvêÈåæ
+// „Éó„É≠„Éà„Çø„Ç§„ÉóÂÆ£Ë®Ä
 bool account_sql_init(void);
 void account_sql_final(void);
 void account_sql_sync(void);
@@ -41,7 +20,7 @@ bool account_sql_account_save(struct mmo_account *ac2);
 bool account_sql_account_new(struct mmo_account* account,const char *tmpstr);
 void display_conf_warnings_sql(void);
 
-// ÉGÉCÉäÉAÉX
+// „Ç®„Ç§„É™„Ç¢„Çπ
 #define login_init            account_sql_init
 #define login_sync            account_sql_sync
 #define login_final           account_sql_final

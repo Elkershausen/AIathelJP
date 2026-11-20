@@ -1,27 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-// original : core.h 2003/03/14 11:55:25 Rev 1.4
-
-#ifndef	_SOCKET_H_
+ï»¿#ifndef	_SOCKET_H_
 #define _SOCKET_H_
 
 #include <stdio.h>
@@ -36,10 +13,10 @@
 #define RFIFOSIZE_SERVERLINK 128 * 1024
 #define WFIFOSIZE_SERVERLINK 128 * 1024
 
-// ƒNƒ‰ƒCƒAƒ“ƒg‚ª‚P“x‚Éó‚¯æ‚ê‚é‚Ì‚Í21820byte‚Ü‚Å
+// ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆãŒï¼‘åº¦ã«å—ã‘å–ã‚Œã‚‹ã®ã¯21820byteã¾ã§
 #define SOCKET_EMPTY_SIZE (20 * 1024)
 
-// ‚±‚±‚Å•Â‚¶‚é‚Ì‚Å‚Í‚È‚­Asocket.c ‚Å•Â‚¶‚é
+// ã“ã“ã§é–‰ã˜ã‚‹ã®ã§ã¯ãªãã€socket.c ã§é–‰ã˜ã‚‹
 #define close(id) do { if (session[id]) session[id]->eof = 1; } while(0);
 
 // define declaration
@@ -94,9 +71,9 @@ struct socket_data {
 	int (*func_send)(int);
 	int (*func_parse)(int);
 	int (*func_destruct)(int);
-	int flag_destruct;	// ƒfƒXƒgƒ‰ƒNƒ^‚ªÄ“xŒÄ‚Î‚ê‚È‚¢ˆ×‚Ìƒtƒ‰ƒO
-	int flag_httpd;		// 0:httpd –¢‰ğÍ 1;‰ğÍÏ‚İ
-	unsigned int rlr_tick, rlr_bytes, rlr_disc;	// ‘Ñˆæ§ŒÀ—p
+	int flag_destruct;	// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ãŒå†åº¦å‘¼ã°ã‚Œãªã„ç‚ºã®ãƒ•ãƒ©ã‚°
+	int flag_httpd;		// 0:httpd æœªè§£æ 1;è§£ææ¸ˆã¿
+	unsigned int rlr_tick, rlr_bytes, rlr_disc;	// å¸¯åŸŸåˆ¶é™ç”¨
 	void* session_data;
 	void* session_data2;
 	unsigned short server_port;

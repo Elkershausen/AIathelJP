@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+Ôªø#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -43,7 +22,7 @@ static int achieve_journal_cache = 1000;
 #endif
 
 /*==========================================
- * ê›íËÉtÉ@ÉCÉãì«çû
+ * Ë®≠ÂÆö„Éï„Ç°„Ç§„É´Ë™≠Ëæº
  *------------------------------------------
  */
 int achievedb_txt_config_read_sub(const char *w1, const char *w2)
@@ -70,7 +49,7 @@ int achievedb_txt_config_read_sub(const char *w1, const char *w2)
 }
 
 /*==========================================
- * é¿ê—ÉfÅ[É^Çï∂éöóÒÇ÷ïœä∑
+ * ÂÆüÁ∏æ„Éá„Éº„Çø„ÇíÊñáÂ≠óÂàó„Å∏Â§âÊèõ
  *------------------------------------------
  */
 static int achievedb_tostr(char *str, struct achieve *a)
@@ -97,7 +76,7 @@ static int achievedb_tostr(char *str, struct achieve *a)
 }
 
 /*==========================================
- * é¿ê—ÉfÅ[É^Çï∂éöóÒÇ©ÇÁïœä∑
+ * ÂÆüÁ∏æ„Éá„Éº„Çø„ÇíÊñáÂ≠óÂàó„Åã„ÇâÂ§âÊèõ
  *------------------------------------------
  */
 static int achievedb_fromstr(char *str, struct achieve *a)
@@ -112,7 +91,7 @@ static int achievedb_fromstr(char *str, struct achieve *a)
 		return 1;
 
 	if(str[next] == '\n' || str[next] == '\r')
-		return 1;	// account_idÇ∆char_idÇæÇØÇÃçsÇÕóLÇËìæÇ»Ç¢
+		return 1;	// account_id„Å®char_id„Å†„Åë„ÅÆË°å„ÅØÊúâ„ÇäÂæó„Å™„ÅÑ
 	next++;
 
 	for(i = 0; str[next] && str[next] != '\t'; i++) {
@@ -151,20 +130,20 @@ static int achievedb_fromstr(char *str, struct achieve *a)
 
 #ifdef TXT_JOURNAL
 // ----------------------------------------------------------
-// é¿ê—ÉfÅ[É^ópÉWÉÉÅ[ÉiÉãÇÃÉçÅ[ÉãÉtÉHÉèÅ[ÉhópÉRÅ[ÉãÉoÉbÉNä÷êî
+// ÂÆüÁ∏æ„Éá„Éº„ÇøÁî®„Ç∏„É£„Éº„Éä„É´„ÅÆ„É≠„Éº„É´„Éï„Ç©„ÉØ„Éº„ÉâÁî®„Ç≥„Éº„É´„Éê„ÉÉ„ÇØÈñ¢Êï∞
 // ----------------------------------------------------------
 int achieve_journal_rollforward( int key, void* buf, int flag )
 {
 	struct achieve *a = (struct achieve *)numdb_search( achieve_db, key );
 
-	// îOÇÃÇΩÇﬂÉ`ÉFÉbÉN
+	// Âøµ„ÅÆ„Åü„ÇÅ„ÉÅ„Çß„ÉÉ„ÇØ
 	if( flag == JOURNAL_FLAG_WRITE && key != ((struct achieve *)buf)->char_id )
 	{
 		printf("int_achieve: journal: key != char_id !\n");
 		return 0;
 	}
 
-	// ÉfÅ[É^ÇÃíuÇ´ä∑Ç¶
+	// „Éá„Éº„Çø„ÅÆÁΩÆ„ÅçÊèõ„Åà
 	if( a )
 	{
 		if( flag == JOURNAL_FLAG_DELETE ) {
@@ -176,7 +155,7 @@ int achieve_journal_rollforward( int key, void* buf, int flag )
 		return 1;
 	}
 
-	// í«â¡
+	// ËøΩÂä†
 	if( flag != JOURNAL_FLAG_DELETE )
 	{
 		a = (struct achieve *)aCalloc( 1, sizeof( struct achieve ) );
@@ -191,7 +170,7 @@ int achievedb_txt_sync(void);
 #endif
 
 /*==========================================
- * é¿ê—ÉfÅ[É^ÉtÉ@ÉCÉãÇÃì«Ç›çûÇ›
+ * ÂÆüÁ∏æ„Éá„Éº„Çø„Éï„Ç°„Ç§„É´„ÅÆË™≠„ÅøËæº„Åø
  *------------------------------------------
  */
 static bool achievedb_txt_read(void)
@@ -225,19 +204,19 @@ static bool achievedb_txt_read(void)
 #ifdef TXT_JOURNAL
 	if( achieve_journal_enable )
 	{
-		// ÉWÉÉÅ[ÉiÉãÉfÅ[É^ÇÃÉçÅ[ÉãÉtÉHÉèÅ[Éh
+		// „Ç∏„É£„Éº„Éä„É´„Éá„Éº„Çø„ÅÆ„É≠„Éº„É´„Éï„Ç©„ÉØ„Éº„Éâ
 		if( journal_load( &achieve_journal, sizeof(struct achieve), achieve_journal_file ) )
 		{
 			int c = journal_rollforward( &achieve_journal, achieve_journal_rollforward );
 
 			printf("int_achieve: journal: roll-forward (%d)\n", c );
 
-			// ÉçÅ[ÉãÉtÉHÉèÅ[ÉhÇµÇΩÇÃÇ≈ÅAtxt ÉfÅ[É^Çï€ë∂Ç∑ÇÈ ( journal Ç‡êVãKçÏê¨Ç≥ÇÍÇÈ)
+			// „É≠„Éº„É´„Éï„Ç©„ÉØ„Éº„Éâ„Åó„Åü„ÅÆ„Åß„ÄÅtxt „Éá„Éº„Çø„Çí‰øùÂ≠ò„Åô„Çã ( journal „ÇÇÊñ∞Ë¶è‰ΩúÊàê„Åï„Çå„Çã)
 			achievedb_txt_sync();
 		}
 		else
 		{
-			// ÉWÉÉÅ[ÉiÉãÇêVãKçÏê¨Ç∑ÇÈ
+			// „Ç∏„É£„Éº„Éä„É´„ÇíÊñ∞Ë¶è‰ΩúÊàê„Åô„Çã
 			journal_final( &achieve_journal );
 			journal_create( &achieve_journal, sizeof(struct achieve), achieve_journal_cache, achieve_journal_file );
 		}
@@ -248,7 +227,7 @@ static bool achievedb_txt_read(void)
 }
 
 /*==========================================
- * ìØä˙
+ * ÂêåÊúü
  *------------------------------------------
  */
 static int achievedb_txt_sync_sub(void *key, void *data, va_list ap)
@@ -257,7 +236,7 @@ static int achievedb_txt_sync_sub(void *key, void *data, va_list ap)
 	FILE *fp;
 	struct achieve *a = (struct achieve *)data;
 
-	// countÇ™0ÇÃÇ∆Ç´ÇÕèëÇ´çûÇ›ÇµÇ»Ç¢
+	// count„Åå0„ÅÆ„Å®„Åç„ÅØÊõ∏„ÅçËæº„Åø„Åó„Å™„ÅÑ
 	if(a && a->count > 0) {
 		achievedb_tostr(line, a);
 		fp = va_arg(ap, FILE *);
@@ -284,7 +263,7 @@ int achievedb_txt_sync(void)
 #ifdef TXT_JOURNAL
 	if( achieve_journal_enable )
 	{
-		// ÉRÉ~ÉbÉgÇµÇΩÇÃÇ≈ÉWÉÉÅ[ÉiÉãÇêVãKçÏê¨Ç∑ÇÈ
+		// „Ç≥„Éü„ÉÉ„Éà„Åó„Åü„ÅÆ„Åß„Ç∏„É£„Éº„Éä„É´„ÇíÊñ∞Ë¶è‰ΩúÊàê„Åô„Çã
 		journal_final( &achieve_journal );
 		journal_create( &achieve_journal, sizeof(struct achieve), achieve_journal_cache, achieve_journal_file );
 	}
@@ -294,7 +273,7 @@ int achievedb_txt_sync(void)
 }
 
 /*==========================================
- * é¿ê—ÉfÅ[É^çÌèú
+ * ÂÆüÁ∏æ„Éá„Éº„ÇøÂâäÈô§
  *------------------------------------------
  */
 bool achievedb_txt_delete(int char_id)
@@ -316,7 +295,7 @@ bool achievedb_txt_delete(int char_id)
 }
 
 /*==========================================
- * ÉLÉÉÉâIDÇ©ÇÁé¿ê—ÉfÅ[É^ÇéÊìæ
+ * „Ç≠„É£„É©ID„Åã„ÇâÂÆüÁ∏æ„Éá„Éº„Çø„ÇíÂèñÂæó
  *------------------------------------------
  */
 const struct achieve *achievedb_txt_load(int char_id)
@@ -325,7 +304,7 @@ const struct achieve *achievedb_txt_load(int char_id)
 }
 
 /*==========================================
- * ÉZÅ[Éu
+ * „Çª„Éº„Éñ
  *------------------------------------------
  */
 bool achievedb_txt_save(struct achieve *a2)
@@ -342,7 +321,7 @@ bool achievedb_txt_save(struct achieve *a2)
 		a1->char_id    = a2->char_id;
 	}
 
-	// ÉfÅ[É^Ç™ã§Ç…0å¬Ç»ÇÁÉRÉsÅ[ÇµÇ»Ç¢
+	// „Éá„Éº„Çø„ÅåÂÖ±„Å´0ÂÄã„Å™„Çâ„Ç≥„Éî„Éº„Åó„Å™„ÅÑ
 	if(a1->count > 0 || a2->count > 0)
 		memcpy(a1, a2, sizeof(struct achieve));
 
@@ -354,7 +333,7 @@ bool achievedb_txt_save(struct achieve *a2)
 }
 
 /*==========================================
- * èIóπ
+ * ÁµÇ‰∫Ü
  *------------------------------------------
  */
 static int achievedb_txt_final_sub(void *key, void *data, va_list ap)
@@ -380,7 +359,7 @@ void achievedb_txt_final(void)
 }
 
 /*==========================================
- * èâä˙âª
+ * ÂàùÊúüÂåñ
  *------------------------------------------
  */
 bool achievedb_txt_init(void)
