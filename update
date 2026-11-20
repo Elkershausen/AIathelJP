@@ -1,4 +1,15 @@
-﻿2026-11-18 #0019
+﻿2026-11-20 #0020
+Visual studio 2026 に対応(vc_make.bat)
+ - Community Professional Enterprise どのエディションでもコンパイルできるようになりました
+ - C:\Program Files\Microsoft Visual Studio\2026\任意EDITION\VC\Auxiliary\Build\vcvars64.bat となっていればいいです
+ - インストール時に「C++ によるデスクトップ開発」にチェックさえ入っていれば、どのエディションでもそのまま通ります
+
+文字コード修正(login converter)
+ - 文字コードをUTF-8にするのはAIコーディングのためです
+
+Ariga-11.sln Auriga-14.sin 役目を終えたため削除
+
+2026-11-18 #0019
 ニブルヘイムダンジョン反映(map_auriga.conf mob_db.txt npc_monster_niflheimdun.sc mapflag.sc)
 文字コード修正(char map)
 

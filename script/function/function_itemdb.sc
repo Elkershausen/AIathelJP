@@ -223,8 +223,10 @@ function	script	bonus2bMagicSubRace_All	{
 function	script	ounosini_A	{
 if(equippeditem(310760)) {
 	bonus bAspdAddRate,15;
-	bonus2 bSubRace,Rct_Player,10;
-	bonus2 bMagicSubRace,Rct_Player,10;
+	bonus2 bSubRace,Rct_Player_Human,10;
+	bonus2 bMagicSubRace,Rct_Player_Human,10;
+	bonus2 bSubRace,Rct_Player_Doram,10;
+	bonus2 bMagicSubRace,Rct_Player_Doram,10;
 	skill "PA_GOSPEL",1;
 	}
 	return;
@@ -238,8 +240,10 @@ if(equippeditem(310760)) {
 function	script	ounosini_B	{
 if(equippeditem(310760)) {
 	bonus bAspdAddRate,15;
-	bonus2 bSubRace,Rct_Player,40;
-	bonus2 bMagicSubRace,Rct_Player,40;
+	bonus2 bSubRace,Rct_Player_Human,40;
+	bonus2 bMagicSubRace,Rct_Player_Human,40;
+	bonus2 bSubRace,Rct_Player_Doram,40;
+	bonus2 bMagicSubRace,Rct_Player_Doram,40;
 	skill "PA_GOSPEL",1;
 	}
 	return;
@@ -254,8 +258,10 @@ function	script	riseikioku_A	{
 if(equippeditem(300314)) {
 	bonus bBaseAtk,100;
 	bonus bMatk,100;
-	bonus2 bSubRace,Rct_Player,10;
-	bonus2 bMagicSubRace,Rct_Player,10;
+	bonus2 bSubRace,Rct_Player_Human,10;
+	bonus2 bMagicSubRace,Rct_Player_Human,10;
+	bonus2 bSubRace,Rct_Player_Doram,10;
+	bonus2 bMagicSubRace,Rct_Player_Doram,10;
 	skill "LK_CONCENTRATION",5;
 	}
 	return;
@@ -270,8 +276,10 @@ function	script	riseikioku_B	{
 if(equippeditem(300314)) {
 	bonus bBaseAtk,200;
 	bonus bMatk,200;
-	bonus2 bSubRace,Rct_Player,40;
-	bonus2 bMagicSubRace,Rct_Player,40;
+	bonus2 bSubRace,Rct_Player_Human,40;
+	bonus2 bMagicSubRace,Rct_Player_Human,40;
+	bonus2 bSubRace,Rct_Player_Doram,40;
+	bonus2 bMagicSubRace,Rct_Player_Doram,40;
 	skill "LK_CONCENTRATION",5;
 	}
 	return;
@@ -286,8 +294,10 @@ function	script	riseikioku_C	{
 if(equippeditem(300314)) {
 	bonus bBaseAtk,100;
 	bonus bMatk,100;
-	bonus2 bSubRace,Rct_Player,40;
-	bonus2 bMagicSubRace,Rct_Player,40;
+	bonus2 bSubRace,Rct_Player_Human,40;
+	bonus2 bMagicSubRace,Rct_Player_Human,40;
+	bonus2 bSubRace,Rct_Player_Doram,40;
+	bonus2 bMagicSubRace,Rct_Player_Doram,40;
 	skill "LK_CONCENTRATION",5;
 	}
 	return;
@@ -495,16 +505,16 @@ if(getbaseclass(Class,2||3) == CLASS_GS) {
 
 function	script	gyakusatuLv1	{
 	if(getequiprefinerycnt() >= 7) {
-		bonus2 bAddRace,Rct_Human,9;
+		bonus2 bAddRace,Rct_Player_Human,9;
 	}
 	if(getequiprefinerycnt() >= 8) {
-		bonus2 bAddRace,Rct_Human,16;
+		bonus2 bAddRace,Rct_Player_Human,16;
 	}
 	if(getequiprefinerycnt() >= 9) {
-		bonus2 bAddRace,Rct_Human,25;
+		bonus2 bAddRace,Rct_Player_Human,25;
 	}
 	if(getequiprefinerycnt() >= 10) {
-		bonus2 bAddRace,Rct_Human,36;
+		bonus2 bAddRace,Rct_Player_Human,36;
 	}
 	return;
 }
@@ -515,16 +525,16 @@ function	script	gyakusatuLv1	{
 
 function	script	gyakusatuLv2	{
 	if(getequiprefinerycnt() >= 7) {
-		bonus2 bAddRace,Rct_Human,16;
+		bonus2 bAddRace,Rct_Player_Human,16;
 	}
 	if(getequiprefinerycnt() >= 8) {
-		bonus2 bAddRace,Rct_Human,25;
+		bonus2 bAddRace,Rct_Player_Human,25;
 	}
 	if(getequiprefinerycnt() >= 9) {
-		bonus2 bAddRace,Rct_Human,36;
+		bonus2 bAddRace,Rct_Player_Human,36;
 	}
 	if(getequiprefinerycnt() >= 10) {
-		bonus2 bAddRace,Rct_Human,49;
+		bonus2 bAddRace,Rct_Player_Human,49;
 	}
 	return;
 }
@@ -535,16 +545,16 @@ function	script	gyakusatuLv2	{
 
 function	script	hametuLv1	{
 	if(getequiprefinerycnt() >= 7) {
-		bonus2 bMagicAddRace,Rct_Human,4;
+		bonus2 bMagicAddRace,Rct_Player_Human,4;
 	}
 	if(getequiprefinerycnt() >= 8) {
-		bonus2 bMagicAddRace,Rct_Human,6;
+		bonus2 bMagicAddRace,Rct_Player_Human,6;
 	}
 	if(getequiprefinerycnt() >= 9) {
-		bonus2 bMagicAddRace,Rct_Human,8;
+		bonus2 bMagicAddRace,Rct_Player_Human,8;
 	}
 	if(getequiprefinerycnt() >= 10) {
-		bonus2 bMagicAddRace,Rct_Human,10;
+		bonus2 bMagicAddRace,Rct_Player_Human,10;
 	}
 	return;
 }
@@ -591,8 +601,10 @@ function	script	shukufukuLv1	{
 //{ callfunc "Glacier202409"; }
 //’´‰z’iŠK‚ÌğŒ‚ªÀ‘•‚Å‚«‚½‚çŒø‰Ê‚ğ’Ç‹L‚µ‚Ä‚­‚¾‚³‚¢
 function	script	Glacier202409	{
-	bonus2 bSubRace,Rct_Player,40;
-	bonus2 bMagicSubRace,Rct_Player,40;
+	bonus2 bSubRace,Rct_Player_Human,40;
+	bonus2 bMagicSubRace,Rct_Player_Human,40;
+	bonus2 bSubRace,Rct_Player_Doram,40;
+	bonus2 bMagicSubRace,Rct_Player_Doram,40;
 	bonus2 bAddRace,Rct_Formless,6*getequiprefinerycnt();
 	bonus2 bAddRace,Rct_Undead,6*getequiprefinerycnt();
 	bonus2 bAddRace,Rct_Brute,6*getequiprefinerycnt();
@@ -644,8 +656,10 @@ function	script	Glacier202409	{
 //{ callfunc "D_Glacier202409"; }
 //’´‰z’iŠK‚ÌğŒ‚ªÀ‘•‚Å‚«‚½‚çŒø‰Ê‚ğ’Ç‹L‚µ‚Ä‚­‚¾‚³‚¢
 function	script	D_Glacier202409	{
-	bonus2 bSubRace,Rct_Player,40;
-	bonus2 bMagicSubRace,Rct_Player,40;
+	bonus2 bSubRace,Rct_Player_Human,40;
+	bonus2 bMagicSubRace,Rct_Player_Human,40;
+	bonus2 bSubRace,Rct_Player_Doram,40;
+	bonus2 bMagicSubRace,Rct_Player_Doram,40;
 	bonus2 bAddRace,Rct_Formless,6*getequiprefinerycnt();
 	bonus2 bAddRace,Rct_Undead,6*getequiprefinerycnt();
 	bonus2 bAddRace,Rct_Brute,6*getequiprefinerycnt();
@@ -697,8 +711,10 @@ function	script	D_Glacier202409	{
 //{ callfunc "Glacier_B202409"; }
 //’´‰z’iŠK‚ÌğŒ‚ªÀ‘•‚Å‚«‚½‚çŒø‰Ê‚ğ’Ç‹L‚µ‚Ä‚­‚¾‚³‚¢
 function	script	Glacier_B202409	{
-	bonus2 bSubRace,Rct_Player,10;
-	bonus2 bMagicSubRace,Rct_Player,10;
+	bonus2 bSubRace,Rct_Player_Human,10;
+	bonus2 bMagicSubRace,Rct_Player_Human,10;
+	bonus2 bSubRace,Rct_Player_Doram,10;
+	bonus2 bMagicSubRace,Rct_Player_Doram,10;
 	bonus2 bAddRace,Rct_Formless,6*getequiprefinerycnt();
 	bonus2 bAddRace,Rct_Undead,6*getequiprefinerycnt();
 	bonus2 bAddRace,Rct_Brute,6*getequiprefinerycnt();
@@ -750,8 +766,10 @@ function	script	Glacier_B202409	{
 //{ callfunc "D_Glacier_B202409"; }
 //’´‰z’iŠK‚ÌğŒ‚ªÀ‘•‚Å‚«‚½‚çŒø‰Ê‚ğ’Ç‹L‚µ‚Ä‚­‚¾‚³‚¢
 function	script	D_Glacier_B202409	{
-	bonus2 bSubRace,Rct_Player,10;
-	bonus2 bMagicSubRace,Rct_Player,10;
+	bonus2 bSubRace,Rct_Player_Human,10;
+	bonus2 bMagicSubRace,Rct_Player_Human,10;
+	bonus2 bSubRace,Rct_Player_Doram,10;
+	bonus2 bMagicSubRace,Rct_Player_Doram,10;
 	bonus2 bAddRace,Rct_Formless,6*getequiprefinerycnt();
 	bonus2 bAddRace,Rct_Undead,6*getequiprefinerycnt();
 	bonus2 bAddRace,Rct_Brute,6*getequiprefinerycnt();

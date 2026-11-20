@@ -1,5 +1,6 @@
 @echo off
 rem Visual Studio でのビルド用バッチファイル
+rem C++ によるデスクトップ開発 をインストールしていればエディションは問いません
 
 rem 対応するコンパイラのバージョン
 rem  - Visual Studio 2026
@@ -22,31 +23,34 @@ set __PACKETDEF__=/D "PACKETVER=20260107" /D "NEW_006b"
 rem ----------------------------------------------------------------
 rem コンパイラ設定
 
-rem ---- Visual Studio 2026 / 2022 64bitコンパイル の設定
-set VCVARS_PATH=
+rem ---- Visual Studio 2026 / 2022 64bitコンパイル の設定 (全検索対応)
+set "VCVARS_PATH="
+set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
 
-rem 1. VS2026 の検出 (Community / Professional / Enterprise)
-if exist "%ProgramFiles%\Microsoft Visual Studio\2026\Community\VC\Auxiliary\Build\vcvars64.bat" (
-    set "VCVARS_PATH=%ProgramFiles%\Microsoft Visual Studio\2026\Community\VC\Auxiliary\Build\vcvars64.bat"
-) else if exist "%ProgramFiles%\Microsoft Visual Studio\2026\Professional\VC\Auxiliary\Build\vcvars64.bat" (
-    set "VCVARS_PATH=%ProgramFiles%\Microsoft Visual Studio\2026\Professional\VC\Auxiliary\Build\vcvars64.bat"
-) else if exist "%ProgramFiles%\Microsoft Visual Studio\2026\Enterprise\VC\Auxiliary\Build\vcvars64.bat" (
-    set "VCVARS_PATH=%ProgramFiles%\Microsoft Visual Studio\2026\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+rem 1. vswhere.exe で最新の C++ コンパイラ搭載環境を検索
+if exist "%VSWHERE%" (
+    for /f "usebackq tokens=*" %%i in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
+        if exist "%%i\VC\Auxiliary\Build\vcvars64.bat" set "VCVARS_PATH=%%i\VC\Auxiliary\Build\vcvars64.bat"
+    )
 )
 
-rem 2. VS2026 が見つからない場合は VS2022 をフォールバック
+rem 2. vswhere で見つからない場合、標準フォルダ配下（Preview / BuildTools含む）を直接探索
 if "%VCVARS_PATH%"=="" (
-    if exist "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" (
-        set "VCVARS_PATH=%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
-    ) else if exist "%ProgramFiles%\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat" (
-        set "VCVARS_PATH=%ProgramFiles%\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat"
-    ) else if exist "%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" (
-        set "VCVARS_PATH=%ProgramFiles%\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+    for /f "delims=" %%f in ('dir /b /s "%ProgramFiles%\Microsoft Visual Studio\vcvars64.bat" 2^>nul') do (
+        set "VCVARS_PATH=%%f"
+    )
+)
+
+rem 3. x86 Program Files 側も念のため探索
+if "%VCVARS_PATH%"=="" (
+    for /f "delims=" %%f in ('dir /b /s "%ProgramFiles(x86)%\Microsoft Visual Studio\vcvars64.bat" 2^>nul') do (
+        set "VCVARS_PATH=%%f"
     )
 )
 
 if "%VCVARS_PATH%"=="" (
-    echo [ERROR] Visual Studio 2026 または 2022 の vcvars64.bat が見つかりませんでした。
+    echo [ERROR] PC内に vcvars64.bat が1つも見つかりませんでした。
+    echo Visual Studio Installer の「変更」から「C++ によるデスクトップ開発」を追加してください。
     pause
     exit /b 1
 )

@@ -1,35 +1,14 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#ifndef _LOGIN_H_
+ï»¿#ifndef _LOGIN_H_
 #define _LOGIN_H_
 
 #include "mmo.h"
 
 #define MAX_CHAR_SERVERS 5
 
-#define PASSWORDENC		3	// ˆÃ†‰»ƒpƒXƒ[ƒh‚É‘Î‰‚³‚¹‚é‚Æ‚«’è‹`‚·‚é
-							// passwordencrypt‚Ì‚Æ‚«‚Í1A
-							// passwordencrypt2‚Ì‚Æ‚«‚Í2‚É‚·‚éB
-							// 3‚É‚·‚é‚Æ—¼•û‚É‘Î‰
+#define PASSWORDENC		3	// æš—å·åŒ–ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ã«å¯¾å¿œã•ã›ã‚‹ã¨ãå®šç¾©ã™ã‚‹
+							// passwordencryptã®ã¨ãã¯1ã€
+							// passwordencrypt2ã®ã¨ãã¯2ã«ã™ã‚‹ã€‚
+							// 3ã«ã™ã‚‹ã¨ä¸¡æ–¹ã«å¯¾å¿œ
 
 struct login_session_data {
 	int account_id;

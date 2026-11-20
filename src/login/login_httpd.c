@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 
@@ -64,7 +43,7 @@ static void login_httpd_account(struct httpd_session_data *sd,const char* url)
 
 	do {
 		if(httpd_get_method(sd) != HTTPD_METHOD_POST) {
-			// POSTˆÈŠO‚¨’f‚è
+			// POSTä»¥å¤–ãŠæ–­ã‚Š
 			msg = "Illegal request."; break;
 		}
 		if(!httpd_new_account_flag) {
@@ -80,7 +59,7 @@ static void login_httpd_account(struct httpd_session_data *sd,const char* url)
 			msg = "Illegal character found in UserID."; break;
 		}
 
-		if(check[0]) {	// ID ‚Ìƒ`ƒFƒbƒN‚Í userid ‚¾‚¯‚Å‚¢‚¢
+		if(check[0]) {	// ID ã®ãƒã‚§ãƒƒã‚¯ã¯ userid ã ã‘ã§ã„ã„
 			if(account_load_str(userid) == NULL) {
 				msg = "OK : You can use UserID.";
 			} else {
@@ -109,7 +88,7 @@ static void login_httpd_account(struct httpd_session_data *sd,const char* url)
 			auriga_strlcpy(ma.userid, userid, sizeof(ma.userid));
 			auriga_strlcpy(ma.pass  , passwd, sizeof(ma.pass));
 			ma.sex = gender[0];
-			auriga_strlcpy(ma.mail  , "@"     , sizeof(ma.mail)); // b’è
+			auriga_strlcpy(ma.mail  , "@"     , sizeof(ma.mail)); // æš«å®š
 			auriga_strlcpy(ma.birth , "000000", sizeof(ma.birth));
 			snprintf(buf, sizeof(buf), "( httpd %08lx )", httpd_get_ip(sd));
 			if( !account_new(&ma,buf) ) {
@@ -120,8 +99,8 @@ static void login_httpd_account(struct httpd_session_data *sd,const char* url)
 		}
 	} while(0);
 
-	// HTTP/1.1‚Å•Ô‚·‚ÆƒAƒJƒEƒ“ƒg‚ğ˜A‘±‚µ‚Äì¬‚·‚é”n­‚ª‚¢‚»‚¤‚È‚Ì‚ÅA
-	// ‚ ‚¦‚ÄHTTP/1.0ˆµ‚¢‚µ‚Ä‚¢‚éB
+	// HTTP/1.1ã§è¿”ã™ã¨ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚’é€£ç¶šã—ã¦ä½œæˆã™ã‚‹é¦¬é¹¿ãŒã„ãã†ãªã®ã§ã€
+	// ã‚ãˆã¦HTTP/1.0æ‰±ã„ã—ã¦ã„ã‚‹ã€‚
 	httpd_send_head(sd,200,"text/plain",-1);
 	httpd_send_data(sd,(int)strlen(msg),msg);
 
@@ -165,7 +144,7 @@ static int login_httpd_auth_func( struct httpd_access* a, struct httpd_session_d
 	const char *p;
 
 	p = (const char *)memchr(userid, '\0', 24);
-	if( p == NULL )	// 24•¶šˆÈã‚Í‚ ‚è‚¦‚È‚¢
+	if( p == NULL )	// 24æ–‡å­—ä»¥ä¸Šã¯ã‚ã‚Šãˆãªã„
 		return 0;
 
 	acc = account_load_str( userid );

@@ -1,29 +1,4 @@
-/*
- * Copyright (C) 2002-2020  Auriga
- *
- * This file is part of Auriga.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
- *
- */
-
-// $Id: login-converter.c,v 1.1 2005/03/21 12:00:14 aboon Exp $
-// original : login2.c 2003/01/28 02:29:17 Rev.1.1.1.1
-// login data file to mysql conversion utility.
-//
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 
 #include "mmo.h"
@@ -159,9 +134,9 @@ int login_convert(void)
 			i = sscanf(p, "%d\t%255[^\t]\t%255[^\t]\t%255[^\t]\t%c\t%d\t%d\t%n",
 				&account_id, userid, pass, lastlogin, &sex, &logincount, &state, &n);
 
-			if(i < 5)		// %newid% ‚Ìs‚Íconvert‚µ‚È‚¢
+			if(i < 5)		// %newid% ã®è¡Œã¯convertã—ãªã„
 				continue;
-			if(account_id < 0)	// ƒAƒJƒEƒ“ƒgID‚ª‚¨‚©‚µ‚¢ê‡‚Í”O‚Ì‚½‚ß’e‚¢‚Ä‚¨‚­
+			if(account_id < 0)	// ã‚¢ã‚«ã‚¦ãƒ³ãƒˆIDãŒãŠã‹ã—ã„å ´åˆã¯å¿µã®ãŸã‚å¼¾ã„ã¦ãŠã
 				continue;
 			user_level = isGM(account_id);
 
@@ -170,14 +145,14 @@ int login_convert(void)
 			pass[23]      = '\0';
 			lastlogin[23] = '\0';
 
-			// ƒ[ƒ‹ƒAƒhƒŒƒX‚ª‚È‚¢ê‡‚Í "@" ‚É’uŠ·
+			// ãƒ¡ãƒ¼ãƒ«ã‚¢ãƒ‰ãƒ¬ã‚¹ãŒãªã„å ´åˆã¯ "@" ã«ç½®æ›
 			if( n <= 0 || sscanf(p+n, "%255[^\t]\t%n", email, &n2) != 1 || !strchr(email,'@') ) {
 				memset(&email,0,sizeof(email));
 				email[0] = '@';
 			}
 			n = (n2 > 0)? n+n2: 0;
 
-			// ‘Sƒ[ƒ‹ƒh‹¤—LƒAƒJƒEƒ“ƒg•Ï” ( ## •Ï” ) “Ç‚İ‚İ
+			// å…¨ãƒ¯ãƒ¼ãƒ«ãƒ‰å…±æœ‰ã‚¢ã‚«ã‚¦ãƒ³ãƒˆå¤‰æ•° ( ## å¤‰æ•° ) èª­ã¿è¾¼ã¿
 			if(n > 0) {
 				char str[256];
 				memset(&dat, 0, sizeof(dat));
@@ -196,11 +171,11 @@ int login_convert(void)
 				dat.reg_num = 0;
 			}
 
-			// ƒT[ƒo‚Ìê‡ID‚ª0‚¾‚ÆAUTO_INCREMENT‚³‚ê‚é‚Ì‚Å•â³‚·‚é
+			// ã‚µãƒ¼ãƒã®å ´åˆIDãŒ0ã ã¨AUTO_INCREMENTã•ã‚Œã‚‹ã®ã§è£œæ­£ã™ã‚‹
 			if(sex == 'S')
 				account_id++;
 
-			// Œx—}§‚Ì‚½‚ß•ÏŠ·‚µ‚Ä‚¨‚­
+			// è­¦å‘ŠæŠ‘åˆ¶ã®ãŸã‚å¤‰æ›ã—ã¦ãŠã
 			if(strcmp(lastlogin,"-") == 0)
 				auriga_strlcpy(lastlogin, "0000-00-00 00:00:00", sizeof(lastlogin));
 
