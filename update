@@ -1,4 +1,9 @@
-﻿2026-11-20 #0020
+﻿2026-11-21 #0021
+古いコンパイルオプションを削除し、概ね2021年以降の Intel / AMD に最適化実施(vc_male.bat)
+ - コンパイル速度がCPUコア数に強く依存するようになり、コア数が多いほど速くなります
+ - AI開発用コンパイルオプションも用意しました
+
+2026-11-20 #0020
 Visual studio 2026 に対応(vc_make.bat)
  - Community Professional Enterprise どのエディションでもコンパイルできるようになりました
  - C:\Program Files\Microsoft Visual Studio\2026\任意EDITION\VC\Auxiliary\Build\vcvars64.bat となっていればいいです

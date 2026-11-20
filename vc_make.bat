@@ -117,49 +117,16 @@ rem set __TIMER_CACHE__=/D "TIMER_CACHE=256"
 rem ---------------------------
 rem コンパイルオプション設定
 
-@rem CPU最適化スイッチ(By Nameless)
-@rem 以下の例を参考にスイッチ名を記入してください。
-set _model_=EM64T
+rem モード選択:
+rem   MODERN : 現代の Intel / AMD CPU 両対応（通常・本番ビルド用）
+rem   DEV    : 高速コンパイル＆厳格チェック（AI開発・テスト用）
+set _model_=MODERN
 
-@rem 最適化なし
-if "%_model_%"=="NOOPTIMIZE" set __cpu__=/c /W3 /Od /Zi
+rem 現代の Intel / AMD 64bit CPU 共通最適化（AVX2有効）
+if "%_model_%"=="MODERN" set __cpu__=/c /O2 /arch:AVX2 /MP /W3 /TC /Zi
 
-@rem CPUアーキテクチャ32BitCPU/64BitCPU
-if "%_model_%"=="x32" set __cpu__=/c /W3 /O2 %__OPT_OP__% /GA /TC /Zi
-if "%_model_%"=="x64" set __cpu__=/c /arch:SSE2 /W3 /O2 %__OPT_OP__% /GA /TC /Zi
-
-@rem メモリー1024以上搭載の32bitCPU/64bitCPU
-if "%_model_%"=="HiMemL" set __cpu__=/c /bigobj /W3 /O2 %__OPT_OP__% /GA /TC /Zi
-if "%_model_%"=="HiMemH" set __cpu__=/c /bigobj /arch:SSE2 /W3 /O2 %__OPT_OP__% /GA /TC /Zi
-
-@rem スタック制御をコンパイラで行う場合
-if "%_model_%"=="Stac32" set __cpu__=/c /F4096 /W3 /O2 %__OPT_OP__% /GA /TC /Zi
-if "%_model_%"=="Stac64" set __cpu__=/c /F4096 /arch:SSE2 /W3 /O2 %__OPT_OP__% /GA /TC /Zi
-@rem AMD系64bitCPU用
-if "%_model_%"=="A64x2" set __cpu__=/c /favor:blend /W3 /O2 %__OPT_OP__% /GA /TC /Zi
-if "%_model_%"=="A64x1" set __cpu__=/c /favor:AMD64 /W3 /O2 %__OPT_OP__% /GA /TC /Zi
-
-@rem Intel系64bitCPU用
-if "%_model_%"=="EM64T" set __cpu__=/c /favor:EM64T /W3 /O2 %__OPT_OP__% /GA /TC /Zi
-
-
-@rem 以下実験段階(人柱求む by Nameless)
-@rem 暴走風味…32BitCPU最高速モード
-if "%_model_%"=="mode01" set __cpu__=/c /fp:fast /F4096 /bigobj /W3 /Ox /GA /TC /Zi
-@rem 暴走風味…64BitCPU最高速モード
-if "%_model_%"=="mode02" set __cpu__=/c /arch:SSE2 /fp:fast /F4096 /bigobj /W3 /Ox /Gr /GA /TC /Zi
-@rem 暴走風味…AMD 64x2 & FX系最適化・最高速
-if "%_model_%"=="mode03" set __cpu__=/c /arch:SSE2 /fp:fast /F4096 /bigobj /favor:AMD64 /W3 /Ox /Gr /GA /TC /Zi
-if "%_model_%"=="mode04" set __cpu__=/c /arch:SSE2 /fp:fast /F4096 /bigobj /favor:blend /W3 /Ox /Gr /GA /TC /Zi
-@rem 暴走風味…Intel 64bitCPU用最適化・最高速
-if "%_model_%"=="mode05" set __cpu__=/c /arch:SSE2 /fp:fast /F4096 /bigobj /favor:EM64T /W3 /Ox /Gr /GA /TC /Zi
-@rem 以下リザーブ
-if "%_model_%"=="mode06" set __cpu__=/c /W3 /Ox /Gr /GA /TC /Zi
-if "%_model_%"=="mode07" set __cpu__=/c /W3 /Ox /Gr /GA /TC /Zi
-if "%_model_%"=="mode08" set __cpu__=/c /W3 /Ox /Gr /GA /TC /Zi
-if "%_model_%"=="mode09" set __cpu__=/c /W3 /Ox /Gr /GA /TC /Zi
-
-
+rem AI開発・高速ビルド用（最適化なし・警告強化）
+if "%_model_%"=="DEV" set __cpu__=/c /Od /MP /W4 /TC /Zi
 
 rem ----------------------------------------------------------------
 rem 最終的なビルドオプションを生成
